@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Universal to JPEG Converter - FileFlow | Convert Any File to JPEG</title>
+    <meta name="description" content="Convert any file format to JPEG images. Supports PDF, HEIC, PNG, WEBP, AVIF, BMP and more. Smart conversion with preview.">
+    <link rel="canonical" href="https://fileflow.com/convert-to-jpeg">
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="Universal to JPEG Converter - FileFlow">
+    <meta property="og:description" content="Convert any file format to JPEG images. Supports PDF, HEIC, PNG, WEBP, AVIF, BMP and more.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://fileflow.com/convert-to-jpeg">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="/styles.css">
+    
+    <!-- Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.1/dist/umd/util.js"></script>
+</head>
+<body>
+    <!-- Top AdSense Banner -->
+    <div class="ad-placeholder ad-banner-top">
+        <span class="ad-text">Advertisement Banner (728x90)</span>
+    </div>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-content">
+                <div class="nav-brand">
+                    <a href="/" class="logo-link">
+                        <h1 class="logo">FileFlow</h1>
+                    </a>
+                </div>
+                <div class="nav-menu desktop-only">
+                    <a href="/#tools" class="nav-link">Tools</a>
+                    <a href="/#about" class="nav-link">About</a>
+                    <a href="/#support" class="nav-link">Support</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="layout-wrapper">
+        <!-- Desktop Sidebar Ad Left -->
+        <div class="sidebar-ad desktop-only">
+            <div class="ad-placeholder ad-sidebar">
+                <span class="ad-text">Sidebar<br>Advertisement<br>(160x600)</span>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="container">
+                <!-- Tool Header -->
+                <div class="tool-header-section">
+                    <nav class="breadcrumb">
+                        <a href="/" class="breadcrumb-link" data-testid="link-back-home">← Back to Tools</a>
+                    </nav>
+                    <h1 class="tool-page-title">Universal to JPEG Converter</h1>
+                    <p class="tool-page-description">Convert any file format to JPEG images. Supports PDF, HEIC, PNG, WEBP, AVIF, BMP and more.</p>
+                </div>
+
+                <!-- Upload Section -->
+                <div class="tool-container">
+                    <div id="upload-section" class="upload-section">
+                        <div class="file-drop-zone" data-testid="drop-zone-universal" onclick="document.getElementById('file-input').click()">
+                            <svg class="upload-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                            </svg>
+                            <h3 class="upload-title">Drop any files here or click to upload</h3>
+                            <p class="upload-instructions">Supports PDF, HEIC, PNG, WEBP, AVIF, BMP, video frames and more</p>
+                        </div>
+                        <input type="file" id="file-input" multiple class="file-input" accept="*/*" data-testid="input-universal-files">
+                    </div>
+
+                    <!-- Quality Settings -->
+                    <div id="quality-settings" class="quality-settings hidden">
+                        <h3 class="section-subtitle">JPEG Quality</h3>
+                        <div class="quality-options">
+                            <label class="quality-option">
+                                <input type="radio" name="quality" value="0.7" data-testid="radio-quality-70">
+                                <span class="quality-label">Standard (70%)</span>
+                            </label>
+                            <label class="quality-option">
+                                <input type="radio" name="quality" value="0.85" checked data-testid="radio-quality-85">
+                                <span class="quality-label">High (85%)</span>
+                            </label>
+                            <label class="quality-option">
+                                <input type="radio" name="quality" value="0.95" data-testid="radio-quality-95">
+                                <span class="quality-label">Maximum (95%)</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- File List -->
+                    <div id="file-list" class="file-list hidden">
+                        <h3 class="section-subtitle">Selected Files</h3>
+                        <div id="file-cards" class="file-cards">
+                            <!-- File cards will be inserted here -->
+                        </div>
+                    </div>
+
+                    <!-- Progress Section -->
+                    <div id="progress-section" class="progress-section hidden">
+                        <div class="progress-header">
+                            <span class="progress-label">Converting to JPEG...</span>
+                            <span id="progress-text" class="progress-text" data-testid="text-progress">0%</span>
+                        </div>
+                        <div class="progress-bar-container">
+                            <div id="progress-bar" class="progress-bar" data-testid="progress-bar" style="width: 0%"></div>
+                        </div>
+                        <div id="conversion-status" class="ffmpeg-status" data-testid="text-conversion-status">
+                            Analyzing files...
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div id="action-buttons" class="action-buttons hidden">
+                        <button id="convert-btn" class="btn btn-primary" data-testid="button-convert">
+                            Convert to JPEG
+                        </button>
+                        <button id="clear-btn" class="btn btn-secondary" data-testid="button-clear">
+                            Clear All
+                        </button>
+                    </div>
+
+                    <!-- Preview and Download Section -->
+                    <div id="download-section" class="download-section hidden">
+                        <div class="success-message">
+                            <div class="success-header">
+                                <svg class="success-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <h3 class="success-title">Conversion Complete!</h3>
+                            </div>
+                            <p class="success-text">Your files have been successfully converted to JPEG.</p>
+                            <div id="preview-container" class="preview-container" data-testid="preview-container">
+                                <!-- Preview images will be inserted here -->
+                            </div>
+                            <div id="download-links" class="download-links" data-testid="download-links">
+                                <!-- Download links will be inserted here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tool Information -->
+                <div class="tool-info-section">
+                    <h3 class="info-title">How it works</h3>
+                    <div class="info-content">
+                        <ul class="info-list">
+                            <li>Converts PDF first page, HEIC photos, PNG/WEBP/AVIF images to JPEG</li>
+                            <li>Extracts first frame from video files as JPEG images</li>
+                            <li>Smart format detection and optimal conversion method</li>
+                            <li>Preview results before downloading</li>
+                            <li>All processing happens locally in your browser</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Desktop Sidebar Ad Right -->
+        <div class="sidebar-ad desktop-only">
+            <div class="ad-placeholder ad-sidebar">
+                <span class="ad-text">Sidebar<br>Advertisement<br>(160x600)</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom AdSense Banner -->
+    <div class="ad-placeholder ad-banner-bottom">
+        <span class="ad-text">Advertisement Banner (728x90)</span>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3 class="footer-title">FileFlow</h3>
+                    <p class="footer-description">Professional file conversion tools for everyone.</p>
+                </div>
+                <div class="footer-section">
+                    <h4 class="footer-subtitle">Related Tools</h4>
+                    <ul class="footer-links">
+                        <li><a href="/heic-to-jpg.html" class="footer-link">HEIC to JPG</a></li>
+                        <li><a href="/jpg-to-png.html" class="footer-link">JPG to PNG</a></li>
+                        <li><a href="/pdf-merge.html" class="footer-link">PDF Merge</a></li>
+                        <li><a href="/mp4-to-mp3.html" class="footer-link">MP4 to MP3</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 FileFlow. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/js/main.js"></script>
+    <script src="/js/converters/universal-converter.js"></script>
+</body>
+</html>

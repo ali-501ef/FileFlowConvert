@@ -25,6 +25,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.sendFile(path.join(clientPath, 'mp4-to-mp3.html'));
   });
 
+  app.get('/convert-to-jpeg', (req, res) => {
+    res.sendFile(path.join(clientPath, 'convert-to-jpeg.html'));
+  });
+
   // Fallback to index.html for other routes
   app.get('*', (req, res) => {
     res.sendFile(path.join(clientPath, 'index.html'));
