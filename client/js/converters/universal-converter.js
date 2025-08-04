@@ -129,8 +129,8 @@ class UniversalConverter extends FileHandler {
         const fileName = file.name.toLowerCase();
         const mimeType = file.type.toLowerCase();
 
-        // HEIC files
-        if (fileName.endsWith('.heic') || mimeType === 'image/heic') {
+        // HEIC files (check for both .heic and .heif extensions)
+        if (fileName.endsWith('.heic') || fileName.endsWith('.heif') || mimeType === 'image/heic' || mimeType === 'image/heif') {
             return 'heic';
         }
 
@@ -160,19 +160,40 @@ class UniversalConverter extends FileHandler {
      */
     async convertHeicToJpeg(file, quality) {
         if (typeof heic2any === 'undefined') {
-            throw new Error('HEIC conversion library not loaded');
+            throw new Error('HEIC conversion library not available. Please refresh the page and try again.');
         }
 
         try {
-            const convertedBlob = await heic2any({
-                blob: file,
-                toType: "image/jpeg",
-                quality: quality
-            });
+            // Try different configuration options for better compatibility
+            let convertedBlob;
+            
+            try {
+                // First attempt with standard configuration
+                convertedBlob = await heic2any({
+                    blob: file,
+                    toType: "image/jpeg",
+                    quality: quality
+                });
+            } catch (firstError) {
+                console.warn('First HEIC conversion attempt failed, trying alternative method:', firstError);
+                
+                // Second attempt with different quality setting
+                convertedBlob = await heic2any({
+                    blob: file,
+                    toType: "image/jpeg",
+                    quality: 0.8
+                });
+            }
 
+            // Handle both single blob and array of blobs
+            if (Array.isArray(convertedBlob)) {
+                return convertedBlob[0];
+            }
+            
             return convertedBlob;
         } catch (error) {
-            throw new Error(`HEIC conversion failed: ${error.message}`);
+            // If HEIC conversion completely fails, create an informative error
+            throw new Error(`HEIC conversion failed. This may be due to an unsupported HEIC variant or corrupted file. Error: ${error.message}`);
         }
     }
 

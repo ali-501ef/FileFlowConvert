@@ -21,6 +21,20 @@
     
     <!-- Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
+    <script>
+        // Verify heic2any library is loaded
+        window.addEventListener('load', function() {
+            if (typeof heic2any === 'undefined') {
+                console.warn('HEIC conversion library failed to load, attempting fallback...');
+                // Fallback: try loading from alternative CDN
+                const script = document.createElement('script');
+                script.src = 'https://unpkg.com/heic2any@0.0.4/dist/heic2any.min.js';
+                script.onload = () => console.log('HEIC library loaded from fallback CDN');
+                script.onerror = () => console.error('HEIC library failed to load from all sources');
+                document.head.appendChild(script);
+            }
+        });
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.1/dist/umd/util.js"></script>
