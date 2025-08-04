@@ -84,6 +84,49 @@
                         </div>
                     </div>
 
+                    <!-- Advanced Options -->
+                    <div id="advanced-options-section" class="advanced-options-section hidden">
+                        <button id="advanced-toggle" class="advanced-toggle" data-testid="button-advanced-toggle">
+                            <span class="advanced-toggle-text">Advanced Options</span>
+                            <span class="advanced-toggle-icon">⚙️</span>
+                            <svg class="advanced-chevron" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        
+                        <div id="advanced-content" class="advanced-content">
+                            <div class="advanced-grid">
+                                <div class="advanced-option">
+                                    <label class="advanced-label">Resize Image</label>
+                                    <div class="resize-inputs">
+                                        <input type="number" id="width" class="advanced-input" placeholder="Width" min="1" max="10000" data-testid="input-width">
+                                        <span class="resize-separator">×</span>
+                                        <input type="number" id="height" class="advanced-input" placeholder="Height" min="1" max="10000" data-testid="input-height">
+                                    </div>
+                                    <p class="advanced-hint">Leave empty to maintain original size</p>
+                                </div>
+                                
+                                <div class="advanced-option">
+                                    <label class="advanced-label" for="compression">Compression Level</label>
+                                    <select id="compression" class="advanced-select" data-testid="select-compression">
+                                        <option value="none">No compression (Best quality)</option>
+                                        <option value="low" selected>Low compression</option>
+                                        <option value="medium">Medium compression</option>
+                                        <option value="high">High compression (Smallest file)</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="advanced-option">
+                                    <label class="advanced-label">Metadata</label>
+                                    <div class="checkbox-wrapper">
+                                        <input type="checkbox" id="preserve-metadata" class="advanced-checkbox" data-testid="checkbox-metadata">
+                                        <label for="preserve-metadata" class="checkbox-label">Preserve metadata (EXIF data)</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Progress Section -->
                     <div id="progress-section" class="progress-section hidden">
                         <div class="progress-header">
@@ -174,6 +217,7 @@
     </footer>
 
     <script src="/js/main.js"></script>
+    <script src="/js/advanced-options.js"></script>
     <script src="/js/converters/image-converter.js"></script>
 </body>
 </html>

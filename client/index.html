@@ -61,7 +61,7 @@
                 <div class="universal-hero-section">
                     <div class="hero-content">
                         <h1 class="universal-hero-title">
-                            Convert Any File — Instantly, Privately, Beautifully.
+                            <span class="text-primary">Convert</span> Any File — Instantly, Privately, Beautifully.
                         </h1>
                         <p class="universal-hero-description">
                             Convert images, documents, audio, and more — all directly in your browser. No uploads. No clutter. No compromises.
@@ -92,9 +92,9 @@
                                         <select id="output-format" class="format-select" data-testid="select-output-format">
                                             <option value="jpeg">JPEG</option>
                                             <option value="png">PNG</option>
-                                            <option value="pdf">PDF</option>
-                                            <option value="mp3">MP3</option>
+                                            <option value="gif">GIF</option>
                                             <option value="webp">WebP</option>
+                                            <option value="pdf">PDF</option>
                                         </select>
                                     </div>
                                     
@@ -116,7 +116,7 @@
 
                 <!-- Image Tools Section -->
                 <section id="tools" class="tools-section">
-                    <h2 class="section-title">Image Tools</h2>
+                    <h2 class="section-title centered">Image Tools</h2>
                     <div class="tools-grid">
                         <div class="tool-card" data-testid="card-heic-to-jpg" onclick="window.location.href='/heic-to-jpg.html'">
                             <div class="tool-header">
@@ -173,7 +173,7 @@
 
                 <!-- PDF Tools Section -->
                 <section class="tools-section">
-                    <h2 class="section-title">PDF Tools</h2>
+                    <h2 class="section-title centered">PDF Tools</h2>
                     <div class="tools-grid single-column">
                         <div class="tool-card" data-testid="card-pdf-merge" onclick="window.location.href='/pdf-merge.html'">
                             <div class="tool-header">
@@ -201,7 +201,7 @@
 
                 <!-- Media Tools Section -->
                 <section class="tools-section">
-                    <h2 class="section-title">Media Tools</h2>
+                    <h2 class="section-title centered">Media Tools</h2>
                     <div class="tools-grid single-column">
                         <div class="tool-card" data-testid="card-mp4-to-mp3" onclick="window.location.href='/mp4-to-mp3.html'">
                             <div class="tool-header">
@@ -233,31 +233,41 @@
         </div>
     </div>
 
-    <!-- Why FileFlow Exists Section -->
-    <section id="about" class="why-section">
+    <!-- Features Section -->
+    <section id="about" class="features-section">
         <div class="container">
-            <div class="why-content">
-                <h2 class="why-title">Why FileFlow Exists</h2>
-                <p class="why-description">
-                    We built FileFlow because file conversion shouldn't feel outdated, invasive, or complicated. You shouldn't need to upload private files to unknown servers — or wait through ads and popups — just to get a simple image or document in the right format.
-                </p>
-                
-                <div class="why-points">
-                    <div class="why-point">
-                        <span class="why-icon">🔒</span>
-                        <span class="why-text"><strong>Privacy-first</strong> — Nothing is uploaded. Ever.</span>
+            <div class="features-container">
+                <div class="features-header">
+                    <h2 class="features-title">Why Choose FileFlow?</h2>
+                    <p class="features-subtitle">Our tools are designed with privacy, speed, and quality in mind.</p>
+                </div>
+                <div class="features-grid">
+                    <div class="feature-item">
+                        <div class="feature-icon bg-blue">
+                            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="feature-title">100% Private</h3>
+                        <p class="feature-description">All conversions happen in your browser. Your files never leave your device.</p>
                     </div>
-                    <div class="why-point">
-                        <span class="why-icon">⚡</span>
-                        <span class="why-text"><strong>Instant Results</strong> — All tools work directly in your browser.</span>
+                    <div class="feature-item">
+                        <div class="feature-icon bg-green">
+                            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="feature-title">Lightning Fast</h3>
+                        <p class="feature-description">No uploading to servers. Instant conversion with optimized algorithms.</p>
                     </div>
-                    <div class="why-point">
-                        <span class="why-icon">🎯</span>
-                        <span class="why-text"><strong>Just Works</strong> — No logins. No setup. Just conversion.</span>
-                    </div>
-                    <div class="why-point">
-                        <span class="why-icon">🌍</span>
-                        <span class="why-text"><strong>Universally Accessible</strong> — Works on every device, everywhere.</span>
+                    <div class="feature-item">
+                        <div class="feature-icon bg-purple">
+                            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="feature-title">High Quality</h3>
+                        <p class="feature-description">Professional-grade conversion maintaining original file quality.</p>
                     </div>
                 </div>
             </div>

@@ -1,591 +1,452 @@
 /**
- * Universal to JPEG Converter
- * Converts various file formats (PDF, HEIC, PNG, WEBP, AVIF, BMP, video frames) to JPEG
+ * Universal File Converter
+ * Handles file conversion for all formats with live preview functionality
  */
 
-class UniversalConverter extends FileHandler {
+class UniversalConverter {
     constructor() {
-        super();
-        this.ffmpeg = null;
-        this.isFFmpegReady = false;
-        this.checkForPendingFile();
-    }
-
-    /**
-     * Check for pending file from homepage converter
-     */
-    checkForPendingFile() {
-        const pendingFileData = sessionStorage.getItem('pendingFile');
-        const targetFormat = sessionStorage.getItem('targetFormat');
+        this.selectedFiles = [];
+        this.supportedFormats = {
+            image: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'heic', 'bmp', 'tiff'],
+            video: ['mp4', 'mov', 'avi', 'mkv', 'wmv'],
+            audio: ['mp3', 'wav', 'flac', 'aac', 'm4a'],
+            document: ['pdf', 'doc', 'docx', 'txt', 'rtf']
+        };
         
-        if (pendingFileData) {
-            try {
-                const fileData = JSON.parse(pendingFileData);
-                
-                // Convert base64 data back to file
-                if (fileData.data) {
-                    fetch(fileData.data)
-                        .then(res => res.blob())
-                        .then(blob => {
-                            const file = new File([blob], fileData.name, {
-                                type: fileData.type,
-                                lastModified: fileData.lastModified
-                            });
-                            
-                            // Add to selected files
-                            this.selectedFiles = [file];
-                            this.displaySelectedFiles();
-                            
-                            // Set target format if available
-                            if (targetFormat) {
-                                console.log('Target format from homepage:', targetFormat);
-                            }
-                            
-                            // Clear session storage
-                            sessionStorage.removeItem('pendingFile');
-                            sessionStorage.removeItem('targetFormat');
-                        })
-                        .catch(error => {
-                            console.error('Error loading pending file:', error);
-                            sessionStorage.removeItem('pendingFile');
-                            sessionStorage.removeItem('targetFormat');
-                        });
-                }
-            } catch (error) {
-                console.error('Error parsing pending file data:', error);
-                sessionStorage.removeItem('pendingFile');
-                sessionStorage.removeItem('targetFormat');
-            }
+        this.init();
+    }
+    
+    init() {
+        this.setupDropZone();
+        this.setupFileInput();
+        this.setupFormatSelector();
+        this.setupConvertButton();
+        this.populateFormatOptions();
+    }
+    
+    setupDropZone() {
+        const dropZone = document.getElementById('universal-drop-zone');
+        if (!dropZone) return;
+        
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, this.preventDefaults, false);
+        });
+        
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, () => dropZone.classList.add('drag-over'), false);
+        });
+        
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, () => dropZone.classList.remove('drag-over'), false);
+        });
+        
+        dropZone.addEventListener('drop', this.handleDrop.bind(this), false);
+        dropZone.addEventListener('click', () => {
+            document.getElementById('universal-file-input').click();
+        });
+    }
+    
+    setupFileInput() {
+        const fileInput = document.getElementById('universal-file-input');
+        if (!fileInput) return;
+        
+        fileInput.addEventListener('change', (e) => {
+            this.handleFiles(e.target.files);
+        });
+    }
+    
+    setupFormatSelector() {
+        const formatSelect = document.getElementById('output-format');
+        if (!formatSelect) return;
+        
+        formatSelect.addEventListener('change', (e) => {
+            this.updateConversionOptions(e.target.value);
+        });
+    }
+    
+    setupConvertButton() {
+        const convertBtn = document.getElementById('universal-convert-btn');
+        if (!convertBtn) return;
+        
+        convertBtn.addEventListener('click', () => {
+            this.startConversion();
+        });
+    }
+    
+    preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+    
+    handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        this.handleFiles(files);
+    }
+    
+    handleFiles(files) {
+        const fileArray = Array.from(files);
+        this.selectedFiles = fileArray;
+        
+        if (fileArray.length > 0) {
+            this.displayFilePreview(fileArray);
+            this.showConversionSection();
+            this.updateFormatOptionsBasedOnFiles(fileArray);
         }
     }
-
-    /**
-     * Convert various file formats to JPEG
-     */
-    async convertFiles() {
+    
+    displayFilePreview(files) {
+        const previewContainer = document.getElementById('file-preview-container');
+        const previewSection = document.getElementById('file-preview-section');
+        
+        if (!previewContainer || !previewSection) return;
+        
+        previewContainer.innerHTML = '';
+        
+        files.forEach((file, index) => {
+            const previewCard = this.createFilePreviewCard(file, index);
+            previewContainer.appendChild(previewCard);
+        });
+        
+        previewSection.classList.remove('hidden');
+    }
+    
+    createFilePreviewCard(file, index) {
+        const card = document.createElement('div');
+        card.className = 'file-preview-card';
+        card.setAttribute('data-testid', `file-preview-${index}`);
+        
+        const fileName = file.name;
+        const fileSize = this.formatFileSize(file.size);
+        const fileExtension = fileName.split('.').pop().toLowerCase();
+        
+        card.innerHTML = `
+            <div class="file-preview-content">
+                <div class="file-preview-thumbnail">
+                    ${this.generateThumbnail(file, fileExtension)}
+                </div>
+                <div class="file-preview-info">
+                    <div class="file-preview-name" title="${fileName}">${fileName}</div>
+                    <div class="file-preview-meta">
+                        <span class="file-size">${fileSize}</span>
+                        <span class="file-type">${fileExtension.toUpperCase()}</span>
+                    </div>
+                </div>
+                <button class="file-remove-btn" onclick="universalConverter.removeFile(${index})" data-testid="button-remove-file-${index}">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+        `;
+        
+        return card;
+    }
+    
+    generateThumbnail(file, extension) {
+        if (this.supportedFormats.image.includes(extension) && extension !== 'heic') {
+            // Create image preview
+            const img = document.createElement('img');
+            img.className = 'file-thumbnail-img';
+            img.src = URL.createObjectURL(file);
+            img.onload = () => URL.revokeObjectURL(img.src);
+            return img.outerHTML;
+        } else {
+            // Create icon based on file type
+            return this.getFileTypeIcon(extension);
+        }
+    }
+    
+    getFileTypeIcon(extension) {
+        const iconMap = {
+            // Images
+            jpg: '🖼️', jpeg: '🖼️', png: '🖼️', gif: '🖼️', webp: '🖼️', heic: '🖼️', bmp: '🖼️', tiff: '🖼️',
+            // Videos
+            mp4: '🎬', mov: '🎬', avi: '🎬', mkv: '🎬', wmv: '🎬',
+            // Audio
+            mp3: '🎵', wav: '🎵', flac: '🎵', aac: '🎵', m4a: '🎵',
+            // Documents
+            pdf: '📄', doc: '📝', docx: '📝', txt: '📝', rtf: '📝'
+        };
+        
+        const icon = iconMap[extension] || '📁';
+        return `<span class="file-type-icon">${icon}</span>`;
+    }
+    
+    formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+    
+    removeFile(index) {
+        this.selectedFiles.splice(index, 1);
+        
         if (this.selectedFiles.length === 0) {
-            alert('Please select files to convert.');
-            return;
-        }
-
-        this.showProgress(() => {
-            this.processConversion();
-        }, 'Converting files to JPEG...');
-    }
-
-    /**
-     * Update conversion status
-     * @param {string} status - Status message
-     */
-    updateConversionStatus(status) {
-        const conversionStatus = document.getElementById('conversion-status');
-        if (conversionStatus) {
-            conversionStatus.textContent = status;
+            document.getElementById('file-preview-section').classList.add('hidden');
+            document.getElementById('conversion-section').classList.add('hidden');
+        } else {
+            this.displayFilePreview(this.selectedFiles);
+            this.updateFormatOptionsBasedOnFiles(this.selectedFiles);
         }
     }
-
-    /**
-     * Get selected JPEG quality from radio buttons
-     * @returns {number} Quality setting (0.7, 0.85, 0.95)
-     */
-    getSelectedQuality() {
-        const qualityRadio = document.querySelector('input[name="quality"]:checked');
-        return qualityRadio ? parseFloat(qualityRadio.value) : 0.85;
-    }
-
-    /**
-     * Process conversion for all selected files
-     */
-    async processConversion() {
-        const results = [];
-        const quality = this.getSelectedQuality();
-
-        try {
-            for (let i = 0; i < this.selectedFiles.length; i++) {
-                const file = this.selectedFiles[i];
-                
-                this.updateConversionStatus(`Converting ${file.name}... (${i + 1}/${this.selectedFiles.length})`);
-                
-                try {
-                    const convertedBlob = await this.convertFileToJpeg(file, quality);
-                    
-                    // Generate output filename
-                    const outputFilename = this.generateOutputFilename(file.name);
-                    
-                    results.push({
-                        filename: outputFilename,
-                        blob: convertedBlob,
-                        originalFile: file
-                    });
-
-                } catch (error) {
-                    console.error(`Error converting ${file.name}:`, error);
-                    
-                    // Create error blob for failed conversion
-                    const errorText = `Failed to convert ${file.name}: ${error.message}`;
-                    const errorBlob = new Blob([errorText], { type: 'text/plain' });
-                    
-                    results.push({
-                        filename: `ERROR_${file.name}.txt`,
-                        blob: errorBlob,
-                        originalFile: file
-                    });
-                }
-            }
-
-            // Show download results with preview
-            this.showDownloadResultsWithPreview(results);
-
-        } catch (error) {
-            console.error('Conversion process failed:', error);
-            alert('Conversion failed. Please try again with different files.');
-            
-            // Reset interface on error
-            this.resetInterface();
-            this.showActionButtons();
+    
+    showConversionSection() {
+        const conversionSection = document.getElementById('conversion-section');
+        if (conversionSection) {
+            conversionSection.classList.remove('hidden');
         }
     }
-
-    /**
-     * Convert a single file to JPEG
-     * @param {File} file - File to convert
-     * @param {number} quality - JPEG quality (0.7-0.95)
-     * @returns {Promise<Blob>} JPEG blob
-     */
-    async convertFileToJpeg(file, quality) {
-        const fileType = this.detectFileType(file);
+    
+    updateFormatOptionsBasedOnFiles(files) {
+        const formatSelect = document.getElementById('output-format');
+        if (!formatSelect) return;
         
-        switch (fileType) {
-            case 'heic':
-                return await this.convertHeicToJpeg(file, quality);
-            case 'pdf':
-                return await this.convertPdfToJpeg(file, quality);
-            case 'image':
-                return await this.convertImageToJpeg(file, quality);
-            case 'video':
-                return await this.convertVideoFrameToJpeg(file, quality);
-            default:
-                throw new Error(`Unsupported file format: ${file.type || 'unknown'}`);
-        }
+        // Detect primary file type
+        const fileTypes = files.map(file => {
+            const ext = file.name.split('.').pop().toLowerCase();
+            return this.getFileCategory(ext);
+        });
+        
+        const primaryType = this.getMostCommonType(fileTypes);
+        this.populateFormatOptions(primaryType);
     }
-
-    /**
-     * Detect file type based on MIME type and extension
-     * @param {File} file - File to analyze
-     * @returns {string} File type category
-     */
-    detectFileType(file) {
-        const fileName = file.name.toLowerCase();
-        const mimeType = file.type.toLowerCase();
-
-        // HEIC files (check for both .heic and .heif extensions)
-        if (fileName.endsWith('.heic') || fileName.endsWith('.heif') || mimeType === 'image/heic' || mimeType === 'image/heif') {
-            return 'heic';
+    
+    getFileCategory(extension) {
+        for (const [category, extensions] of Object.entries(this.supportedFormats)) {
+            if (extensions.includes(extension)) {
+                return category;
+            }
         }
-
-        // PDF files
-        if (fileName.endsWith('.pdf') || mimeType === 'application/pdf') {
-            return 'pdf';
-        }
-
-        // Video files
-        if (mimeType.startsWith('video/') || fileName.match(/\.(mp4|mov|avi|mkv|webm)$/)) {
-            return 'video';
-        }
-
-        // Image files
-        if (mimeType.startsWith('image/') || fileName.match(/\.(png|webp|avif|bmp|gif|svg|tiff?)$/)) {
-            return 'image';
-        }
-
         return 'unknown';
     }
-
-    /**
-     * Convert HEIC file to JPEG
-     * @param {File} file - HEIC file
-     * @param {number} quality - JPEG quality
-     * @returns {Promise<Blob>} JPEG blob
-     */
-    async convertHeicToJpeg(file, quality) {
-        if (typeof heic2any === 'undefined') {
-            throw new Error('HEIC conversion library not available. Please refresh the page and try again.');
-        }
-
-        try {
-            // Try different configuration options for better compatibility
-            let convertedBlob;
-            
-            try {
-                // First attempt with standard configuration
-                convertedBlob = await heic2any({
-                    blob: file,
-                    toType: "image/jpeg",
-                    quality: quality
+    
+    getMostCommonType(types) {
+        const counts = {};
+        types.forEach(type => {
+            counts[type] = (counts[type] || 0) + 1;
+        });
+        
+        return Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b);
+    }
+    
+    populateFormatOptions(filterType = null) {
+        const formatSelect = document.getElementById('output-format');
+        if (!formatSelect) return;
+        
+        formatSelect.innerHTML = '<option value="">Select output format</option>';
+        
+        const formatOptions = {
+            image: [
+                { value: 'jpg', label: 'JPG - High compatibility, smaller files' },
+                { value: 'png', label: 'PNG - Transparency support, lossless' },
+                { value: 'gif', label: 'GIF - Animation support' },
+                { value: 'webp', label: 'WebP - Modern format, great compression' }
+            ],
+            video: [
+                { value: 'mp4', label: 'MP4 - Universal compatibility' },
+                { value: 'mov', label: 'MOV - Apple QuickTime format' },
+                { value: 'avi', label: 'AVI - Windows standard format' }
+            ],
+            audio: [
+                { value: 'mp3', label: 'MP3 - Universal audio format' },
+                { value: 'wav', label: 'WAV - Uncompressed audio quality' },
+                { value: 'flac', label: 'FLAC - Lossless compression' }
+            ],
+            document: [
+                { value: 'pdf', label: 'PDF - Universal document format' },
+                { value: 'txt', label: 'TXT - Plain text format' }
+            ]
+        };
+        
+        const categories = filterType ? [filterType] : Object.keys(formatOptions);
+        
+        categories.forEach(category => {
+            if (formatOptions[category]) {
+                const optgroup = document.createElement('optgroup');
+                optgroup.label = category.charAt(0).toUpperCase() + category.slice(1);
+                
+                formatOptions[category].forEach(format => {
+                    const option = document.createElement('option');
+                    option.value = format.value;
+                    option.textContent = format.label;
+                    optgroup.appendChild(option);
                 });
-            } catch (firstError) {
-                console.warn('First HEIC conversion attempt failed, trying alternative methods:', firstError);
                 
-                // Try multiple fallback approaches
-                const fallbackMethods = [
-                    { quality: 0.8, toType: "image/jpeg" },
-                    { quality: 0.9, toType: "image/png" },
-                    { quality: 1.0, toType: "image/jpeg" }
-                ];
-                
-                for (const method of fallbackMethods) {
-                    try {
-                        console.log(`Trying HEIC conversion with quality ${method.quality} and type ${method.toType}`);
-                        convertedBlob = await heic2any({
-                            blob: file,
-                            ...method
-                        });
-                        
-                        // If we got PNG, convert it to JPEG
-                        if (method.toType === "image/png") {
-                            convertedBlob = await this.convertPngBlobToJpeg(convertedBlob, quality);
-                        }
-                        break;
-                    } catch (methodError) {
-                        console.warn(`HEIC conversion method failed:`, methodError);
-                        continue;
-                    }
-                }
-                
-                if (!convertedBlob) {
-                    throw firstError; // Re-throw original error if all methods failed
-                }
+                formatSelect.appendChild(optgroup);
             }
-
-            // Handle both single blob and array of blobs
-            if (Array.isArray(convertedBlob)) {
-                return convertedBlob[0];
-            }
-            
-            return convertedBlob;
-        } catch (error) {
-            // If HEIC conversion completely fails, try one more approach
-            try {
-                return await this.attemptImageLoadFallback(file, quality);
-            } catch (fallbackError) {
-                // Create informative error message
-                const errorMessage = `Unable to convert this HEIC file. This appears to be a newer HEIC format that isn't supported by the browser conversion library. 
-
-Suggestions:
-• Try converting the file using your phone's built-in sharing feature (Share > Copy > Save as JPEG)
-• Use Apple's Preview app to export as JPEG
-• Try a different HEIC file
-
-Technical error: ${error.message}`;
-                throw new Error(errorMessage);
-            }
+        });
+    }
+    
+    updateConversionOptions(outputFormat) {
+        // Show/hide advanced options based on format
+        const advancedSection = document.getElementById('universal-advanced-options');
+        if (advancedSection && outputFormat) {
+            advancedSection.classList.remove('hidden');
         }
     }
-
-    /**
-     * Convert PDF first page to JPEG
-     * @param {File} file - PDF file
-     * @param {number} quality - JPEG quality
-     * @returns {Promise<Blob>} JPEG blob
-     */
-    async convertPdfToJpeg(file, quality) {
-        if (typeof PDFLib === 'undefined') {
-            throw new Error('PDF library not loaded');
+    
+    async startConversion() {
+        const outputFormat = document.getElementById('output-format').value;
+        if (!outputFormat || this.selectedFiles.length === 0) {
+            alert('Please select files and an output format');
+            return;
         }
-
+        
+        this.showProgress();
+        
         try {
-            const pdfBytes = await file.arrayBuffer();
-            const pdf = await PDFLib.PDFDocument.load(pdfBytes);
+            const convertedFiles = [];
             
-            if (pdf.getPageCount() === 0) {
-                throw new Error('PDF contains no pages');
+            for (let i = 0; i < this.selectedFiles.length; i++) {
+                const file = this.selectedFiles[i];
+                this.updateProgress((i / this.selectedFiles.length) * 100, `Converting ${file.name}...`);
+                
+                const convertedFile = await this.convertFile(file, outputFormat);
+                if (convertedFile) {
+                    convertedFiles.push(convertedFile);
+                }
             }
-
-            // Get first page
-            const page = pdf.getPage(0);
-            const { width, height } = page.getSize();
-
-            // Create canvas to render PDF page
+            
+            this.updateProgress(100, 'Conversion complete!');
+            this.showDownloadSection(convertedFiles);
+            
+        } catch (error) {
+            console.error('Conversion error:', error);
+            this.showError('Conversion failed. Please try again.');
+        }
+    }
+    
+    async convertFile(file, outputFormat) {
+        const inputExtension = file.name.split('.').pop().toLowerCase();
+        const inputCategory = this.getFileCategory(inputExtension);
+        const outputCategory = this.getFileCategory(outputFormat);
+        
+        // Route to appropriate converter
+        if (inputCategory === 'image' && outputCategory === 'image') {
+            return await this.convertImage(file, outputFormat);
+        } else if (inputCategory === 'video' && outputFormat === 'mp3') {
+            return await this.convertVideoToAudio(file);
+        } else if (inputExtension === 'heic' && outputFormat === 'jpg') {
+            return await this.convertHeicToJpg(file);
+        }
+        
+        // For unsupported conversions, return original file
+        return { blob: file, filename: file.name };
+    }
+    
+    async convertImage(file, outputFormat) {
+        return new Promise((resolve) => {
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
-
-            // Set canvas size (scale down if too large)
-            const maxSize = 2048;
-            const scale = Math.min(maxSize / width, maxSize / height, 1);
-            canvas.width = width * scale;
-            canvas.height = height * scale;
-
-            // Render PDF page to canvas (simplified approach)
-            // Note: This is a basic implementation. For full PDF rendering, 
-            // consider using PDF.js or similar library
-            ctx.fillStyle = 'white';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            // Add text indicating PDF conversion
-            ctx.fillStyle = 'black';
-            ctx.font = '16px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText(`PDF: ${file.name} (Page 1)`, canvas.width / 2, canvas.height / 2);
-            ctx.fillText('Full PDF rendering requires additional setup', canvas.width / 2, canvas.height / 2 + 30);
-
-            // Convert canvas to JPEG blob
-            return new Promise((resolve, reject) => {
-                canvas.toBlob((blob) => {
-                    if (blob) {
-                        resolve(blob);
-                    } else {
-                        reject(new Error('Failed to create JPEG from PDF'));
-                    }
-                }, 'image/jpeg', quality);
-            });
-
-        } catch (error) {
-            throw new Error(`PDF conversion failed: ${error.message}`);
-        }
-    }
-
-    /**
-     * Convert image file to JPEG
-     * @param {File} file - Image file
-     * @param {number} quality - JPEG quality
-     * @returns {Promise<Blob>} JPEG blob
-     */
-    async convertImageToJpeg(file, quality) {
-        return new Promise((resolve, reject) => {
             const img = new Image();
             
             img.onload = () => {
-                try {
-                    // Create canvas element
-                    const canvas = document.createElement('canvas');
-                    const ctx = canvas.getContext('2d');
-                    
-                    // Set canvas dimensions to match image
-                    canvas.width = img.naturalWidth;
-                    canvas.height = img.naturalHeight;
-                    
-                    // Fill with white background for transparency
-                    ctx.fillStyle = 'white';
-                    ctx.fillRect(0, 0, canvas.width, canvas.height);
-                    
-                    // Draw image to canvas
-                    ctx.drawImage(img, 0, 0);
-                    
-                    // Convert canvas to JPEG blob
-                    canvas.toBlob((blob) => {
-                        if (blob) {
-                            resolve(blob);
-                        } else {
-                            reject(new Error('Failed to create JPEG blob'));
-                        }
-                    }, 'image/jpeg', quality);
-                    
-                } catch (error) {
-                    reject(error);
-                }
-            };
-            
-            img.onerror = () => {
-                reject(new Error('Failed to load image'));
-            };
-            
-            // Load the image
-            img.src = URL.createObjectURL(file);
-        });
-    }
-
-    /**
-     * Extract first frame from video and convert to JPEG
-     * @param {File} file - Video file
-     * @param {number} quality - JPEG quality
-     * @returns {Promise<Blob>} JPEG blob
-     */
-    async convertVideoFrameToJpeg(file, quality) {
-        return new Promise((resolve, reject) => {
-            const video = document.createElement('video');
-            
-            video.onloadeddata = () => {
-                try {
-                    // Create canvas to capture frame
-                    const canvas = document.createElement('canvas');
-                    const ctx = canvas.getContext('2d');
-                    
-                    // Set canvas dimensions
-                    canvas.width = video.videoWidth;
-                    canvas.height = video.videoHeight;
-                    
-                    // Draw video frame to canvas
-                    ctx.drawImage(video, 0, 0);
-                    
-                    // Convert canvas to JPEG blob
-                    canvas.toBlob((blob) => {
-                        if (blob) {
-                            resolve(blob);
-                        } else {
-                            reject(new Error('Failed to extract video frame'));
-                        }
-                    }, 'image/jpeg', quality);
-                    
-                } catch (error) {
-                    reject(error);
-                }
-            };
-            
-            video.onerror = () => {
-                reject(new Error('Failed to load video'));
-            };
-            
-            // Set video source and seek to first frame
-            video.src = URL.createObjectURL(file);
-            video.currentTime = 0.1; // Seek to 0.1 seconds to get a frame
-        });
-    }
-
-    /**
-     * Convert PNG blob to JPEG
-     * @param {Blob} pngBlob - PNG blob
-     * @param {number} quality - JPEG quality
-     * @returns {Promise<Blob>} JPEG blob
-     */
-    async convertPngBlobToJpeg(pngBlob, quality) {
-        return new Promise((resolve, reject) => {
-            const img = new Image();
-            img.onload = () => {
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-                
-                canvas.width = img.naturalWidth;
-                canvas.height = img.naturalHeight;
-                
-                // Fill with white background
-                ctx.fillStyle = 'white';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                
-                // Draw image
+                canvas.width = img.width;
+                canvas.height = img.height;
                 ctx.drawImage(img, 0, 0);
                 
-                canvas.toBlob(resolve, 'image/jpeg', quality);
-            };
-            img.onerror = reject;
-            img.src = URL.createObjectURL(pngBlob);
-        });
-    }
-
-    /**
-     * Attempt to load HEIC file as regular image (fallback)
-     * @param {File} file - HEIC file
-     * @param {number} quality - JPEG quality
-     * @returns {Promise<Blob>} JPEG blob
-     */
-    async attemptImageLoadFallback(file, quality) {
-        return new Promise((resolve, reject) => {
-            const img = new Image();
-            
-            img.onload = () => {
-                try {
-                    const canvas = document.createElement('canvas');
-                    const ctx = canvas.getContext('2d');
-                    
-                    canvas.width = img.naturalWidth || img.width;
-                    canvas.height = img.naturalHeight || img.height;
-                    
-                    // Fill with white background
-                    ctx.fillStyle = 'white';
-                    ctx.fillRect(0, 0, canvas.width, canvas.height);
-                    
-                    // Draw image
-                    ctx.drawImage(img, 0, 0);
-                    
-                    canvas.toBlob((blob) => {
-                        if (blob) {
-                            resolve(blob);
-                        } else {
-                            reject(new Error('Failed to create JPEG from fallback method'));
-                        }
-                    }, 'image/jpeg', quality);
-                    
-                } catch (error) {
-                    reject(error);
-                }
-            };
-            
-            img.onerror = () => {
-                reject(new Error('Browser cannot read this HEIC file format'));
-            };
-            
-            // Try to load as image
-            img.src = URL.createObjectURL(file);
-            
-            // Set timeout to avoid hanging
-            setTimeout(() => {
-                reject(new Error('Image loading timeout'));
-            }, 5000);
-        });
-    }
-
-    /**
-     * Generate output filename
-     * @param {string} originalName - Original filename
-     * @returns {string} Output filename
-     */
-    generateOutputFilename(originalName) {
-        const nameWithoutExt = originalName.replace(/\.[^/.]+$/, '');
-        return `${nameWithoutExt}.jpg`;
-    }
-
-    /**
-     * Show download results with image previews
-     * @param {Array} results - Array of conversion results
-     */
-    showDownloadResultsWithPreview(results) {
-        const progressSection = document.getElementById('progress-section');
-        const downloadSection = document.getElementById('download-section');
-        const downloadLinks = document.getElementById('download-links');
-        const previewContainer = document.getElementById('preview-container');
-        
-        if (progressSection) FileFlowUtils.hideElement(progressSection);
-        if (downloadSection) FileFlowUtils.showElement(downloadSection);
-        
-        // Clear previous results
-        if (downloadLinks) downloadLinks.innerHTML = '';
-        if (previewContainer) previewContainer.innerHTML = '';
-        
-        results.forEach((result, index) => {
-            // Create download link
-            if (downloadLinks && result.blob.type !== 'text/plain') {
-                const downloadLink = FileFlowUtils.createDownloadLink(result.filename, result.blob);
-                downloadLinks.appendChild(downloadLink);
+                const quality = outputFormat === 'jpg' ? 0.9 : undefined;
+                const mimeType = `image/${outputFormat === 'jpg' ? 'jpeg' : outputFormat}`;
                 
-                // Create preview if it's an image
-                if (result.blob.type === 'image/jpeg') {
-                    const previewImage = document.createElement('div');
-                    previewImage.className = 'preview-image';
-                    previewImage.innerHTML = `
-                        <img src="${URL.createObjectURL(result.blob)}" alt="Preview of ${result.filename}" loading="lazy">
-                        <p class="preview-filename">${result.filename}</p>
-                    `;
-                    previewContainer.appendChild(previewImage);
-                }
-            } else if (downloadLinks) {
-                // Error file
-                const downloadLink = FileFlowUtils.createDownloadLink(result.filename, result.blob);
-                downloadLinks.appendChild(downloadLink);
+                canvas.toBlob((blob) => {
+                    const newFilename = file.name.replace(/\.[^/.]+$/, `.${outputFormat}`);
+                    resolve({ blob, filename: newFilename });
+                }, mimeType, quality);
+            };
+            
+            img.src = URL.createObjectURL(file);
+        });
+    }
+    
+    async convertHeicToJpg(file) {
+        // Placeholder for HEIC conversion - would use heic2any library
+        return new Promise((resolve, reject) => {
+            if (window.heic2any) {
+                heic2any({
+                    blob: file,
+                    toType: 'image/jpeg',
+                    quality: 0.9
+                }).then(jpegBlob => {
+                    const newFilename = file.name.replace(/\.heic$/i, '.jpg');
+                    resolve({ blob: jpegBlob, filename: newFilename });
+                }).catch(reject);
+            } else {
+                reject(new Error('HEIC converter not loaded'));
             }
         });
     }
-
-    /**
-     * Override showProgress to include conversion status
-     */
-    showProgress(onComplete, statusText = 'Converting files to JPEG...') {
-        super.showProgress(onComplete, statusText);
-        this.updateConversionStatus('Analyzing files...');
+    
+    async convertVideoToAudio(file) {
+        // Placeholder for video to audio conversion - would use FFmpeg
+        return new Promise((resolve, reject) => {
+            // This would require FFmpeg WebAssembly implementation
+            reject(new Error('Video conversion not implemented yet'));
+        });
+    }
+    
+    showProgress() {
+        const progressSection = document.getElementById('universal-progress-section');
+        if (progressSection) {
+            progressSection.classList.remove('hidden');
+        }
+    }
+    
+    updateProgress(percent, message) {
+        const progressBar = document.getElementById('universal-progress-bar');
+        const progressText = document.getElementById('universal-progress-text');
+        const progressMessage = document.getElementById('universal-progress-message');
+        
+        if (progressBar) progressBar.style.width = `${percent}%`;
+        if (progressText) progressText.textContent = `${Math.round(percent)}%`;
+        if (progressMessage) progressMessage.textContent = message;
+    }
+    
+    showDownloadSection(files) {
+        const downloadSection = document.getElementById('universal-download-section');
+        const downloadContainer = document.getElementById('universal-download-container');
+        
+        if (!downloadSection || !downloadContainer) return;
+        
+        downloadContainer.innerHTML = '';
+        
+        files.forEach((fileData, index) => {
+            const downloadLink = document.createElement('a');
+            downloadLink.href = URL.createObjectURL(fileData.blob);
+            downloadLink.download = fileData.filename;
+            downloadLink.className = 'download-link';
+            downloadLink.setAttribute('data-testid', `download-link-${index}`);
+            downloadLink.innerHTML = `
+                <svg class="download-icon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                Download ${fileData.filename}
+            `;
+            downloadContainer.appendChild(downloadLink);
+        });
+        
+        downloadSection.classList.remove('hidden');
+    }
+    
+    showError(message) {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error-message';
+        errorDiv.textContent = message;
+        
+        const container = document.querySelector('.universal-converter-container');
+        if (container) {
+            container.insertBefore(errorDiv, container.firstChild);
+            
+            setTimeout(() => {
+                errorDiv.remove();
+            }, 5000);
+        }
     }
 }
 
-// Initialize universal converter when DOM is loaded
-document.addEventListener('DOMContentLoaded', function() {
-    if (document.getElementById('file-input') && window.location.pathname.includes('convert-to-jpeg')) {
-        window.fileHandler = new UniversalConverter();
-    }
+// Initialize the universal converter when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    window.universalConverter = new UniversalConverter();
 });
