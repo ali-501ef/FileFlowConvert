@@ -8,6 +8,55 @@ class UniversalConverter extends FileHandler {
         super();
         this.ffmpeg = null;
         this.isFFmpegReady = false;
+        this.checkForPendingFile();
+    }
+
+    /**
+     * Check for pending file from homepage converter
+     */
+    checkForPendingFile() {
+        const pendingFileData = sessionStorage.getItem('pendingFile');
+        const targetFormat = sessionStorage.getItem('targetFormat');
+        
+        if (pendingFileData) {
+            try {
+                const fileData = JSON.parse(pendingFileData);
+                
+                // Convert base64 data back to file
+                if (fileData.data) {
+                    fetch(fileData.data)
+                        .then(res => res.blob())
+                        .then(blob => {
+                            const file = new File([blob], fileData.name, {
+                                type: fileData.type,
+                                lastModified: fileData.lastModified
+                            });
+                            
+                            // Add to selected files
+                            this.selectedFiles = [file];
+                            this.displaySelectedFiles();
+                            
+                            // Set target format if available
+                            if (targetFormat) {
+                                console.log('Target format from homepage:', targetFormat);
+                            }
+                            
+                            // Clear session storage
+                            sessionStorage.removeItem('pendingFile');
+                            sessionStorage.removeItem('targetFormat');
+                        })
+                        .catch(error => {
+                            console.error('Error loading pending file:', error);
+                            sessionStorage.removeItem('pendingFile');
+                            sessionStorage.removeItem('targetFormat');
+                        });
+                }
+            } catch (error) {
+                console.error('Error parsing pending file data:', error);
+                sessionStorage.removeItem('pendingFile');
+                sessionStorage.removeItem('targetFormat');
+            }
+        }
     }
 
     /**

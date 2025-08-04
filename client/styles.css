@@ -1083,12 +1083,286 @@ body {
     word-break: break-word;
 }
 
+/* Universal Converter Hero Section */
+.universal-hero-section {
+    text-align: center;
+    padding: 4rem 0 3rem;
+    margin-bottom: 3rem;
+}
+
+.universal-hero-title {
+    font-size: clamp(2.75rem, 6vw, 4rem);
+    font-weight: 700;
+    color: var(--foreground);
+    margin-bottom: 1.5rem;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+}
+
+.universal-hero-description {
+    font-size: 1.375rem;
+    color: hsl(210, 11%, 71%);
+    max-width: 48rem;
+    margin: 0 auto 3rem;
+    line-height: 1.6;
+    font-weight: 400;
+}
+
+.universal-converter-interface {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 2rem;
+    background-color: var(--surface);
+    border-radius: 1.5rem;
+    box-shadow: var(--shadow-lg);
+    border: 1px solid hsl(210, 20%, 90%);
+}
+
+/* Drop Zone */
+.drop-zone {
+    border: 2px dashed hsl(210, 11%, 85%);
+    border-radius: var(--radius-xl);
+    padding: 2.5rem 2rem;
+    margin-bottom: 2rem;
+    background-color: hsl(210, 20%, 99%);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.drop-zone:hover,
+.drop-zone.drag-over {
+    border-color: var(--primary);
+    background-color: hsl(215, 84%, 98%);
+    transform: translateY(-2px);
+}
+
+.drop-zone-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.upload-icon {
+    color: hsl(210, 11%, 71%);
+    opacity: 0.8;
+}
+
+.drop-zone-text {
+    font-size: 1.125rem;
+    font-weight: 500;
+    color: var(--foreground);
+    margin: 0;
+}
+
+.drop-zone-subtext {
+    font-size: 1rem;
+    color: hsl(210, 11%, 71%);
+    margin: 0;
+}
+
+/* Converter Controls */
+.converter-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    align-items: center;
+}
+
+.choose-file-btn {
+    background-color: var(--surface);
+    border: 2px solid var(--border);
+    color: var(--foreground);
+    padding: 0.875rem 2rem;
+    border-radius: var(--radius-lg);
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 140px;
+}
+
+.choose-file-btn:hover {
+    border-color: var(--primary);
+    background-color: hsl(215, 84%, 98%);
+    transform: translateY(-1px);
+}
+
+.convert-options {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.select-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.select-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--foreground);
+}
+
+.format-select {
+    padding: 0.875rem 1rem;
+    border: 2px solid var(--border);
+    border-radius: var(--radius-lg);
+    background-color: var(--surface);
+    color: var(--foreground);
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 120px;
+}
+
+.format-select:hover,
+.format-select:focus {
+    border-color: var(--primary);
+    outline: none;
+}
+
+.convert-now-btn {
+    background-color: var(--primary);
+    color: white;
+    border: none;
+    padding: 0.875rem 2rem;
+    border-radius: var(--radius-lg);
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 140px;
+}
+
+.convert-now-btn:hover:not(:disabled) {
+    background-color: var(--primary-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.convert-now-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Why FileFlow Exists Section */
+.why-section {
+    background-color: var(--surface);
+    padding: 4rem 0;
+    margin-top: 4rem;
+    border-top: 1px solid var(--border);
+}
+
+.why-content {
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.why-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--foreground);
+    margin-bottom: 2rem;
+    line-height: 1.2;
+}
+
+.why-description {
+    font-size: 1.25rem;
+    color: hsl(210, 11%, 71%);
+    line-height: 1.7;
+    margin-bottom: 3rem;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.why-points {
+    display: grid;
+    gap: 1.5rem;
+    max-width: 600px;
+    margin: 0 auto;
+    text-align: left;
+}
+
+.why-point {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem;
+    background-color: hsl(210, 20%, 99%);
+    border-radius: var(--radius-lg);
+    border: 1px solid hsl(210, 20%, 92%);
+}
+
+.why-icon {
+    font-size: 1.5rem;
+    line-height: 1;
+    flex-shrink: 0;
+    margin-top: 0.125rem;
+}
+
+.why-text {
+    font-size: 1.125rem;
+    line-height: 1.6;
+    color: var(--foreground);
+}
+
+/* Responsive adjustments for universal converter */
+@media (max-width: 640px) {
+    .universal-converter-interface {
+        margin: 0 1rem;
+        padding: 1.5rem;
+    }
+    
+    .drop-zone {
+        padding: 2rem 1rem;
+    }
+    
+    .convert-options {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .format-select,
+    .convert-now-btn,
+    .choose-file-btn {
+        width: 100%;
+    }
+    
+    .why-title {
+        font-size: 2rem;
+    }
+    
+    .why-description {
+        font-size: 1.125rem;
+    }
+    
+    .why-point {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.75rem;
+    }
+    
+    .why-icon {
+        align-self: center;
+    }
+}
+
 /* Print styles */
 @media print {
     .ad-placeholder,
     .navbar,
     .footer,
-    .action-buttons {
+    .action-buttons,
+    .universal-converter-interface {
         display: none;
     }
 }

@@ -57,14 +57,56 @@
         <!-- Main Content -->
         <main class="main-content">
             <div class="container">
-                <!-- Hero Section -->
-                <div class="hero-section">
-                    <h1 class="hero-title">
-                        Convert Files with <span class="text-primary">Precision</span> – Smart. Secure. Instant.
-                    </h1>
-                    <p class="hero-description">
-                        No uploads. No limits. Convert files instantly — with total privacy, right in your browser.
-                    </p>
+                <!-- Universal Converter Hero Section -->
+                <div class="universal-hero-section">
+                    <div class="hero-content">
+                        <h1 class="universal-hero-title">
+                            Convert Any File — Instantly, Privately, Beautifully.
+                        </h1>
+                        <p class="universal-hero-description">
+                            Convert images, documents, audio, and more — all directly in your browser. No uploads. No clutter. No compromises.
+                        </p>
+                        
+                        <!-- Universal Converter Interface -->
+                        <div class="universal-converter-interface">
+                            <div class="drop-zone" id="universal-drop-zone" data-testid="dropzone-universal">
+                                <div class="drop-zone-content">
+                                    <div class="upload-icon">
+                                        <svg width="48" height="48" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                        </svg>
+                                    </div>
+                                    <p class="drop-zone-text">Drag and drop your file here</p>
+                                    <p class="drop-zone-subtext">or</p>
+                                </div>
+                            </div>
+                            
+                            <div class="converter-controls">
+                                <button class="choose-file-btn" id="choose-file-btn" data-testid="button-choose-file">
+                                    Choose a File
+                                </button>
+                                
+                                <div class="convert-options">
+                                    <div class="select-wrapper">
+                                        <label for="output-format" class="select-label">Convert to...</label>
+                                        <select id="output-format" class="format-select" data-testid="select-output-format">
+                                            <option value="jpeg">JPEG</option>
+                                            <option value="png">PNG</option>
+                                            <option value="pdf">PDF</option>
+                                            <option value="mp3">MP3</option>
+                                            <option value="webp">WebP</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <button class="convert-now-btn" id="convert-now-btn" data-testid="button-convert-now" disabled>
+                                        Convert Now
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <input type="file" id="universal-file-input" style="display: none;" data-testid="input-file-universal">
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Top Content Ad -->
@@ -191,41 +233,31 @@
         </div>
     </div>
 
-    <!-- Features Section -->
-    <section id="about" class="features-section">
+    <!-- Why FileFlow Exists Section -->
+    <section id="about" class="why-section">
         <div class="container">
-            <div class="features-container">
-                <div class="features-header">
-                    <h2 class="features-title">Why Choose FileFlow?</h2>
-                    <p class="features-subtitle">Our tools are designed with privacy, speed, and quality in mind.</p>
-                </div>
-                <div class="features-grid">
-                    <div class="feature-item">
-                        <div class="feature-icon bg-blue">
-                            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                            </svg>
-                        </div>
-                        <h3 class="feature-title">100% Private</h3>
-                        <p class="feature-description">All conversions happen in your browser. Your files never leave your device.</p>
+            <div class="why-content">
+                <h2 class="why-title">Why FileFlow Exists</h2>
+                <p class="why-description">
+                    We built FileFlow because file conversion shouldn't feel outdated, invasive, or complicated. You shouldn't need to upload private files to unknown servers — or wait through ads and popups — just to get a simple image or document in the right format.
+                </p>
+                
+                <div class="why-points">
+                    <div class="why-point">
+                        <span class="why-icon">🔒</span>
+                        <span class="why-text"><strong>Privacy-first</strong> — Nothing is uploaded. Ever.</span>
                     </div>
-                    <div class="feature-item">
-                        <div class="feature-icon bg-green">
-                            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                            </svg>
-                        </div>
-                        <h3 class="feature-title">Lightning Fast</h3>
-                        <p class="feature-description">No uploading to servers. Instant conversion with optimized algorithms.</p>
+                    <div class="why-point">
+                        <span class="why-icon">⚡</span>
+                        <span class="why-text"><strong>Instant Results</strong> — All tools work directly in your browser.</span>
                     </div>
-                    <div class="feature-item">
-                        <div class="feature-icon bg-purple">
-                            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                        </div>
-                        <h3 class="feature-title">High Quality</h3>
-                        <p class="feature-description">Professional-grade conversion maintaining original file quality.</p>
+                    <div class="why-point">
+                        <span class="why-icon">🎯</span>
+                        <span class="why-text"><strong>Just Works</strong> — No logins. No setup. Just conversion.</span>
+                    </div>
+                    <div class="why-point">
+                        <span class="why-icon">🌍</span>
+                        <span class="why-text"><strong>Universally Accessible</strong> — Works on every device, everywhere.</span>
                     </div>
                 </div>
             </div>
@@ -272,5 +304,6 @@
     </footer>
 
     <script src="/js/main.js"></script>
+    <script src="/js/universal-homepage.js"></script>
 </body>
 </html>
