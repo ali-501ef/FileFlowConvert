@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Compress - FileFlow</title>
-    <meta name="description" content="Compress video files to reduce size while maintaining quality with FileFlow's Video Compress tool. Support for MP4, AVI, MOV and more formats.">
+    <title>GIF Maker - FileFlow</title>
+    <meta name="description" content="Create animated GIFs from videos with FileFlow's GIF Maker. Customize frame rate, quality, and duration for perfect GIF animations.">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -24,20 +24,20 @@
         <div class="hero-section">
             <div class="hero-content">
                 <div class="hero-badge">
-                    <div class="tool-icon bg-red">
+                    <div class="tool-icon bg-blue">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M12 20h9"></path>
-                            <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                            <rect width="18" height="18" x="3" y="3" rx="2"/>
+                            <path d="m9 9 5 12 1.774-5.226L21 14 9 9z"/>
                         </svg>
                     </div>
                     <span>Media Tools</span>
                 </div>
-                <h1 class="hero-title">Video Compress</h1>
-                <p class="hero-description">Reduce video file size while maintaining quality</p>
+                <h1 class="hero-title">GIF Maker</h1>
+                <p class="hero-description">Create animated GIFs from videos</p>
                 <div class="hero-features">
-                    <span class="feature-tag">✓ Multiple formats</span>
+                    <span class="feature-tag">✓ Custom frame rate</span>
                     <span class="feature-tag">✓ Quality control</span>
-                    <span class="feature-tag">✓ Size optimization</span>
+                    <span class="feature-tag">✓ Loop options</span>
                 </div>
             </div>
         </div>
@@ -54,6 +54,10 @@
                 <p>or click to browse</p>
                 <p class="supported-formats">Supports MP4, AVI, MOV, WMV, MKV</p>
                 <input type="file" id="fileInput" accept="video/*" hidden>
+            </div>
+
+            <div class="video-preview" id="videoPreview" style="display: none;">
+                <video id="videoPlayer" controls style="width: 100%; max-height: 400px; border-radius: 12px;"></video>
             </div>
 
             <div class="advanced-options" id="advancedOptions">
@@ -79,64 +83,52 @@
                 </div>
                 <div class="options-content" id="optionsContent">
                     <div class="option-group">
-                        <label for="compressionLevel">Compression Level</label>
-                        <select id="compressionLevel">
-                            <option value="light">Light (Higher quality, larger size)</option>
-                            <option value="medium" selected>Medium (Balanced)</option>
-                            <option value="heavy">Heavy (Lower quality, smaller size)</option>
-                            <option value="custom">Custom Settings</option>
-                        </select>
-                    </div>
-                    <div class="custom-settings" id="customSettings" style="display: none;">
-                        <div class="option-group">
-                            <label for="videoBitrate">Video Bitrate (kbps)</label>
-                            <input type="number" id="videoBitrate" min="100" max="10000" value="1000">
-                        </div>
-                        <div class="option-group">
-                            <label for="resolution">Resolution</label>
-                            <select id="resolution">
-                                <option value="original">Keep Original</option>
-                                <option value="1080p">1080p (1920x1080)</option>
-                                <option value="720p">720p (1280x720)</option>
-                                <option value="480p">480p (854x480)</option>
-                                <option value="360p">360p (640x360)</option>
-                            </select>
-                        </div>
-                        <div class="option-group">
-                            <label for="frameRate">Frame Rate (fps)</label>
-                            <select id="frameRate">
-                                <option value="original">Keep Original</option>
-                                <option value="60">60 fps</option>
-                                <option value="30">30 fps</option>
-                                <option value="24">24 fps</option>
-                                <option value="15">15 fps</option>
-                            </select>
-                        </div>
+                        <label for="startTime">Start Time (seconds)</label>
+                        <input type="number" id="startTime" min="0" value="0" step="0.1">
                     </div>
                     <div class="option-group">
-                        <label for="outputFormat">Output Format</label>
-                        <select id="outputFormat">
-                            <option value="mp4">MP4 (Recommended)</option>
-                            <option value="webm">WebM</option>
-                            <option value="avi">AVI</option>
+                        <label for="duration">Duration (seconds)</label>
+                        <input type="number" id="duration" min="0.5" max="10" value="3" step="0.1">
+                    </div>
+                    <div class="option-group">
+                        <label for="frameRate">Frame Rate (FPS)</label>
+                        <select id="frameRate">
+                            <option value="10" selected>10 FPS (Smaller file)</option>
+                            <option value="15">15 FPS (Balanced)</option>
+                            <option value="24">24 FPS (Smooth)</option>
+                            <option value="30">30 FPS (Very smooth)</option>
                         </select>
                     </div>
+                    <div class="option-group">
+                        <label for="quality">Quality</label>
+                        <select id="quality">
+                            <option value="low">Low (Smaller file)</option>
+                            <option value="medium" selected>Medium (Balanced)</option>
+                            <option value="high">High (Larger file)</option>
+                        </select>
+                    </div>
+                    <div class="option-group">
+                        <label for="width">Width (pixels)</label>
+                        <select id="width">
+                            <option value="original">Keep Original</option>
+                            <option value="480" selected>480px</option>
+                            <option value="320">320px</option>
+                            <option value="240">240px</option>
+                        </select>
+                    </div>
+                    <div class="option-group">
+                        <input type="checkbox" id="loop" checked>
+                        <label for="loop">Loop GIF infinitely</label>
+                    </div>
+                    <div class="option-group">
+                        <input type="checkbox" id="boomerang">
+                        <label for="boomerang">Boomerang effect (play forward then backward)</label>
+                    </div>
                 </div>
-            </div>
-
-            <div class="file-preview" id="filePreview" style="display: none;">
-                <div class="preview-header">
-                    <h3 id="fileName"></h3>
-                    <span id="fileSize"></span>
-                </div>
-                <div class="video-preview">
-                    <video id="videoPreview" controls style="max-width: 100%; max-height: 300px;"></video>
-                </div>
-                <div class="video-info" id="videoInfo"></div>
             </div>
 
             <button class="convert-btn" id="convertBtn" disabled>
-                <span class="btn-text">Compress Video</span>
+                <span class="btn-text">Create GIF</span>
                 <div class="btn-loader" style="display: none;"></div>
             </button>
 
@@ -145,11 +137,13 @@
                     <div class="progress-fill" id="progressFill"></div>
                 </div>
                 <div class="progress-text" id="progressText">0%</div>
+                <div class="progress-stage" id="progressStage">Processing frames...</div>
             </div>
 
             <div class="results" id="results" style="display: none;">
-                <h3>Compression Complete</h3>
-                <div class="compression-stats" id="compressionStats"></div>
+                <h3>GIF Created Successfully</h3>
+                <div class="gif-preview" id="gifPreview"></div>
+                <div class="gif-info" id="gifInfo"></div>
                 <div class="result-actions">
                     <button class="download-btn" id="downloadBtn">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -157,15 +151,14 @@
                             <polyline points="7,10 12,15 17,10"></polyline>
                             <line x1="12" y1="15" x2="12" y2="3"></line>
                         </svg>
-                        Download Compressed Video
+                        Download GIF
                     </button>
                 </div>
             </div>
         </div>
     </main>
 
-    <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.7/dist/umd/ffmpeg.js"></script>
     <script src="js/advanced-options.js"></script>
-    <script src="js/converters/video-compress.js"></script>
+    <script src="js/converters/gif-maker.js"></script>
 </body>
 </html>

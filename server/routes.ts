@@ -64,6 +64,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.sendFile(path.join(clientPath, 'audio-converter.html'));
   });
 
+  app.get('/pdf-compress', (req, res) => {
+    res.sendFile(path.join(clientPath, 'pdf-compress.html'));
+  });
+
+  app.get('/pdf-to-word', (req, res) => {
+    res.sendFile(path.join(clientPath, 'pdf-to-word.html'));
+  });
+
+  app.get('/video-trim', (req, res) => {
+    res.sendFile(path.join(clientPath, 'video-trim.html'));
+  });
+
+  app.get('/gif-maker', (req, res) => {
+    res.sendFile(path.join(clientPath, 'gif-maker.html'));
+  });
+
+  app.get('/video-merger', (req, res) => {
+    res.sendFile(path.join(clientPath, 'video-merger.html'));
+  });
+
+  app.get('/pdf-rotate', (req, res) => {
+    res.sendFile(path.join(clientPath, 'pdf-rotate.html'));
+  });
+
+  app.get('/pdf-watermark', (req, res) => {
+    res.sendFile(path.join(clientPath, 'pdf-watermark.html'));
+  });
+
   app.get('/convert-to-jpeg', (req, res) => {
     res.sendFile(path.join(clientPath, 'convert-to-jpeg.html'));
   });

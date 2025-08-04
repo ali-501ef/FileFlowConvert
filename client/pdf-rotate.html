@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Compress - FileFlow</title>
-    <meta name="description" content="Compress video files to reduce size while maintaining quality with FileFlow's Video Compress tool. Support for MP4, AVI, MOV and more formats.">
+    <title>PDF Rotate - FileFlow</title>
+    <meta name="description" content="Rotate PDF pages to correct orientation with FileFlow's PDF Rotate tool. Individual pages or batch rotation with 90° increments.">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -24,20 +24,20 @@
         <div class="hero-section">
             <div class="hero-content">
                 <div class="hero-badge">
-                    <div class="tool-icon bg-red">
+                    <div class="tool-icon bg-purple">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M12 20h9"></path>
-                            <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                            <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/>
+                            <path d="M21 3v5h-5"/>
                         </svg>
                     </div>
-                    <span>Media Tools</span>
+                    <span>PDF Tools</span>
                 </div>
-                <h1 class="hero-title">Video Compress</h1>
-                <p class="hero-description">Reduce video file size while maintaining quality</p>
+                <h1 class="hero-title">PDF Rotate</h1>
+                <p class="hero-description">Rotate PDF pages to correct orientation</p>
                 <div class="hero-features">
-                    <span class="feature-tag">✓ Multiple formats</span>
-                    <span class="feature-tag">✓ Quality control</span>
-                    <span class="feature-tag">✓ Size optimization</span>
+                    <span class="feature-tag">✓ Individual pages</span>
+                    <span class="feature-tag">✓ Batch rotation</span>
+                    <span class="feature-tag">✓ 90° increments</span>
                 </div>
             </div>
         </div>
@@ -46,14 +46,34 @@
             <div class="upload-area" id="uploadArea">
                 <div class="upload-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <polygon points="23 7 16 12 23 17 23 7"></polygon>
-                        <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+                        <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+                        <polyline points="14,2 14,8 20,8"></polyline>
                     </svg>
                 </div>
-                <h3>Drop your video file here</h3>
+                <h3>Drop your PDF file here</h3>
                 <p>or click to browse</p>
-                <p class="supported-formats">Supports MP4, AVI, MOV, WMV, MKV</p>
-                <input type="file" id="fileInput" accept="video/*" hidden>
+                <input type="file" id="fileInput" accept=".pdf" hidden>
+            </div>
+
+            <div class="page-preview" id="pagePreview" style="display: none;">
+                <h3>PDF Pages</h3>
+                <div class="pages-grid" id="pagesGrid"></div>
+                <div class="rotation-controls">
+                    <button class="rotate-all-btn" id="rotateAllLeft">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                            <path d="M3 3v5h5"/>
+                        </svg>
+                        Rotate All Left
+                    </button>
+                    <button class="rotate-all-btn" id="rotateAllRight">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/>
+                            <path d="M21 3v5h-5"/>
+                        </svg>
+                        Rotate All Right
+                    </button>
+                </div>
             </div>
 
             <div class="advanced-options" id="advancedOptions">
@@ -79,64 +99,26 @@
                 </div>
                 <div class="options-content" id="optionsContent">
                     <div class="option-group">
-                        <label for="compressionLevel">Compression Level</label>
-                        <select id="compressionLevel">
-                            <option value="light">Light (Higher quality, larger size)</option>
-                            <option value="medium" selected>Medium (Balanced)</option>
-                            <option value="heavy">Heavy (Lower quality, smaller size)</option>
-                            <option value="custom">Custom Settings</option>
+                        <label for="rotationAngle">Default Rotation</label>
+                        <select id="rotationAngle">
+                            <option value="90">90° Clockwise</option>
+                            <option value="180">180° (Upside down)</option>
+                            <option value="270">270° (90° Counter-clockwise)</option>
                         </select>
-                    </div>
-                    <div class="custom-settings" id="customSettings" style="display: none;">
-                        <div class="option-group">
-                            <label for="videoBitrate">Video Bitrate (kbps)</label>
-                            <input type="number" id="videoBitrate" min="100" max="10000" value="1000">
-                        </div>
-                        <div class="option-group">
-                            <label for="resolution">Resolution</label>
-                            <select id="resolution">
-                                <option value="original">Keep Original</option>
-                                <option value="1080p">1080p (1920x1080)</option>
-                                <option value="720p">720p (1280x720)</option>
-                                <option value="480p">480p (854x480)</option>
-                                <option value="360p">360p (640x360)</option>
-                            </select>
-                        </div>
-                        <div class="option-group">
-                            <label for="frameRate">Frame Rate (fps)</label>
-                            <select id="frameRate">
-                                <option value="original">Keep Original</option>
-                                <option value="60">60 fps</option>
-                                <option value="30">30 fps</option>
-                                <option value="24">24 fps</option>
-                                <option value="15">15 fps</option>
-                            </select>
-                        </div>
                     </div>
                     <div class="option-group">
-                        <label for="outputFormat">Output Format</label>
-                        <select id="outputFormat">
-                            <option value="mp4">MP4 (Recommended)</option>
-                            <option value="webm">WebM</option>
-                            <option value="avi">AVI</option>
-                        </select>
+                        <input type="checkbox" id="autoDetect">
+                        <label for="autoDetect">Auto-detect page orientation</label>
+                    </div>
+                    <div class="option-group">
+                        <input type="checkbox" id="preserveAspectRatio" checked>
+                        <label for="preserveAspectRatio">Preserve aspect ratio</label>
                     </div>
                 </div>
-            </div>
-
-            <div class="file-preview" id="filePreview" style="display: none;">
-                <div class="preview-header">
-                    <h3 id="fileName"></h3>
-                    <span id="fileSize"></span>
-                </div>
-                <div class="video-preview">
-                    <video id="videoPreview" controls style="max-width: 100%; max-height: 300px;"></video>
-                </div>
-                <div class="video-info" id="videoInfo"></div>
             </div>
 
             <button class="convert-btn" id="convertBtn" disabled>
-                <span class="btn-text">Compress Video</span>
+                <span class="btn-text">Apply Rotations</span>
                 <div class="btn-loader" style="display: none;"></div>
             </button>
 
@@ -148,8 +130,7 @@
             </div>
 
             <div class="results" id="results" style="display: none;">
-                <h3>Compression Complete</h3>
-                <div class="compression-stats" id="compressionStats"></div>
+                <h3>Rotation Complete</h3>
                 <div class="result-actions">
                     <button class="download-btn" id="downloadBtn">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -157,15 +138,15 @@
                             <polyline points="7,10 12,15 17,10"></polyline>
                             <line x1="12" y1="15" x2="12" y2="3"></line>
                         </svg>
-                        Download Compressed Video
+                        Download Rotated PDF
                     </button>
                 </div>
             </div>
         </div>
     </main>
 
-    <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.7/dist/umd/ffmpeg.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
     <script src="js/advanced-options.js"></script>
-    <script src="js/converters/video-compress.js"></script>
+    <script src="js/converters/pdf-rotate.js"></script>
 </body>
 </html>

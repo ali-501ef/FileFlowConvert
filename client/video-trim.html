@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Compress - FileFlow</title>
-    <meta name="description" content="Compress video files to reduce size while maintaining quality with FileFlow's Video Compress tool. Support for MP4, AVI, MOV and more formats.">
+    <title>Video Trim - FileFlow</title>
+    <meta name="description" content="Trim and cut video clips with precision using FileFlow's Video Trim tool. Extract specific segments from your videos with frame-perfect accuracy.">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -24,20 +24,20 @@
         <div class="hero-section">
             <div class="hero-content">
                 <div class="hero-badge">
-                    <div class="tool-icon bg-red">
+                    <div class="tool-icon bg-orange">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M12 20h9"></path>
-                            <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                            <path d="m15 18-6-6 6-6"/>
+                            <path d="m9 12h12"/>
                         </svg>
                     </div>
                     <span>Media Tools</span>
                 </div>
-                <h1 class="hero-title">Video Compress</h1>
-                <p class="hero-description">Reduce video file size while maintaining quality</p>
+                <h1 class="hero-title">Video Trim</h1>
+                <p class="hero-description">Trim and cut video clips with precision</p>
                 <div class="hero-features">
-                    <span class="feature-tag">✓ Multiple formats</span>
-                    <span class="feature-tag">✓ Quality control</span>
-                    <span class="feature-tag">✓ Size optimization</span>
+                    <span class="feature-tag">✓ Frame-perfect accuracy</span>
+                    <span class="feature-tag">✓ Timeline preview</span>
+                    <span class="feature-tag">✓ Multiple segments</span>
                 </div>
             </div>
         </div>
@@ -54,6 +54,34 @@
                 <p>or click to browse</p>
                 <p class="supported-formats">Supports MP4, AVI, MOV, WMV, MKV</p>
                 <input type="file" id="fileInput" accept="video/*" hidden>
+            </div>
+
+            <div class="video-preview" id="videoPreview" style="display: none;">
+                <video id="videoPlayer" controls style="width: 100%; max-height: 400px; border-radius: 12px;"></video>
+                <div class="trim-controls" id="trimControls">
+                    <div class="timeline-container">
+                        <div class="timeline" id="timeline">
+                            <div class="timeline-track"></div>
+                            <div class="start-handle" id="startHandle"></div>
+                            <div class="end-handle" id="endHandle"></div>
+                            <div class="trim-region" id="trimRegion"></div>
+                        </div>
+                    </div>
+                    <div class="time-inputs">
+                        <div class="input-group">
+                            <label for="startTime">Start Time</label>
+                            <input type="text" id="startTime" placeholder="00:00:00" pattern="[0-9]{2}:[0-9]{2}:[0-9]{2}">
+                        </div>
+                        <div class="input-group">
+                            <label for="endTime">End Time</label>
+                            <input type="text" id="endTime" placeholder="00:00:10" pattern="[0-9]{2}:[0-9]{2}:[0-9]{2}">
+                        </div>
+                        <div class="input-group">
+                            <label for="duration">Duration</label>
+                            <input type="text" id="duration" readonly>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="advanced-options" id="advancedOptions">
@@ -79,41 +107,6 @@
                 </div>
                 <div class="options-content" id="optionsContent">
                     <div class="option-group">
-                        <label for="compressionLevel">Compression Level</label>
-                        <select id="compressionLevel">
-                            <option value="light">Light (Higher quality, larger size)</option>
-                            <option value="medium" selected>Medium (Balanced)</option>
-                            <option value="heavy">Heavy (Lower quality, smaller size)</option>
-                            <option value="custom">Custom Settings</option>
-                        </select>
-                    </div>
-                    <div class="custom-settings" id="customSettings" style="display: none;">
-                        <div class="option-group">
-                            <label for="videoBitrate">Video Bitrate (kbps)</label>
-                            <input type="number" id="videoBitrate" min="100" max="10000" value="1000">
-                        </div>
-                        <div class="option-group">
-                            <label for="resolution">Resolution</label>
-                            <select id="resolution">
-                                <option value="original">Keep Original</option>
-                                <option value="1080p">1080p (1920x1080)</option>
-                                <option value="720p">720p (1280x720)</option>
-                                <option value="480p">480p (854x480)</option>
-                                <option value="360p">360p (640x360)</option>
-                            </select>
-                        </div>
-                        <div class="option-group">
-                            <label for="frameRate">Frame Rate (fps)</label>
-                            <select id="frameRate">
-                                <option value="original">Keep Original</option>
-                                <option value="60">60 fps</option>
-                                <option value="30">30 fps</option>
-                                <option value="24">24 fps</option>
-                                <option value="15">15 fps</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="option-group">
                         <label for="outputFormat">Output Format</label>
                         <select id="outputFormat">
                             <option value="mp4">MP4 (Recommended)</option>
@@ -121,22 +114,28 @@
                             <option value="avi">AVI</option>
                         </select>
                     </div>
+                    <div class="option-group">
+                        <label for="quality">Video Quality</label>
+                        <select id="quality">
+                            <option value="original">Keep Original</option>
+                            <option value="high">High Quality</option>
+                            <option value="medium" selected>Medium Quality</option>
+                            <option value="low">Low Quality</option>
+                        </select>
+                    </div>
+                    <div class="option-group">
+                        <input type="checkbox" id="fadeIn">
+                        <label for="fadeIn">Fade in at start</label>
+                    </div>
+                    <div class="option-group">
+                        <input type="checkbox" id="fadeOut">
+                        <label for="fadeOut">Fade out at end</label>
+                    </div>
                 </div>
-            </div>
-
-            <div class="file-preview" id="filePreview" style="display: none;">
-                <div class="preview-header">
-                    <h3 id="fileName"></h3>
-                    <span id="fileSize"></span>
-                </div>
-                <div class="video-preview">
-                    <video id="videoPreview" controls style="max-width: 100%; max-height: 300px;"></video>
-                </div>
-                <div class="video-info" id="videoInfo"></div>
             </div>
 
             <button class="convert-btn" id="convertBtn" disabled>
-                <span class="btn-text">Compress Video</span>
+                <span class="btn-text">Trim Video</span>
                 <div class="btn-loader" style="display: none;"></div>
             </button>
 
@@ -148,8 +147,7 @@
             </div>
 
             <div class="results" id="results" style="display: none;">
-                <h3>Compression Complete</h3>
-                <div class="compression-stats" id="compressionStats"></div>
+                <h3>Trim Complete</h3>
                 <div class="result-actions">
                     <button class="download-btn" id="downloadBtn">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -157,15 +155,14 @@
                             <polyline points="7,10 12,15 17,10"></polyline>
                             <line x1="12" y1="15" x2="12" y2="3"></line>
                         </svg>
-                        Download Compressed Video
+                        Download Trimmed Video
                     </button>
                 </div>
             </div>
         </div>
     </main>
 
-    <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.7/dist/umd/ffmpeg.js"></script>
     <script src="js/advanced-options.js"></script>
-    <script src="js/converters/video-compress.js"></script>
+    <script src="js/converters/video-trim.js"></script>
 </body>
 </html>
