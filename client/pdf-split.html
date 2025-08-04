@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Split - FileFlow</title>
+    <meta name="description" content="Split PDF files into separate pages or custom ranges with FileFlow's PDF Split tool. Fast, secure, and completely client-side processing.">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="nav">
+        <div class="nav-container">
+            <a href="/" class="nav-logo">FileFlow</a>
+            <div class="nav-links">
+                <a href="/" class="nav-link">Home</a>
+                <a href="/convert-to-jpeg.html" class="nav-link">Image Tools</a>
+                <a href="/pdf-merge.html" class="nav-link">PDF Tools</a>
+                <a href="/mp4-to-mp3.html" class="nav-link">Media Tools</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main">
+        <div class="tool-header">
+            <div class="tool-icon bg-red">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M16 3h5v5"></path>
+                    <path d="m21 3-5 5"></path>
+                    <path d="M8 3H3v5"></path>
+                    <path d="m3 3 5 5"></path>
+                    <path d="M16 21h5v-5"></path>
+                    <path d="m21 21-5-5"></path>
+                    <path d="M8 21H3v-5"></path>
+                    <path d="m3 21 5-5"></path>
+                </svg>
+            </div>
+            <div class="tool-info">
+                <h1 class="tool-title">PDF Split</h1>
+                <p class="tool-description">Split your PDF into separate pages or custom page ranges</p>
+            </div>
+        </div>
+
+        <div class="converter-container">
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+                        <polyline points="14,2 14,8 20,8"></polyline>
+                    </svg>
+                </div>
+                <h3>Drop your PDF file here</h3>
+                <p>or click to browse</p>
+                <input type="file" id="fileInput" accept=".pdf" hidden>
+            </div>
+
+            <div class="advanced-options" id="advancedOptions">
+                <div class="options-header" id="optionsToggle">
+                    <div class="options-title">
+                        <svg class="options-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z"/>
+                            <path d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/>
+                            <path d="M12 2v2"/>
+                            <path d="M12 20v2"/>
+                            <path d="m4.93 4.93 1.41 1.41"/>
+                            <path d="m17.66 17.66 1.41 1.41"/>
+                            <path d="M2 12h2"/>
+                            <path d="M20 12h2"/>
+                            <path d="m6.34 17.66-1.41 1.41"/>
+                            <path d="m19.07 4.93-1.41 1.41"/>
+                        </svg>
+                        <span>Advanced Options</span>
+                    </div>
+                    <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m6 9 6 6 6-6"/>
+                    </svg>
+                </div>
+                <div class="options-content" id="optionsContent">
+                    <div class="option-group">
+                        <label for="splitMode">Split Mode</label>
+                        <select id="splitMode">
+                            <option value="all">Split into individual pages</option>
+                            <option value="range">Split by page range</option>
+                            <option value="interval">Split by interval</option>
+                        </select>
+                    </div>
+                    <div class="option-group" id="rangeGroup" style="display: none;">
+                        <label for="pageRange">Page Range (e.g., 1-5, 8, 10-12)</label>
+                        <input type="text" id="pageRange" placeholder="1-5, 8, 10-12">
+                    </div>
+                    <div class="option-group" id="intervalGroup" style="display: none;">
+                        <label for="intervalSize">Pages per file</label>
+                        <input type="number" id="intervalSize" min="1" value="1">
+                    </div>
+                </div>
+            </div>
+
+            <div class="file-preview" id="filePreview" style="display: none;">
+                <div class="preview-header">
+                    <h3 id="fileName"></h3>
+                    <span id="fileSize"></span>
+                </div>
+                <div class="pdf-info" id="pdfInfo"></div>
+            </div>
+
+            <button class="convert-btn" id="convertBtn" disabled>
+                <span class="btn-text">Split PDF</span>
+                <div class="btn-loader" style="display: none;"></div>
+            </button>
+
+            <div class="results" id="results" style="display: none;">
+                <h3>Split Results</h3>
+                <div class="results-list" id="resultsList"></div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+    <script src="js/advanced-options.js"></script>
+    <script src="js/converters/pdf-split.js"></script>
+</body>
+</html>

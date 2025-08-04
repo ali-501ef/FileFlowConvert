@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Converter - FileFlow</title>
+    <meta name="description" content="Convert between audio formats including MP3, WAV, FLAC, AAC, and OGG with FileFlow's Audio Converter tool. High-quality conversions with bitrate control.">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="nav">
+        <div class="nav-container">
+            <a href="/" class="nav-logo">FileFlow</a>
+            <div class="nav-links">
+                <a href="/" class="nav-link">Home</a>
+                <a href="/convert-to-jpeg.html" class="nav-link">Image Tools</a>
+                <a href="/pdf-merge.html" class="nav-link">PDF Tools</a>
+                <a href="/mp4-to-mp3.html" class="nav-link">Media Tools</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main">
+        <div class="tool-header">
+            <div class="tool-icon bg-green">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
+                    <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                </svg>
+            </div>
+            <div class="tool-info">
+                <h1 class="tool-title">Audio Converter</h1>
+                <p class="tool-description">Convert between audio formats with quality control</p>
+            </div>
+        </div>
+
+        <div class="converter-container">
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
+                    </svg>
+                </div>
+                <h3>Drop your audio file here</h3>
+                <p>or click to browse</p>
+                <p class="supported-formats">Supports MP3, WAV, FLAC, AAC, OGG, M4A</p>
+                <input type="file" id="fileInput" accept="audio/*" hidden>
+            </div>
+
+            <div class="advanced-options" id="advancedOptions">
+                <div class="options-header" id="optionsToggle">
+                    <div class="options-title">
+                        <svg class="options-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z"/>
+                            <path d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/>
+                            <path d="M12 2v2"/>
+                            <path d="M12 20v2"/>
+                            <path d="m4.93 4.93 1.41 1.41"/>
+                            <path d="m17.66 17.66 1.41 1.41"/>
+                            <path d="M2 12h2"/>
+                            <path d="M20 12h2"/>
+                            <path d="m6.34 17.66-1.41 1.41"/>
+                            <path d="m19.07 4.93-1.41 1.41"/>
+                        </svg>
+                        <span>Advanced Options</span>
+                    </div>
+                    <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m6 9 6 6 6-6"/>
+                    </svg>
+                </div>
+                <div class="options-content" id="optionsContent">
+                    <div class="option-group">
+                        <label for="outputFormat">Output Format</label>
+                        <select id="outputFormat">
+                            <option value="mp3">MP3 (Most Compatible)</option>
+                            <option value="wav">WAV (Uncompressed)</option>
+                            <option value="flac">FLAC (Lossless)</option>
+                            <option value="aac">AAC (High Quality)</option>
+                            <option value="ogg">OGG (Open Source)</option>
+                        </select>
+                    </div>
+                    <div class="option-group">
+                        <label for="audioQuality">Audio Quality</label>
+                        <select id="audioQuality">
+                            <option value="high">High (320 kbps)</option>
+                            <option value="medium" selected>Medium (192 kbps)</option>
+                            <option value="standard">Standard (128 kbps)</option>
+                            <option value="custom">Custom Bitrate</option>
+                        </select>
+                    </div>
+                    <div class="option-group" id="customBitrateGroup" style="display: none;">
+                        <label for="customBitrate">Custom Bitrate (kbps)</label>
+                        <input type="number" id="customBitrate" min="64" max="320" value="192">
+                    </div>
+                    <div class="option-group">
+                        <label for="sampleRate">Sample Rate</label>
+                        <select id="sampleRate">
+                            <option value="keep">Keep Original</option>
+                            <option value="44100">44.1 kHz (CD Quality)</option>
+                            <option value="48000">48 kHz (Professional)</option>
+                            <option value="96000">96 kHz (High Resolution)</option>
+                        </select>
+                    </div>
+                    <div class="option-group">
+                        <input type="checkbox" id="preserveMetadata" checked>
+                        <label for="preserveMetadata">Preserve metadata (title, artist, album)</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="file-preview" id="filePreview" style="display: none;">
+                <div class="preview-header">
+                    <h3 id="fileName"></h3>
+                    <span id="fileSize"></span>
+                </div>
+                <div class="audio-preview">
+                    <audio id="audioPreview" controls style="width: 100%;"></audio>
+                </div>
+                <div class="audio-info" id="audioInfo"></div>
+            </div>
+
+            <button class="convert-btn" id="convertBtn" disabled>
+                <span class="btn-text">Convert Audio</span>
+                <div class="btn-loader" style="display: none;"></div>
+            </button>
+
+            <div class="results" id="results" style="display: none;">
+                <h3>Conversion Complete</h3>
+                <div class="result-actions">
+                    <button class="download-btn" id="downloadBtn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7,10 12,15 17,10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        Download Converted Audio
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/advanced-options.js"></script>
+    <script src="js/converters/audio-converter.js"></script>
+</body>
+</html>

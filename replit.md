@@ -47,10 +47,11 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (January 2025)
 
-### Major Tool Expansion
-- **PDF Tools Section**: Expanded from 1 to 6 tools including PDF Merge (active), PDF Split, PDF Compress, PDF to Word, PDF Rotate, and PDF Watermark (coming soon)
-- **Media Tools Section**: Expanded from 1 to 6 tools including MP4 to MP3 (active), Video Compress, Audio Converter, Video Trim, GIF Maker, and Video Merger (coming soon)
-- **Coming Soon Badges**: Added visual indicators for upcoming tools with proper styling and reduced opacity
+### Major Tool Expansion (January 2025)
+- **PDF Tools Section**: Expanded from 1 to 6 tools including PDF Merge (active), **PDF Split (now active)**, PDF Compress, PDF to Word, PDF Rotate, and PDF Watermark (coming soon)
+- **Media Tools Section**: Expanded from 1 to 6 tools including MP4 to MP3 (active), **Video Compress (now active)**, **Audio Converter (now active)**, Video Trim, GIF Maker, and Video Merger (coming soon)
+- **Database Integration**: Added PostgreSQL database with conversion tracking and user management
+- **Functional Tools**: Implemented PDF Split, Video Compress, and Audio Converter with full client-side processing
 
 ### Advanced Options Implementation
 - **Advanced Options Handler**: Created comprehensive JavaScript module for managing advanced settings across all tools
