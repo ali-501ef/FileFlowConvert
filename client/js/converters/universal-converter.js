@@ -175,14 +175,37 @@ class UniversalConverter extends FileHandler {
                     quality: quality
                 });
             } catch (firstError) {
-                console.warn('First HEIC conversion attempt failed, trying alternative method:', firstError);
+                console.warn('First HEIC conversion attempt failed, trying alternative methods:', firstError);
                 
-                // Second attempt with different quality setting
-                convertedBlob = await heic2any({
-                    blob: file,
-                    toType: "image/jpeg",
-                    quality: 0.8
-                });
+                // Try multiple fallback approaches
+                const fallbackMethods = [
+                    { quality: 0.8, toType: "image/jpeg" },
+                    { quality: 0.9, toType: "image/png" },
+                    { quality: 1.0, toType: "image/jpeg" }
+                ];
+                
+                for (const method of fallbackMethods) {
+                    try {
+                        console.log(`Trying HEIC conversion with quality ${method.quality} and type ${method.toType}`);
+                        convertedBlob = await heic2any({
+                            blob: file,
+                            ...method
+                        });
+                        
+                        // If we got PNG, convert it to JPEG
+                        if (method.toType === "image/png") {
+                            convertedBlob = await this.convertPngBlobToJpeg(convertedBlob, quality);
+                        }
+                        break;
+                    } catch (methodError) {
+                        console.warn(`HEIC conversion method failed:`, methodError);
+                        continue;
+                    }
+                }
+                
+                if (!convertedBlob) {
+                    throw firstError; // Re-throw original error if all methods failed
+                }
             }
 
             // Handle both single blob and array of blobs
@@ -192,8 +215,21 @@ class UniversalConverter extends FileHandler {
             
             return convertedBlob;
         } catch (error) {
-            // If HEIC conversion completely fails, create an informative error
-            throw new Error(`HEIC conversion failed. This may be due to an unsupported HEIC variant or corrupted file. Error: ${error.message}`);
+            // If HEIC conversion completely fails, try one more approach
+            try {
+                return await this.attemptImageLoadFallback(file, quality);
+            } catch (fallbackError) {
+                // Create informative error message
+                const errorMessage = `Unable to convert this HEIC file. This appears to be a newer HEIC format that isn't supported by the browser conversion library. 
+
+Suggestions:
+• Try converting the file using your phone's built-in sharing feature (Share > Copy > Save as JPEG)
+• Use Apple's Preview app to export as JPEG
+• Try a different HEIC file
+
+Technical error: ${error.message}`;
+                throw new Error(errorMessage);
+            }
         }
     }
 
@@ -353,6 +389,88 @@ class UniversalConverter extends FileHandler {
             // Set video source and seek to first frame
             video.src = URL.createObjectURL(file);
             video.currentTime = 0.1; // Seek to 0.1 seconds to get a frame
+        });
+    }
+
+    /**
+     * Convert PNG blob to JPEG
+     * @param {Blob} pngBlob - PNG blob
+     * @param {number} quality - JPEG quality
+     * @returns {Promise<Blob>} JPEG blob
+     */
+    async convertPngBlobToJpeg(pngBlob, quality) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                
+                canvas.width = img.naturalWidth;
+                canvas.height = img.naturalHeight;
+                
+                // Fill with white background
+                ctx.fillStyle = 'white';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // Draw image
+                ctx.drawImage(img, 0, 0);
+                
+                canvas.toBlob(resolve, 'image/jpeg', quality);
+            };
+            img.onerror = reject;
+            img.src = URL.createObjectURL(pngBlob);
+        });
+    }
+
+    /**
+     * Attempt to load HEIC file as regular image (fallback)
+     * @param {File} file - HEIC file
+     * @param {number} quality - JPEG quality
+     * @returns {Promise<Blob>} JPEG blob
+     */
+    async attemptImageLoadFallback(file, quality) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            
+            img.onload = () => {
+                try {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    
+                    canvas.width = img.naturalWidth || img.width;
+                    canvas.height = img.naturalHeight || img.height;
+                    
+                    // Fill with white background
+                    ctx.fillStyle = 'white';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    
+                    // Draw image
+                    ctx.drawImage(img, 0, 0);
+                    
+                    canvas.toBlob((blob) => {
+                        if (blob) {
+                            resolve(blob);
+                        } else {
+                            reject(new Error('Failed to create JPEG from fallback method'));
+                        }
+                    }, 'image/jpeg', quality);
+                    
+                } catch (error) {
+                    reject(error);
+                }
+            };
+            
+            img.onerror = () => {
+                reject(new Error('Browser cannot read this HEIC file format'));
+            };
+            
+            // Try to load as image
+            img.src = URL.createObjectURL(file);
+            
+            // Set timeout to avoid hanging
+            setTimeout(() => {
+                reject(new Error('Image loading timeout'));
+            }, 5000);
         });
     }
 
