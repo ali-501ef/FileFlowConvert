@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Merge Tool - FileFlow | Combine PDF Files</title>
+    <meta name="description" content="Merge multiple PDF files into one document. Drag & drop ordering, unlimited files, preserves formatting. Free online PDF merger.">
+    <link rel="canonical" href="https://fileflow.com/pdf-merge">
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="PDF Merge Tool - FileFlow">
+    <meta property="og:description" content="Merge multiple PDF files into one document. Drag & drop ordering, unlimited files.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://fileflow.com/pdf-merge">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="/styles.css">
+    
+    <!-- PDF-lib Library -->
+    <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+</head>
+<body>
+    <!-- Top AdSense Banner -->
+    <div class="ad-placeholder ad-banner-top">
+        <span class="ad-text">Advertisement Banner (728x90)</span>
+    </div>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-content">
+                <div class="nav-brand">
+                    <a href="/" class="logo-link">
+                        <h1 class="logo">FileFlow</h1>
+                    </a>
+                </div>
+                <div class="nav-menu desktop-only">
+                    <a href="/#tools" class="nav-link">Tools</a>
+                    <a href="/#about" class="nav-link">About</a>
+                    <a href="/#support" class="nav-link">Support</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="layout-wrapper">
+        <!-- Desktop Sidebar Ad Left -->
+        <div class="sidebar-ad desktop-only">
+            <div class="ad-placeholder ad-sidebar">
+                <span class="ad-text">Sidebar<br>Advertisement<br>(160x600)</span>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="container">
+                <!-- Tool Header -->
+                <div class="tool-header-section">
+                    <nav class="breadcrumb">
+                        <a href="/" class="breadcrumb-link" data-testid="link-back-home">← Back to Tools</a>
+                    </nav>
+                    <h1 class="tool-page-title">PDF Merge Tool</h1>
+                    <p class="tool-page-description">Combine multiple PDF files into a single document with custom ordering.</p>
+                </div>
+
+                <!-- Upload Section -->
+                <div class="tool-container">
+                    <div id="upload-section" class="upload-section">
+                        <div class="file-drop-zone" data-testid="drop-zone-pdf" onclick="document.getElementById('file-input').click()">
+                            <svg class="upload-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                            </svg>
+                            <h3 class="upload-title">Drop PDF files here or click to upload</h3>
+                            <p class="upload-instructions">Select multiple PDF files to merge into one document</p>
+                        </div>
+                        <input type="file" id="file-input" multiple class="file-input" accept=".pdf,.PDF" data-testid="input-pdf-files">
+                    </div>
+
+                    <!-- File List -->
+                    <div id="file-list" class="file-list hidden">
+                        <h3 class="section-subtitle">Selected Files (Drag to reorder)</h3>
+                        <div id="file-cards" class="file-cards sortable">
+                            <!-- File cards will be inserted here -->
+                        </div>
+                    </div>
+
+                    <!-- Progress Section -->
+                    <div id="progress-section" class="progress-section hidden">
+                        <div class="progress-header">
+                            <span class="progress-label">Merging PDFs...</span>
+                            <span id="progress-text" class="progress-text" data-testid="text-progress">0%</span>
+                        </div>
+                        <div class="progress-bar-container">
+                            <div id="progress-bar" class="progress-bar" data-testid="progress-bar" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div id="action-buttons" class="action-buttons hidden">
+                        <button id="convert-btn" class="btn btn-primary" data-testid="button-merge">
+                            Merge PDFs
+                        </button>
+                        <button id="clear-btn" class="btn btn-secondary" data-testid="button-clear">
+                            Clear All
+                        </button>
+                    </div>
+
+                    <!-- Download Section -->
+                    <div id="download-section" class="download-section hidden">
+                        <div class="success-message">
+                            <div class="success-header">
+                                <svg class="success-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <h3 class="success-title">Merge Complete!</h3>
+                            </div>
+                            <p class="success-text">Your PDF files have been successfully merged.</p>
+                            <div id="download-links" class="download-links" data-testid="download-links">
+                                <!-- Download links will be inserted here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tool Information -->
+                <div class="tool-info-section">
+                    <h3 class="info-title">How it works</h3>
+                    <div class="info-content">
+                        <ul class="info-list">
+                            <li>Merge unlimited PDF files into one document</li>
+                            <li>Drag and drop to reorder files before merging</li>
+                            <li>Preserves all formatting and embedded content</li>
+                            <li>No file size limits or watermarks</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Desktop Sidebar Ad Right -->
+        <div class="sidebar-ad desktop-only">
+            <div class="ad-placeholder ad-sidebar">
+                <span class="ad-text">Sidebar<br>Advertisement<br>(160x600)</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom AdSense Banner -->
+    <div class="ad-placeholder ad-banner-bottom">
+        <span class="ad-text">Advertisement Banner (728x90)</span>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3 class="footer-title">FileFlow</h3>
+                    <p class="footer-description">Professional file conversion tools for everyone.</p>
+                </div>
+                <div class="footer-section">
+                    <h4 class="footer-subtitle">Related Tools</h4>
+                    <ul class="footer-links">
+                        <li><a href="/heic-to-jpg.html" class="footer-link">HEIC to JPG</a></li>
+                        <li><a href="/jpg-to-png.html" class="footer-link">JPG to PNG</a></li>
+                        <li><a href="/mp4-to-mp3.html" class="footer-link">MP4 to MP3</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 FileFlow. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/js/main.js"></script>
+    <script src="/js/converters/pdf-converter.js"></script>
+</body>
+</html>
