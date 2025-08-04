@@ -88,6 +88,15 @@ body {
     flex-shrink: 0;
 }
 
+.sidebar-ad-sticky {
+    position: fixed;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 200px;
+    z-index: 40;
+}
+
 /* Responsive utilities */
 .desktop-only {
     display: none;
@@ -104,6 +113,17 @@ body {
     
     .mobile-only {
         display: none;
+    }
+    
+    /* Adjust main content margin for sticky sidebar */
+    .main-content {
+        margin-right: 220px;
+    }
+}
+
+@media (max-width: 1279px) {
+    .sidebar-ad-sticky {
+        display: none !important;
     }
 }
 
@@ -137,6 +157,25 @@ body {
     font-weight: 500;
     text-align: center;
     line-height: 1.25;
+}
+
+.ad-label {
+    color: hsl(210, 11%, 71%);
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Content ad placeholders */
+.ad-content-horizontal {
+    min-height: 90px;
+    width: 100%;
+    margin: 2rem auto;
+    border-radius: var(--radius-lg);
+    border: 1px solid hsl(210, 20%, 94%);
+    background-color: hsl(210, 20%, 98%);
 }
 
 /* Navigation */
@@ -224,7 +263,7 @@ body {
 
 /* Tools sections */
 .tools-section {
-    margin-bottom: var(--section-spacing);
+    margin-bottom: 2.5rem;
 }
 
 .section-title {
@@ -236,7 +275,7 @@ body {
 
 .tools-grid {
     display: grid;
-    gap: 1.5rem;
+    gap: 2rem;
 }
 
 .tools-grid:not(.single-column) {
@@ -263,7 +302,8 @@ body {
 
 .tool-card:hover {
     transform: translateY(-4px);
-    box-shadow: var(--shadow-xl);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15), 0 10px 20px -5px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
 }
 
 .tool-header {
@@ -329,14 +369,16 @@ body {
 /* Features section */
 .features-section {
     margin-bottom: var(--section-spacing);
+    background-color: #F9FAFB;
+    padding: 2rem 0;
 }
 
 .features-container {
-    background-color: var(--surface);
+    background-color: transparent;
     border-radius: 1.5rem;
-    padding: clamp(2rem, 5vw, 3rem);
-    box-shadow: var(--shadow-sm);
-    border: 1px solid hsl(210, 20%, 92%);
+    padding: clamp(1.5rem, 4vw, 2rem);
+    box-shadow: none;
+    border: none;
 }
 
 .features-header {
@@ -374,8 +416,8 @@ body {
 }
 
 .feature-icon {
-    width: 4rem;
-    height: 4rem;
+    width: 3rem;
+    height: 3rem;
     border-radius: 50%;
     display: flex;
     align-items: center;
