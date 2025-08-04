@@ -2,7 +2,7 @@
 
 ## Overview
 
-FileFlow is a client-side file conversion web application that provides multiple file format conversion tools. The application offers HEIC to JPG conversion, JPG to PNG conversion, PDF merging, and MP4 to MP3 conversion. Built with a modern web stack, it features a React frontend with TypeScript, Express.js backend, and uses client-side processing libraries for file conversions to ensure user privacy and fast processing.
+FileFlow is a comprehensive client-side file conversion web application with a premium Apple/Notion-inspired design. The platform features a universal converter with live file previews, drag-and-drop functionality, and advanced options for all conversion tools. It includes multiple specialized tool sections: Image Tools (HEIC to JPG, JPG to PNG), PDF Tools (merge, split, compress, rotate, watermark, PDF to Word), and Media Tools (MP4 to MP3, video compression, audio conversion, video trimming, GIF creation, video merging). Built with vanilla JavaScript and modern web technologies, all conversions happen client-side for maximum privacy and speed.
 
 ## User Preferences
 
@@ -11,12 +11,12 @@ Preferred communication style: Simple, everyday language.
 ## System Architecture
 
 ### Frontend Architecture
-- **Framework**: React with TypeScript using Vite as the build tool
-- **UI Components**: Shadcn/ui component library built on Radix UI primitives
-- **Styling**: Tailwind CSS with custom CSS variables for theming
-- **State Management**: TanStack Query for server state management
-- **Routing**: Wouter for lightweight client-side routing
-- **Design Pattern**: Component-based architecture with reusable UI components
+- **Framework**: Vanilla JavaScript with modern ES6+ features and modular design
+- **UI Design**: Apple/Notion-inspired premium interface with clean aesthetics
+- **Styling**: Custom CSS with CSS variables, smooth animations, and responsive grid layouts
+- **File Processing**: Client-side conversion engines with live preview functionality
+- **Universal Converter**: Drag-and-drop interface with intelligent format detection
+- **Advanced Options**: Tool-specific settings with smooth toggle animations
 
 ### Backend Architecture
 - **Framework**: Express.js with TypeScript
@@ -33,44 +33,49 @@ Preferred communication style: Simple, everyday language.
 - **Migration Strategy**: Drizzle Kit for database migrations
 
 ### File Processing Architecture
-- **HEIC Conversion**: Client-side processing using heic2any library
-- **Image Conversion**: HTML5 Canvas API for JPG to PNG conversion
-- **PDF Operations**: PDF-lib library for client-side PDF merging
-- **Video Processing**: FFmpeg WebAssembly for MP4 to MP3 conversion
-- **Processing Strategy**: All conversions happen client-side for privacy and performance
+- **Universal Converter**: Multi-format support with intelligent type detection and live previews
+- **Image Tools**: HEIC to JPG conversion, JPG to PNG with advanced resize/compression options
+- **PDF Tools**: Comprehensive suite including merge, split, compress, rotate, watermark, and PDF to Word conversion
+- **Media Tools**: Video/audio processing including MP4 to MP3, video compression, audio conversion, trimming, GIF creation, and video merging
+- **Advanced Options**: Tool-specific settings for quality control, compression, metadata preservation, and format-specific parameters
+- **Client-Side Processing**: All conversions happen locally for maximum privacy and speed
 
 ### Authentication and Authorization
 - **User Schema**: Basic user system with username/password authentication
 - **Session Management**: Express sessions with PostgreSQL storage
 - **Security**: Bcrypt for password hashing (implied by user schema structure)
 
+## Recent Changes (January 2025)
+
+### Major Tool Expansion
+- **PDF Tools Section**: Expanded from 1 to 6 tools including PDF Merge (active), PDF Split, PDF Compress, PDF to Word, PDF Rotate, and PDF Watermark (coming soon)
+- **Media Tools Section**: Expanded from 1 to 6 tools including MP4 to MP3 (active), Video Compress, Audio Converter, Video Trim, GIF Maker, and Video Merger (coming soon)
+- **Coming Soon Badges**: Added visual indicators for upcoming tools with proper styling and reduced opacity
+
+### Advanced Options Implementation
+- **Advanced Options Handler**: Created comprehensive JavaScript module for managing advanced settings across all tools
+- **Tool-Specific Settings**: Added resize/compression controls for images, page range/orientation settings for PDFs, and bitrate/trimming options for audio/video
+- **Smooth Animations**: Implemented expandable sections with gear icons and chevron animations
+
+### UI/UX Improvements
+- **Responsive Grid Layout**: Enhanced tools grid with better spacing, centering, and 3-column layout on desktop
+- **Live File Previews**: Universal converter displays thumbnails for images and file type icons for other formats
+- **Drag-and-Drop Interface**: Implemented modern file upload with visual feedback and hover states
+
 ## External Dependencies
 
-### Core Framework Dependencies
-- **React Ecosystem**: React 18, TypeScript, Vite for modern frontend development
-- **Backend Runtime**: Node.js with Express.js framework
-- **Database**: Neon Database (serverless PostgreSQL) with Drizzle ORM
-
-### UI and Styling Libraries
-- **Component Library**: Shadcn/ui with Radix UI primitives for accessible components
-- **Styling**: Tailwind CSS for utility-first styling
-- **Icons**: Lucide React for consistent iconography
-- **Fonts**: Inter font family from Google Fonts
+### Core Technologies
+- **Frontend**: Vanilla JavaScript with modern ES6+ modules
+- **Backend**: Node.js with Express.js for static file serving
+- **Styling**: Custom CSS with CSS variables and responsive design
 
 ### File Processing Libraries
-- **HEIC Processing**: heic2any library for iPhone photo conversion
-- **PDF Operations**: PDF-lib for client-side PDF manipulation
-- **Video Processing**: FFmpeg WebAssembly for audio extraction
-- **Image Processing**: Native HTML5 Canvas API
+- **Image Processing**: HTML5 Canvas API for native image conversion
+- **HEIC Processing**: heic2any library for iPhone photo conversion (planned)
+- **PDF Operations**: PDF-lib for client-side PDF manipulation (planned)
+- **Video Processing**: FFmpeg WebAssembly for media conversion (planned)
 
-### Development and Build Tools
-- **Build System**: Vite for frontend, ESBuild for backend bundling
-- **Development**: TSX for TypeScript execution, various Vite plugins
-- **Code Quality**: TypeScript for type safety, ESLint configuration
-- **Replit Integration**: Custom Vite plugins for Replit environment support
-
-### State Management and Utilities
-- **Data Fetching**: TanStack Query for server state management
-- **Form Handling**: React Hook Form with Zod validation
-- **Utilities**: date-fns for date manipulation, clsx for conditional styling
-- **Carousel**: Embla Carousel for image/content carousels
+### Development Tools
+- **Build System**: Vite for development server and hot reloading
+- **Code Quality**: Modern JavaScript with ESLint configuration
+- **Replit Integration**: Custom server setup for seamless deployment

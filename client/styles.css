@@ -402,6 +402,41 @@ body {
     line-height: 1.4;
 }
 
+/* Coming Soon Tool Cards */
+.tool-card.coming-soon {
+    opacity: 0.65;
+    cursor: default;
+    pointer-events: none;
+    position: relative;
+}
+
+.tool-card.coming-soon:hover {
+    transform: none;
+    box-shadow: var(--shadow-sm);
+}
+
+.coming-soon-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: linear-gradient(135deg, var(--primary), #3b82f6);
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    z-index: 10;
+}
+
+/* Additional icon colors for new tools */
+.tool-icon.bg-teal {
+    background-color: #e6fffa;
+    color: #319795;
+}
+
 /* Features section */
 .features-section {
     margin-bottom: var(--section-spacing);
