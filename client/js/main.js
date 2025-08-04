@@ -436,8 +436,8 @@ window.removeFile = function(index) {
 
 // Initialize file handler when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
-    // Only initialize if we're on a tool page (not homepage)
-    if (document.getElementById('file-input')) {
+    // Only initialize if we're on a tool page (not homepage) and no specific converter will be loaded
+    if (document.getElementById('file-input') && !window.location.pathname.includes('convert-to-jpeg')) {
         window.fileHandler = new FileHandler();
     }
     
