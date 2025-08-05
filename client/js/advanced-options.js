@@ -18,72 +18,89 @@ class AdvancedOptionsHandler {
     }
 
     setupToggle() {
-        // Find advanced options elements
-        const advancedToggle = document.getElementById('advanced-toggle') || 
-                              document.querySelector('.advanced-toggle') ||
-                              document.querySelector('.options-header');
-        
-        const advancedContent = document.getElementById('advanced-content') || 
-                               document.querySelector('.advanced-content') ||
-                               document.querySelector('.options-content');
-        
-        const advancedSection = document.getElementById('advanced-options-section') ||
-                               document.querySelector('.advanced-options-section') ||
-                               document.querySelector('.advanced-options');
+        // Find all possible advanced options elements
+        const toggleSelectors = [
+            '#advanced-toggle',
+            '.advanced-toggle', 
+            '.options-header',
+            '#optionsToggle'
+        ];
 
-        if (advancedToggle && advancedContent) {
-            this.attachToggleListener(advancedToggle, advancedContent, advancedSection);
+        const contentSelectors = [
+            '#advanced-content',
+            '.advanced-content',
+            '.options-content',
+            '#optionsContent'
+        ];
+
+        // Try to find toggle and content elements
+        let advancedToggle = null;
+        let advancedContent = null;
+
+        for (const selector of toggleSelectors) {
+            advancedToggle = document.querySelector(selector);
+            if (advancedToggle) break;
         }
 
-        // Also setup for any existing advanced options
+        for (const selector of contentSelectors) {
+            advancedContent = document.querySelector(selector);
+            if (advancedContent) break;
+        }
+
+        if (advancedToggle && advancedContent) {
+            this.attachToggleListener(advancedToggle, advancedContent);
+        }
+
+        // Also setup for any existing advanced options sections
         document.querySelectorAll('.advanced-options').forEach(section => {
-            const header = section.querySelector('.options-header');
-            const content = section.querySelector('.options-content');
+            const header = section.querySelector('.options-header') || section.querySelector('#optionsToggle');
+            const content = section.querySelector('.options-content') || section.querySelector('#optionsContent');
             
             if (header && content) {
-                this.attachToggleListener(header, content, section);
+                this.attachToggleListener(header, content);
             }
         });
     }
 
-    attachToggleListener(toggleElement, contentElement, sectionElement) {
-        toggleElement.addEventListener('click', (e) => {
+    attachToggleListener(toggleElement, contentElement) {
+        // Remove any existing listeners
+        const newToggle = toggleElement.cloneNode(true);
+        toggleElement.parentNode.replaceChild(newToggle, toggleElement);
+        
+        newToggle.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
             
-            const isExpanded = contentElement.style.display === 'block' || 
-                              contentElement.style.display === 'flex' ||
-                              sectionElement?.classList.contains('expanded');
+            const isVisible = contentElement.style.display === 'block' || 
+                             contentElement.style.display === 'flex' ||
+                             !contentElement.style.display ||
+                             contentElement.style.display === '';
 
-            if (isExpanded) {
+            if (isVisible && contentElement.style.display !== 'none') {
                 // Collapse
                 contentElement.style.display = 'none';
-                sectionElement?.classList.remove('expanded');
                 
                 // Update chevron
-                const chevron = toggleElement.querySelector('.advanced-chevron') || 
-                               toggleElement.querySelector('.chevron');
+                const chevron = newToggle.querySelector('.advanced-chevron') || 
+                               newToggle.querySelector('.chevron');
                 if (chevron) {
                     chevron.style.transform = 'rotate(0deg)';
                 }
             } else {
                 // Expand
-                contentElement.style.display = contentElement.classList.contains('advanced-grid') ? 'block' : 'flex';
-                sectionElement?.classList.add('expanded');
+                contentElement.style.display = 'block';
                 
-                // Update chevron
-                const chevron = toggleElement.querySelector('.advanced-chevron') || 
-                               toggleElement.querySelector('.chevron');
+                // Update chevron  
+                const chevron = newToggle.querySelector('.advanced-chevron') || 
+                               newToggle.querySelector('.chevron');
                 if (chevron) {
                     chevron.style.transform = 'rotate(180deg)';
                 }
             }
         });
 
-        // Set initial state - make options available before file upload
-        if (sectionElement && !sectionElement.classList.contains('hidden')) {
-            sectionElement.style.display = 'block';
-        }
+        // Initially hide content
+        contentElement.style.display = 'none';
     }
 }
 

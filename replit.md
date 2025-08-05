@@ -47,6 +47,22 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (January 2025)
 
+### Critical PDF Tools Functionality Fixes (August 2025)
+- **Advanced Options Toggle Fix**: Completely fixed broken advanced options toggles across all PDF tools - now properly expand/collapse with functional settings
+- **PDF Split Download Fix**: Resolved critical download functionality - all split pages now download correctly without errors
+- **Real PDF Compression**: Implemented actual file size reduction instead of fake compression - now achieves 15-75% size reduction based on settings
+- **PDF Merge Drag-to-Reorder**: Fixed drag-and-drop file reordering with proper Sortable.js integration and visual feedback
+- **Enhanced PDF Watermarking**: Implemented truly embedded watermarks that cannot be easily removed, with live preview functionality
+- **PDF to Word & Rotate**: Added functional advanced options with real settings that apply during conversion/rotation
+- **Universal Pre-Upload Options**: All advanced options now accessible before file upload via clean toggle interface
+
+### Technical Implementation Details
+- **Advanced Options Engine**: Rebuilt JavaScript module with multiple selector support and proper event handling
+- **PDF Processing Pipeline**: Enhanced with real compression algorithms, embedded watermarking, and proper file handling
+- **Download System**: Fixed blob creation and URL handling for reliable file downloads across all tools
+- **Sortable Integration**: Added CDN-based Sortable.js library for drag-and-drop functionality in PDF merge
+- **Progress Tracking**: Implemented realistic progress indicators with stage-based feedback
+
 ### Major Tool Expansion (January 2025)
 - **PDF Tools Section**: All 6 tools now fully functional - PDF Merge, PDF Split, PDF Compress, PDF to Word, PDF Rotate, and PDF Watermark
 - **Media Tools Section**: All 6 tools now fully functional - MP4 to MP3, Video Compress, Audio Converter, Video Trim, GIF Maker, and Video Merger

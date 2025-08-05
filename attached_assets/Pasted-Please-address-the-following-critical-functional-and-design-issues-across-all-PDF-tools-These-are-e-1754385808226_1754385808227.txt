@@ -1,0 +1,97 @@
+Please address the following critical functional and design issues across all PDF tools. These are essential to provide a professional user experience and bring FileFlow to a deployable, premium-ready state.
+
+🔧 PDF Merge Tool
+Drag-to-reorder is broken: The interface allows hover but doesn't let files be dropped in a new position. This must be fixed for a seamless experience.
+
+Advanced Options completely non-functional: The toggle does not open, and there is either no content inside or the settings have no effect. For example, setting orientation to landscape does nothing.
+Fix this immediately and ensure it contains useful, working controls such as:
+
+Output file orientation
+
+Page margins
+
+Merge order (e.g., by filename or manual)
+
+Replace “Page Range” option with a better, intuitive advanced setting.
+
+Ensure Advanced Options can be opened even before files are uploaded, shown under a clean toggle UI.
+
+🧩 PDF Split Tool
+Core function fails: While it visually splits pages, the Download buttons do nothing—users cannot get the output.
+
+Advanced Options toggle is broken and shows nothing.
+Fix the toggle and ensure it contains real, working features such as:
+
+Page range selectors
+
+Output naming format (e.g., file_p1.pdf)
+
+Make options visible even without files uploaded.
+
+📉 PDF Compress Tool
+Compression is fake: Files say “25% reduced” but download with the exact same size as before. The compression engine must actually optimize file size.
+
+Advanced Options toggle is broken and empty.
+Provide real compression settings including:
+
+Compression level (Low / Medium / High)
+
+Remove metadata
+
+Image quality control
+
+Flattening scanned layers (OCR-based)
+
+📄 PDF to Word Tool
+Main conversion works, but:
+
+Advanced Options toggle is broken and contains nothing.
+
+The settings listed (e.g. preserve formatting, OCR recognition) do not apply.
+
+Implement real functionality behind those options, with tooltips or helper text for clarity.
+
+🔄 PDF Rotate Tool
+Page rotation functions, but:
+
+Advanced Options are non-functional—toggle does not open and no real settings are provided.
+
+Add useful options like:
+
+Auto-orient by content
+
+Batch vs individual rotation
+
+Preview of rotated output
+
+💧 PDF Watermark Tool
+Watermarks are not permanent: Current system adds a removable overlay. This is not secure and defeats the purpose of watermarking.
+
+Implement true embedded watermarks that cannot be deleted from the final PDF.
+
+Live preview needed: Let users see watermark position, opacity, and scale before confirming.
+
+Advanced Options toggle does not open and is empty.
+Populate it with real, working settings like:
+
+Watermark layering (behind/above)
+
+Position presets
+
+Rotation angle
+
+Opacity slider
+
+Repeat/tile pattern toggle
+
+🔄 Site-wide & Shared Issues
+Advanced Options are broken across all tools:
+
+Toggles do not open or show empty panels
+
+Even if visible, the features do not function
+
+These must be fixed urgently, with real, functional options implemented under clear toggle sections.
+
+Allow all Advanced Options to be accessible even before uploading files.
+

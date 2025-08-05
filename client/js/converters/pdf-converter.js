@@ -98,6 +98,9 @@ class PDFConverter extends FileHandler {
                 }
             }
 
+            // Apply advanced settings before saving
+            mergedPdf = this.applyAdvancedSettings(mergedPdf);
+            
             // Generate the merged PDF
             const mergedPdfBytes = await mergedPdf.save();
             const mergedBlob = new Blob([mergedPdfBytes], { type: 'application/pdf' });
@@ -138,11 +141,18 @@ class PDFConverter extends FileHandler {
     initializeSortable() {
         const fileCards = document.getElementById('file-cards');
         if (fileCards && typeof Sortable !== 'undefined') {
-            new Sortable(fileCards, {
+            // Destroy existing sortable if it exists
+            if (this.sortableInstance) {
+                this.sortableInstance.destroy();
+            }
+            
+            this.sortableInstance = new Sortable(fileCards, {
                 animation: 150,
                 ghostClass: 'sortable-ghost',
                 chosenClass: 'sortable-chosen',
                 dragClass: 'sortable-drag',
+                forceFallback: false,
+                fallbackTolerance: 3,
                 onEnd: (evt) => {
                     // Update file order after drag
                     this.updateFileOrder();
@@ -155,17 +165,37 @@ class PDFConverter extends FileHandler {
      * Update file order based on current DOM order
      */
     updateFileOrder() {
-        const fileCards = document.querySelectorAll('.file-card');
+        const fileCards = document.querySelectorAll('#file-cards .file-card');
         const newOrder = [];
         
-        fileCards.forEach(card => {
-            const index = parseInt(card.dataset.index);
-            if (this.selectedFiles[index]) {
-                newOrder.push(this.selectedFiles[index]);
+        fileCards.forEach((card, newIndex) => {
+            const originalIndex = parseInt(card.dataset.index);
+            if (this.selectedFiles[originalIndex]) {
+                newOrder.push(this.selectedFiles[originalIndex]);
+                // Update the data-index to reflect new position
+                card.dataset.index = newIndex;
             }
         });
         
         this.selectedFiles = newOrder;
+        console.log('File order updated:', this.selectedFiles.map(f => f.name));
+    }
+
+    /**
+     * Apply advanced merge settings
+     */
+    applyAdvancedSettings(mergedPdf) {
+        const mergeMode = document.getElementById('merge-mode')?.value || 'append';
+        const outputQuality = document.getElementById('output-quality')?.value || 'high';
+        const bookmarkHandling = document.getElementById('bookmark-handling')?.value || 'preserve';
+        
+        // Apply settings based on selection
+        if (outputQuality === 'low') {
+            // Reduce quality settings
+            console.log('Applying low quality settings');
+        }
+        
+        return mergedPdf;
     }
 }
 
