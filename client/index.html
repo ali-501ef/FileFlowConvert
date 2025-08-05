@@ -106,6 +106,16 @@
                             
                             <input type="file" id="universal-file-input" style="display: none;" data-testid="input-file-universal">
                         </div>
+                        
+                        <!-- Hero CTA Button -->
+                        <div class="hero-cta">
+                            <button class="cta-button" onclick="document.getElementById('tools').scrollIntoView({behavior: 'smooth'})">
+                                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                </svg>
+                                Start a Conversion
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -116,7 +126,17 @@
 
                 <!-- Image Tools Section -->
                 <section id="tools" class="tools-section">
-                    <h2 class="section-title centered">Image Tools</h2>
+                    <div class="section-header">
+                        <div class="section-icon">
+                            <svg width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                        </div>
+                        <div class="section-content">
+                            <h2 class="section-title">Image Tools</h2>
+                            <p class="section-description">Professional image conversion and optimization</p>
+                        </div>
+                    </div>
                     <div class="tools-grid">
                         <div class="tool-card" data-testid="card-heic-to-jpg" onclick="window.location.href='/heic-to-jpg.html'">
                             <div class="tool-header">
@@ -135,7 +155,13 @@
                             </div>
                         </div>
 
-                        <div class="tool-card" data-testid="card-convert-to-jpeg" onclick="window.location.href='/convert-to-jpeg.html'">
+                        <div class="tool-card featured-tool" data-testid="card-convert-to-jpeg" onclick="window.location.href='/convert-to-jpeg.html'">
+                            <div class="featured-badge">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                </svg>
+                                NEW
+                            </div>
                             <div class="tool-header">
                                 <div class="tool-icon bg-orange">
                                     <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -143,7 +169,7 @@
                                     </svg>
                                 </div>
                                 <div class="tool-info">
-                                    <h3 class="tool-title">Universal to JPEG <span class="new-badge">New</span></h3>
+                                    <h3 class="tool-title">Universal to JPEG</h3>
                                     <p class="tool-description">Convert any file format to JPEG images</p>
                                 </div>
                             </div>
@@ -171,9 +197,27 @@
                     </div>
                 </section>
 
+                <!-- Image Tools Ad -->
+                <div class="section-ad-container">
+                    <div class="ad-placeholder ad-section-banner">
+                        <span class="ad-label">Advertisement</span>
+                        <span class="ad-text">728x90 Banner Ad Space</span>
+                    </div>
+                </div>
+
                 <!-- PDF Tools Section -->
                 <section class="tools-section">
-                    <h2 class="section-title centered">PDF Tools</h2>
+                    <div class="section-header">
+                        <div class="section-icon">
+                            <svg width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                        </div>
+                        <div class="section-content">
+                            <h2 class="section-title">PDF Tools</h2>
+                            <p class="section-description">Complete PDF manipulation and optimization suite</p>
+                        </div>
+                    </div>
                     <div class="tools-grid">
                         <div class="tool-card" data-testid="card-pdf-merge" onclick="window.location.href='/pdf-merge.html'">
                             <div class="tool-header">
@@ -289,14 +333,27 @@
                     </div>
                 </section>
 
-                <!-- Mid Content Ad -->
-                <div class="ad-placeholder ad-content-horizontal">
-                    <span class="ad-label">Sponsored</span>
+                <!-- PDF Tools Ad -->
+                <div class="section-ad-container">
+                    <div class="ad-placeholder ad-section-banner">
+                        <span class="ad-label">Advertisement</span>
+                        <span class="ad-text">728x90 Banner Ad Space</span>
+                    </div>
                 </div>
 
                 <!-- Media Tools Section -->
                 <section class="tools-section">
-                    <h2 class="section-title centered">Media Tools</h2>
+                    <div class="section-header">
+                        <div class="section-icon">
+                            <svg width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
+                            </svg>
+                        </div>
+                        <div class="section-content">
+                            <h2 class="section-title">Media Tools</h2>
+                            <p class="section-description">Video and audio conversion and editing tools</p>
+                        </div>
+                    </div>
                     <div class="tools-grid">
                         <div class="tool-card" data-testid="card-mp4-to-mp3" onclick="window.location.href='/mp4-to-mp3.html'">
                             <div class="tool-header">
@@ -410,6 +467,54 @@
                     </div>
                 </section>
 
+                <!-- Media Tools Ad -->
+                <div class="section-ad-container">
+                    <div class="ad-placeholder ad-section-banner">
+                        <span class="ad-label">Advertisement</span>
+                        <span class="ad-text">728x90 Banner Ad Space</span>
+                    </div>
+                </div>
+
+                <!-- Why Choose FileFlow Section -->
+                <section class="benefits-section">
+                    <div class="benefits-header">
+                        <h2 class="section-title centered">Why Choose FileFlow?</h2>
+                        <p class="section-description centered">Professional file conversion with uncompromising quality and privacy</p>
+                    </div>
+                    
+                    <div class="benefits-grid">
+                        <div class="benefit-card">
+                            <div class="benefit-icon">
+                                <svg width="32" height="32" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                                </svg>
+                            </div>
+                            <h3 class="benefit-title">Privacy First</h3>
+                            <p class="benefit-description">All conversions happen directly in your browser. No uploads, no cloud processing, your files never leave your device.</p>
+                        </div>
+                        
+                        <div class="benefit-card">
+                            <div class="benefit-icon">
+                                <svg width="32" height="32" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                </svg>
+                            </div>
+                            <h3 class="benefit-title">No Uploads Needed</h3>
+                            <p class="benefit-description">Lightning-fast client-side processing means instant results without waiting for server uploads or downloads.</p>
+                        </div>
+                        
+                        <div class="benefit-card">
+                            <div class="benefit-icon">
+                                <svg width="32" height="32" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                            <h3 class="benefit-title">Trusted by Millions</h3>
+                            <p class="benefit-description">Professional-grade conversion tools used by content creators, developers, and businesses worldwide.</p>
+                        </div>
+                    </div>
+                </section>
+
             </div>
         </main>
 
@@ -421,46 +526,7 @@
         </div>
     </div>
 
-    <!-- Features Section -->
-    <section id="about" class="features-section">
-        <div class="container">
-            <div class="features-container">
-                <div class="features-header">
-                    <h2 class="features-title">Why Choose FileFlow?</h2>
-                    <p class="features-subtitle">Our tools are designed with privacy, speed, and quality in mind.</p>
-                </div>
-                <div class="features-grid">
-                    <div class="feature-item">
-                        <div class="feature-icon bg-blue">
-                            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                            </svg>
-                        </div>
-                        <h3 class="feature-title">100% Private</h3>
-                        <p class="feature-description">All conversions happen in your browser. Your files never leave your device.</p>
-                    </div>
-                    <div class="feature-item">
-                        <div class="feature-icon bg-green">
-                            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                            </svg>
-                        </div>
-                        <h3 class="feature-title">Lightning Fast</h3>
-                        <p class="feature-description">No uploading to servers. Instant conversion with optimized algorithms.</p>
-                    </div>
-                    <div class="feature-item">
-                        <div class="feature-icon bg-purple">
-                            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                        </div>
-                        <h3 class="feature-title">High Quality</h3>
-                        <p class="feature-description">Professional-grade conversion maintaining original file quality.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+
 
     <!-- Bottom Content Ad -->
     <div class="ad-placeholder ad-content-horizontal">
