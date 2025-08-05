@@ -70,12 +70,15 @@
                 <!-- Upload Section -->
                 <div class="tool-container">
                     <div id="upload-section" class="upload-section">
-                        <div class="file-drop-zone" data-testid="drop-zone-video" onclick="document.getElementById('file-input').click()">
-                            <svg class="upload-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-                            </svg>
-                            <h3 class="upload-title">Drop video files here or click to upload</h3>
-                            <p class="upload-instructions">Select video files to extract audio (max 50MB per file)</p>
+                        <div class="upload-area" data-testid="drop-zone-video" onclick="document.getElementById('file-input').click()">
+                            <div class="upload-icon">
+                                <svg width="64" height="64" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                </svg>
+                            </div>
+                            <h3>Drop video files here</h3>
+                            <p>or click anywhere to upload files</p>
+                            <p class="supported-formats">Select video files to extract audio (max 50MB per file)</p>
                         </div>
                         <input type="file" id="file-input" multiple class="file-input" accept=".mp4,.MP4,.mov,.MOV,.avi,.AVI" data-testid="input-video-files">
                     </div>
