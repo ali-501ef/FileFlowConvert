@@ -162,68 +162,164 @@ class UniversalHomepageConverter {
             return;
         }
         
-        // Redirect to appropriate converter based on file type and output format
-        this.redirectToSpecificConverter(this.selectedFile, outputFormat);
+        // Perform conversion directly on the homepage
+        this.performInlineConversion(this.selectedFile, outputFormat);
+    }
+    
+    async performInlineConversion(file, outputFormat) {
+        // Show loading state
+        this.showConversionProgress();
+        
+        try {
+            const fileType = file.type.toLowerCase();
+            
+            if (fileType.startsWith('image/')) {
+                await this.convertImage(file, outputFormat);
+            } else if (fileType === 'application/pdf') {
+                this.showUnsupportedMessage('PDF', outputFormat);
+            } else if (fileType.startsWith('video/')) {
+                this.showUnsupportedMessage('Video', outputFormat);
+            } else if (fileType.startsWith('audio/')) {
+                this.showUnsupportedMessage('Audio', outputFormat);
+            } else {
+                this.showUnsupportedMessage('File', outputFormat);
+            }
+        } catch (error) {
+            console.error('Conversion error:', error);
+            this.showConversionError(error.message);
+        }
+    }
+    
+    async convertImage(file, outputFormat) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            img.onload = () => {
+                // Set canvas dimensions
+                canvas.width = img.width;
+                canvas.height = img.height;
+                
+                // Draw image on canvas
+                ctx.drawImage(img, 0, 0);
+                
+                // Convert to target format
+                const mimeType = this.getMimeType(outputFormat);
+                const quality = this.getCompressionQuality(outputFormat);
+                
+                canvas.toBlob((blob) => {
+                    if (blob) {
+                        this.downloadConvertedFile(blob, file.name, outputFormat);
+                        this.showConversionSuccess();
+                        resolve();
+                    } else {
+                        reject(new Error('Failed to convert image'));
+                    }
+                }, mimeType, quality);
+            };
+            
+            img.onerror = () => reject(new Error('Failed to load image'));
+            img.src = URL.createObjectURL(file);
+        });
+    }
+    
+    getMimeType(format) {
+        const mimeTypes = {
+            'jpeg': 'image/jpeg',
+            'jpg': 'image/jpeg',
+            'png': 'image/png',
+            'webp': 'image/webp',
+            'gif': 'image/gif'
+        };
+        return mimeTypes[format.toLowerCase()] || 'image/jpeg';
+    }
+    
+    getCompressionQuality(format) {
+        // Return quality for lossy formats
+        if (format.toLowerCase() === 'jpeg' || format.toLowerCase() === 'jpg') {
+            return 0.9; // 90% quality
+        }
+        return 1.0; // No compression for lossless formats
+    }
+    
+    downloadConvertedFile(blob, originalName, format) {
+        const link = document.createElement('a');
+        const fileName = this.getConvertedFileName(originalName, format);
+        
+        link.href = URL.createObjectURL(blob);
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // Clean up object URL
+        setTimeout(() => URL.revokeObjectURL(link.href), 100);
+    }
+    
+    getConvertedFileName(originalName, format) {
+        const nameWithoutExt = originalName.replace(/\.[^/.]+$/, '');
+        return `${nameWithoutExt}.${format.toLowerCase()}`;
+    }
+    
+    showConversionProgress() {
+        this.convertBtn.innerHTML = `
+            <svg class="animate-spin" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10" stroke-width="2" stroke-opacity="0.3"></circle>
+                <path d="M12 2a10 10 0 0 1 10 10" stroke-width="2" stroke-linecap="round"></path>
+            </svg>
+            Converting...
+        `;
+        this.convertBtn.disabled = true;
+    }
+    
+    showConversionSuccess() {
+        this.convertBtn.innerHTML = `
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+            Converted!
+        `;
+        
+        // Reset button after 2 seconds
+        setTimeout(() => {
+            this.convertBtn.innerHTML = 'Convert Now';
+            this.convertBtn.disabled = false;
+        }, 2000);
+    }
+    
+    showConversionError(message) {
+        this.convertBtn.innerHTML = 'Conversion Failed';
+        this.convertBtn.disabled = false;
+        
+        // Show error message to user
+        alert(`Conversion failed: ${message}`);
+        
+        // Reset button after 2 seconds
+        setTimeout(() => {
+            this.convertBtn.innerHTML = 'Convert Now';
+        }, 2000);
+    }
+    
+    showUnsupportedMessage(fileType, format) {
+        const message = `${fileType} to ${format.toUpperCase()} conversion requires specialized tools. Redirecting to the appropriate converter...`;
+        alert(message);
+        
+        // Redirect to appropriate tool for complex conversions
+        this.redirectToSpecificConverter(this.selectedFile, format);
     }
     
     redirectToSpecificConverter(file, outputFormat) {
         const fileType = file.type.toLowerCase();
         const fileName = file.name.toLowerCase();
         
-        // Store file in sessionStorage to pass to the converter page
-        const fileData = {
-            name: file.name,
-            type: file.type,
-            size: file.size,
-            lastModified: file.lastModified
-        };
-        
-        // For small images only (under 5MB), store in sessionStorage
-        if (file.size <= 5 * 1024 * 1024 && file.type.startsWith('image/')) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                try {
-                    fileData.data = e.target.result;
-                    sessionStorage.setItem('pendingFile', JSON.stringify(fileData));
-                    sessionStorage.setItem('targetFormat', outputFormat);
-                } catch (error) {
-                    console.warn('SessionStorage quota exceeded, proceeding without file data');
-                }
-                
-                // Redirect based on conversion type
-                this.performRedirect(file, outputFormat);
-            };
-            reader.readAsDataURL(file);
-        } else {
-            // For larger files or non-images, redirect without storing data
-            this.performRedirect(file, outputFormat);
-        }
-    }
-    
-    performRedirect(file, outputFormat) {
-        const fileType = file.type.toLowerCase();
-        const fileName = file.name.toLowerCase();
-        
-        if (outputFormat === 'jpeg' || outputFormat === 'jpg') {
-            // For JPEG output, use universal converter or HEIC converter
-            if (fileType.includes('heic') || fileName.includes('.heic')) {
-                window.location.href = '/heic-to-jpg.html';
-            } else {
-                window.location.href = '/convert-to-jpeg.html';
-            }
-        } else if (outputFormat === 'png') {
-            // For PNG output
-            if (fileType.includes('jpeg') || fileType.includes('jpg')) {
-                window.location.href = '/jpg-to-png.html';
-            } else {
-                window.location.href = '/convert-to-jpeg.html'; // Use universal converter
-            }
-        } else if (outputFormat === 'pdf') {
+        if (outputFormat === 'pdf') {
             window.location.href = '/pdf-merge.html';
         } else if (outputFormat === 'mp3') {
             window.location.href = '/mp4-to-mp3.html';
+        } else if (fileType.includes('heic') || fileName.includes('.heic')) {
+            window.location.href = '/heic-to-jpg.html';
         } else {
-            // Default to universal converter
             window.location.href = '/convert-to-jpeg.html';
         }
     }
