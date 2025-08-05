@@ -2832,7 +2832,7 @@ body {
 }
 
 .universal-converter-interface {
-    max-width: 600px;
+    max-width: 740px;
     margin: 0 auto;
     padding: 2rem;
     background-color: var(--surface);
