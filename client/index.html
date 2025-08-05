@@ -569,23 +569,6 @@
         </div>
     </footer>
 
-    <!-- HEIC Conversion Library - Load synchronously -->
-    <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
-    
-    <!-- Fallback HEIC loader -->
-    <script>
-        window.addEventListener('load', function() {
-            if (typeof heic2any === 'undefined') {
-                console.warn('Primary HEIC library failed, loading fallback...');
-                const fallbackScript = document.createElement('script');
-                fallbackScript.src = 'https://unpkg.com/heic2any@0.0.4/dist/heic2any.min.js';
-                document.head.appendChild(fallbackScript);
-            } else {
-                console.log('HEIC library loaded successfully');
-            }
-        });
-    </script>
-    
     <script src="/js/main.js"></script>
     <script src="/js/universal-homepage.js"></script>
 </body>
