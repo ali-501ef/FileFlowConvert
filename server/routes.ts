@@ -154,9 +154,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/convert', async (req, res) => {
     try {
+      console.log('Convert request body:', req.body);
       const { file_id, output_format, temp_path } = req.body;
 
+      if (!temp_path) {
+        return res.status(400).json({ error: "Missing temp_path parameter" });
+      }
+
+      console.log('Checking file at path:', temp_path);
       if (!fs.existsSync(temp_path)) {
+        console.log('Available files in uploads:', fs.readdirSync(uploadsDir));
         return res.status(404).json({ error: "Input file not found" });
       }
 

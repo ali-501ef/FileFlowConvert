@@ -114,7 +114,7 @@ class ServerFileConverter {
             const formData = new FormData();
             formData.append('file', file);
             
-            const response = await fetch(`${this.serverUrl}/upload`, {
+            const response = await fetch(`${this.serverUrl}/api/upload`, {
                 method: 'POST',
                 body: formData
             });
@@ -176,19 +176,29 @@ class ServerFileConverter {
             this.showStatus('Converting file...', 'converting');
             this.convertBtn.disabled = true;
             
-            const formData = new FormData();
-            formData.append('file_id', this.uploadedFileData.file_id);
-            formData.append('output_format', outputFormat);
-            formData.append('temp_path', this.uploadedFileData.temp_path);
+            const requestData = {
+                file_id: this.uploadedFileData.file_id,
+                output_format: outputFormat,
+                temp_path: this.uploadedFileData.temp_path
+            };
             
-            const response = await fetch(`${this.serverUrl}/convert`, {
+            const response = await fetch(`${this.serverUrl}/api/convert`, {
                 method: 'POST',
-                body: formData
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestData)
             });
             
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.detail || `Conversion failed: ${response.status}`);
+                let errorMessage = `Conversion failed: ${response.status}`;
+                try {
+                    const errorData = await response.json();
+                    errorMessage = errorData.error || errorData.detail || errorMessage;
+                } catch (e) {
+                    // Response might not be JSON
+                }
+                throw new Error(errorMessage);
             }
             
             const data = await response.json();
