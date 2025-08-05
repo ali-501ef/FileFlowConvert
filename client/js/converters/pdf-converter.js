@@ -128,11 +128,44 @@ class PDFConverter extends FileHandler {
     displayFileList() {
         super.displayFileList();
         
-        // Make file cards draggable after they're created
+        // Initialize sortable after file cards are created
+        this.initializeSortable();
+    }
+
+    /**
+     * Initialize drag and drop functionality for file reordering
+     */
+    initializeSortable() {
+        const fileCards = document.getElementById('file-cards');
+        if (fileCards && typeof Sortable !== 'undefined') {
+            new Sortable(fileCards, {
+                animation: 150,
+                ghostClass: 'sortable-ghost',
+                chosenClass: 'sortable-chosen',
+                dragClass: 'sortable-drag',
+                onEnd: (evt) => {
+                    // Update file order after drag
+                    this.updateFileOrder();
+                }
+            });
+        }
+    }
+
+    /**
+     * Update file order based on current DOM order
+     */
+    updateFileOrder() {
         const fileCards = document.querySelectorAll('.file-card');
+        const newOrder = [];
+        
         fileCards.forEach(card => {
-            card.draggable = true;
+            const index = parseInt(card.dataset.index);
+            if (this.selectedFiles[index]) {
+                newOrder.push(this.selectedFiles[index]);
+            }
         });
+        
+        this.selectedFiles = newOrder;
     }
 }
 

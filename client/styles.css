@@ -907,6 +907,34 @@ body {
     transition: all 0.3s ease;
 }
 
+/* ===== SORTABLE DRAG AND DROP STYLING ===== */
+.sortable-ghost {
+    opacity: 0.4;
+    transform: scale(0.98);
+}
+
+.sortable-chosen {
+    transform: scale(1.02);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+}
+
+.sortable-drag {
+    transform: rotate(2deg);
+    z-index: 1001;
+}
+
+.file-card {
+    cursor: move;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.file-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
 .options-header {
     padding: 1.25rem 1.5rem;
     cursor: pointer;

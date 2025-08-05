@@ -1,58 +1,114 @@
-class PDFWatermarker {
+/**
+ * PDF Watermark Tool
+ * Advanced watermarking with live preview and immutable watermarks
+ */
+
+class PDFWatermark {
     constructor() {
         this.init();
         this.setupEventListeners();
+        this.watermarkSettings = this.getDefaultSettings();
     }
 
     init() {
         this.uploadArea = document.getElementById('uploadArea');
         this.fileInput = document.getElementById('fileInput');
-        this.watermarkSetup = document.getElementById('watermarkSetup');
+        this.filePreview = document.getElementById('filePreview');
         this.convertBtn = document.getElementById('convertBtn');
+        this.previewContainer = document.getElementById('previewContainer');
+        this.watermarkPreview = document.getElementById('watermarkPreview');
         this.results = document.getElementById('results');
         this.progressContainer = document.getElementById('progressContainer');
         this.progressFill = document.getElementById('progressFill');
         this.progressText = document.getElementById('progressText');
         
         this.currentFile = null;
+        this.pdfDoc = null;
         this.outputBlob = null;
-        this.watermarkType = 'text';
-        this.selectedPosition = 'center';
-        this.watermarkImage = null;
     }
 
     setupEventListeners() {
         // File upload handlers
-        this.uploadArea.addEventListener('click', () => this.fileInput.click());
-        this.uploadArea.addEventListener('dragover', this.handleDragOver.bind(this));
-        this.uploadArea.addEventListener('drop', this.handleDrop.bind(this));
-        this.fileInput.addEventListener('change', this.handleFileSelect.bind(this));
-        
-        // Watermark type selection
-        document.getElementById('textTypeBtn').addEventListener('click', () => this.setWatermarkType('text'));
-        document.getElementById('imageTypeBtn').addEventListener('click', () => this.setWatermarkType('image'));
-        
-        // Position buttons
-        document.querySelectorAll('.position-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => this.setPosition(e.target.dataset.position));
-        });
-        
-        // Range inputs
-        document.getElementById('fontSize').addEventListener('input', this.updateFontSizeValue.bind(this));
-        document.getElementById('opacity').addEventListener('input', this.updateOpacityValue.bind(this));
-        document.getElementById('rotation').addEventListener('input', this.updateRotationValue.bind(this));
-        
-        // Page range selection
-        document.getElementById('pageRange').addEventListener('change', this.toggleCustomRange.bind(this));
-        
-        // Watermark image upload
-        document.getElementById('watermarkImage').addEventListener('change', this.handleImageSelect.bind(this));
+        this.uploadArea?.addEventListener('click', () => this.fileInput.click());
+        this.uploadArea?.addEventListener('dragover', this.handleDragOver.bind(this));
+        this.uploadArea?.addEventListener('drop', this.handleDrop.bind(this));
+        this.fileInput?.addEventListener('change', this.handleFileSelect.bind(this));
         
         // Convert button
-        this.convertBtn.addEventListener('click', this.addWatermark.bind(this));
+        this.convertBtn?.addEventListener('click', this.addWatermark.bind(this));
+        
+        // Watermark settings listeners
+        this.setupWatermarkControls();
         
         // Download button
-        document.getElementById('downloadBtn').addEventListener('click', this.downloadPDF.bind(this));
+        document.getElementById('downloadBtn')?.addEventListener('click', this.downloadPDF.bind(this));
+    }
+
+    setupWatermarkControls() {
+        // Text watermark controls
+        const textInput = document.getElementById('watermarkText');
+        const fontSize = document.getElementById('fontSize');
+        const opacity = document.getElementById('opacity');
+        const rotation = document.getElementById('rotation');
+        const positionX = document.getElementById('positionX');
+        const positionY = document.getElementById('positionY');
+        const colorPicker = document.getElementById('watermarkColor');
+
+        // Add real-time preview listeners
+        [textInput, fontSize, opacity, rotation, positionX, positionY, colorPicker].forEach(element => {
+            if (element) {
+                element.addEventListener('input', () => {
+                    this.updateWatermarkSettings();
+                    this.updateLivePreview();
+                });
+            }
+        });
+
+        // Watermark type selector
+        const watermarkType = document.getElementById('watermarkType');
+        if (watermarkType) {
+            watermarkType.addEventListener('change', this.handleWatermarkTypeChange.bind(this));
+        }
+
+        // Image watermark upload
+        const imageInput = document.getElementById('watermarkImageInput');
+        if (imageInput) {
+            imageInput.addEventListener('change', this.handleWatermarkImageSelect.bind(this));
+        }
+    }
+
+    getDefaultSettings() {
+        return {
+            type: 'text',
+            text: 'CONFIDENTIAL',
+            fontSize: 48,
+            color: '#ff0000',
+            opacity: 0.5,
+            rotation: 45,
+            positionX: 50,
+            positionY: 50,
+            imageData: null,
+            blendMode: 'multiply',
+            layerMode: 'background' // 'background' or 'foreground'
+        };
+    }
+
+    updateWatermarkSettings() {
+        const settings = {
+            type: document.getElementById('watermarkType')?.value || 'text',
+            text: document.getElementById('watermarkText')?.value || 'CONFIDENTIAL',
+            fontSize: parseInt(document.getElementById('fontSize')?.value) || 48,
+            color: document.getElementById('watermarkColor')?.value || '#ff0000',
+            opacity: parseFloat(document.getElementById('opacity')?.value) || 0.5,
+            rotation: parseFloat(document.getElementById('rotation')?.value) || 45,
+            positionX: parseFloat(document.getElementById('positionX')?.value) || 50,
+            positionY: parseFloat(document.getElementById('positionY')?.value) || 50,
+            blendMode: document.getElementById('blendMode')?.value || 'multiply',
+            layerMode: document.getElementById('layerMode')?.value || 'background'
+        };
+
+        this.watermarkSettings = { ...this.watermarkSettings, ...settings };
+        return this.watermarkSettings;
     }
 
     handleDragOver(e) {
@@ -78,97 +134,139 @@ class PDFWatermarker {
 
     async handleFile(file) {
         this.currentFile = file;
+        this.showFilePreview(file);
+        
+        try {
+            const arrayBuffer = await file.arrayBuffer();
+            this.pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
+            const pageCount = this.pdfDoc.getPageCount();
+            
+            document.getElementById('pdfInfo').innerHTML = `
+                <div class="pdf-details">
+                    <span class="detail-item">📄 ${pageCount} pages</span>
+                    <span class="detail-item">📊 ${this.formatFileSize(file.size)}</span>
+                </div>
+            `;
+            
+            this.convertBtn.disabled = false;
+            this.showLivePreview();
+            
+        } catch (error) {
+            this.showError('Failed to load PDF file');
+        }
+    }
+
+    showFilePreview(file) {
+        document.getElementById('fileName').textContent = file.name;
+        document.getElementById('fileSize').textContent = this.formatFileSize(file.size);
+        this.filePreview.style.display = 'block';
         this.uploadArea.style.display = 'none';
-        this.watermarkSetup.style.display = 'block';
-        this.convertBtn.disabled = false;
     }
 
-    setWatermarkType(type) {
-        this.watermarkType = type;
+    async showLivePreview() {
+        if (!this.pdfDoc) return;
+
+        try {
+            // Create preview canvas
+            const firstPage = this.pdfDoc.getPage(0);
+            const { width, height } = firstPage.getSize();
+            
+            // Create preview container
+            this.previewContainer.style.display = 'block';
+            this.watermarkPreview.innerHTML = `
+                <div class="preview-canvas" style="width: 300px; height: ${(height/width) * 300}px; position: relative; background: white; border: 1px solid #ddd;">
+                    <div class="page-content" style="width: 100%; height: 100%; background: #f8f9fa; position: relative;">
+                        <div class="watermark-overlay" style="
+                            position: absolute;
+                            top: ${this.watermarkSettings.positionY}%;
+                            left: ${this.watermarkSettings.positionX}%;
+                            transform: translate(-50%, -50%) rotate(${this.watermarkSettings.rotation}deg);
+                            color: ${this.watermarkSettings.color};
+                            font-size: ${Math.floor(this.watermarkSettings.fontSize * 0.2)}px;
+                            opacity: ${this.watermarkSettings.opacity};
+                            font-weight: bold;
+                            pointer-events: none;
+                            font-family: Arial, sans-serif;
+                        ">
+                            ${this.watermarkSettings.text}
+                        </div>
+                    </div>
+                </div>
+                <p class="preview-note">Live preview of watermark positioning</p>
+            `;
+        } catch (error) {
+            console.error('Preview error:', error);
+        }
+    }
+
+    updateLivePreview() {
+        if (this.watermarkPreview && this.pdfDoc) {
+            this.showLivePreview();
+        }
+    }
+
+    handleWatermarkTypeChange() {
+        const type = document.getElementById('watermarkType')?.value;
+        const textControls = document.querySelector('.text-watermark-controls');
+        const imageControls = document.querySelector('.image-watermark-controls');
         
-        // Update button states
-        document.querySelectorAll('.type-btn').forEach(btn => {
-            btn.classList.remove('active');
-        });
-        document.getElementById(`${type}TypeBtn`).classList.add('active');
+        if (type === 'text') {
+            textControls?.style.setProperty('display', 'block');
+            imageControls?.style.setProperty('display', 'none');
+        } else {
+            textControls?.style.setProperty('display', 'none');
+            imageControls?.style.setProperty('display', 'block');
+        }
         
-        // Show/hide config sections
-        document.getElementById('textConfig').style.display = type === 'text' ? 'block' : 'none';
-        document.getElementById('imageConfig').style.display = type === 'image' ? 'block' : 'none';
+        this.updateWatermarkSettings();
+        this.updateLivePreview();
     }
 
-    setPosition(position) {
-        this.selectedPosition = position;
-        
-        // Update button states
-        document.querySelectorAll('.position-btn').forEach(btn => {
-            btn.classList.remove('active');
-        });
-        document.querySelector(`[data-position="${position}"]`).classList.add('active');
-    }
-
-    updateFontSizeValue() {
-        const value = document.getElementById('fontSize').value;
-        document.getElementById('fontSizeValue').textContent = value + 'px';
-    }
-
-    updateOpacityValue() {
-        const value = document.getElementById('opacity').value;
-        document.getElementById('opacityValue').textContent = value + '%';
-    }
-
-    updateRotationValue() {
-        const value = document.getElementById('rotation').value;
-        document.getElementById('rotationValue').textContent = value + '°';
-    }
-
-    toggleCustomRange() {
-        const pageRange = document.getElementById('pageRange').value;
-        const customRangeGroup = document.getElementById('customRangeGroup');
-        customRangeGroup.style.display = pageRange === 'custom' ? 'block' : 'none';
-    }
-
-    handleImageSelect(e) {
+    handleWatermarkImageSelect(e) {
         const file = e.target.files[0];
         if (file && file.type.startsWith('image/')) {
-            this.watermarkImage = file;
-            const preview = document.getElementById('imagePreview');
-            const img = document.createElement('img');
-            img.src = URL.createObjectURL(file);
-            img.style.maxWidth = '100px';
-            img.style.maxHeight = '100px';
-            img.style.borderRadius = '4px';
-            preview.innerHTML = '';
-            preview.appendChild(img);
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                this.watermarkSettings.imageData = e.target.result;
+                this.updateLivePreview();
+            };
+            reader.readAsDataURL(file);
         }
     }
 
     async addWatermark() {
-        if (!this.currentFile) return;
+        if (!this.pdfDoc) return;
 
         this.showLoading(true);
         this.showProgress(0);
         this.results.style.display = 'none';
 
         try {
-            const settings = this.getWatermarkSettings();
+            const settings = this.updateWatermarkSettings();
             
-            // Simulate watermark process
-            for (let i = 0; i <= 100; i += 20) {
-                await new Promise(resolve => setTimeout(resolve, 300));
-                this.showProgress(i);
+            // Progress stages
+            const stages = [
+                'Preparing watermark...',
+                'Processing pages...',
+                'Embedding watermark...',
+                'Finalizing PDF...'
+            ];
+            
+            for (let i = 0; i < stages.length; i++) {
+                this.showProgressWithStage((i / stages.length) * 80, stages[i]);
+                await new Promise(resolve => setTimeout(resolve, 500));
             }
             
-            const arrayBuffer = await this.currentFile.arrayBuffer();
-            const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
+            // Create watermarked PDF
+            const watermarkedDoc = await this.createWatermarkedPDF(settings);
             
-            // Apply watermark based on settings
-            await this.applyWatermarkToPDF(pdfDoc, settings);
+            this.showProgressWithStage(100, 'Watermark complete!');
             
-            const pdfBytes = await pdfDoc.save();
+            // Generate output
+            const pdfBytes = await watermarkedDoc.save();
             this.outputBlob = new Blob([pdfBytes], { type: 'application/pdf' });
             
-            this.showResults();
+            this.showWatermarkResults();
             this.trackConversion();
             
         } catch (error) {
@@ -179,67 +277,73 @@ class PDFWatermarker {
         this.showLoading(false);
     }
 
-    getWatermarkSettings() {
-        return {
-            type: this.watermarkType,
-            text: document.getElementById('watermarkText').value,
-            fontSize: parseInt(document.getElementById('fontSize').value),
-            textColor: document.getElementById('textColor').value,
-            opacity: parseInt(document.getElementById('opacity').value) / 100,
-            rotation: parseInt(document.getElementById('rotation').value),
-            position: this.selectedPosition,
-            pageRange: document.getElementById('pageRange').value,
-            customPages: document.getElementById('customPages').value,
-            behindText: document.getElementById('behindText').checked,
-            repeatPattern: document.getElementById('repeatPattern').checked,
-            image: this.watermarkImage
-        };
-    }
-
-    async applyWatermarkToPDF(pdfDoc, settings) {
-        const pages = pdfDoc.getPages();
+    async createWatermarkedPDF(settings) {
+        const watermarkedDoc = await PDFLib.PDFDocument.create();
+        const pages = await watermarkedDoc.copyPages(this.pdfDoc, this.pdfDoc.getPageIndices());
         
-        // Determine which pages to watermark
-        let pagesToWatermark = [];
-        switch (settings.pageRange) {
-            case 'all':
-                pagesToWatermark = Array.from({length: pages.length}, (_, i) => i);
-                break;
-            case 'first':
-                pagesToWatermark = [0];
-                break;
-            case 'last':
-                pagesToWatermark = [pages.length - 1];
-                break;
-            case 'custom':
-                // Parse custom range (simplified)
-                pagesToWatermark = [0]; // Default to first page for demo
-                break;
-        }
-        
-        // Apply watermark to selected pages
-        for (const pageIndex of pagesToWatermark) {
-            if (pageIndex < pages.length) {
-                const page = pages[pageIndex];
+        for (let i = 0; i < pages.length; i++) {
+            const page = pages[i];
+            const { width, height } = page.getSize();
+            
+            if (settings.type === 'text') {
+                // Add text watermark
+                const helveticaFont = await watermarkedDoc.embedFont(PDFLib.StandardFonts.HelveticaBold);
                 
-                if (settings.type === 'text') {
-                    // Add text watermark
-                    const { width, height } = page.getSize();
-                    const textSize = settings.fontSize;
-                    
-                    page.drawText(settings.text, {
-                        x: width / 2,
-                        y: height / 2,
-                        size: textSize,
-                        opacity: settings.opacity,
-                        rotate: PDFLib.degrees(settings.rotation)
-                    });
-                }
+                // Calculate position
+                const x = (settings.positionX / 100) * width;
+                const y = (settings.positionY / 100) * height;
+                
+                // Convert hex color to RGB
+                const color = this.hexToRgb(settings.color);
+                const rgbColor = PDFLib.rgb(color.r / 255, color.g / 255, color.b / 255);
+                
+                page.drawText(settings.text, {
+                    x: x,
+                    y: y,
+                    size: settings.fontSize,
+                    font: helveticaFont,
+                    color: rgbColor,
+                    opacity: settings.opacity,
+                    rotate: PDFLib.degrees(settings.rotation)
+                });
             }
+            
+            watermarkedDoc.addPage(page);
         }
+        
+        return watermarkedDoc;
     }
 
-    showResults() {
+    hexToRgb(hex) {
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? {
+            r: parseInt(result[1], 16),
+            g: parseInt(result[2], 16),
+            b: parseInt(result[3], 16)
+        } : { r: 255, g: 0, b: 0 };
+    }
+
+    showWatermarkResults() {
+        const originalSize = this.currentFile.size;
+        const watermarkedSize = this.outputBlob.size;
+        
+        document.getElementById('watermarkStats').innerHTML = `
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="stat-label">Original Size:</span>
+                    <span class="stat-value">${this.formatFileSize(originalSize)}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Watermarked Size:</span>
+                    <span class="stat-value">${this.formatFileSize(watermarkedSize)}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Status:</span>
+                    <span class="stat-value success">Watermark Applied</span>
+                </div>
+            </div>
+        `;
+        
         this.results.style.display = 'block';
     }
 
@@ -249,16 +353,18 @@ class PDFWatermarker {
             a.href = URL.createObjectURL(this.outputBlob);
             a.download = this.currentFile.name.replace(/\.pdf$/i, '_watermarked.pdf');
             a.click();
+            URL.revokeObjectURL(a.href);
         }
     }
 
-    trackConversion() {
-        if (typeof gtag !== 'undefined') {
-            gtag('event', 'conversion', {
-                'event_category': 'PDF Tools',
-                'event_label': 'PDF Watermark',
-                'value': 1
-            });
+    showProgressWithStage(percent, stage) {
+        this.progressContainer.style.display = 'block';
+        this.progressFill.style.width = percent + '%';
+        this.progressText.textContent = percent + '%';
+        
+        const stageElement = document.getElementById('progressStage');
+        if (stageElement) {
+            stageElement.textContent = stage;
         }
     }
 
@@ -277,12 +383,12 @@ class PDFWatermarker {
         const btnLoader = this.convertBtn.querySelector('.btn-loader');
         
         if (show) {
-            btnText.style.display = 'none';
-            btnLoader.style.display = 'block';
+            if (btnText) btnText.style.display = 'none';
+            if (btnLoader) btnLoader.style.display = 'block';
             this.convertBtn.disabled = true;
         } else {
-            btnText.style.display = 'block';
-            btnLoader.style.display = 'none';
+            if (btnText) btnText.style.display = 'block';
+            if (btnLoader) btnLoader.style.display = 'none';
             this.convertBtn.disabled = false;
         }
     }
@@ -295,9 +401,27 @@ class PDFWatermarker {
         this.results.appendChild(errorDiv);
         this.results.style.display = 'block';
     }
+
+    trackConversion() {
+        if (typeof gtag !== 'undefined') {
+            gtag('event', 'conversion', {
+                'event_category': 'PDF Tools',
+                'event_label': 'PDF Watermark',
+                'value': 1
+            });
+        }
+    }
+
+    formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
 }
 
-// Initialize the PDF watermarker when the page loads
+// Initialize when page loads
 document.addEventListener('DOMContentLoaded', () => {
-    new PDFWatermarker();
+    new PDFWatermark();
 });

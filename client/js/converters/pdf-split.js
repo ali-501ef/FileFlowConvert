@@ -242,7 +242,7 @@ class PDFSplitter {
                         ${result.pages} page${result.pages > 1 ? 's' : ''} • ${this.formatFileSize(result.size)}
                     </div>
                 </div>
-                <button class="download-btn" onclick="this.downloadFile('${result.url}', '${result.name}')">
+                <button class="download-btn" data-url="${result.url}" data-name="${result.name}">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                         <polyline points="7,10 12,15 17,10"></polyline>
@@ -251,6 +251,13 @@ class PDFSplitter {
                     Download
                 </button>
             `;
+            
+            // Add event listener for download button
+            const downloadBtn = resultItem.querySelector('.download-btn');
+            downloadBtn.addEventListener('click', () => {
+                this.downloadFile(result.url, result.name);
+            });
+            
             this.resultsList.appendChild(resultItem);
         });
 
