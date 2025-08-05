@@ -10,32 +10,60 @@ class PDFMergeHandler {
     }
 
     setupAdvancedOptions() {
-        const advancedToggle = document.getElementById('advanced-toggle');
-        const advancedContent = document.getElementById('advanced-content');
-        const chevron = document.querySelector('.advanced-chevron');
-        
-        if (advancedToggle && advancedContent) {
-            advancedToggle.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                
-                const isVisible = advancedContent.style.display === 'block';
-                
-                if (isVisible) {
-                    // Collapse
-                    advancedContent.style.display = 'none';
-                    if (chevron) {
-                        chevron.style.transform = 'rotate(0deg)';
-                    }
-                } else {
-                    // Expand
-                    advancedContent.style.display = 'block';
-                    if (chevron) {
-                        chevron.style.transform = 'rotate(180deg)';
-                    }
-                }
+        // Wait for DOM to be fully loaded
+        setTimeout(() => {
+            const advancedToggle = document.getElementById('advanced-toggle');
+            const advancedContent = document.getElementById('advanced-content');
+            const chevron = document.querySelector('.advanced-chevron');
+            
+            console.log('Advanced toggle setup:', {
+                toggle: !!advancedToggle,
+                content: !!advancedContent,
+                chevron: !!chevron
             });
-        }
+            
+            if (advancedToggle && advancedContent) {
+                // Remove any existing listeners
+                const newToggle = advancedToggle.cloneNode(true);
+                advancedToggle.parentNode.replaceChild(newToggle, advancedToggle);
+                
+                newToggle.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    console.log('Advanced options clicked');
+                    
+                    const isVisible = advancedContent.style.display === 'block';
+                    
+                    if (isVisible) {
+                        // Collapse
+                        advancedContent.style.display = 'none';
+                        const newChevron = newToggle.querySelector('.advanced-chevron');
+                        if (newChevron) {
+                            newChevron.style.transform = 'rotate(0deg)';
+                        }
+                        console.log('Advanced options collapsed');
+                    } else {
+                        // Expand
+                        advancedContent.style.display = 'block';
+                        const newChevron = newToggle.querySelector('.advanced-chevron');
+                        if (newChevron) {
+                            newChevron.style.transform = 'rotate(180deg)';
+                        }
+                        console.log('Advanced options expanded');
+                    }
+                });
+                
+                // Set initial state
+                advancedContent.style.display = 'none';
+                console.log('Advanced options setup complete');
+            } else {
+                console.error('Advanced options elements not found:', {
+                    toggle: advancedToggle,
+                    content: advancedContent
+                });
+            }
+        }, 100);
     }
 
     setupMergeSettings() {
@@ -205,7 +233,22 @@ class PDFMergeHandler {
     }
 }
 
-// Initialize when page loads
+// Initialize when page loads - multiple initialization methods for reliability
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('PDF Merge Handler initializing...');
     window.pdfMergeHandler = new PDFMergeHandler();
 });
+
+// Backup initialization in case DOMContentLoaded has already fired
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        if (!window.pdfMergeHandler) {
+            console.log('PDF Merge Handler backup initialization...');
+            window.pdfMergeHandler = new PDFMergeHandler();
+        }
+    });
+} else {
+    // DOM is already loaded
+    console.log('PDF Merge Handler immediate initialization...');
+    window.pdfMergeHandler = new PDFMergeHandler();
+}
