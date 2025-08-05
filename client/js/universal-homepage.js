@@ -174,27 +174,49 @@ class UniversalHomepageConverter {
             const fileType = file.type.toLowerCase();
             const fileName = file.name.toLowerCase();
             
-            // Handle HEIC files directly on homepage
+            console.log('Converting file:', {
+                name: fileName,
+                type: fileType,
+                size: file.size,
+                outputFormat: outputFormat
+            });
+            
+            // Handle HEIC files specifically
             if (fileName.includes('.heic') || fileName.includes('.heif') || fileType.includes('heic') || fileType.includes('heif')) {
                 await this.convertHeicImage(file, outputFormat);
                 return;
             }
             
+            // Handle regular images
             if (fileType.startsWith('image/')) {
                 await this.convertImage(file, outputFormat);
-            } else if (fileType === 'application/pdf') {
-                await this.convertPdfToImage(file, outputFormat);
-            } else if (fileType.startsWith('video/')) {
-                await this.convertMediaFile(file, outputFormat);
-            } else if (fileType.startsWith('audio/')) {
-                await this.convertMediaFile(file, outputFormat);
-            } else {
-                // Try to handle unknown file types by checking extension
-                await this.handleUnknownFileType(file, outputFormat);
+                return;
             }
+            
+            // Handle PDFs
+            if (fileType === 'application/pdf' || fileName.endsWith('.pdf')) {
+                await this.convertPdfToImage(file, outputFormat);
+                return;
+            }
+            
+            // Handle videos
+            if (fileType.startsWith('video/') || fileName.match(/\.(mp4|avi|mov|mkv|webm|wmv|flv)$/i)) {
+                await this.convertMediaFile(file, outputFormat);
+                return;
+            }
+            
+            // Handle audio
+            if (fileType.startsWith('audio/') || fileName.match(/\.(mp3|wav|flac|aac|ogg|m4a)$/i)) {
+                await this.convertMediaFile(file, outputFormat);
+                return;
+            }
+            
+            // Try to handle unknown file types by extension
+            await this.handleUnknownFileType(file, outputFormat);
+            
         } catch (error) {
             console.error('Conversion error:', error);
-            this.showConversionError(error.message);
+            this.showConversionError(error.message || 'An unexpected error occurred during conversion');
         }
     }
     
@@ -206,48 +228,64 @@ class UniversalHomepageConverter {
             
             img.onload = () => {
                 try {
-                    // Set canvas dimensions
+                    console.log('Image loaded, converting...', {
+                        width: img.width,
+                        height: img.height,
+                        outputFormat: outputFormat
+                    });
+                    
+                    // Set canvas dimensions to match image
                     canvas.width = img.width;
                     canvas.height = img.height;
                     
-                    // Clear canvas and draw image
+                    // Clear canvas
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
                     
-                    // For PNG output, ensure transparency is preserved
-                    if (outputFormat.toLowerCase() === 'png') {
-                        ctx.globalCompositeOperation = 'source-over';
-                    } else {
-                        // For JPEG, fill with white background
+                    // For JPEG output, fill with white background first
+                    if (outputFormat.toLowerCase() === 'jpeg' || outputFormat.toLowerCase() === 'jpg') {
                         ctx.fillStyle = '#FFFFFF';
                         ctx.fillRect(0, 0, canvas.width, canvas.height);
                     }
                     
-                    // Draw image on canvas
+                    // Draw the image onto canvas
                     ctx.drawImage(img, 0, 0);
                     
-                    // Convert to target format
+                    // Get the target MIME type and quality
                     const mimeType = this.getMimeType(outputFormat);
                     const quality = this.getCompressionQuality(outputFormat);
                     
+                    console.log('Converting to:', { mimeType, quality });
+                    
+                    // Convert canvas to blob
                     canvas.toBlob((blob) => {
+                        // Clean up the object URL
+                        URL.revokeObjectURL(img.src);
+                        
                         if (blob && blob.size > 0) {
+                            console.log('Conversion successful, blob size:', blob.size);
                             this.downloadConvertedFile(blob, file.name, outputFormat);
                             this.showConversionSuccess();
                             resolve();
                         } else {
-                            reject(new Error('Failed to convert image - empty result'));
+                            console.error('Conversion failed - empty blob');
+                            reject(new Error('Image conversion produced empty result'));
                         }
                     }, mimeType, quality);
+                    
                 } catch (error) {
+                    console.error('Canvas conversion error:', error);
+                    URL.revokeObjectURL(img.src);
                     reject(new Error(`Image conversion failed: ${error.message}`));
                 }
             };
             
             img.onerror = (error) => {
-                reject(new Error('Failed to load image - unsupported format or corrupted file'));
+                console.error('Image load error:', error);
+                URL.revokeObjectURL(img.src);
+                reject(new Error('Failed to load image - the file may be corrupted or in an unsupported format'));
             };
             
-            // Set crossOrigin to handle CORS if needed
+            // Load the image
             img.crossOrigin = 'anonymous';
             img.src = URL.createObjectURL(file);
         });
@@ -352,94 +390,99 @@ class UniversalHomepageConverter {
     
     async convertHeicImage(file, outputFormat) {
         try {
-            // Load heic2any dynamically
-            if (!window.heic2any) {
+            // Check if heic2any is available
+            if (typeof window.heic2any !== 'function') {
+                // Try to load it dynamically
                 await this.loadHeicLibrary();
-            }
-            
-            // Try conversion with different settings for compatibility
-            let convertedBlob;
-            try {
-                // First attempt with standard settings
-                convertedBlob = await heic2any({
-                    blob: file,
-                    toType: this.getMimeType(outputFormat),
-                    quality: this.getCompressionQuality(outputFormat)
-                });
-            } catch (initialError) {
-                console.log('First conversion attempt failed, trying alternative settings:', initialError);
                 
-                // Second attempt with JPEG output and different quality
-                try {
-                    convertedBlob = await heic2any({
-                        blob: file,
-                        toType: "image/jpeg",
-                        quality: 0.8
-                    });
-                } catch (secondError) {
-                    // Third attempt with minimal settings
-                    convertedBlob = await heic2any({
-                        blob: file,
-                        toType: "image/jpeg"
-                    });
+                // Check again after loading
+                if (typeof window.heic2any !== 'function') {
+                    throw new Error('HEIC conversion library is not available');
                 }
             }
             
-            // Handle array result (heic2any sometimes returns array)
+            console.log('Starting HEIC conversion...', {
+                fileName: file.name,
+                fileSize: file.size,
+                outputFormat: outputFormat
+            });
+            
+            // Convert HEIC to JPEG (most compatible format)
+            const convertedBlob = await window.heic2any({
+                blob: file,
+                toType: "image/jpeg",
+                quality: 0.92
+            });
+            
+            // Handle array result (heic2any can return array)
             const finalBlob = Array.isArray(convertedBlob) ? convertedBlob[0] : convertedBlob;
             
-            if (finalBlob && finalBlob.size > 0) {
-                this.downloadConvertedFile(finalBlob, file.name, outputFormat === 'jpg' || outputFormat === 'jpeg' ? outputFormat : 'jpg');
-                this.showConversionSuccess();
-            } else {
-                throw new Error('Conversion completed but resulted in empty file');
+            console.log('HEIC conversion completed', {
+                originalSize: file.size,
+                convertedSize: finalBlob.size
+            });
+            
+            if (!finalBlob || finalBlob.size === 0) {
+                throw new Error('Conversion produced empty result');
             }
+            
+            // Download the converted file
+            this.downloadConvertedFile(finalBlob, file.name, 'jpg');
+            this.showConversionSuccess();
+            
         } catch (error) {
             console.error('HEIC conversion error:', error);
             
-            // Provide more helpful error message
-            let errorMessage = 'HEIC conversion failed';
-            if (error.message.includes('ERR_LIBHEIF')) {
-                errorMessage = 'This HEIC file uses an unsupported format. Please try converting it with the specialized HEIC converter or use a different image format.';
-            } else if (error.message.includes('Failed to load')) {
-                errorMessage = 'Unable to load conversion library. Please check your internet connection and try again.';
+            // Provide detailed error feedback
+            let errorMessage;
+            if (error.message.includes('ERR_LIBHEIF') || error.message.includes('format not supported')) {
+                errorMessage = 'This HEIC file format is not supported. Please try a different HEIC file or use another image format.';
+            } else if (error.message.includes('library') || error.message.includes('load')) {
+                errorMessage = 'Could not load HEIC conversion library. Please refresh the page and try again.';
             } else {
-                errorMessage = `Conversion failed: ${error.message}`;
+                errorMessage = `HEIC conversion failed: ${error.message}`;
             }
             
             this.showConversionError(errorMessage);
-            
-            // Offer alternative - redirect to specialized converter
-            setTimeout(() => {
-                if (confirm('Would you like to try the specialized HEIC converter instead?')) {
-                    window.location.href = '/heic-to-jpg.html';
-                }
-            }, 2000);
         }
     }
     
     async loadHeicLibrary() {
         return new Promise((resolve, reject) => {
-            if (window.heic2any) {
+            // Check if already loaded
+            if (window.heic2any && typeof window.heic2any === 'function') {
                 resolve();
                 return;
             }
             
+            // Clean up any existing script attempts
+            const existingScript = document.querySelector('script[src*="heic2any"]');
+            if (existingScript) {
+                existingScript.remove();
+            }
+            
             const script = document.createElement('script');
             script.src = 'https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js';
+            script.crossOrigin = 'anonymous';
+            
             script.onload = () => {
-                // Wait a bit for the library to initialize
+                // Give the library time to initialize
                 setTimeout(() => {
-                    if (window.heic2any) {
+                    if (window.heic2any && typeof window.heic2any === 'function') {
+                        console.log('HEIC library loaded successfully');
                         resolve();
                     } else {
-                        reject(new Error('HEIC library failed to initialize'));
+                        console.error('HEIC library loaded but function not available');
+                        reject(new Error('HEIC library failed to initialize properly'));
                     }
-                }, 100);
+                }, 200);
             };
-            script.onerror = () => {
-                reject(new Error('Failed to load HEIC conversion library'));
+            
+            script.onerror = (error) => {
+                console.error('Failed to load HEIC library:', error);
+                reject(new Error('Failed to load HEIC conversion library from CDN'));
             };
+            
             document.head.appendChild(script);
         });
     }
