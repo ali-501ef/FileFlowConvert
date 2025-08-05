@@ -571,5 +571,12 @@
 
     <script src="/js/main.js"></script>
     <script src="/js/server-converter.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize the server converter
+            window.serverConverter = new ServerFileConverter();
+            console.log('Universal converter initialized');
+        });
+    </script>
 </body>
 </html>
