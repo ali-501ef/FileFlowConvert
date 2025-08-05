@@ -1,22 +1,10 @@
 class UniversalHomepageConverter {
     constructor() {
-        // Add debug logging
-        console.log('Initializing UniversalHomepageConverter...');
-        
         this.dropZone = document.getElementById('universal-drop-zone');
         this.fileInput = document.getElementById('universal-file-input');
         this.chooseFileBtn = document.getElementById('choose-file-btn');
         this.outputFormatSelect = document.getElementById('output-format');
         this.convertBtn = document.getElementById('convert-now-btn');
-        
-        // Debug element detection
-        console.log('Elements found:', {
-            dropZone: !!this.dropZone,
-            fileInput: !!this.fileInput,
-            chooseFileBtn: !!this.chooseFileBtn,
-            outputFormatSelect: !!this.outputFormatSelect,
-            convertBtn: !!this.convertBtn
-        });
         
         this.selectedFile = null;
         
@@ -25,16 +13,8 @@ class UniversalHomepageConverter {
     
     initializeEventListeners() {
         if (!this.dropZone || !this.fileInput || !this.chooseFileBtn || !this.convertBtn) {
-            console.error('Critical elements missing for universal converter:', {
-                dropZone: !!this.dropZone,
-                fileInput: !!this.fileInput,
-                chooseFileBtn: !!this.chooseFileBtn,
-                convertBtn: !!this.convertBtn
-            });
             return; // Elements not found, homepage converter not available
         }
-        
-        console.log('Setting up event listeners...');
         
         // Drop zone events
         this.dropZone.addEventListener('dragover', this.handleDragOver.bind(this));
@@ -171,26 +151,16 @@ class UniversalHomepageConverter {
     }
     
     handleConvert() {
-        console.log('Convert button clicked!');
-        
         if (!this.selectedFile) {
-            console.error('No file selected');
             alert('Please select a file first.');
             return;
         }
         
         const outputFormat = this.outputFormatSelect.value;
         if (!outputFormat) {
-            console.error('No output format selected');
             alert('Please select an output format.');
             return;
         }
-        
-        console.log('Starting conversion:', {
-            file: this.selectedFile.name,
-            type: this.selectedFile.type,
-            outputFormat: outputFormat
-        });
         
         // Perform conversion directly on the homepage
         this.performInlineConversion(this.selectedFile, outputFormat);
@@ -213,13 +183,14 @@ class UniversalHomepageConverter {
             if (fileType.startsWith('image/')) {
                 await this.convertImage(file, outputFormat);
             } else if (fileType === 'application/pdf') {
-                this.showUnsupportedMessage('PDF', outputFormat);
+                await this.convertPdfToImage(file, outputFormat);
             } else if (fileType.startsWith('video/')) {
-                this.showUnsupportedMessage('Video', outputFormat);
+                await this.convertMediaFile(file, outputFormat);
             } else if (fileType.startsWith('audio/')) {
-                this.showUnsupportedMessage('Audio', outputFormat);
+                await this.convertMediaFile(file, outputFormat);
             } else {
-                this.showUnsupportedMessage('File', outputFormat);
+                // Try to handle unknown file types by checking extension
+                await this.handleUnknownFileType(file, outputFormat);
             }
         } catch (error) {
             console.error('Conversion error:', error);
@@ -290,14 +261,18 @@ class UniversalHomepageConverter {
             'webp': 'image/webp',
             'gif': 'image/gif',
             'bmp': 'image/bmp',
-            'tiff': 'image/tiff'
+            'tiff': 'image/tiff',
+            'mp3': 'audio/mpeg',
+            'wav': 'audio/wav',
+            'pdf': 'application/pdf'
         };
         return mimeTypes[format.toLowerCase()] || 'image/jpeg';
     }
     
     getCompressionQuality(format) {
         // Return quality for lossy formats
-        if (format.toLowerCase() === 'jpeg' || format.toLowerCase() === 'jpg') {
+        const lossyFormats = ['jpeg', 'jpg', 'webp'];
+        if (lossyFormats.includes(format.toLowerCase())) {
             return 0.9; // 90% quality
         }
         return 1.0; // No compression for lossless formats
@@ -361,26 +336,18 @@ class UniversalHomepageConverter {
         }, 2000);
     }
     
-    showUnsupportedMessage(fileType, format) {
-        let message;
-        let shouldRedirect = true;
-        
-        if (fileType === 'HEIC') {
-            message = `HEIC files require specialized conversion. Redirecting to our HEIC to JPG converter...`;
-        } else if (fileType === 'PDF') {
-            message = `PDF conversions require specialized tools. Redirecting to our PDF converter...`;
-        } else {
-            message = `${fileType} to ${format.toUpperCase()} conversion requires specialized tools. Redirecting to the appropriate converter...`;
+    async showUnsupportedMessage(fileType, format) {
+        try {
+            if (fileType === 'PDF' && format !== 'pdf') {
+                await this.convertPdfToImage(this.selectedFile, format);
+            } else if (fileType.startsWith('video/') || fileType.startsWith('audio/')) {
+                await this.convertMediaFile(this.selectedFile, format);
+            } else {
+                this.showConversionError(`${fileType} to ${format.toUpperCase()} conversion is not yet supported. Please try a different format.`);
+            }
+        } catch (error) {
+            this.showConversionError(`Failed to convert ${fileType} to ${format}: ${error.message}`);
         }
-        
-        // Reset button first
-        this.convertBtn.innerHTML = 'Redirecting...';
-        
-        // Show message and redirect after a short delay
-        setTimeout(() => {
-            alert(message);
-            this.redirectToSpecificConverter(this.selectedFile, format);
-        }, 500);
     }
     
     async convertHeicImage(file, outputFormat) {
@@ -477,29 +444,236 @@ class UniversalHomepageConverter {
         });
     }
     
-    redirectToSpecificConverter(file, outputFormat) {
-        const fileType = file.type.toLowerCase();
+    async convertPdfToImage(file, outputFormat) {
+        try {
+            // Load PDF.js library dynamically
+            if (!window.pdfjsLib) {
+                await this.loadPdfJsLibrary();
+            }
+            
+            const arrayBuffer = await file.arrayBuffer();
+            const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+            
+            // Convert first page to image
+            const page = await pdf.getPage(1);
+            const viewport = page.getViewport({ scale: 2.0 });
+            
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = viewport.width;
+            canvas.height = viewport.height;
+            
+            await page.render({
+                canvasContext: ctx,
+                viewport: viewport
+            }).promise;
+            
+            // Convert canvas to blob
+            const blob = await new Promise(resolve => {
+                canvas.toBlob(resolve, this.getMimeType(outputFormat), this.getCompressionQuality(outputFormat));
+            });
+            
+            this.downloadConvertedFile(blob, file.name, outputFormat);
+            this.showConversionSuccess();
+            
+        } catch (error) {
+            console.error('PDF conversion error:', error);
+            this.showConversionError(`PDF conversion failed: ${error.message}`);
+        }
+    }
+    
+    async convertMediaFile(file, outputFormat) {
+        try {
+            // For now, provide a simple media conversion fallback using Web APIs
+            if (file.type.startsWith('video/') && (outputFormat === 'jpeg' || outputFormat === 'png')) {
+                // Extract video thumbnail using video element
+                return await this.extractVideoThumbnail(file, outputFormat);
+            } else if (file.type.startsWith('audio/') && outputFormat === 'wav') {
+                // For audio conversion, we'll use Web Audio API
+                return await this.convertAudioFormat(file, outputFormat);
+            } else {
+                // For complex media conversions, show informative message
+                this.showConversionError(`${file.type} to ${outputFormat.toUpperCase()} conversion requires specialized software. Please use a dedicated media converter for this task.`);
+            }
+        } catch (error) {
+            console.error('Media conversion error:', error);
+            this.showConversionError(`Media conversion failed: ${error.message}`);
+        }
+    }
+    
+    async extractVideoThumbnail(file, outputFormat) {
+        return new Promise((resolve, reject) => {
+            const video = document.createElement('video');
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            video.preload = 'metadata';
+            video.onloadedmetadata = () => {
+                // Set canvas dimensions to video dimensions
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                
+                // Seek to 1 second or 10% of video duration
+                video.currentTime = Math.min(1, video.duration * 0.1);
+            };
+            
+            video.onseeked = () => {
+                try {
+                    // Draw video frame to canvas
+                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                    
+                    // Convert to blob
+                    canvas.toBlob((blob) => {
+                        if (blob && blob.size > 0) {
+                            this.downloadConvertedFile(blob, file.name, outputFormat);
+                            this.showConversionSuccess();
+                            resolve();
+                        } else {
+                            reject(new Error('Failed to extract video thumbnail'));
+                        }
+                    }, this.getMimeType(outputFormat), this.getCompressionQuality(outputFormat));
+                } catch (error) {
+                    reject(new Error(`Video thumbnail extraction failed: ${error.message}`));
+                }
+            };
+            
+            video.onerror = () => {
+                reject(new Error('Failed to load video - unsupported format or corrupted file'));
+            };
+            
+            video.src = URL.createObjectURL(file);
+        });
+    }
+    
+    async convertAudioFormat(file, outputFormat) {
+        try {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const arrayBuffer = await file.arrayBuffer();
+            const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+            
+            // Create simple WAV file
+            if (outputFormat === 'wav') {
+                const wav = this.audioBufferToWav(audioBuffer);
+                const blob = new Blob([wav], { type: 'audio/wav' });
+                
+                this.downloadConvertedFile(blob, file.name, outputFormat);
+                this.showConversionSuccess();
+            } else {
+                throw new Error(`Audio conversion to ${outputFormat} not supported by browser`);
+            }
+        } catch (error) {
+            console.error('Audio conversion error:', error);
+            this.showConversionError(`Audio conversion failed: ${error.message}`);
+        }
+    }
+    
+    audioBufferToWav(buffer) {
+        const length = buffer.length;
+        const numberOfChannels = buffer.numberOfChannels;
+        const sampleRate = buffer.sampleRate;
+        const arrayBuffer = new ArrayBuffer(44 + length * numberOfChannels * 2);
+        const view = new DataView(arrayBuffer);
+        
+        // WAV header
+        const writeString = (offset, string) => {
+            for (let i = 0; i < string.length; i++) {
+                view.setUint8(offset + i, string.charCodeAt(i));
+            }
+        };
+        
+        writeString(0, 'RIFF');
+        view.setUint32(4, 36 + length * numberOfChannels * 2, true);
+        writeString(8, 'WAVE');
+        writeString(12, 'fmt ');
+        view.setUint32(16, 16, true);
+        view.setUint16(20, 1, true);
+        view.setUint16(22, numberOfChannels, true);
+        view.setUint32(24, sampleRate, true);
+        view.setUint32(28, sampleRate * numberOfChannels * 2, true);
+        view.setUint16(32, numberOfChannels * 2, true);
+        view.setUint16(34, 16, true);
+        writeString(36, 'data');
+        view.setUint32(40, length * numberOfChannels * 2, true);
+        
+        // Audio data
+        let offset = 44;
+        for (let i = 0; i < length; i++) {
+            for (let channel = 0; channel < numberOfChannels; channel++) {
+                const sample = Math.max(-1, Math.min(1, buffer.getChannelData(channel)[i]));
+                view.setInt16(offset, sample < 0 ? sample * 0x8000 : sample * 0x7FFF, true);
+                offset += 2;
+            }
+        }
+        
+        return arrayBuffer;
+    }
+    
+    async handleUnknownFileType(file, outputFormat) {
         const fileName = file.name.toLowerCase();
         
-        if (outputFormat === 'pdf') {
-            window.location.href = '/pdf-merge.html';
-        } else if (outputFormat === 'mp3') {
-            window.location.href = '/mp4-to-mp3.html';
+        // Try to detect file type by extension
+        if (fileName.endsWith('.heic') || fileName.endsWith('.heif')) {
+            await this.convertHeicImage(file, outputFormat);
+        } else if (fileName.endsWith('.pdf')) {
+            await this.convertPdfToImage(file, outputFormat);
+        } else if (fileName.match(/\.(mp4|avi|mov|mkv|webm)$/)) {
+            await this.convertMediaFile(file, outputFormat);
+        } else if (fileName.match(/\.(mp3|wav|flac|aac|ogg)$/)) {
+            await this.convertMediaFile(file, outputFormat);
         } else {
-            window.location.href = '/convert-to-jpeg.html';
+            this.showConversionError(`File type not supported: ${fileName}. Please try uploading a common image, PDF, or media file.`);
         }
+    }
+    
+    async loadPdfJsLibrary() {
+        return new Promise((resolve, reject) => {
+            if (window.pdfjsLib) {
+                resolve();
+                return;
+            }
+            
+            const script = document.createElement('script');
+            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+            script.onload = () => {
+                // Set worker source
+                if (window.pdfjsLib) {
+                    window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+                    resolve();
+                } else {
+                    reject(new Error('PDF.js failed to load'));
+                }
+            };
+            script.onerror = () => reject(new Error('Failed to load PDF.js library'));
+            document.head.appendChild(script);
+        });
+    }
+    
+    async loadFFmpegLibrary() {
+        return new Promise((resolve, reject) => {
+            if (window.FFmpeg) {
+                resolve();
+                return;
+            }
+            
+            const script = document.createElement('script');
+            script.src = 'https://unpkg.com/@ffmpeg/ffmpeg@0.12.7/dist/umd/ffmpeg.js';
+            script.onload = () => {
+                if (window.FFmpeg) {
+                    resolve();
+                } else {
+                    reject(new Error('FFmpeg failed to load'));
+                }
+            };
+            script.onerror = () => reject(new Error('Failed to load FFmpeg library'));
+            document.head.appendChild(script);
+        });
     }
 }
 
 // Initialize the universal homepage converter when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM loaded, current path:', window.location.pathname);
-    
     // Only initialize if we're on the homepage
     if (window.location.pathname === '/' || window.location.pathname === '/index.html') {
-        console.log('Initializing homepage converter...');
         window.homepageConverter = new UniversalHomepageConverter();
-    } else {
-        console.log('Not on homepage, skipping converter initialization');
     }
 });
