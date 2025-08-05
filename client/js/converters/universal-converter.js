@@ -383,7 +383,7 @@ class UniversalConverter {
         // Placeholder for video to audio conversion - would use FFmpeg
         return new Promise((resolve, reject) => {
             // This would require FFmpeg WebAssembly implementation
-            reject(new Error('Video conversion not implemented yet'));
+            reject(new Error('Video conversion requires server-side processing'));
         });
     }
     
