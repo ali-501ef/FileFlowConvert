@@ -51,15 +51,44 @@ class HEICConverter extends FileHandler {
                 const file = heicFiles[i];
                 
                 try {
-                    // Convert HEIC to JPG using heic2any
-                    const convertedBlob = await heic2any({
-                        blob: file,
-                        toType: "image/jpeg",
-                        quality: 0.92 // High quality conversion
-                    });
+                    // Try multiple conversion approaches for better compatibility
+                    let convertedBlob;
+                    
+                    try {
+                        // First attempt with high quality
+                        convertedBlob = await heic2any({
+                            blob: file,
+                            toType: "image/jpeg",
+                            quality: 0.92
+                        });
+                    } catch (highQualityError) {
+                        console.log(`High quality conversion failed for ${file.name}, trying medium quality:`, highQualityError);
+                        
+                        try {
+                            // Second attempt with medium quality
+                            convertedBlob = await heic2any({
+                                blob: file,
+                                toType: "image/jpeg",
+                                quality: 0.8
+                            });
+                        } catch (mediumQualityError) {
+                            console.log(`Medium quality conversion failed for ${file.name}, trying basic conversion:`, mediumQualityError);
+                            
+                            // Third attempt with basic settings
+                            convertedBlob = await heic2any({
+                                blob: file,
+                                toType: "image/jpeg"
+                            });
+                        }
+                    }
 
                     // Handle array result (heic2any sometimes returns array)
                     const finalBlob = Array.isArray(convertedBlob) ? convertedBlob[0] : convertedBlob;
+
+                    // Validate the result
+                    if (!finalBlob || finalBlob.size === 0) {
+                        throw new Error('Conversion resulted in empty file');
+                    }
 
                     // Generate output filename
                     const outputFilename = file.name.replace(/\.(heic|HEIF|heif)$/i, '.jpg');

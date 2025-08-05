@@ -19,8 +19,19 @@
     <!-- Styles -->
     <link rel="stylesheet" href="/styles.css">
     
-    <!-- HEIC2ANY Library - Updated Version -->
+    <!-- HEIC2ANY Library - Try alternative version for better compatibility -->
     <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
+    <script>
+        // Fallback loader for heic2any with better error handling
+        window.addEventListener('load', function() {
+            if (typeof heic2any === 'undefined') {
+                console.warn('Primary HEIC library failed to load, attempting fallback...');
+                const fallbackScript = document.createElement('script');
+                fallbackScript.src = 'https://unpkg.com/heic2any@0.0.4/dist/heic2any.min.js';
+                document.head.appendChild(fallbackScript);
+            }
+        });
+    </script>
 </head>
 <body>
     <!-- Top AdSense Banner -->

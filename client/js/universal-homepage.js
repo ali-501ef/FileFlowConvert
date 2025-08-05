@@ -360,25 +360,64 @@ class UniversalHomepageConverter {
                 await this.loadHeicLibrary();
             }
             
-            // Convert HEIC to blob
-            const convertedBlob = await heic2any({
-                blob: file,
-                toType: this.getMimeType(outputFormat),
-                quality: this.getCompressionQuality(outputFormat)
-            });
+            // Try conversion with different settings for compatibility
+            let convertedBlob;
+            try {
+                // First attempt with standard settings
+                convertedBlob = await heic2any({
+                    blob: file,
+                    toType: this.getMimeType(outputFormat),
+                    quality: this.getCompressionQuality(outputFormat)
+                });
+            } catch (initialError) {
+                console.log('First conversion attempt failed, trying alternative settings:', initialError);
+                
+                // Second attempt with JPEG output and different quality
+                try {
+                    convertedBlob = await heic2any({
+                        blob: file,
+                        toType: "image/jpeg",
+                        quality: 0.8
+                    });
+                } catch (secondError) {
+                    // Third attempt with minimal settings
+                    convertedBlob = await heic2any({
+                        blob: file,
+                        toType: "image/jpeg"
+                    });
+                }
+            }
             
             // Handle array result (heic2any sometimes returns array)
             const finalBlob = Array.isArray(convertedBlob) ? convertedBlob[0] : convertedBlob;
             
             if (finalBlob && finalBlob.size > 0) {
-                this.downloadConvertedFile(finalBlob, file.name, outputFormat);
+                this.downloadConvertedFile(finalBlob, file.name, outputFormat === 'jpg' || outputFormat === 'jpeg' ? outputFormat : 'jpg');
                 this.showConversionSuccess();
             } else {
-                throw new Error('Failed to convert HEIC - empty result');
+                throw new Error('Conversion completed but resulted in empty file');
             }
         } catch (error) {
             console.error('HEIC conversion error:', error);
-            this.showConversionError(`HEIC conversion failed: ${error.message}`);
+            
+            // Provide more helpful error message
+            let errorMessage = 'HEIC conversion failed';
+            if (error.message.includes('ERR_LIBHEIF')) {
+                errorMessage = 'This HEIC file uses an unsupported format. Please try converting it with the specialized HEIC converter or use a different image format.';
+            } else if (error.message.includes('Failed to load')) {
+                errorMessage = 'Unable to load conversion library. Please check your internet connection and try again.';
+            } else {
+                errorMessage = `Conversion failed: ${error.message}`;
+            }
+            
+            this.showConversionError(errorMessage);
+            
+            // Offer alternative - redirect to specialized converter
+            setTimeout(() => {
+                if (confirm('Would you like to try the specialized HEIC converter instead?')) {
+                    window.location.href = '/heic-to-jpg.html';
+                }
+            }, 2000);
         }
     }
     
@@ -392,7 +431,14 @@ class UniversalHomepageConverter {
             const script = document.createElement('script');
             script.src = 'https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js';
             script.onload = () => {
-                resolve();
+                // Wait a bit for the library to initialize
+                setTimeout(() => {
+                    if (window.heic2any) {
+                        resolve();
+                    } else {
+                        reject(new Error('HEIC library failed to initialize'));
+                    }
+                }, 100);
             };
             script.onerror = () => {
                 reject(new Error('Failed to load HEIC conversion library'));
