@@ -177,23 +177,47 @@ class PDFConverter extends FileHandler {
             }
         });
         
-        this.selectedFiles = newOrder;
-        console.log('File order updated:', this.selectedFiles.map(f => f.name));
+        // Only update if we have valid files
+        if (newOrder.length > 0) {
+            this.selectedFiles = newOrder;
+            console.log('File order updated:', this.selectedFiles.map(f => f.name));
+        }
     }
 
     /**
      * Apply advanced merge settings
      */
     applyAdvancedSettings(mergedPdf) {
+        // Get the merge handler if available
+        if (window.pdfMergeHandler) {
+            const settings = window.pdfMergeHandler.getMergeSettings();
+            return window.pdfMergeHandler.applyMergeSettings(mergedPdf, settings);
+        }
+        
+        // Fallback to basic settings
         const mergeMode = document.getElementById('merge-mode')?.value || 'append';
         const outputQuality = document.getElementById('output-quality')?.value || 'high';
         const bookmarkHandling = document.getElementById('bookmark-handling')?.value || 'preserve';
+        const metadataHandling = document.getElementById('metadata-handling')?.value || 'first';
         
-        // Apply settings based on selection
-        if (outputQuality === 'low') {
-            // Reduce quality settings
-            console.log('Applying low quality settings');
+        // Apply basic metadata handling
+        if (metadataHandling === 'none') {
+            mergedPdf.setTitle('');
+            mergedPdf.setAuthor('');
+            mergedPdf.setSubject('');
+            mergedPdf.setCreator('');
+            mergedPdf.setProducer('');
+        } else if (metadataHandling === 'first') {
+            mergedPdf.setCreator('FileFlow PDF Merge Tool');
+            mergedPdf.setProducer('FileFlow');
         }
+        
+        console.log('Applied advanced settings:', {
+            mergeMode,
+            outputQuality,
+            bookmarkHandling,
+            metadataHandling
+        });
         
         return mergedPdf;
     }

@@ -1,0 +1,211 @@
+/**
+ * PDF Merge Advanced Options Handler
+ * Handles the advanced options functionality specifically for PDF merge
+ */
+
+class PDFMergeHandler {
+    constructor() {
+        this.setupAdvancedOptions();
+        this.setupMergeSettings();
+    }
+
+    setupAdvancedOptions() {
+        const advancedToggle = document.getElementById('advanced-toggle');
+        const advancedContent = document.getElementById('advanced-content');
+        const chevron = document.querySelector('.advanced-chevron');
+        
+        if (advancedToggle && advancedContent) {
+            advancedToggle.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const isVisible = advancedContent.style.display === 'block';
+                
+                if (isVisible) {
+                    // Collapse
+                    advancedContent.style.display = 'none';
+                    if (chevron) {
+                        chevron.style.transform = 'rotate(0deg)';
+                    }
+                } else {
+                    // Expand
+                    advancedContent.style.display = 'block';
+                    if (chevron) {
+                        chevron.style.transform = 'rotate(180deg)';
+                    }
+                }
+            });
+        }
+    }
+
+    setupMergeSettings() {
+        // Add functionality to merge mode selector
+        const mergeMode = document.getElementById('merge-mode');
+        if (mergeMode) {
+            mergeMode.addEventListener('change', (e) => {
+                const mode = e.target.value;
+                console.log('Merge mode changed to:', mode);
+                
+                if (mode === 'interleave') {
+                    this.showInterleaveOptions();
+                } else if (mode === 'custom') {
+                    this.showCustomArrangementOptions();
+                } else {
+                    this.hideExtraOptions();
+                }
+            });
+        }
+
+        // Add functionality to output quality selector
+        const outputQuality = document.getElementById('output-quality');
+        if (outputQuality) {
+            outputQuality.addEventListener('change', (e) => {
+                const quality = e.target.value;
+                console.log('Output quality changed to:', quality);
+            });
+        }
+
+        // Add functionality to bookmark handling
+        const bookmarkHandling = document.getElementById('bookmark-handling');
+        if (bookmarkHandling) {
+            bookmarkHandling.addEventListener('change', (e) => {
+                const handling = e.target.value;
+                console.log('Bookmark handling changed to:', handling);
+            });
+        }
+
+        // Add functionality to metadata handling
+        const metadataHandling = document.getElementById('metadata-handling');
+        if (metadataHandling) {
+            metadataHandling.addEventListener('change', (e) => {
+                const handling = e.target.value;
+                console.log('Metadata handling changed to:', handling);
+                
+                if (handling === 'custom') {
+                    this.showCustomMetadataOptions();
+                } else {
+                    this.hideCustomMetadataOptions();
+                }
+            });
+        }
+    }
+
+    showInterleaveOptions() {
+        // Show options for interleaving pages
+        const advancedGrid = document.querySelector('.advanced-grid');
+        if (advancedGrid && !document.getElementById('interleave-options')) {
+            const interleaveDiv = document.createElement('div');
+            interleaveDiv.id = 'interleave-options';
+            interleaveDiv.className = 'advanced-option';
+            interleaveDiv.innerHTML = `
+                <label class="advanced-label" for="interleave-pattern">Interleave Pattern</label>
+                <select id="interleave-pattern" class="advanced-select">
+                    <option value="1-1">1:1 (alternating pages)</option>
+                    <option value="2-1">2:1 (2 pages from first, 1 from second)</option>
+                    <option value="1-2">1:2 (1 page from first, 2 from second)</option>
+                </select>
+                <p class="advanced-hint">Choose how to interleave pages between documents</p>
+            `;
+            advancedGrid.appendChild(interleaveDiv);
+        }
+    }
+
+    showCustomArrangementOptions() {
+        // Show options for custom page arrangement
+        const advancedGrid = document.querySelector('.advanced-grid');
+        if (advancedGrid && !document.getElementById('custom-arrangement-options')) {
+            const customDiv = document.createElement('div');
+            customDiv.id = 'custom-arrangement-options';
+            customDiv.className = 'advanced-option';
+            customDiv.innerHTML = `
+                <label class="advanced-label" for="page-arrangement">Page Arrangement</label>
+                <textarea id="page-arrangement" class="advanced-textarea" placeholder="e.g., 1:1-3, 2:all, 3:5-8"></textarea>
+                <p class="advanced-hint">Format: FileNumber:PageRange (e.g., 1:1-3 means file 1 pages 1-3)</p>
+            `;
+            advancedGrid.appendChild(customDiv);
+        }
+    }
+
+    showCustomMetadataOptions() {
+        // Show custom metadata input fields
+        const advancedGrid = document.querySelector('.advanced-grid');
+        if (advancedGrid && !document.getElementById('custom-metadata-options')) {
+            const metadataDiv = document.createElement('div');
+            metadataDiv.id = 'custom-metadata-options';
+            metadataDiv.className = 'advanced-option custom-metadata';
+            metadataDiv.innerHTML = `
+                <div class="metadata-fields">
+                    <div class="metadata-field">
+                        <label class="advanced-label" for="custom-title">Document Title</label>
+                        <input type="text" id="custom-title" class="advanced-input" placeholder="Enter title">
+                    </div>
+                    <div class="metadata-field">
+                        <label class="advanced-label" for="custom-author">Author</label>
+                        <input type="text" id="custom-author" class="advanced-input" placeholder="Enter author">
+                    </div>
+                    <div class="metadata-field">
+                        <label class="advanced-label" for="custom-subject">Subject</label>
+                        <input type="text" id="custom-subject" class="advanced-input" placeholder="Enter subject">
+                    </div>
+                </div>
+            `;
+            advancedGrid.appendChild(metadataDiv);
+        }
+    }
+
+    hideExtraOptions() {
+        // Remove dynamic options
+        const interleaveOptions = document.getElementById('interleave-options');
+        const customOptions = document.getElementById('custom-arrangement-options');
+        
+        if (interleaveOptions) interleaveOptions.remove();
+        if (customOptions) customOptions.remove();
+    }
+
+    hideCustomMetadataOptions() {
+        const customMetadata = document.getElementById('custom-metadata-options');
+        if (customMetadata) customMetadata.remove();
+    }
+
+    getMergeSettings() {
+        // Collect all advanced settings
+        return {
+            mergeMode: document.getElementById('merge-mode')?.value || 'append',
+            outputQuality: document.getElementById('output-quality')?.value || 'high',
+            bookmarkHandling: document.getElementById('bookmark-handling')?.value || 'preserve',
+            metadataHandling: document.getElementById('metadata-handling')?.value || 'first',
+            interleavePattern: document.getElementById('interleave-pattern')?.value || '1-1',
+            pageArrangement: document.getElementById('page-arrangement')?.value || '',
+            customTitle: document.getElementById('custom-title')?.value || '',
+            customAuthor: document.getElementById('custom-author')?.value || '',
+            customSubject: document.getElementById('custom-subject')?.value || ''
+        };
+    }
+
+    applyMergeSettings(pdfDoc, settings) {
+        // Apply the selected settings to the merged PDF
+        console.log('Applying merge settings:', settings);
+        
+        // Apply metadata settings
+        if (settings.metadataHandling === 'custom') {
+            if (settings.customTitle) pdfDoc.setTitle(settings.customTitle);
+            if (settings.customAuthor) pdfDoc.setAuthor(settings.customAuthor);
+            if (settings.customSubject) pdfDoc.setSubject(settings.customSubject);
+            pdfDoc.setCreator('FileFlow PDF Merge Tool');
+            pdfDoc.setProducer('FileFlow');
+        } else if (settings.metadataHandling === 'none') {
+            pdfDoc.setTitle('');
+            pdfDoc.setAuthor('');
+            pdfDoc.setSubject('');
+            pdfDoc.setCreator('');
+            pdfDoc.setProducer('');
+        }
+        
+        return pdfDoc;
+    }
+}
+
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', () => {
+    window.pdfMergeHandler = new PDFMergeHandler();
+});
