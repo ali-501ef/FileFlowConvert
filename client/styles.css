@@ -2857,6 +2857,7 @@ body {
     border-color: var(--primary);
     background-color: hsl(215, 84%, 98%);
     transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.15);
 }
 
 .drop-zone-content {

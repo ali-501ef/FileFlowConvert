@@ -39,7 +39,8 @@ class ServerFileConverter {
         
         // Drop zone click (for clicking anywhere in the drop zone)
         this.dropZone.addEventListener('click', (e) => {
-            // Always trigger file input when clicking the drop zone
+            e.preventDefault();
+            e.stopPropagation();
             this.fileInput.click();
         });
         
@@ -328,6 +329,74 @@ class ServerFileConverter {
         const sizes = ['Bytes', 'KB', 'MB', 'GB'];
         const i = Math.floor(Math.log(bytes) / Math.log(k));
         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+    
+    showStatus(message, type = 'info') {
+        console.log(`Status [${type}]: ${message}`);
+        this.showNotification(message, type);
+    }
+    
+    showNotification(message, type = 'info') {
+        // Remove existing notification
+        const existingNotification = document.getElementById('conversion-status');
+        if (existingNotification) {
+            existingNotification.remove();
+        }
+        
+        // Create new notification
+        const notification = document.createElement('div');
+        notification.id = 'conversion-status';
+        notification.textContent = message;
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            transform: translateX(100%);
+            opacity: 0;
+            font-size: 14px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        `;
+        
+        // Set colors based on type
+        if (type === 'error') {
+            notification.style.backgroundColor = '#fef2f2';
+            notification.style.color = '#dc2626';
+            notification.style.border = '1px solid #fecaca';
+        } else if (type === 'success') {
+            notification.style.backgroundColor = '#f0fdf4';
+            notification.style.color = '#16a34a';
+            notification.style.border = '1px solid #bbf7d0';
+        } else if (type === 'uploading' || type === 'converting') {
+            notification.style.backgroundColor = '#eff6ff';
+            notification.style.color = '#2563eb';
+            notification.style.border = '1px solid #dbeafe';
+        } else {
+            notification.style.backgroundColor = '#f8fafc';
+            notification.style.color = '#475569';
+            notification.style.border = '1px solid #e2e8f0';
+        }
+        
+        document.body.appendChild(notification);
+        
+        // Show the notification
+        setTimeout(() => {
+            notification.style.transform = 'translateX(0)';
+            notification.style.opacity = '1';
+        }, 100);
+        
+        // Auto-hide after 3 seconds (unless it's a process status)
+        if (type !== 'uploading' && type !== 'converting') {
+            setTimeout(() => {
+                notification.style.transform = 'translateX(100%)';
+                notification.style.opacity = '0';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
     }
 }
 

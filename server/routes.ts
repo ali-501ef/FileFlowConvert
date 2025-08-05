@@ -94,7 +94,7 @@ try:
             if img.mode == 'RGBA':
                 background.paste(img, mask=img.split()[-1])
             img = background
-        img.save(output_path, 'JPEG', quality=92, optimize=True)
+        img.save(output_path, 'JPEG', quality=85, optimize=True, progressive=True)
     else:
         img.save(output_path, output_format, optimize=True)
     
