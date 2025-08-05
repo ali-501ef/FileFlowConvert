@@ -172,6 +172,13 @@ class UniversalHomepageConverter {
         
         try {
             const fileType = file.type.toLowerCase();
+            const fileName = file.name.toLowerCase();
+            
+            // Check for HEIC files by name since MIME type might not be detected
+            if (fileName.includes('.heic') || fileName.includes('.heif') || fileType.includes('heic') || fileType.includes('heif')) {
+                this.showUnsupportedMessage('HEIC', outputFormat);
+                return;
+            }
             
             if (fileType.startsWith('image/')) {
                 await this.convertImage(file, outputFormat);
@@ -197,29 +204,50 @@ class UniversalHomepageConverter {
             const ctx = canvas.getContext('2d');
             
             img.onload = () => {
-                // Set canvas dimensions
-                canvas.width = img.width;
-                canvas.height = img.height;
-                
-                // Draw image on canvas
-                ctx.drawImage(img, 0, 0);
-                
-                // Convert to target format
-                const mimeType = this.getMimeType(outputFormat);
-                const quality = this.getCompressionQuality(outputFormat);
-                
-                canvas.toBlob((blob) => {
-                    if (blob) {
-                        this.downloadConvertedFile(blob, file.name, outputFormat);
-                        this.showConversionSuccess();
-                        resolve();
+                try {
+                    // Set canvas dimensions
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    
+                    // Clear canvas and draw image
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    
+                    // For PNG output, ensure transparency is preserved
+                    if (outputFormat.toLowerCase() === 'png') {
+                        ctx.globalCompositeOperation = 'source-over';
                     } else {
-                        reject(new Error('Failed to convert image'));
+                        // For JPEG, fill with white background
+                        ctx.fillStyle = '#FFFFFF';
+                        ctx.fillRect(0, 0, canvas.width, canvas.height);
                     }
-                }, mimeType, quality);
+                    
+                    // Draw image on canvas
+                    ctx.drawImage(img, 0, 0);
+                    
+                    // Convert to target format
+                    const mimeType = this.getMimeType(outputFormat);
+                    const quality = this.getCompressionQuality(outputFormat);
+                    
+                    canvas.toBlob((blob) => {
+                        if (blob && blob.size > 0) {
+                            this.downloadConvertedFile(blob, file.name, outputFormat);
+                            this.showConversionSuccess();
+                            resolve();
+                        } else {
+                            reject(new Error('Failed to convert image - empty result'));
+                        }
+                    }, mimeType, quality);
+                } catch (error) {
+                    reject(new Error(`Image conversion failed: ${error.message}`));
+                }
             };
             
-            img.onerror = () => reject(new Error('Failed to load image'));
+            img.onerror = (error) => {
+                reject(new Error('Failed to load image - unsupported format or corrupted file'));
+            };
+            
+            // Set crossOrigin to handle CORS if needed
+            img.crossOrigin = 'anonymous';
             img.src = URL.createObjectURL(file);
         });
     }
@@ -230,7 +258,9 @@ class UniversalHomepageConverter {
             'jpg': 'image/jpeg',
             'png': 'image/png',
             'webp': 'image/webp',
-            'gif': 'image/gif'
+            'gif': 'image/gif',
+            'bmp': 'image/bmp',
+            'tiff': 'image/tiff'
         };
         return mimeTypes[format.toLowerCase()] || 'image/jpeg';
     }
@@ -302,11 +332,25 @@ class UniversalHomepageConverter {
     }
     
     showUnsupportedMessage(fileType, format) {
-        const message = `${fileType} to ${format.toUpperCase()} conversion requires specialized tools. Redirecting to the appropriate converter...`;
-        alert(message);
+        let message;
+        let shouldRedirect = true;
         
-        // Redirect to appropriate tool for complex conversions
-        this.redirectToSpecificConverter(this.selectedFile, format);
+        if (fileType === 'HEIC') {
+            message = `HEIC files require specialized conversion. Redirecting to our HEIC to JPG converter...`;
+        } else if (fileType === 'PDF') {
+            message = `PDF conversions require specialized tools. Redirecting to our PDF converter...`;
+        } else {
+            message = `${fileType} to ${format.toUpperCase()} conversion requires specialized tools. Redirecting to the appropriate converter...`;
+        }
+        
+        // Reset button first
+        this.convertBtn.innerHTML = 'Redirecting...';
+        
+        // Show message and redirect after a short delay
+        setTimeout(() => {
+            alert(message);
+            this.redirectToSpecificConverter(this.selectedFile, format);
+        }, 500);
     }
     
     redirectToSpecificConverter(file, outputFormat) {
