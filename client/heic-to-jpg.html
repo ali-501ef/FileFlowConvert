@@ -80,7 +80,7 @@
                 <!-- Upload Section -->
                 <div class="tool-container">
                     <div id="upload-section" class="upload-section">
-                        <div class="drop-zone" id="heic-drop-zone" data-testid="drop-zone-heic" style="cursor: pointer;">
+                        <div class="drop-zone" id="heic-drop-zone" data-testid="drop-zone-heic" style="cursor: pointer;" onclick="document.getElementById('heic-file-input').click()">
                             <div class="drop-zone-content">
                                 <div class="upload-icon">
                                     <svg width="48" height="48" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -162,18 +162,133 @@
     </footer>
 
     <script src="/js/main.js"></script>
-    <!-- HEIC Tool - Use server-side converter -->
-    <script src="/js/server-converter.js"></script>
+    <!-- HEIC Tool - Simple click handler for file upload -->
     <script>
-        // Initialize server-side converter for HEIC tool
         document.addEventListener('DOMContentLoaded', function() {
-            window.heicConverter = new ServerConverter({
-                dropZoneId: 'heic-drop-zone',
-                fileInputId: 'heic-file-input',
-                formatSelectId: 'heic-format-select',
-                convertBtnId: 'heic-convert-btn',
-                serverUrl: window.location.origin,
-                defaultFormat: 'jpg'
+            const dropZone = document.getElementById('heic-drop-zone');
+            const fileInput = document.getElementById('heic-file-input');
+            const formatSelect = document.getElementById('heic-format-select');
+            const convertBtn = document.getElementById('heic-convert-btn');
+            
+            // Click handler for drop zone
+            dropZone.addEventListener('click', function() {
+                fileInput.click();
+            });
+            
+            // File selection handler
+            fileInput.addEventListener('change', function(e) {
+                const files = Array.from(e.target.files);
+                if (files.length > 0) {
+                    // Show file info and enable convert button
+                    const file = files[0];
+                    console.log('File selected:', file.name);
+                    
+                    // Update UI to show file is ready
+                    dropZone.innerHTML = `
+                        <div class="drop-zone-content">
+                            <div class="upload-icon">
+                                <svg width="48" height="48" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                            <h3 class="drop-zone-text">File Ready: ${file.name}</h3>
+                            <p class="drop-zone-subtext">Click "Convert Now" to process</p>
+                        </div>
+                    `;
+                    convertBtn.disabled = false;
+                    convertBtn.style.opacity = '1';
+                }
+            });
+            
+            // Convert button handler
+            convertBtn.addEventListener('click', async function() {
+                const files = fileInput.files;
+                if (files.length === 0) return;
+                
+                const file = files[0];
+                const outputFormat = formatSelect.value;
+                
+                convertBtn.textContent = 'Converting...';
+                convertBtn.disabled = true;
+                
+                try {
+                    // Upload file
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    
+                    const uploadResponse = await fetch('/api/upload', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    const uploadResult = await uploadResponse.json();
+                    
+                    if (!uploadResult.success) {
+                        throw new Error('Upload failed');
+                    }
+                    
+                    // Convert file
+                    const convertResponse = await fetch('/api/convert', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            file_id: uploadResult.file_id,
+                            output_format: outputFormat,
+                            temp_path: uploadResult.temp_path
+                        })
+                    });
+                    
+                    const convertResult = await convertResponse.json();
+                    
+                    if (convertResult.success) {
+                        // Show download link
+                        dropZone.innerHTML = `
+                            <div class="drop-zone-content">
+                                <div class="upload-icon">
+                                    <svg width="48" height="48" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                    </svg>
+                                </div>
+                                <h3 class="drop-zone-text">Conversion Complete!</h3>
+                                <p class="drop-zone-subtext">
+                                    <a href="${convertResult.download_url}" download class="download-link" style="color: #007AFF; text-decoration: underline;">
+                                        Download ${outputFormat.toUpperCase()} (${Math.round(convertResult.file_size/1024)}KB)
+                                    </a>
+                                </p>
+                            </div>
+                        `;
+                        
+                        // Auto-download
+                        const downloadLink = document.createElement('a');
+                        downloadLink.href = convertResult.download_url;
+                        downloadLink.download = convertResult.output_file;
+                        document.body.appendChild(downloadLink);
+                        downloadLink.click();
+                        document.body.removeChild(downloadLink);
+                        
+                    } else {
+                        throw new Error(convertResult.error || 'Conversion failed');
+                    }
+                    
+                } catch (error) {
+                    console.error('Conversion error:', error);
+                    dropZone.innerHTML = `
+                        <div class="drop-zone-content">
+                            <div class="upload-icon">
+                                <svg width="48" height="48" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                            <h3 class="drop-zone-text">Conversion Failed</h3>
+                            <p class="drop-zone-subtext" style="color: #FF3B30;">${error.message}</p>
+                        </div>
+                    `;
+                } finally {
+                    convertBtn.textContent = 'Convert Now';
+                    convertBtn.disabled = false;
+                }
             });
         });
     </script>
