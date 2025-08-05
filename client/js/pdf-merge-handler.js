@@ -368,22 +368,40 @@ class PDFMergeHandler {
         // Apply the selected settings to the merged PDF
         console.log('Applying merge settings:', settings);
         
-        // Apply metadata settings
-        if (settings.metadataHandling === 'custom') {
-            if (settings.customTitle) pdfDoc.setTitle(settings.customTitle);
-            if (settings.customAuthor) pdfDoc.setAuthor(settings.customAuthor);
-            if (settings.customSubject) pdfDoc.setSubject(settings.customSubject);
-            pdfDoc.setCreator('FileFlow PDF Merge Tool');
-            pdfDoc.setProducer('FileFlow');
-        } else if (settings.metadataHandling === 'none') {
-            pdfDoc.setTitle('');
-            pdfDoc.setAuthor('');
-            pdfDoc.setSubject('');
-            pdfDoc.setCreator('');
-            pdfDoc.setProducer('');
+        try {
+            // Apply metadata settings
+            if (settings.metadataHandling === 'custom') {
+                if (settings.customTitle) pdfDoc.setTitle(settings.customTitle);
+                if (settings.customAuthor) pdfDoc.setAuthor(settings.customAuthor);
+                if (settings.customSubject) pdfDoc.setSubject(settings.customSubject);
+                pdfDoc.setCreator('FileFlow PDF Merge Tool');
+                pdfDoc.setProducer('FileFlow');
+            } else if (settings.metadataHandling === 'clean') {
+                pdfDoc.setTitle('');
+                pdfDoc.setAuthor('');
+                pdfDoc.setSubject('');
+                pdfDoc.setCreator('');
+                pdfDoc.setProducer('');
+            } else if (settings.metadataHandling === 'merge-all') {
+                pdfDoc.setCreator('FileFlow PDF Merge Tool');
+                pdfDoc.setProducer('FileFlow');
+                pdfDoc.setTitle('Merged Document');
+            } else {
+                // Default: use first PDF metadata
+                pdfDoc.setCreator('FileFlow PDF Merge Tool');
+                pdfDoc.setProducer('FileFlow');
+            }
+
+            // Apply security settings if password protection is enabled
+            if (settings.securityMode === 'password-protect' && settings.pdfPassword) {
+                // Note: PDF-lib doesn't support password protection directly
+                // This would require additional libraries like pdf2pic + PDF encryption
+                console.log('Password protection requested but not implemented in PDF-lib');
+            }
+            
+        } catch (error) {
+            console.error('Error applying merge settings:', error);
         }
-        
-        return pdfDoc;
     }
 }
 

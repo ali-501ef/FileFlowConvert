@@ -69,7 +69,7 @@ class PDFConverter extends FileHandler {
             const filesToMerge = orderedFiles.length > 0 ? orderedFiles : this.selectedFiles;
             
             // Create a new PDF document
-            const mergedPdf = await PDFLib.PDFDocument.create();
+            let mergedPdf = await PDFLib.PDFDocument.create();
 
             // Process each PDF file
             for (let i = 0; i < filesToMerge.length; i++) {
@@ -99,7 +99,7 @@ class PDFConverter extends FileHandler {
             }
 
             // Apply advanced settings before saving
-            mergedPdf = this.applyAdvancedSettings(mergedPdf);
+            this.applyAdvancedSettings(mergedPdf);
             
             // Generate the merged PDF
             const mergedPdfBytes = await mergedPdf.save();
@@ -191,7 +191,8 @@ class PDFConverter extends FileHandler {
         // Get the merge handler if available
         if (window.pdfMergeHandler) {
             const settings = window.pdfMergeHandler.getMergeSettings();
-            return window.pdfMergeHandler.applyMergeSettings(mergedPdf, settings);
+            window.pdfMergeHandler.applyMergeSettings(mergedPdf, settings);
+            return;
         }
         
         // Fallback to basic settings
@@ -218,8 +219,6 @@ class PDFConverter extends FileHandler {
             bookmarkHandling,
             metadataHandling
         });
-        
-        return mergedPdf;
     }
 }
 
