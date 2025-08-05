@@ -1,0 +1,77 @@
+Build Proper Server-Side File Conversion System
+The universal file converter tool on the homepage does not work. It fails to process files like HEIC, JPEG, or PDFs, and often returns errors or incorrect redirects. We need to rebuild the entire system using server-side file handling and conversion — stop using browser-native processing.
+
+🧱 Core Requirements
+Switch to Server-Side Conversion
+
+Stop using browser-native file decoding
+
+Use server-side processing (FastAPI or Flask preferred)
+
+Install Required Libraries (Python)
+
+Pillow – for general image conversion
+
+pyheif – to decode HEIC files
+
+PyMuPDF, pdf2image, or pikepdf – for handling PDFs
+
+python-docx or mammoth – for DOCX to HTML or TXT
+
+ffmpeg-python – for video/audio conversions (MP4 ➝ MP3, etc.)
+
+Add any required dependencies using requirements.txt
+
+Handle File Uploads
+
+Create a /upload endpoint using UploadFile via FastAPI
+
+Store uploaded files temporarily in /uploads
+
+Detect file type by MIME type and extension
+
+Implement Conversion Logic
+
+Based on input and target format, use correct tool:
+
+HEIC ➝ JPG: use pyheif + Pillow
+
+PNG ➝ PDF: use Pillow.save("output.pdf", "PDF")
+
+PDF ➝ DOCX: use pdf2docx or pandoc
+
+MP4 ➝ MP3: use ffmpeg
+
+Save the result in /output/ with a unique file name
+
+Return a valid download link to the user
+
+File Preview
+
+Before conversion, show a preview image if it's an image file
+
+For PDF, optionally show number of pages or thumbnail (optional)
+
+Error Handling
+
+If conversion fails, return a clear error message
+
+Do not return placeholder .txt files
+
+Add user feedback in the frontend for unsupported formats
+
+Frontend Integration
+
+Connect frontend drag-and-drop file box to /upload using JavaScript (POST)
+
+Add “Convert” button to send file + target format to /convert
+
+Once complete, show Download button with real output file link
+
+UI/UX
+
+Keep current UI, but ensure conversion buttons and loaders reflect real backend status
+
+Add basic status indicators like “Uploading”, “Converting…”, “Done”, and errors
+
+This system should replace the broken universal converter and work for images, PDFs, videos, documents, and audio. The frontend must always reflect real conversion state and only show a download button when an actual converted file exists.

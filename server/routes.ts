@@ -1,14 +1,209 @@
-import type { Express } from "express";
+import type { Express, Request } from "express";
 import { createServer, type Server } from "http";
 import path from "path";
 import express from "express";
+import multer, { type Multer } from "multer";
+import fs from "fs";
+import { spawn } from "child_process";
 import { insertConversionSchema } from "@shared/schema";
 import { storage } from "./storage";
+
+// Extended Request interface for multer
+interface MulterRequest extends Request {
+  file?: Express.Multer.File;
+}
+
+// Configure multer for file uploads
+const uploadsDir = path.join(process.cwd(), 'uploads');
+const outputDir = path.join(process.cwd(), 'output');
+
+// Ensure directories exist
+[uploadsDir, outputDir].forEach(dir => {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+});
+
+const storage_multer = multer.diskStorage({
+  destination: function (req: any, file: any, cb: any) {
+    cb(null, uploadsDir);
+  },
+  filename: function (req: any, file: any, cb: any) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({ 
+  storage: storage_multer,
+  limits: { fileSize: 50 * 1024 * 1024 } // 50MB limit
+});
+
+// Conversion helper function using Python
+async function convertImageWithPython(inputPath: string, outputPath: string, outputFormat: string): Promise<boolean> {
+  return new Promise((resolve) => {
+    const pythonScript = `
+import sys
+from PIL import Image, ImageOps
+import os
+
+try:
+    input_path = sys.argv[1]
+    output_path = sys.argv[2]
+    output_format = sys.argv[3].upper()
+    
+    with Image.open(input_path) as img:
+        # Apply EXIF orientation
+        img = ImageOps.exif_transpose(img)
+        
+        # Handle format conversion
+        if output_format in ['JPG', 'JPEG']:
+            if img.mode in ('RGBA', 'LA', 'P'):
+                background = Image.new('RGB', img.size, (255, 255, 255))
+                if img.mode == 'P':
+                    img = img.convert('RGBA')
+                if img.mode == 'RGBA':
+                    background.paste(img, mask=img.split()[-1])
+                img = background
+            img.save(output_path, 'JPEG', quality=92, optimize=True)
+        else:
+            img.save(output_path, output_format, optimize=True)
+    
+    print("SUCCESS")
+except Exception as e:
+    print(f"ERROR: {e}")
+    sys.exit(1)
+`;
+
+    const tempScriptPath = path.join(process.cwd(), 'temp_convert.py');
+    fs.writeFileSync(tempScriptPath, pythonScript);
+
+    const pythonProcess = spawn('python3', [tempScriptPath, inputPath, outputPath, outputFormat], {
+      stdio: ['pipe', 'pipe', 'pipe']
+    });
+
+    let output = '';
+    let error = '';
+
+    pythonProcess.stdout.on('data', (data) => {
+      output += data.toString();
+    });
+
+    pythonProcess.stderr.on('data', (data) => {
+      error += data.toString();
+    });
+
+    pythonProcess.on('close', (code) => {
+      // Clean up temp script
+      try {
+        fs.unlinkSync(tempScriptPath);
+      } catch {}
+
+      if (code === 0 && output.includes('SUCCESS')) {
+        resolve(true);
+      } else {
+        console.error('Python conversion error:', error);
+        resolve(false);
+      }
+    });
+  });
+}
+
+function getSupportedFormats(extension: string): string[] {
+  const formatMap: Record<string, string[]> = {
+    'jpg': ['png', 'webp', 'gif', 'bmp'],
+    'jpeg': ['png', 'webp', 'gif', 'bmp'],
+    'png': ['jpg', 'jpeg', 'webp', 'gif', 'bmp'],
+    'webp': ['jpg', 'jpeg', 'png', 'gif', 'bmp'],
+    'gif': ['jpg', 'jpeg', 'png', 'webp', 'bmp'],
+    'bmp': ['jpg', 'jpeg', 'png', 'webp', 'gif'],
+    'tiff': ['jpg', 'jpeg', 'png', 'webp', 'gif'],
+  };
+  return formatMap[extension] || [];
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Serve static files from client directory
   const clientPath = path.resolve(import.meta.dirname, "../client");
   app.use(express.static(clientPath));
+
+  // File conversion API endpoints
+  app.post('/api/upload', upload.single('file'), async (req: MulterRequest, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: "No file uploaded" });
+      }
+
+      const fileExtension = path.extname(req.file.originalname).toLowerCase().substring(1);
+      const supportedFormats = getSupportedFormats(fileExtension);
+
+      res.json({
+        success: true,
+        file_id: req.file.filename,
+        filename: req.file.originalname,
+        size: req.file.size,
+        extension: fileExtension,
+        supported_formats: supportedFormats,
+        temp_path: req.file.path
+      });
+    } catch (error) {
+      console.error('Upload error:', error);
+      res.status(500).json({ error: "Upload failed" });
+    }
+  });
+
+  app.post('/api/convert', async (req, res) => {
+    try {
+      const { file_id, output_format, temp_path } = req.body;
+
+      if (!fs.existsSync(temp_path)) {
+        return res.status(404).json({ error: "Input file not found" });
+      }
+
+      // Generate output path
+      const outputFilename = `${file_id}_converted.${output_format}`;
+      const outputPath = path.join(outputDir, outputFilename);
+
+      // Perform conversion
+      const success = await convertImageWithPython(temp_path, outputPath, output_format);
+
+      // Clean up input file
+      try {
+        fs.unlinkSync(temp_path);
+      } catch {}
+
+      if (success && fs.existsSync(outputPath)) {
+        const stats = fs.statSync(outputPath);
+        res.json({
+          success: true,
+          output_file: outputFilename,
+          download_url: `/api/download/${outputFilename}`,
+          file_size: stats.size
+        });
+      } else {
+        res.status(500).json({ error: "Conversion failed" });
+      }
+    } catch (error) {
+      console.error('Conversion error:', error);
+      res.status(500).json({ error: "Conversion failed" });
+    }
+  });
+
+  app.get('/api/download/:filename', (req, res) => {
+    const filename = req.params.filename;
+    const filePath = path.join(outputDir, filename);
+
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ error: "File not found" });
+    }
+
+    res.download(filePath, filename, (err) => {
+      if (err) {
+        console.error('Download error:', err);
+        res.status(500).json({ error: "Download failed" });
+      }
+    });
+  });
 
   // API Routes for database operations
   app.post('/api/conversions', async (req, res) => {
