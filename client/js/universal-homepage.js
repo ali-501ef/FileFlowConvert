@@ -174,9 +174,9 @@ class UniversalHomepageConverter {
             const fileType = file.type.toLowerCase();
             const fileName = file.name.toLowerCase();
             
-            // Check for HEIC files by name since MIME type might not be detected
+            // Handle HEIC files directly on homepage
             if (fileName.includes('.heic') || fileName.includes('.heif') || fileType.includes('heic') || fileType.includes('heif')) {
-                this.showUnsupportedMessage('HEIC', outputFormat);
+                await this.convertHeicImage(file, outputFormat);
                 return;
             }
             
@@ -353,6 +353,54 @@ class UniversalHomepageConverter {
         }, 500);
     }
     
+    async convertHeicImage(file, outputFormat) {
+        try {
+            // Load heic2any dynamically
+            if (!window.heic2any) {
+                await this.loadHeicLibrary();
+            }
+            
+            // Convert HEIC to blob
+            const convertedBlob = await heic2any({
+                blob: file,
+                toType: this.getMimeType(outputFormat),
+                quality: this.getCompressionQuality(outputFormat)
+            });
+            
+            // Handle array result (heic2any sometimes returns array)
+            const finalBlob = Array.isArray(convertedBlob) ? convertedBlob[0] : convertedBlob;
+            
+            if (finalBlob && finalBlob.size > 0) {
+                this.downloadConvertedFile(finalBlob, file.name, outputFormat);
+                this.showConversionSuccess();
+            } else {
+                throw new Error('Failed to convert HEIC - empty result');
+            }
+        } catch (error) {
+            console.error('HEIC conversion error:', error);
+            this.showConversionError(`HEIC conversion failed: ${error.message}`);
+        }
+    }
+    
+    async loadHeicLibrary() {
+        return new Promise((resolve, reject) => {
+            if (window.heic2any) {
+                resolve();
+                return;
+            }
+            
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js';
+            script.onload = () => {
+                resolve();
+            };
+            script.onerror = () => {
+                reject(new Error('Failed to load HEIC conversion library'));
+            };
+            document.head.appendChild(script);
+        });
+    }
+    
     redirectToSpecificConverter(file, outputFormat) {
         const fileType = file.type.toLowerCase();
         const fileName = file.name.toLowerCase();
@@ -361,8 +409,6 @@ class UniversalHomepageConverter {
             window.location.href = '/pdf-merge.html';
         } else if (outputFormat === 'mp3') {
             window.location.href = '/mp4-to-mp3.html';
-        } else if (fileType.includes('heic') || fileName.includes('.heic')) {
-            window.location.href = '/heic-to-jpg.html';
         } else {
             window.location.href = '/convert-to-jpeg.html';
         }

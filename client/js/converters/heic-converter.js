@@ -58,12 +58,15 @@ class HEICConverter extends FileHandler {
                         quality: 0.92 // High quality conversion
                     });
 
+                    // Handle array result (heic2any sometimes returns array)
+                    const finalBlob = Array.isArray(convertedBlob) ? convertedBlob[0] : convertedBlob;
+
                     // Generate output filename
-                    const outputFilename = file.name.replace(/\.(heic|HEIC)$/i, '.jpg');
+                    const outputFilename = file.name.replace(/\.(heic|HEIF|heif)$/i, '.jpg');
                     
                     results.push({
                         filename: outputFilename,
-                        blob: convertedBlob
+                        blob: finalBlob
                     });
 
                 } catch (error) {
