@@ -38,7 +38,7 @@ class PDFMergeHandler {
                     if (isVisible) {
                         // Collapse
                         advancedContent.style.display = 'none';
-                        const newChevron = newToggle.querySelector('.toggle-chevron');
+                        const newChevron = newToggle.querySelector('.advanced-chevron');
                         if (newChevron) {
                             newChevron.style.transform = 'rotate(0deg)';
                         }
@@ -46,7 +46,7 @@ class PDFMergeHandler {
                     } else {
                         // Expand
                         advancedContent.style.display = 'block';
-                        const newChevron = newToggle.querySelector('.toggle-chevron');
+                        const newChevron = newToggle.querySelector('.advanced-chevron');
                         if (newChevron) {
                             newChevron.style.transform = 'rotate(180deg)';
                         }

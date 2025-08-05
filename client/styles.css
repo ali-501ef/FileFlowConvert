@@ -914,74 +914,40 @@ body {
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.04);
 }
 
-.premium-toggle {
+.advanced-toggle {
     width: 100%;
-    padding: 1.5rem 2rem;
+    padding: 1rem 1.5rem;
     background: transparent;
     border: none;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-}
-
-.premium-toggle:hover {
-    background: rgba(99, 102, 241, 0.03);
-}
-
-.premium-toggle:hover .toggle-icon {
-    transform: scale(1.05);
-    color: var(--primary);
-}
-
-.toggle-left {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
-.toggle-icon {
-    width: 44px;
-    height: 44px;
-    background: linear-gradient(135deg, var(--primary), #8b5cf6);
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.2);
-}
-
-.toggle-text {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.25rem;
-}
-
-.toggle-title {
-    font-size: 1.125rem;
+    font-size: 1rem;
     font-weight: 600;
     color: var(--text-primary);
-    line-height: 1.2;
+    transition: all 0.2s ease;
 }
 
-.toggle-subtitle {
-    font-size: 0.875rem;
-    color: var(--text-tertiary);
-    line-height: 1.3;
+.advanced-toggle:hover {
+    background: rgba(99, 102, 241, 0.05);
 }
 
-.toggle-chevron {
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    color: var(--text-tertiary);
+.advanced-toggle-text {
     display: flex;
     align-items: center;
-    justify-content: center;
-    padding: 0.5rem;
+    gap: 0.5rem;
+}
+
+.advanced-toggle-icon {
+    width: 20px;
+    height: 20px;
+    color: var(--text-secondary);
+}
+
+.advanced-chevron {
+    transition: transform 0.3s ease;
+    color: var(--text-tertiary);
 }
 
 .premium-content {
