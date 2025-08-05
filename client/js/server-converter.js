@@ -32,7 +32,14 @@ class ServerFileConverter {
         });
         
         // Choose file button
-        this.chooseFileBtn.addEventListener('click', () => {
+        this.chooseFileBtn.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent event bubbling
+            this.fileInput.click();
+        });
+        
+        // Drop zone click (for clicking anywhere in the drop zone)
+        this.dropZone.addEventListener('click', (e) => {
+            // Always trigger file input when clicking the drop zone
             this.fileInput.click();
         });
         
@@ -96,10 +103,17 @@ class ServerFileConverter {
         this.selectedFile = null;
         this.uploadedFileData = null;
         
-        // Reset UI
+        // Reset UI to original state
         this.dropZone.innerHTML = `
-            <div class="upload-icon">⬆️</div>
-            <p>Drag & drop files to convert</p>
+            <div class="drop-zone-content">
+                <div class="upload-icon">
+                    <svg width="48" height="48" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                    </svg>
+                </div>
+                <p class="drop-zone-text">Drag and drop your file here</p>
+                <p class="drop-zone-subtext">or click to browse</p>
+            </div>
         `;
         
         // Reset format selector
@@ -140,6 +154,8 @@ class ServerFileConverter {
     }
     
     updateFormatOptions(supportedFormats) {
+        console.log('Updating format options with:', supportedFormats);
+        
         if (!supportedFormats || supportedFormats.length === 0) {
             this.outputFormatSelect.innerHTML = '<option value="">No conversions available</option>';
             this.convertBtn.disabled = true;
@@ -157,7 +173,12 @@ class ServerFileConverter {
             this.outputFormatSelect.appendChild(option);
         });
         
-        this.convertBtn.disabled = false;
+        // Enable convert button once format is selected
+        this.outputFormatSelect.addEventListener('change', () => {
+            this.convertBtn.disabled = !this.outputFormatSelect.value;
+        });
+        
+        this.convertBtn.disabled = true; // Keep disabled until format is selected
     }
     
     async handleConvert() {

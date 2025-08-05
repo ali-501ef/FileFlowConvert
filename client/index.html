@@ -61,7 +61,7 @@
                         
                         <!-- Universal Converter Interface -->
                         <div class="universal-converter-interface">
-                            <div class="drop-zone" id="universal-drop-zone" data-testid="dropzone-universal">
+                            <div class="drop-zone" id="universal-drop-zone" data-testid="dropzone-universal" onclick="document.getElementById('universal-file-input').click();" style="cursor: pointer;">
                                 <div class="drop-zone-content">
                                     <div class="upload-icon">
                                         <svg width="48" height="48" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -69,7 +69,7 @@
                                         </svg>
                                     </div>
                                     <p class="drop-zone-text">Drag and drop your file here</p>
-                                    <p class="drop-zone-subtext">or</p>
+                                    <p class="drop-zone-subtext">or click to browse</p>
                                 </div>
                             </div>
                             
@@ -99,7 +99,7 @@
                                 </div>
                             </div>
                             
-                            <input type="file" id="universal-file-input" style="display: none;" data-testid="input-file-universal">
+                            <input type="file" id="universal-file-input" style="display: none;" data-testid="input-file-universal" accept="image/*,.heic,.heif,.mp4,.mp3,.wav,.pdf,.doc,.docx">
                         </div>
                         
                         <!-- Hero CTA Button -->

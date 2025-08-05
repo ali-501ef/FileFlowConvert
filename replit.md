@@ -52,13 +52,17 @@ Preferred communication style: Simple, everyday language.
 ### Complete Server-Side Conversion System Implementation (August 5, 2025)
 - **Critical Fix**: Resolved "Unexpected token '<'" error by implementing proper server-side file conversion system
 - **Python Integration**: Built robust image conversion engine using PIL/Pillow with support for JPEG, PNG, WebP, GIF, BMP formats
+- **HEIC Support Added**: Integrated pyheif and pillow-heif libraries for full Apple HEIC/HEIF file conversion support
 - **Express API Endpoints**: Implemented `/api/upload`, `/api/convert`, and `/api/download` routes with proper error handling
 - **File Upload System**: Configured multer middleware for secure file handling with 50MB size limits and temporary file management
-- **Format Detection**: Added intelligent file type detection and supported format mapping for conversion options
+- **Format Detection**: Added intelligent file type detection and supported format mapping for conversion options (including HEIC)
 - **Real Conversion Engine**: Python subprocess integration performs actual format conversions with quality optimization
 - **Seamless Frontend Integration**: Updated JavaScript client to use JSON requests instead of FormData for conversion API
+- **Drag-and-Drop Fixed**: Implemented clickable drop zone with proper event handling for file selection
+- **Dynamic Format Options**: Dropdown now populates with supported formats based on uploaded file type
 - **No More Client-Side Failures**: Completely replaced broken client-side conversion attempts with reliable server-side processing
 - **Homepage Conversion**: All conversions now work directly on homepage without redirects (as originally required)
+- **TESTING CONFIRMED**: Real HEIC→JPG and PNG→JPG conversions working with proper file downloads
 
 ## Recent Changes (August 2025)
 

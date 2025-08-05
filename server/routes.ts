@@ -39,7 +39,7 @@ const upload = multer({
   limits: { fileSize: 50 * 1024 * 1024 } // 50MB limit
 });
 
-// Conversion helper function using Python
+// Conversion helper function using Python with HEIC support
 async function convertImageWithPython(inputPath: string, outputPath: string, outputFormat: string): Promise<boolean> {
   return new Promise((resolve) => {
     const pythonScript = `
@@ -47,27 +47,56 @@ import sys
 from PIL import Image, ImageOps
 import os
 
+def convert_heic_to_pil(input_path):
+    """Convert HEIC/HEIF to PIL Image using pyheif"""
+    try:
+        import pyheif
+        heif_file = pyheif.read(input_path)
+        img = Image.frombytes(
+            heif_file.mode,
+            heif_file.size,
+            heif_file.data,
+            "raw",
+            heif_file.mode,
+            heif_file.stride,
+        )
+        return img
+    except ImportError:
+        # Fallback: try using pillow-heif
+        try:
+            from pillow_heif import register_heif_opener
+            register_heif_opener()
+            return Image.open(input_path)
+        except ImportError:
+            raise Exception("HEIC support requires pyheif or pillow-heif library")
+
 try:
     input_path = sys.argv[1]
     output_path = sys.argv[2]
     output_format = sys.argv[3].upper()
     
-    with Image.open(input_path) as img:
-        # Apply EXIF orientation
-        img = ImageOps.exif_transpose(img)
-        
-        # Handle format conversion
-        if output_format in ['JPG', 'JPEG']:
-            if img.mode in ('RGBA', 'LA', 'P'):
-                background = Image.new('RGB', img.size, (255, 255, 255))
-                if img.mode == 'P':
-                    img = img.convert('RGBA')
-                if img.mode == 'RGBA':
-                    background.paste(img, mask=img.split()[-1])
-                img = background
-            img.save(output_path, 'JPEG', quality=92, optimize=True)
-        else:
-            img.save(output_path, output_format, optimize=True)
+    # Check if input is HEIC/HEIF
+    input_ext = os.path.splitext(input_path)[1].lower()
+    if input_ext in ['.heic', '.heif']:
+        img = convert_heic_to_pil(input_path)
+    else:
+        img = Image.open(input_path)
+    
+    # Apply EXIF orientation
+    img = ImageOps.exif_transpose(img)
+    
+    # Handle format conversion
+    if output_format in ['JPG', 'JPEG']:
+        if img.mode in ('RGBA', 'LA', 'P'):
+            background = Image.new('RGB', img.size, (255, 255, 255))
+            if img.mode == 'P':
+                img = img.convert('RGBA')
+            if img.mode == 'RGBA':
+                background.paste(img, mask=img.split()[-1])
+            img = background
+        img.save(output_path, 'JPEG', quality=92, optimize=True)
+    else:
+        img.save(output_path, output_format, optimize=True)
     
     print("SUCCESS")
 except Exception as e:
@@ -78,6 +107,7 @@ except Exception as e:
     const tempScriptPath = path.join(process.cwd(), 'temp_convert.py');
     fs.writeFileSync(tempScriptPath, pythonScript);
 
+    console.log('Running Python conversion:', tempScriptPath, inputPath, outputPath, outputFormat);
     const pythonProcess = spawn('python3', [tempScriptPath, inputPath, outputPath, outputFormat], {
       stdio: ['pipe', 'pipe', 'pipe']
     });
@@ -94,6 +124,10 @@ except Exception as e:
     });
 
     pythonProcess.on('close', (code) => {
+      console.log('Python process closed with code:', code);
+      console.log('Python output:', output);
+      console.log('Python error:', error);
+      
       // Clean up temp script
       try {
         fs.unlinkSync(tempScriptPath);
@@ -102,7 +136,8 @@ except Exception as e:
       if (code === 0 && output.includes('SUCCESS')) {
         resolve(true);
       } else {
-        console.error('Python conversion error:', error);
+        console.error('Python conversion error:', error || 'No error output');
+        console.error('Python stdout:', output || 'No stdout');
         resolve(false);
       }
     });
@@ -118,8 +153,10 @@ function getSupportedFormats(extension: string): string[] {
     'gif': ['jpg', 'jpeg', 'png', 'webp', 'bmp'],
     'bmp': ['jpg', 'jpeg', 'png', 'webp', 'gif'],
     'tiff': ['jpg', 'jpeg', 'png', 'webp', 'gif'],
+    'heic': ['jpg', 'jpeg', 'png', 'webp'],
+    'heif': ['jpg', 'jpeg', 'png', 'webp'],
   };
-  return formatMap[extension] || [];
+  return formatMap[extension.toLowerCase()] || [];
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -135,7 +172,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const fileExtension = path.extname(req.file.originalname).toLowerCase().substring(1);
+      console.log('File extension detected:', fileExtension);
       const supportedFormats = getSupportedFormats(fileExtension);
+      console.log('Supported formats for', fileExtension, ':', supportedFormats);
 
       res.json({
         success: true,
