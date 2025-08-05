@@ -80,60 +80,34 @@
                 <!-- Upload Section -->
                 <div class="tool-container">
                     <div id="upload-section" class="upload-section">
-                        <div class="file-drop-zone" data-testid="drop-zone-heic" onclick="document.getElementById('file-input').click()">
-                            <svg class="upload-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-                            </svg>
-                            <h3 class="upload-title">Drop HEIC files here or click to upload</h3>
-                            <p class="upload-instructions">Select HEIC files to convert to JPG format</p>
+                        <div class="drop-zone" id="heic-drop-zone" data-testid="drop-zone-heic" style="cursor: pointer;">
+                            <div class="drop-zone-content">
+                                <div class="upload-icon">
+                                    <svg width="48" height="48" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                    </svg>
+                                </div>
+                                <h3 class="drop-zone-text">Drop HEIC files here</h3>
+                                <p class="drop-zone-subtext">or click to select files</p>
+                                <input type="file" id="heic-file-input" accept=".heic,.heif,image/*" hidden data-testid="input-heic-files">
+                            </div>
                         </div>
-                        <input type="file" id="file-input" multiple class="file-input" accept=".heic,.HEIC" data-testid="input-heic-files">
-                    </div>
-
-                    <!-- File List -->
-                    <div id="file-list" class="file-list hidden">
-                        <h3 class="section-subtitle">Selected Files</h3>
-                        <div id="file-cards" class="file-cards">
-                            <!-- File cards will be inserted here -->
-                        </div>
-                    </div>
-
-                    <!-- Progress Section -->
-                    <div id="progress-section" class="progress-section hidden">
-                        <div class="progress-header">
-                            <span class="progress-label">Converting files...</span>
-                            <span id="progress-text" class="progress-text" data-testid="text-progress">0%</span>
-                        </div>
-                        <div class="progress-bar-container">
-                            <div id="progress-bar" class="progress-bar" data-testid="progress-bar" style="width: 0%"></div>
-                        </div>
-                    </div>
-
-                    <!-- Action Buttons -->
-                    <div id="action-buttons" class="action-buttons hidden">
-                        <button id="convert-btn" class="btn btn-primary" data-testid="button-convert">
-                            Convert Files
-                        </button>
-                        <button id="clear-btn" class="btn btn-secondary" data-testid="button-clear">
-                            Clear All
-                        </button>
-                    </div>
-
-                    <!-- Download Section -->
-                    <div id="download-section" class="download-section hidden">
-                        <div class="success-message">
-                            <div class="success-header">
-                                <svg class="success-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        <div class="converter-controls">
+                            <select id="heic-format-select" class="format-select" data-testid="select-output-format">
+                                <option value="jpg">JPG</option>
+                                <option value="png">PNG</option>
+                                <option value="webp">WebP</option>
+                            </select>
+                            <button id="heic-convert-btn" class="convert-now-btn" data-testid="button-convert-now">
+                                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                                 </svg>
-                                <h3 class="success-title">Conversion Complete!</h3>
-                            </div>
-                            <p class="success-text">Your HEIC files have been successfully converted to JPG.</p>
-                            <div id="download-links" class="download-links" data-testid="download-links">
-                                <!-- Download links will be inserted here -->
-                            </div>
+                                Convert Now
+                            </button>
                         </div>
                     </div>
+
+                    <!-- File Preview (will be populated by JavaScript) -->
                 </div>
 
                 <!-- Tool Information -->
@@ -144,7 +118,7 @@
                             <li>Converts Apple HEIC photos to widely-supported JPG format</li>
                             <li>Maintains original image quality and metadata</li>
                             <li>Supports batch conversion of multiple files</li>
-                            <li>All processing happens locally in your browser</li>
+                            <li>Secure server-side processing with automatic cleanup</li>
                         </ul>
                     </div>
                 </div>
@@ -188,6 +162,20 @@
     </footer>
 
     <script src="/js/main.js"></script>
-    <script src="/js/converters/heic-converter.js"></script>
+    <!-- HEIC Tool - Use server-side converter -->
+    <script src="/js/server-converter.js"></script>
+    <script>
+        // Initialize server-side converter for HEIC tool
+        document.addEventListener('DOMContentLoaded', function() {
+            window.heicConverter = new ServerConverter({
+                dropZoneId: 'heic-drop-zone',
+                fileInputId: 'heic-file-input',
+                formatSelectId: 'heic-format-select',
+                convertBtnId: 'heic-convert-btn',
+                serverUrl: window.location.origin,
+                defaultFormat: 'jpg'
+            });
+        });
+    </script>
 </body>
 </html>

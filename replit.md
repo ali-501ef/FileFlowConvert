@@ -70,6 +70,9 @@ Preferred communication style: Simple, everyday language.
 - **PDF Support Added**: Complete PDF conversion engine supporting PDF→JPG, PNG, DOCX, TXT formats
 - **PDF Libraries Integrated**: PyMuPDF, pdf2docx, pdfplumber, python-docx for comprehensive PDF processing
 - **Multi-Format Engine**: System now handles images (HEIC, PNG, JPG, WebP) and documents (PDF) seamlessly
+- **HEIC Tool Fixed**: Replaced broken client-side HEIC conversion with reliable server-side processing
+- **Error Handling Enhanced**: Added comprehensive logging and proper error feedback for all conversion failures
+- **MIME Type Support**: Enhanced file type detection for better format recognition and conversion options
 
 ## Recent Changes (August 2025)
 
