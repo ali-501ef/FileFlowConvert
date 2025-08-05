@@ -52,12 +52,12 @@ body {
     -moz-osx-font-smoothing: grayscale;
 }
 
-/* Container - Fixed Centering */
+/* Container - Fully Centered */
 .container {
     max-width: var(--container-max-width);
     margin: 0 auto;
     padding: 0 1rem;
-    text-align: center; /* Center all content by default */
+    width: 100%;
 }
 
 @media (min-width: 640px) {
@@ -94,36 +94,23 @@ body {
     }
 }
 
-/* Layout - Improved Centering */
-.layout-wrapper {
-    display: flex;
-    max-width: 1400px;
+/* Main Content - Fully Centered */
+.main-content-centered {
+    width: 100%;
+    max-width: 1200px;
     margin: 0 auto;
-    justify-content: center;
+    padding: 0;
+    display: block;
 }
 
-.main-content {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.sidebar-ad-right {
-    width: 160px;
-    padding: 1rem;
-    flex-shrink: 0;
-    order: 3;
-}
-
-.sidebar-ad-sticky {
+.sidebar-ad-fixed {
     position: fixed;
     right: 20px;
     top: 50%;
     transform: translateY(-50%);
     width: 160px;
     z-index: 40;
+    display: none;
 }
 
 /* Responsive utilities */
@@ -144,9 +131,9 @@ body {
         display: none;
     }
     
-    /* No margin adjustment needed with flexbox centering */
-    .layout-wrapper {
-        gap: 1rem;
+    /* Show sidebar ad only on very wide screens and when content won't be affected */
+    .sidebar-ad-fixed {
+        display: block;
     }
 }
 
