@@ -39,6 +39,40 @@ const upload = multer({
   limits: { fileSize: 50 * 1024 * 1024 } // 50MB limit
 });
 
+// PDF conversion helper function
+async function convertPDFWithPython(inputPath: string, outputPath: string, outputFormat: string): Promise<boolean> {
+  return new Promise((resolve) => {
+    const pdfConverterPath = path.join(process.cwd(), 'server', 'pdf_converter.py');
+    console.log('Running PDF conversion:', pdfConverterPath, inputPath, outputPath, outputFormat);
+    
+    const pythonProcess = spawn('python3', [pdfConverterPath, inputPath, outputPath, outputFormat]);
+    
+    let output = '';
+    let error = '';
+    
+    pythonProcess.stdout.on('data', (data) => {
+      output += data.toString();
+    });
+    
+    pythonProcess.stderr.on('data', (data) => {
+      error += data.toString();
+    });
+    
+    pythonProcess.on('close', (code) => {
+      console.log('PDF Python process closed with code:', code);
+      console.log('PDF Python output:', output);
+      console.log('PDF Python error:', error);
+      
+      if (code === 0 && output.includes('SUCCESS')) {
+        resolve(true);
+      } else {
+        console.error('PDF conversion error:', error || 'No error output');
+        resolve(false);
+      }
+    });
+  });
+}
+
 // Conversion helper function using Python with HEIC support
 async function convertImageWithPython(inputPath: string, outputPath: string, outputFormat: string): Promise<boolean> {
   return new Promise((resolve) => {
@@ -95,6 +129,8 @@ try:
                 background.paste(img, mask=img.split()[-1])
             img = background
         img.save(output_path, 'JPEG', quality=85, optimize=True, progressive=True)
+    elif output_format.upper() == 'PNG':
+        img.save(output_path, 'PNG', optimize=True, compress_level=9)
     else:
         img.save(output_path, output_format, optimize=True)
     
@@ -155,6 +191,7 @@ function getSupportedFormats(extension: string): string[] {
     'tiff': ['jpg', 'jpeg', 'png', 'webp', 'gif'],
     'heic': ['jpg', 'jpeg', 'png', 'webp'],
     'heif': ['jpg', 'jpeg', 'png', 'webp'],
+    'pdf': ['jpg', 'jpeg', 'png', 'docx', 'txt']
   };
   return formatMap[extension.toLowerCase()] || [];
 }
@@ -210,8 +247,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const outputFilename = `${file_id}_converted.${output_format}`;
       const outputPath = path.join(outputDir, outputFilename);
 
-      // Perform conversion
-      const success = await convertImageWithPython(temp_path, outputPath, output_format);
+      // Determine conversion method based on file type
+      const fileExtension = path.extname(temp_path).toLowerCase().substring(1);
+      let success: boolean;
+      
+      if (fileExtension === 'pdf') {
+        success = await convertPDFWithPython(temp_path, outputPath, output_format);
+      } else {
+        success = await convertImageWithPython(temp_path, outputPath, output_format);
+      }
 
       // Clean up input file
       try {

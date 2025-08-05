@@ -66,6 +66,10 @@ Preferred communication style: Simple, everyday language.
 - **File Size Optimization**: Reduced JPEG quality to 85% with progressive=True for 30-50% smaller output files
 - **UI/UX Improvements**: Fixed double-click bug, added smooth animations and visual status notifications
 - **Production Ready**: All critical issues resolved, system fully functional for public use
+- **PNG Optimization**: Added compress_level=9 and optimize=True for maximum PNG compression efficiency
+- **PDF Support Added**: Complete PDF conversion engine supporting PDF→JPG, PNG, DOCX, TXT formats
+- **PDF Libraries Integrated**: PyMuPDF, pdf2docx, pdfplumber, python-docx for comprehensive PDF processing
+- **Multi-Format Engine**: System now handles images (HEIC, PNG, JPG, WebP) and documents (PDF) seamlessly
 
 ## Recent Changes (August 2025)
 
