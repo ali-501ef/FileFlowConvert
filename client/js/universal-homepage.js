@@ -1,10 +1,22 @@
 class UniversalHomepageConverter {
     constructor() {
+        // Add debug logging
+        console.log('Initializing UniversalHomepageConverter...');
+        
         this.dropZone = document.getElementById('universal-drop-zone');
         this.fileInput = document.getElementById('universal-file-input');
         this.chooseFileBtn = document.getElementById('choose-file-btn');
         this.outputFormatSelect = document.getElementById('output-format');
         this.convertBtn = document.getElementById('convert-now-btn');
+        
+        // Debug element detection
+        console.log('Elements found:', {
+            dropZone: !!this.dropZone,
+            fileInput: !!this.fileInput,
+            chooseFileBtn: !!this.chooseFileBtn,
+            outputFormatSelect: !!this.outputFormatSelect,
+            convertBtn: !!this.convertBtn
+        });
         
         this.selectedFile = null;
         
@@ -13,8 +25,16 @@ class UniversalHomepageConverter {
     
     initializeEventListeners() {
         if (!this.dropZone || !this.fileInput || !this.chooseFileBtn || !this.convertBtn) {
+            console.error('Critical elements missing for universal converter:', {
+                dropZone: !!this.dropZone,
+                fileInput: !!this.fileInput,
+                chooseFileBtn: !!this.chooseFileBtn,
+                convertBtn: !!this.convertBtn
+            });
             return; // Elements not found, homepage converter not available
         }
+        
+        console.log('Setting up event listeners...');
         
         // Drop zone events
         this.dropZone.addEventListener('dragover', this.handleDragOver.bind(this));
@@ -151,16 +171,26 @@ class UniversalHomepageConverter {
     }
     
     handleConvert() {
+        console.log('Convert button clicked!');
+        
         if (!this.selectedFile) {
+            console.error('No file selected');
             alert('Please select a file first.');
             return;
         }
         
         const outputFormat = this.outputFormatSelect.value;
         if (!outputFormat) {
+            console.error('No output format selected');
             alert('Please select an output format.');
             return;
         }
+        
+        console.log('Starting conversion:', {
+            file: this.selectedFile.name,
+            type: this.selectedFile.type,
+            outputFormat: outputFormat
+        });
         
         // Perform conversion directly on the homepage
         this.performInlineConversion(this.selectedFile, outputFormat);
@@ -463,8 +493,13 @@ class UniversalHomepageConverter {
 
 // Initialize the universal homepage converter when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM loaded, current path:', window.location.pathname);
+    
     // Only initialize if we're on the homepage
     if (window.location.pathname === '/' || window.location.pathname === '/index.html') {
-        new UniversalHomepageConverter();
+        console.log('Initializing homepage converter...');
+        window.homepageConverter = new UniversalHomepageConverter();
+    } else {
+        console.log('Not on homepage, skipping converter initialization');
     }
 });
