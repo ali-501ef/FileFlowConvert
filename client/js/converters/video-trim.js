@@ -182,38 +182,66 @@ class VideoTrimmer {
     }
 
     async performTrim(settings) {
-        const stages = [
-            'Loading video file...',
-            'Setting trim points...',
-            'Processing video stream...',
-            'Applying quality settings...',
-            'Encoding output...',
-            'Finalizing trimmed video...'
-        ];
-        
-        for (let i = 0; i < stages.length; i++) {
-            const progress = Math.floor((i / stages.length) * 100);
-            this.showProgressWithStages(progress, stages[i]);
-            await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 400));
+        try {
+            // Upload file first
+            const formData = new FormData();
+            formData.append('file', this.currentFile);
+            
+            this.showProgressWithStages(10, 'Uploading video...');
+            const uploadResponse = await fetch('/api/upload', {
+                method: 'POST',
+                body: formData
+            });
+            
+            if (!uploadResponse.ok) {
+                throw new Error('Failed to upload file');
+            }
+            
+            const uploadResult = await uploadResponse.json();
+            this.showProgressWithStages(30, 'Processing video...');
+            
+            // Convert with server-side processing
+            const convertResponse = await fetch('/api/convert-media', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    file_id: uploadResult.file_id,
+                    conversion_type: 'video_trim',
+                    options: {
+                        start_time: settings.startTime,
+                        duration: settings.endTime - settings.startTime
+                    }
+                })
+            });
+            
+            this.showProgressWithStages(90, 'Finalizing...');
+            
+            if (!convertResponse.ok) {
+                const error = await convertResponse.json();
+                throw new Error(error.error || 'Video trim failed');
+            }
+            
+            const result = await convertResponse.json();
+            this.showProgressWithStages(100, 'Complete!');
+            
+            // Download the converted file
+            this.outputBlob = await fetch(result.download_url).then(r => r.blob());
+            
+            const trimmedDuration = settings.endTime - settings.startTime;
+            this.trimInfo = {
+                originalDuration: this.videoDuration,
+                trimmedDuration: trimmedDuration,
+                startTime: settings.startTime,
+                endTime: settings.endTime,
+                outputSize: result.file_size,
+                format: settings.outputFormat.toUpperCase()
+            };
+            
+        } catch (error) {
+            throw new Error(`Video trim failed: ${error.message}`);
         }
-        
-        this.showProgressWithStages(100, 'Complete!');
-        
-        // Create mock trimmed video
-        const trimmedDuration = settings.endTime - settings.startTime;
-        const compressionRatio = trimmedDuration / this.videoDuration;
-        const mockSize = Math.floor(this.currentFile.size * compressionRatio * 0.9);
-        const mockData = new ArrayBuffer(mockSize);
-        this.outputBlob = new Blob([mockData], { type: 'video/mp4' });
-        
-        this.trimInfo = {
-            originalDuration: this.videoDuration,
-            trimmedDuration: trimmedDuration,
-            startTime: settings.startTime,
-            endTime: settings.endTime,
-            outputSize: mockSize,
-            format: settings.outputFormat.toUpperCase()
-        };
     }
 
     showTrimResults() {

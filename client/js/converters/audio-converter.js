@@ -148,18 +148,57 @@ class AudioConverter {
     }
 
     async performConversion(settings) {
-        // Create audio context
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        
-        // Read the file as array buffer
-        const arrayBuffer = await this.currentFile.arrayBuffer();
-        
-        // Decode the audio data
-        const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-        
-        // For demonstration, we'll create a converted blob
-        // In a real implementation, this would use proper audio encoding libraries
-        await this.encodeAudioBuffer(audioBuffer, settings);
+        try {
+            // Upload file first
+            const formData = new FormData();
+            formData.append('file', this.currentFile);
+            
+            this.showProgress(20);
+            const uploadResponse = await fetch('/api/upload', {
+                method: 'POST',
+                body: formData
+            });
+            
+            if (!uploadResponse.ok) {
+                throw new Error('Failed to upload file');
+            }
+            
+            const uploadResult = await uploadResponse.json();
+            this.showProgress(50);
+            
+            // Convert with server-side processing
+            const convertResponse = await fetch('/api/convert-media', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    file_id: uploadResult.file_id,
+                    conversion_type: 'audio_convert',
+                    options: {
+                        format: settings.format,
+                        bitrate: settings.bitrate,
+                        sample_rate: settings.sampleRate
+                    }
+                })
+            });
+            
+            this.showProgress(90);
+            
+            if (!convertResponse.ok) {
+                const error = await convertResponse.json();
+                throw new Error(error.error || 'Conversion failed');
+            }
+            
+            const result = await convertResponse.json();
+            this.showProgress(100);
+            
+            // Download the converted file
+            this.outputBlob = await fetch(result.download_url).then(r => r.blob());
+            
+        } catch (error) {
+            throw new Error(`Audio conversion failed: ${error.message}`);
+        }
     }
 
     async encodeAudioBuffer(audioBuffer, settings) {

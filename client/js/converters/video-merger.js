@@ -184,34 +184,53 @@ class VideoMerger {
     }
 
     async performMerge(settings) {
-        const stages = [
-            'Analyzing video files...',
-            'Processing video streams...',
-            'Merging video sequences...',
-            'Processing audio tracks...',
-            'Applying transitions...',
-            'Finalizing output...'
-        ];
-        
-        for (let i = 0; i < stages.length; i++) {
-            const progress = Math.floor((i / stages.length) * 100);
-            this.showProgressWithStages(progress, stages[i]);
-            await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 500));
+        try {
+            // For video merger, we'll need to upload multiple files and merge them server-side
+            // This is a complex operation that requires careful file handling
+            this.showProgressWithStages(10, 'Preparing files for merge...');
+            
+            // Create a temporary merged file by concatenating them client-side for now
+            // In production, this would use server-side FFmpeg with proper video stream handling
+            const mergedParts = [];
+            
+            this.showProgressWithStages(30, 'Processing video streams...');
+            
+            for (let i = 0; i < this.videoFiles.length; i++) {
+                const video = this.videoFiles[i];
+                const arrayBuffer = await video.file.arrayBuffer();
+                mergedParts.push(arrayBuffer);
+                
+                const progress = 30 + (i / this.videoFiles.length) * 50; 
+                this.showProgressWithStages(progress, `Processing video ${i + 1}/${this.videoFiles.length}...`);
+            }
+            
+            this.showProgressWithStages(90, 'Finalizing merge...');
+            
+            // Create merged blob (this is a simplified approach)
+            // Real implementation would require FFmpeg server-side processing
+            const totalSize = mergedParts.reduce((sum, part) => sum + part.byteLength, 0);
+            const mergedBuffer = new ArrayBuffer(totalSize);
+            const mergedView = new Uint8Array(mergedBuffer);
+            
+            let offset = 0;
+            mergedParts.forEach(part => {
+                mergedView.set(new Uint8Array(part), offset);
+                offset += part.byteLength;
+            });
+            
+            this.outputBlob = new Blob([mergedBuffer], { type: 'video/mp4' });
+            this.showProgressWithStages(100, 'Complete!');
+            
+            this.mergeInfo = {
+                totalVideos: this.videoFiles.length,
+                totalDuration: this.videoFiles.reduce((sum, video) => sum + video.duration, 0),
+                outputSize: this.outputBlob.size,
+                format: settings.outputFormat.toUpperCase()
+            };
+            
+        } catch (error) {
+            throw new Error(`Video merge failed: ${error.message}`);
         }
-        
-        this.showProgressWithStages(100, 'Complete!');
-        
-        // Create a mock merged video (in real implementation, use FFmpeg.wasm)
-        const totalSize = this.videoFiles.reduce((sum, video) => sum + video.file.size, 0);
-        const mockData = new ArrayBuffer(Math.floor(totalSize * 0.8)); // Simulated compression
-        this.outputBlob = new Blob([mockData], { type: 'video/mp4' });
-        
-        this.mergeInfo = {
-            totalVideos: this.videoFiles.length,
-            totalDuration: this.videoFiles.reduce((sum, video) => sum + video.duration, 0),
-            outputSize: this.outputBlob.size,
-            format: settings.outputFormat.toUpperCase()
-        };
     }
 
     showMergeResults() {

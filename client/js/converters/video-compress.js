@@ -176,25 +176,66 @@ class VideoCompressor {
     }
 
     async performCompression(settings) {
-        // Simulate compression progress
-        for (let i = 0; i <= 100; i += 10) {
-            await new Promise(resolve => setTimeout(resolve, 200));
-            this.showProgress(i);
+        try {
+            // Upload file first
+            const formData = new FormData();
+            formData.append('file', this.currentFile);
+            
+            this.showProgress(10);
+            const uploadResponse = await fetch('/api/upload', {
+                method: 'POST',
+                body: formData
+            });
+            
+            if (!uploadResponse.ok) {
+                throw new Error('Failed to upload file');
+            }
+            
+            const uploadResult = await uploadResponse.json();
+            this.showProgress(30);
+            
+            // Convert with server-side processing
+            const convertResponse = await fetch('/api/convert-media', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    file_id: uploadResult.file_id,
+                    conversion_type: 'video_compress',
+                    options: {
+                        compression: settings.compressionRatio < 0.5 ? 'heavy' : settings.compressionRatio < 0.7 ? 'medium' : 'light',
+                        format: settings.format,
+                        bitrate: settings.bitrate,
+                        resolution: settings.resolution,
+                        framerate: settings.frameRate
+                    }
+                })
+            });
+            
+            this.showProgress(90);
+            
+            if (!convertResponse.ok) {
+                const error = await convertResponse.json();
+                throw new Error(error.error || 'Conversion failed');
+            }
+            
+            const result = await convertResponse.json();
+            this.showProgress(100);
+            
+            // Download the converted file
+            this.outputBlob = await fetch(result.download_url).then(r => r.blob());
+            
+            // Store compression stats for display
+            this.compressionStats = {
+                originalSize: this.currentFile.size,
+                compressedSize: result.file_size,
+                compressionRatio: result.compression_ratio || ((this.currentFile.size - result.file_size) / this.currentFile.size * 100).toFixed(1)
+            };
+            
+        } catch (error) {
+            throw new Error(`Compression failed: ${error.message}`);
         }
-        
-        // For demonstration, create a "compressed" version by just copying the file
-        // In a real implementation, this would use FFmpeg.wasm to actually compress
-        const compressedSize = Math.floor(this.currentFile.size * (settings.compressionRatio || 0.6));
-        
-        // Create a blob with simulated compressed size
-        this.outputBlob = new Blob([this.currentFile], { type: 'video/mp4' });
-        
-        // Store compression stats for display
-        this.compressionStats = {
-            originalSize: this.currentFile.size,
-            compressedSize: compressedSize,
-            compressionRatio: ((this.currentFile.size - compressedSize) / this.currentFile.size * 100).toFixed(1)
-        };
     }
 
     showCompressionResults() {

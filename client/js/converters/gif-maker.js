@@ -215,38 +215,68 @@ class GifMaker {
     }
 
     async performGifCreation(settings) {
-        const stages = [
-            'Extracting video frames...',
-            'Processing frame sequence...',
-            'Applying frame rate settings...',
-            'Optimizing colors...',
-            'Compressing GIF...',
-            'Finalizing animation...'
-        ];
-        
-        for (let i = 0; i < stages.length; i++) {
-            const progress = Math.floor((i / stages.length) * 100);
-            this.showProgressWithStages(progress, stages[i]);
-            await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 500));
+        try {
+            // Upload file first
+            const formData = new FormData();
+            formData.append('file', this.currentFile);
+            
+            this.showProgressWithStages(10, 'Uploading video...');
+            const uploadResponse = await fetch('/api/upload', {
+                method: 'POST',
+                body: formData
+            });
+            
+            if (!uploadResponse.ok) {
+                throw new Error('Failed to upload file');
+            }
+            
+            const uploadResult = await uploadResponse.json();
+            this.showProgressWithStages(30, 'Analyzing video...');
+            
+            // Convert with server-side processing
+            const convertResponse = await fetch('/api/convert-media', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    file_id: uploadResult.file_id,
+                    conversion_type: 'video_to_gif',
+                    options: {
+                        start_time: settings.startTime,
+                        duration: settings.endTime - settings.startTime,
+                        fps: settings.frameRate,
+                        width: settings.width === 'original' ? null : parseInt(settings.width)
+                    }
+                })
+            });
+            
+            this.showProgressWithStages(90, 'Generating GIF...');
+            
+            if (!convertResponse.ok) {
+                const error = await convertResponse.json();
+                throw new Error(error.error || 'GIF creation failed');
+            }
+            
+            const result = await convertResponse.json();
+            this.showProgressWithStages(100, 'Complete!');
+            
+            // Download the converted file
+            this.outputBlob = await fetch(result.download_url).then(r => r.blob());
+            
+            const duration = settings.endTime - settings.startTime;
+            this.gifInfo = {
+                duration: duration,
+                frames: Math.floor(duration * settings.frameRate),
+                frameRate: settings.frameRate,
+                width: settings.width,
+                outputSize: result.file_size,
+                quality: settings.quality
+            };
+            
+        } catch (error) {
+            throw new Error(`GIF creation failed: ${error.message}`);
         }
-        
-        this.showProgressWithStages(100, 'Complete!');
-        
-        // Create mock GIF
-        const duration = settings.endTime - settings.startTime;
-        const totalFrames = Math.floor(duration * settings.frameRate);
-        const estimatedSize = totalFrames * (settings.width * 0.75) * 0.1;
-        const mockData = new ArrayBuffer(Math.floor(estimatedSize));
-        this.outputBlob = new Blob([mockData], { type: 'image/gif' });
-        
-        this.gifInfo = {
-            duration: duration,
-            frames: totalFrames,
-            frameRate: settings.frameRate,
-            width: settings.width,
-            outputSize: this.outputBlob.size,
-            quality: settings.quality
-        };
     }
 
     showGifResults() {

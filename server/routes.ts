@@ -316,6 +316,91 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Media conversion endpoint
+  app.post('/api/convert-media', (req, res) => {
+    const { file_id, conversion_type, options = {} } = req.body;
+    
+    if (!file_id || !conversion_type) {
+      return res.status(400).json({ error: 'Missing required parameters' });
+    }
+
+    const tempPath = path.join(uploadsDir, file_id);
+    
+    if (!fs.existsSync(tempPath)) {
+      return res.status(404).json({ error: 'Input file not found' });
+    }
+
+    // Generate output filename with appropriate extension
+    const outputExtension = getOutputExtension(conversion_type, options.format);
+    const outputFile = `${file_id}_converted.${outputExtension}`;
+    const outputPath = path.join(outputDir, outputFile);
+
+    // Prepare Python command
+    const pythonScript = path.join(process.cwd(), 'server', 'media_converter.py');
+    const optionsJson = JSON.stringify(options);
+    
+    console.log(`Running media conversion: ${conversion_type}`);
+    console.log(`Input: ${tempPath}, Output: ${outputPath}`);
+    
+    const pythonProcess = spawn('python3', [pythonScript, tempPath, outputPath, conversion_type, optionsJson]);
+    
+    let output = '';
+    let error = '';
+    
+    pythonProcess.stdout.on('data', (data) => {
+      output += data.toString();
+    });
+    
+    pythonProcess.stderr.on('data', (data) => {
+      error += data.toString();
+    });
+    
+    pythonProcess.on('close', (code) => {
+      console.log(`Media conversion process closed with code: ${code}`);
+      console.log('Python output:', output);
+      console.log('Python error:', error);
+      
+      if (code === 0) {
+        try {
+          const result = JSON.parse(output.trim());
+          if (result.success) {
+            const stats = fs.statSync(outputPath);
+            res.json({
+              success: true,
+              output_file: outputFile,
+              download_url: `/api/download/${outputFile}`,
+              file_size: stats.size,
+              ...result
+            });
+          } else {
+            res.status(500).json(result);
+          }
+        } catch (parseError) {
+          res.status(500).json({ error: 'Failed to parse conversion result' });
+        }
+      } else {
+        res.status(500).json({ error: error || 'Media conversion failed' });
+      }
+    });
+  });
+
+  function getOutputExtension(conversionType: string, format?: string): string {
+    switch (conversionType) {
+      case 'video_compress':
+        return format || 'mp4';
+      case 'video_to_audio':
+        return format || 'mp3';
+      case 'audio_convert':
+        return format || 'mp3';
+      case 'video_trim':
+        return 'mp4';
+      case 'video_to_gif':
+        return 'gif';
+      default:
+        return 'mp4';
+    }
+  }
+
   app.get('/api/download/:filename', (req, res) => {
     const filename = req.params.filename;
     const filePath = path.join(outputDir, filename);
