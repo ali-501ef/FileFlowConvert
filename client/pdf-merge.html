@@ -88,52 +88,187 @@
                     </div>
 
                     <!-- Advanced Options -->
-                    <div id="advanced-options-section" class="advanced-options-section">
-                        <button id="advanced-toggle" class="advanced-toggle" data-testid="button-advanced-toggle">
-                            <span class="advanced-toggle-text">Advanced Options</span>
-                            <span class="advanced-toggle-icon">⚙️</span>
-                            <svg class="advanced-chevron" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                            </svg>
+                    <div id="advanced-options-section" class="premium-advanced-section">
+                        <button id="advanced-toggle" class="premium-toggle" data-testid="button-advanced-toggle">
+                            <div class="toggle-left">
+                                <div class="toggle-icon">
+                                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"></path>
+                                    </svg>
+                                </div>
+                                <div class="toggle-text">
+                                    <span class="toggle-title">Advanced Settings</span>
+                                    <span class="toggle-subtitle">Customize merge behavior and output</span>
+                                </div>
+                            </div>
+                            <div class="toggle-chevron">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </div>
                         </button>
                         
-                        <div id="advanced-content" class="advanced-content" style="display: none;">
-                            <div class="advanced-grid">
-                                <div class="advanced-option">
-                                    <label class="advanced-label" for="merge-mode">Merge Mode</label>
-                                    <select id="merge-mode" class="advanced-select" data-testid="select-merge-mode">
-                                        <option value="append" selected>Append (preserve original order)</option>
-                                        <option value="interleave">Interleave pages</option>
-                                        <option value="custom">Custom arrangement</option>
-                                    </select>
-                                    <p class="advanced-hint">Choose how pages are combined</p>
-                                </div>
-                                
-                                <div class="advanced-option">
-                                    <label class="advanced-label" for="output-quality">Output Quality</label>
-                                    <select id="output-quality" class="advanced-select" data-testid="select-output-quality">
-                                        <option value="high" selected>High (preserve original quality)</option>
-                                        <option value="medium">Medium (balanced size/quality)</option>
-                                        <option value="low">Low (smaller file size)</option>
-                                    </select>
-                                </div>
-                                
-                                <div class="advanced-option">
-                                    <label class="advanced-label" for="bookmark-handling">Bookmark Handling</label>
-                                    <select id="bookmark-handling" class="advanced-select" data-testid="select-bookmark-handling">
-                                        <option value="preserve" selected>Preserve all bookmarks</option>
-                                        <option value="merge">Merge and organize</option>
-                                        <option value="remove">Remove all bookmarks</option>
-                                    </select>
+                        <div id="advanced-content" class="premium-content" style="display: none;">
+                            <div class="settings-categories">
+                                <!-- Merge Configuration -->
+                                <div class="settings-category">
+                                    <h4 class="category-title">Merge Configuration</h4>
+                                    <div class="settings-row">
+                                        <div class="setting-item">
+                                            <label class="setting-label" for="merge-mode">Merge Strategy</label>
+                                            <div class="custom-select-wrapper">
+                                                <select id="merge-mode" class="premium-select" data-testid="select-merge-mode">
+                                                    <option value="append" selected>Sequential - Preserve file order</option>
+                                                    <option value="interleave">Interleave - Alternate pages</option>
+                                                    <option value="custom">Custom - Advanced arrangement</option>
+                                                    <option value="split-merge">Split & Merge - Organize by sections</option>
+                                                </select>
+                                                <div class="select-icon">
+                                                    <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                            <p class="setting-hint">Choose how to combine pages from multiple PDFs</p>
+                                        </div>
+
+                                        <div class="setting-item">
+                                            <label class="setting-label" for="page-orientation">Page Orientation</label>
+                                            <div class="custom-select-wrapper">
+                                                <select id="page-orientation" class="premium-select">
+                                                    <option value="preserve" selected>Preserve original</option>
+                                                    <option value="portrait">Force portrait</option>
+                                                    <option value="landscape">Force landscape</option>
+                                                    <option value="auto-rotate">Auto-rotate for best fit</option>
+                                                </select>
+                                                <div class="select-icon">
+                                                    <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
 
-                                <div class="advanced-option">
-                                    <label class="advanced-label" for="metadata-handling">Metadata</label>
-                                    <select id="metadata-handling" class="advanced-select" data-testid="select-metadata-handling">
-                                        <option value="first" selected>Use first PDF metadata</option>
-                                        <option value="custom">Custom metadata</option>
-                                        <option value="none">Remove metadata</option>
-                                    </select>
+                                <!-- Quality & Optimization -->
+                                <div class="settings-category">
+                                    <h4 class="category-title">Quality & Optimization</h4>
+                                    <div class="settings-row">
+                                        <div class="setting-item">
+                                            <label class="setting-label" for="output-quality">Output Quality</label>
+                                            <div class="custom-select-wrapper">
+                                                <select id="output-quality" class="premium-select" data-testid="select-output-quality">
+                                                    <option value="highest">Highest - No compression</option>
+                                                    <option value="high" selected>High - Minimal compression</option>
+                                                    <option value="balanced">Balanced - Optimize size/quality</option>
+                                                    <option value="compact">Compact - Prioritize small size</option>
+                                                </select>
+                                                <div class="select-icon">
+                                                    <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="setting-item">
+                                            <label class="setting-label" for="color-mode">Color Processing</label>
+                                            <div class="custom-select-wrapper">
+                                                <select id="color-mode" class="premium-select">
+                                                    <option value="preserve" selected>Preserve original</option>
+                                                    <option value="optimize-rgb">Optimize RGB</option>
+                                                    <option value="convert-grayscale">Convert to grayscale</option>
+                                                    <option value="enhance-contrast">Enhance contrast</option>
+                                                </select>
+                                                <div class="select-icon">
+                                                    <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Document Structure -->
+                                <div class="settings-category">
+                                    <h4 class="category-title">Document Structure</h4>
+                                    <div class="settings-row">
+                                        <div class="setting-item">
+                                            <label class="setting-label" for="bookmark-handling">Bookmark Management</label>
+                                            <div class="custom-select-wrapper">
+                                                <select id="bookmark-handling" class="premium-select" data-testid="select-bookmark-handling">
+                                                    <option value="preserve" selected>Preserve all bookmarks</option>
+                                                    <option value="merge-smart">Smart merge & organize</option>
+                                                    <option value="create-index">Create file index</option>
+                                                    <option value="remove">Remove all bookmarks</option>
+                                                </select>
+                                                <div class="select-icon">
+                                                    <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="setting-item">
+                                            <label class="setting-label" for="page-numbering">Page Numbering</label>
+                                            <div class="custom-select-wrapper">
+                                                <select id="page-numbering" class="premium-select">
+                                                    <option value="none" selected>No changes</option>
+                                                    <option value="continuous">Continuous numbering</option>
+                                                    <option value="restart-each">Restart for each file</option>
+                                                    <option value="add-footer">Add page numbers in footer</option>
+                                                </select>
+                                                <div class="select-icon">
+                                                    <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Metadata & Security -->
+                                <div class="settings-category">
+                                    <h4 class="category-title">Metadata & Security</h4>
+                                    <div class="settings-row">
+                                        <div class="setting-item">
+                                            <label class="setting-label" for="metadata-handling">Metadata Handling</label>
+                                            <div class="custom-select-wrapper">
+                                                <select id="metadata-handling" class="premium-select" data-testid="select-metadata-handling">
+                                                    <option value="first" selected>Use first PDF metadata</option>
+                                                    <option value="merge-all">Merge all metadata</option>
+                                                    <option value="custom">Custom metadata</option>
+                                                    <option value="clean">Remove all metadata</option>
+                                                </select>
+                                                <div class="select-icon">
+                                                    <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="setting-item">
+                                            <label class="setting-label" for="security-mode">Security Options</label>
+                                            <div class="custom-select-wrapper">
+                                                <select id="security-mode" class="premium-select">
+                                                    <option value="none" selected>No restrictions</option>
+                                                    <option value="print-only">Allow printing only</option>
+                                                    <option value="view-only">View only (no editing)</option>
+                                                    <option value="password-protect">Password protection</option>
+                                                </select>
+                                                <div class="select-icon">
+                                                    <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

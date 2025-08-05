@@ -38,7 +38,7 @@ class PDFMergeHandler {
                     if (isVisible) {
                         // Collapse
                         advancedContent.style.display = 'none';
-                        const newChevron = newToggle.querySelector('.advanced-chevron');
+                        const newChevron = newToggle.querySelector('.toggle-chevron');
                         if (newChevron) {
                             newChevron.style.transform = 'rotate(0deg)';
                         }
@@ -46,7 +46,7 @@ class PDFMergeHandler {
                     } else {
                         // Expand
                         advancedContent.style.display = 'block';
-                        const newChevron = newToggle.querySelector('.advanced-chevron');
+                        const newChevron = newToggle.querySelector('.toggle-chevron');
                         if (newChevron) {
                             newChevron.style.transform = 'rotate(180deg)';
                         }
@@ -78,11 +78,16 @@ class PDFMergeHandler {
                     this.showInterleaveOptions();
                 } else if (mode === 'custom') {
                     this.showCustomArrangementOptions();
+                } else if (mode === 'split-merge') {
+                    this.showSplitMergeOptions();
                 } else {
                     this.hideExtraOptions();
                 }
             });
         }
+
+        // Add new settings listeners
+        this.setupNewSettingsListeners();
 
         // Add functionality to output quality selector
         const outputQuality = document.getElementById('output-quality');
@@ -195,15 +200,164 @@ class PDFMergeHandler {
         if (customMetadata) customMetadata.remove();
     }
 
+    setupNewSettingsListeners() {
+        // Page orientation listener
+        const pageOrientation = document.getElementById('page-orientation');
+        if (pageOrientation) {
+            pageOrientation.addEventListener('change', (e) => {
+                console.log('Page orientation changed to:', e.target.value);
+            });
+        }
+
+        // Color mode listener
+        const colorMode = document.getElementById('color-mode');
+        if (colorMode) {
+            colorMode.addEventListener('change', (e) => {
+                console.log('Color mode changed to:', e.target.value);
+            });
+        }
+
+        // Page numbering listener
+        const pageNumbering = document.getElementById('page-numbering');
+        if (pageNumbering) {
+            pageNumbering.addEventListener('change', (e) => {
+                console.log('Page numbering changed to:', e.target.value);
+                if (e.target.value === 'add-footer') {
+                    this.showPageNumberingOptions();
+                } else {
+                    this.hidePageNumberingOptions();
+                }
+            });
+        }
+
+        // Security mode listener
+        const securityMode = document.getElementById('security-mode');
+        if (securityMode) {
+            securityMode.addEventListener('change', (e) => {
+                console.log('Security mode changed to:', e.target.value);
+                if (e.target.value === 'password-protect') {
+                    this.showPasswordOptions();
+                } else {
+                    this.hidePasswordOptions();
+                }
+            });
+        }
+    }
+
+    showSplitMergeOptions() {
+        const settingsCategories = document.querySelector('.settings-categories');
+        if (settingsCategories && !document.getElementById('split-merge-options')) {
+            const splitMergeDiv = document.createElement('div');
+            splitMergeDiv.id = 'split-merge-options';
+            splitMergeDiv.className = 'settings-category';
+            splitMergeDiv.innerHTML = `
+                <h4 class="category-title">Split & Merge Configuration</h4>
+                <div class="settings-row">
+                    <div class="setting-item">
+                        <label class="setting-label" for="section-breaks">Section Breaks</label>
+                        <div class="custom-select-wrapper">
+                            <select id="section-breaks" class="premium-select">
+                                <option value="auto">Auto-detect sections</option>
+                                <option value="page-count">Every N pages</option>
+                                <option value="bookmark">At bookmark levels</option>
+                                <option value="manual">Manual specification</option>
+                            </select>
+                            <div class="select-icon">
+                                <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <label class="setting-label" for="merge-order">Merge Order</label>
+                        <div class="custom-select-wrapper">
+                            <select id="merge-order" class="premium-select">
+                                <option value="sequential">Sequential by file</option>
+                                <option value="interleaved">Interleaved sections</option>
+                                <option value="priority">Priority-based</option>
+                            </select>
+                            <div class="select-icon">
+                                <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            settingsCategories.appendChild(splitMergeDiv);
+        }
+    }
+
+    showPageNumberingOptions() {
+        const metadataCategory = document.querySelector('.settings-category:last-child .settings-row');
+        if (metadataCategory && !document.getElementById('page-numbering-options')) {
+            const numberingDiv = document.createElement('div');
+            numberingDiv.id = 'page-numbering-options';
+            numberingDiv.className = 'setting-item';
+            numberingDiv.innerHTML = `
+                <label class="setting-label" for="numbering-format">Number Format</label>
+                <div class="custom-select-wrapper">
+                    <select id="numbering-format" class="premium-select">
+                        <option value="arabic">1, 2, 3...</option>
+                        <option value="roman">i, ii, iii...</option>
+                        <option value="alpha">a, b, c...</option>
+                        <option value="custom">Page X of Y</option>
+                    </select>
+                    <div class="select-icon">
+                        <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </div>
+                </div>
+            `;
+            metadataCategory.appendChild(numberingDiv);
+        }
+    }
+
+    showPasswordOptions() {
+        const metadataCategory = document.querySelector('.settings-category:last-child .settings-row');
+        if (metadataCategory && !document.getElementById('password-options')) {
+            const passwordDiv = document.createElement('div');
+            passwordDiv.id = 'password-options';
+            passwordDiv.className = 'setting-item';
+            passwordDiv.innerHTML = `
+                <label class="setting-label" for="pdf-password">Password</label>
+                <input type="password" id="pdf-password" class="premium-input" placeholder="Enter password for PDF">
+                <p class="setting-hint">Password will be required to open the merged PDF</p>
+            `;
+            metadataCategory.appendChild(passwordDiv);
+        }
+    }
+
+    hidePageNumberingOptions() {
+        const numberingOptions = document.getElementById('page-numbering-options');
+        if (numberingOptions) numberingOptions.remove();
+    }
+
+    hidePasswordOptions() {
+        const passwordOptions = document.getElementById('password-options');
+        if (passwordOptions) passwordOptions.remove();
+    }
+
     getMergeSettings() {
         // Collect all advanced settings
         return {
             mergeMode: document.getElementById('merge-mode')?.value || 'append',
+            pageOrientation: document.getElementById('page-orientation')?.value || 'preserve',
             outputQuality: document.getElementById('output-quality')?.value || 'high',
+            colorMode: document.getElementById('color-mode')?.value || 'preserve',
             bookmarkHandling: document.getElementById('bookmark-handling')?.value || 'preserve',
+            pageNumbering: document.getElementById('page-numbering')?.value || 'none',
             metadataHandling: document.getElementById('metadata-handling')?.value || 'first',
+            securityMode: document.getElementById('security-mode')?.value || 'none',
             interleavePattern: document.getElementById('interleave-pattern')?.value || '1-1',
             pageArrangement: document.getElementById('page-arrangement')?.value || '',
+            sectionBreaks: document.getElementById('section-breaks')?.value || 'auto',
+            mergeOrder: document.getElementById('merge-order')?.value || 'sequential',
+            numberingFormat: document.getElementById('numbering-format')?.value || 'arabic',
+            pdfPassword: document.getElementById('pdf-password')?.value || '',
             customTitle: document.getElementById('custom-title')?.value || '',
             customAuthor: document.getElementById('custom-author')?.value || '',
             customSubject: document.getElementById('custom-subject')?.value || ''
