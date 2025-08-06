@@ -131,7 +131,7 @@
             </div>
 
             <div class="converter-container">
-                <div class="upload-area" id="upload-area" onclick="document.getElementById('file-input').click()" data-testid="upload-area-video">
+                <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()" data-testid="upload-area-video">
                     <div class="upload-icon">
                         <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                             <polygon points="23 7 16 12 23 17 23 7"></polygon>
@@ -141,78 +141,95 @@
                     <h3>Drop your video file here</h3>
                     <p>or click anywhere to browse files</p>
                     <p class="supported-formats">Supports MP4, MOV, AVI (max 50MB)</p>
-                    <input type="file" id="file-input" multiple accept=".mp4,.MP4,.mov,.MOV,.avi,.AVI" hidden data-testid="input-video-files">
+                    <input type="file" id="fileInput" accept="video/*" hidden>
                 </div>
 
-                    <!-- Quality Settings -->
-                    <div id="quality-settings" class="quality-settings hidden">
-                        <h3 class="section-subtitle">Audio Quality</h3>
-                        <div class="quality-options">
-                            <label class="quality-option">
-                                <input type="radio" name="quality" value="128" data-testid="radio-quality-128">
-                                <span class="quality-label">128 kbps (Standard)</span>
-                            </label>
-                            <label class="quality-option">
-                                <input type="radio" name="quality" value="192" checked data-testid="radio-quality-192">
-                                <span class="quality-label">192 kbps (Good)</span>
-                            </label>
-                            <label class="quality-option">
-                                <input type="radio" name="quality" value="320" data-testid="radio-quality-320">
-                                <span class="quality-label">320 kbps (High)</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- File List -->
-                    <div id="file-list" class="file-list hidden">
-                        <h3 class="section-subtitle">Selected Files</h3>
-                        <div id="file-cards" class="file-cards">
-                            <!-- File cards will be inserted here -->
-                        </div>
-                    </div>
-
-                    <!-- Advanced Options -->
-                    <div class="advanced-options" id="advancedOptions">
-                        <div class="options-header" id="optionsToggle">
-                            <div class="options-title">
-                                <svg class="options-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z"/>
-                                    <path d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/>
-                                    <path d="M12 2v2"/>
-                                    <path d="M12 20v2"/>
-                                    <path d="m4.93 4.93 1.41 1.41"/>
-                                    <path d="m17.66 17.66 1.41 1.41"/>
-                                    <path d="M2 12h2"/>
-                                    <path d="M20 12h2"/>
-                                    <path d="m6.34 17.66-1.41 1.41"/>
-                                    <path d="m19.07 4.93-1.41 1.41"/>
-                                </svg>
-                                <span>Advanced Options</span>
-                            </div>
-                            <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="m6 9 6 6 6-6"/>
+                <div class="advanced-options" id="advancedOptions">
+                    <div class="options-header" id="optionsToggle">
+                        <div class="options-title">
+                            <svg class="options-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z"/>
+                                <path d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/>
+                                <path d="M12 2v2"/>
+                                <path d="M12 20v2"/>
+                                <path d="m4.93 4.93 1.41 1.41"/>
+                                <path d="m17.66 17.66 1.41 1.41"/>
+                                <path d="M2 12h2"/>
+                                <path d="M20 12h2"/>
+                                <path d="m6.34 17.66-1.41 1.41"/>
+                                <path d="m19.07 4.93-1.41 1.41"/>
                             </svg>
+                            <span>Advanced Options</span>
                         </div>
-                        <div class="options-content" id="optionsContent">
-                            <div class="option-group">
-                                <label for="bitrate">Audio Bitrate</label>
-                                <select id="bitrate" data-testid="select-bitrate">
-                                    <option value="192" selected>192 kbps (Good)</option>
-                                    <option value="128">128 kbps (Standard)</option>
-                                    <option value="256">256 kbps (Very Good)</option>
-                                    <option value="320">320 kbps (Best)</option>
-                                </select>
-                            </div>
-                            <div class="option-group">
-                                <label for="trim-start">Trim Start (seconds)</label>
-                                <input type="number" id="trim-start" placeholder="0" min="0" step="0.1" data-testid="input-trim-start">
-                            </div>
-                            <div class="option-group">
-                                <label for="trim-end">Trim End (seconds)</label>
-                                <input type="number" id="trim-end" placeholder="Auto" min="0" step="0.1" data-testid="input-trim-end">
-                            </div>
+                        <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="m6 9 6 6 6-6"/>
+                        </svg>
+                    </div>
+                    <div class="options-content" id="optionsContent">
+                        <div class="option-group">
+                            <label for="audioQuality">Audio Quality</label>
+                            <select id="audioQuality">
+                                <option value="192" selected>192 kbps (Good)</option>
+                                <option value="128">128 kbps (Standard)</option>
+                                <option value="256">256 kbps (Very Good)</option>
+                                <option value="320">320 kbps (Best)</option>
+                            </select>
+                        </div>
+                        <div class="option-group">
+                            <label for="outputFormat">Output Format</label>
+                            <select id="outputFormat">
+                                <option value="mp3" selected>MP3 (Most Compatible)</option>
+                                <option value="wav">WAV (Uncompressed)</option>
+                                <option value="aac">AAC (High Quality)</option>
+                            </select>
                         </div>
                     </div>
+                </div>
+
+                <div class="file-preview" id="filePreview" style="display: none;">
+                    <div class="preview-header">
+                        <h3 id="fileName"></h3>
+                        <span id="fileSize"></span>
+                    </div>
+                    <div class="video-preview">
+                        <video id="videoPreview" controls style="max-width: 100%; max-height: 300px;"></video>
+                    </div>
+                </div>
+
+                <button class="convert-btn" id="convertBtn" disabled>
+                    <span class="btn-text">Extract Audio</span>
+                    <div class="btn-loader" style="display: none;"></div>
+                </button>
+
+                <div class="progress-container" id="progressContainer" style="display: none;">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="progress-text" id="progressText">0%</div>
+                </div>
+
+                <div class="results" id="results" style="display: none;">
+                    <h3>Extraction Complete</h3>
+                    <div class="result-actions">
+                        <button class="download-btn" id="downloadBtn">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7,10 12,15 17,10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                            Download Audio File
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.1/dist/umd/util.js"></script>
+        <script src="js/advanced-options.js"></script>
+        <script src="js/converters/mp4-to-mp3.js"></script>
+    </body>
+    </html>
 
                     <!-- Progress Section -->
                     <div id="progress-section" class="progress-section hidden">

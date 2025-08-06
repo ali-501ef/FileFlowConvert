@@ -133,7 +133,7 @@
             </div>
 
             <div class="converter-container">
-                <div class="upload-area" id="upload-area" onclick="document.getElementById('file-input').click()" data-testid="upload-area-pdf">
+                <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()" data-testid="upload-area-pdf">
                     <div class="upload-icon">
                         <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -144,38 +144,92 @@
                     </div>
                     <h3>Drop your PDF files here</h3>
                     <p>or click anywhere to browse files</p>
-                    <p class="supported-formats">Supports PDF files</p>
-                    <input type="file" id="file-input" multiple accept=".pdf,.PDF" hidden data-testid="input-pdf-files">
+                    <p class="supported-formats">Supports PDF files only</p>
+                    <input type="file" id="fileInput" multiple accept=".pdf,.PDF" hidden>
                 </div>
 
-                    <!-- File List -->
-                    <div id="file-list" class="file-list hidden">
-                        <h3 class="section-subtitle">Selected Files (Drag to reorder)</h3>
-                        <div id="file-cards" class="file-cards sortable">
-                            <!-- File cards will be inserted here -->
+                <div class="advanced-options" id="advancedOptions">
+                    <div class="options-header" id="optionsToggle">
+                        <div class="options-title">
+                            <svg class="options-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z"/>
+                                <path d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/>
+                                <path d="M12 2v2"/>
+                                <path d="M12 20v2"/>
+                                <path d="m4.93 4.93 1.41 1.41"/>
+                                <path d="m17.66 17.66 1.41 1.41"/>
+                                <path d="M2 12h2"/>
+                                <path d="M20 12h2"/>
+                                <path d="m6.34 17.66-1.41 1.41"/>
+                                <path d="m19.07 4.93-1.41 1.41"/>
+                            </svg>
+                            <span>Advanced Options</span>
+                        </div>
+                        <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="m6 9 6 6 6-6"/>
+                        </svg>
+                    </div>
+                    <div class="options-content" id="optionsContent">
+                        <div class="option-group">
+                            <label for="mergeOrder">Merge Order</label>
+                            <select id="mergeOrder">
+                                <option value="sequential" selected>Sequential (File order)</option>
+                                <option value="alphabetical">Alphabetical</option>
+                                <option value="size">By file size</option>
+                            </select>
+                        </div>
+                        <div class="option-group">
+                            <label for="outputQuality">Output Quality</label>
+                            <select id="outputQuality">
+                                <option value="high" selected>High Quality</option>
+                                <option value="medium">Medium (Compressed)</option>
+                                <option value="low">Low (Smallest size)</option>
+                            </select>
                         </div>
                     </div>
+                </div>
 
-                    <!-- Advanced Options -->
-                    <div id="advanced-options-section" class="premium-advanced-section">
-                        <button id="advanced-toggle" class="advanced-toggle" data-testid="button-advanced-toggle">
-                            <span class="advanced-toggle-text">
-                                <svg class="advanced-toggle-icon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                </svg>
-                                Advanced Options
-                            </span>
-                            <svg class="advanced-chevron" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                <div class="file-preview" id="filePreview" style="display: none;">
+                    <div class="preview-header">
+                        <h3 id="fileName"></h3>
+                        <span id="fileSize"></span>
+                    </div>
+                    <div class="file-list" id="fileList"></div>
+                </div>
+
+                <button class="convert-btn" id="convertBtn" disabled>
+                    <span class="btn-text">Merge PDFs</span>
+                    <div class="btn-loader" style="display: none;"></div>
+                </button>
+
+                <div class="progress-container" id="progressContainer" style="display: none;">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="progress-text" id="progressText">0%</div>
+                </div>
+
+                <div class="results" id="results" style="display: none;">
+                    <h3>Merge Complete</h3>
+                    <div class="result-actions">
+                        <button class="download-btn" id="downloadBtn">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7,10 12,15 17,10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
                             </svg>
+                            Download Merged PDF
                         </button>
-                        
-                        <div id="advanced-content" class="premium-content" style="display: none;">
-                            <div class="settings-categories">
-                                <!-- Merge Configuration -->
-                                <div class="settings-category">
-                                    <h4 class="category-title">Merge Configuration</h4>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+        <script src="js/advanced-options.js"></script>
+        <script src="js/converters/pdf-merge.js"></script>
+    </body>
+    </html>
                                     <div class="settings-row">
                                         <div class="setting-item">
                                             <label class="setting-label" for="merge-mode">Merge Strategy</label>
