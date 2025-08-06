@@ -720,19 +720,33 @@ body {
     box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
 
+.option-group {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
 .option-group input[type="checkbox"] {
     width: 18px;
     height: 18px;
-    margin-right: 0.75rem;
     accent-color: var(--primary);
     cursor: pointer;
+    order: 2;
+    margin-left: auto;
 }
 
 .option-group input[type="checkbox"] + label {
-    display: inline;
+    display: flex;
     cursor: pointer;
     margin-bottom: 0;
-    vertical-align: middle;
+    order: 1;
+    flex: 1;
+}
+
+/* Handle standalone checkboxes without adjacent labels */
+.option-group label:not(input[type="checkbox"] + label) {
+    order: 1;
+    flex: 1;
 }
 
 .options-grid {
