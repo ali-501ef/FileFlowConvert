@@ -954,41 +954,51 @@ body {
 /* Tools sections - Premium Apple-style Headers */
 .tools-section {
     margin-bottom: 5rem;
-    margin-top: 5rem;
+    margin-top: 4rem;
 }
 
 .tools-section:first-of-type {
-    margin-top: 6rem; /* Extra space from sticky navigation */
+    margin-top: 4.5rem; /* Reduced spacing to hug navigation */
 }
 
 .section-header {
-    text-align: center;
-    margin-bottom: 3rem;
+    text-align: left;
+    margin-bottom: 2.5rem;
     padding: 0 var(--card-spacing);
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
 }
 
 .section-icon {
-    display: none; /* Remove icons for cleaner Apple-style design */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    flex-shrink: 0;
+    margin-top: 0.25rem;
+    color: hsl(210, 11%, 71%);
 }
 
 .section-content {
-    max-width: 640px;
-    margin: 0 auto;
+    flex: 1;
 }
 
 .section-title {
-    font-size: clamp(2.25rem, 4vw, 2.75rem);
-    font-weight: 600;
+    font-size: clamp(1.75rem, 3vw, 2rem);
+    font-weight: 700;
     color: var(--foreground);
-    margin: 0 0 0.75rem 0;
-    line-height: 1.15;
-    letter-spacing: -0.025em;
+    margin: 0 0 0.5rem 0;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 .section-description {
-    font-size: 1.125rem;
+    font-size: 1rem;
     font-weight: 400;
-    color: hsl(210, 11%, 71%);
+    color: hsl(210, 11%, 65%);
     line-height: 1.5;
     margin: 0;
 }
