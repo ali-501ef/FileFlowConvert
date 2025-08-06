@@ -138,8 +138,26 @@ body {
     padding: 0 var(--card-spacing);
     display: flex;
     align-items: center;
-    justify-content: space-between;
     height: 64px;
+    position: relative;
+}
+
+.sticky-nav .nav-brand {
+    position: absolute;
+    left: var(--card-spacing);
+}
+
+.sticky-nav .nav-menu {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+}
+
+.mobile-nav-toggle {
+    position: absolute;
+    right: var(--card-spacing);
 }
 
 .sticky-nav .nav-brand {
@@ -157,12 +175,6 @@ body {
 
 .sticky-nav .nav-brand a:hover {
     color: var(--primary);
-}
-
-.sticky-nav .nav-menu {
-    display: flex;
-    align-items: center;
-    gap: 2rem;
 }
 
 .nav-dropdown {

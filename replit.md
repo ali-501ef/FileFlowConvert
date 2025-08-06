@@ -12,10 +12,11 @@ Preferred communication style: Simple, everyday language.
 - **Framework**: Vanilla JavaScript with modern ES6+ features and modular design.
 - **UI Design**: Apple/Notion-inspired premium interface with clean aesthetics, glassmorphism effects, consistent icon sizing, and a white background system.
 - **Styling**: Custom CSS with CSS variables, smooth animations, and responsive grid layouts.
+- **Navigation**: Clean sticky navigation bar with centered dropdown menus for Image Tools, PDF Tools, and Audio/Video Tools. Universal Converter removed from navigation to focus on dedicated tool categories.
 - **File Processing**: Client-side conversion engines with live preview functionality.
-- **Universal Converter**: Drag-and-drop interface with intelligent format detection.
+- **Universal Converter**: Drag-and-drop interface with intelligent format detection available on homepage without redirects.
 - **Advanced Options**: Tool-specific settings with smooth toggle animations.
-- **UI/UX Decisions**: Larger heading fonts, refined labels, optimized whitespace, vibrant blue primary actions, soft grays, and clean contrast ratios.
+- **UI/UX Decisions**: Larger heading fonts, refined labels, optimized whitespace, vibrant blue primary actions, soft grays, clean contrast ratios, and absolute positioning for brand logo and mobile toggle with centered menu items.
 
 ### Backend Architecture
 - **Framework**: Express.js with TypeScript.
