@@ -3500,7 +3500,13 @@ body {
 
 @media (min-width: 768px) {
     .footer-content {
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (min-width: 1024px) {
+    .footer-content {
+        grid-template-columns: repeat(6, 1fr);
     }
 }
 
@@ -3555,6 +3561,59 @@ body {
 .footer-bottom p {
     color: hsl(210, 11%, 71%);
     font-size: 0.875rem;
+}
+
+/* Legal Pages Styles */
+.page-wrapper {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.main-content {
+    flex: 1;
+}
+
+.page-header {
+    text-align: center;
+    padding: 4rem 0 2rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 3rem;
+}
+
+.page-title {
+    font-size: clamp(2.5rem, 5vw, 3rem);
+    font-weight: 700;
+    color: var(--foreground);
+    margin-bottom: 0.5rem;
+    line-height: 1.1;
+}
+
+.page-subtitle {
+    color: hsl(210, 11%, 71%);
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.content-section {
+    padding: 0 0 4rem;
+    max-width: 48rem;
+    margin: 0 auto;
+}
+
+.placeholder-content {
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 1rem;
+    padding: 3rem 2rem;
+    text-align: center;
+    color: hsl(210, 11%, 71%);
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+.placeholder-content p {
+    margin: 0;
 }
 
 /* Utility classes */
