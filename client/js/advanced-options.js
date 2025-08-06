@@ -71,14 +71,17 @@ class AdvancedOptionsHandler {
             e.preventDefault();
             e.stopPropagation();
             
-            const isVisible = contentElement.style.display === 'block' || 
+            // Handle both old and new advanced options structures
+            const isActive = contentElement.classList.contains('active') ||
+                             contentElement.style.display === 'block' || 
                              contentElement.style.display === 'flex' ||
-                             !contentElement.style.display ||
-                             contentElement.style.display === '';
+                             (!contentElement.style.display || contentElement.style.display === '');
 
-            if (isVisible && contentElement.style.display !== 'none') {
-                // Collapse
+            if (isActive && contentElement.style.display !== 'none') {
+                // Collapse - use new structure classes
+                contentElement.classList.remove('active');
                 contentElement.style.display = 'none';
+                newToggle.classList.remove('active');
                 
                 // Update chevron
                 const chevron = newToggle.querySelector('.advanced-chevron') || 
@@ -87,8 +90,10 @@ class AdvancedOptionsHandler {
                     chevron.style.transform = 'rotate(0deg)';
                 }
             } else {
-                // Expand
+                // Expand - use new structure classes
+                contentElement.classList.add('active');
                 contentElement.style.display = 'block';
+                newToggle.classList.add('active');
                 
                 // Update chevron  
                 const chevron = newToggle.querySelector('.advanced-chevron') || 

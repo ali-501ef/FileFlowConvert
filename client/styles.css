@@ -624,34 +624,115 @@ body {
     margin-bottom: var(--card-spacing);
 }
 
-/* Advanced Options */
+/* Advanced Options - Simple Clean Style */
 .advanced-options {
-    background: var(--surface);
-    border: 1px solid var(--border-soft);
-    border-radius: var(--radius-lg);
-    margin: var(--element-spacing) 0;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    margin: 1.5rem 0;
     overflow: hidden;
-    box-shadow: var(--shadow-soft);
+    backdrop-filter: blur(12px);
 }
 
 .options-header {
-    padding: var(--element-spacing);
-    background: var(--gradient-soft);
+    padding: 1.25rem 1.5rem;
+    background: transparent;
     cursor: pointer;
-    transition: all var(--transition-base);
+    transition: all 0.2s ease;
     display: flex;
     align-items: center;
-    gap: var(--micro-spacing);
-    border-bottom: 1px solid var(--border-soft);
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .options-header:hover {
-    background: var(--muted);
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.options-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.options-icon {
+    color: var(--primary);
+}
+
+.chevron {
+    color: var(--text-tertiary);
+    transition: transform 0.2s ease;
+}
+
+.options-header.active .chevron {
+    transform: rotate(180deg);
 }
 
 .options-content {
-    padding: var(--card-spacing);
-    background: var(--surface);
+    padding: 1.5rem;
+    background: transparent;
+    display: none;
+}
+
+.options-content.active {
+    display: block;
+}
+
+.option-group {
+    margin-bottom: 1.25rem;
+}
+
+.option-group:last-child {
+    margin-bottom: 0;
+}
+
+.option-group label {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+}
+
+.option-group input[type="text"],
+.option-group input[type="number"],
+.option-group select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.02);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+.option-group input[type="text"]:focus,
+.option-group input[type="number"]:focus,
+.option-group select:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: rgba(255, 255, 255, 0.04);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.option-group input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    margin-right: 0.75rem;
+    accent-color: var(--primary);
+    cursor: pointer;
+}
+
+.option-group input[type="checkbox"] + label {
+    display: inline;
+    cursor: pointer;
+    margin-bottom: 0;
+    vertical-align: middle;
 }
 
 .options-grid {
