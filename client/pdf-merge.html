@@ -107,33 +107,46 @@
             </div>
         </div>
 
-        <!-- Main Content -->
-        <main class="main-content">
-            <div class="container">
-                <!-- Tool Header -->
-                <div class="tool-header-section">
-                    <nav class="breadcrumb">
-                        <a href="/" class="breadcrumb-link" data-testid="link-back-home">← Back to Tools</a>
-                    </nav>
-                    <h1 class="tool-page-title">PDF Merge Tool</h1>
-                    <p class="tool-page-description">Combine multiple PDF files into a single document with custom ordering.</p>
-                </div>
-
-                <!-- Upload Section -->
-                <div class="tool-container">
-                    <div id="upload-section" class="upload-section">
-                        <div class="upload-area" data-testid="drop-zone-pdf" onclick="document.getElementById('file-input').click()">
-                            <div class="upload-icon">
-                                <svg width="64" height="64" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-                                </svg>
-                            </div>
-                            <h3>Drop PDF files here</h3>
-                            <p>or click anywhere to upload files</p>
-                            <p class="supported-formats">Select multiple PDF files to merge into one document</p>
+        <main class="main">
+            <div class="hero-section">
+                <div class="hero-content">
+                    <div class="hero-badge">
+                        <div class="tool-icon bg-blue">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14,2 14,8 20,8"></polyline>
+                                <line x1="16" y1="13" x2="8" y2="13"></line>
+                                <line x1="16" y1="17" x2="8" y2="17"></line>
+                                <polyline points="10,9 9,9 8,9"></polyline>
+                            </svg>
                         </div>
-                        <input type="file" id="file-input" multiple class="file-input" accept=".pdf,.PDF" data-testid="input-pdf-files">
+                        <span>PDF Tools</span>
                     </div>
+                    <h1 class="hero-title">PDF Merge</h1>
+                    <p class="hero-description">Combine multiple PDF files into a single document</p>
+                    <div class="hero-features">
+                        <span class="feature-tag">✓ Drag & drop ordering</span>
+                        <span class="feature-tag">✓ Unlimited files</span>
+                        <span class="feature-tag">✓ Preserves formatting</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="converter-container">
+                <div class="upload-area" id="upload-area" onclick="document.getElementById('file-input').click()" data-testid="upload-area-pdf">
+                    <div class="upload-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14,2 14,8 20,8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                        </svg>
+                    </div>
+                    <h3>Drop your PDF files here</h3>
+                    <p>or click anywhere to browse files</p>
+                    <p class="supported-formats">Supports PDF files</p>
+                    <input type="file" id="file-input" multiple accept=".pdf,.PDF" hidden data-testid="input-pdf-files">
+                </div>
 
                     <!-- File List -->
                     <div id="file-list" class="file-list hidden">

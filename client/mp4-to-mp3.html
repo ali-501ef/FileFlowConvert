@@ -108,33 +108,41 @@
             </div>
         </div>
 
-        <!-- Main Content -->
-        <main class="main-content">
-            <div class="container">
-                <!-- Tool Header -->
-                <div class="tool-header-section">
-                    <nav class="breadcrumb">
-                        <a href="/" class="breadcrumb-link" data-testid="link-back-home">← Back to Tools</a>
-                    </nav>
-                    <h1 class="tool-page-title">MP4 to MP3 Converter</h1>
-                    <p class="tool-page-description">Extract high-quality audio from video files (50MB limit).</p>
-                </div>
-
-                <!-- Upload Section -->
-                <div class="tool-container">
-                    <div id="upload-section" class="upload-section">
-                        <div class="upload-area" data-testid="drop-zone-video" onclick="document.getElementById('file-input').click()">
-                            <div class="upload-icon">
-                                <svg width="64" height="64" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-                                </svg>
-                            </div>
-                            <h3>Drop video files here</h3>
-                            <p>or click anywhere to upload files</p>
-                            <p class="supported-formats">Select video files to extract audio (max 50MB per file)</p>
+        <main class="main">
+            <div class="hero-section">
+                <div class="hero-content">
+                    <div class="hero-badge">
+                        <div class="tool-icon bg-purple">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                            </svg>
                         </div>
-                        <input type="file" id="file-input" multiple class="file-input" accept=".mp4,.MP4,.mov,.MOV,.avi,.AVI" data-testid="input-video-files">
+                        <span>Audio/Video Tools</span>
                     </div>
+                    <h1 class="hero-title">MP4 to MP3</h1>
+                    <p class="hero-description">Extract high-quality audio from video files</p>
+                    <div class="hero-features">
+                        <span class="feature-tag">✓ High quality audio</span>
+                        <span class="feature-tag">✓ Multiple formats</span>
+                        <span class="feature-tag">✓ Fast conversion</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="converter-container">
+                <div class="upload-area" id="upload-area" onclick="document.getElementById('file-input').click()" data-testid="upload-area-video">
+                    <div class="upload-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="23 7 16 12 23 17 23 7"></polygon>
+                            <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+                        </svg>
+                    </div>
+                    <h3>Drop your video file here</h3>
+                    <p>or click anywhere to browse files</p>
+                    <p class="supported-formats">Supports MP4, MOV, AVI (max 50MB)</p>
+                    <input type="file" id="file-input" multiple accept=".mp4,.MP4,.mov,.MOV,.avi,.AVI" hidden data-testid="input-video-files">
+                </div>
 
                     <!-- Quality Settings -->
                     <div id="quality-settings" class="quality-settings hidden">
