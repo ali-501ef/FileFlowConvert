@@ -6,17 +6,76 @@
     <title>GIF Maker - FileFlow</title>
     <meta name="description" content="Create animated GIFs from videos with FileFlow's GIF Maker. Customize frame rate, quality, and duration for perfect GIF animations.">
     <link rel="stylesheet" href="styles.css">
+    
+    <!-- Navigation Script -->
+    <script src="/js/navigation.js" defer></script>
 </head>
 <body>
-    <nav class="nav">
+    <!-- Sticky Navigation Bar -->
+    <nav class="sticky-nav">
         <div class="nav-container">
-            <a href="/" class="nav-logo">FileFlow</a>
-            <div class="nav-links">
-                <a href="/" class="nav-link">Home</a>
-                <a href="/convert-to-jpeg.html" class="nav-link">Image Tools</a>
-                <a href="/pdf-merge.html" class="nav-link">PDF Tools</a>
-                <a href="/mp4-to-mp3.html" class="nav-link">Media Tools</a>
+            <div class="nav-brand">
+                <a href="/" data-testid="nav-brand">FileFlow</a>
             </div>
+            
+            <div class="nav-menu">
+                <!-- Image Tools -->
+                <div class="nav-dropdown">
+                    <button class="nav-dropdown-trigger" data-testid="nav-image-trigger">
+                        Image Tools
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    <div class="nav-dropdown-content">
+                        <a href="/convert-to-jpeg.html" class="nav-dropdown-item" data-testid="nav-convert-jpeg">Convert to JPEG</a>
+                        <a href="/heic-to-jpg.html" class="nav-dropdown-item" data-testid="nav-heic-jpg">HEIC to JPG</a>
+                        <a href="/jpg-to-png.html" class="nav-dropdown-item" data-testid="nav-jpg-png">JPG to PNG</a>
+                    </div>
+                </div>
+
+                <!-- PDF Tools -->
+                <div class="nav-dropdown">
+                    <button class="nav-dropdown-trigger" data-testid="nav-pdf-trigger">
+                        PDF Tools
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    <div class="nav-dropdown-content">
+                        <a href="/pdf-merge.html" class="nav-dropdown-item" data-testid="nav-pdf-merge">PDF Merge</a>
+                        <a href="/pdf-split.html" class="nav-dropdown-item" data-testid="nav-pdf-split">PDF Split</a>
+                        <a href="/pdf-compress.html" class="nav-dropdown-item" data-testid="nav-pdf-compress">PDF Compress</a>
+                        <a href="/pdf-rotate.html" class="nav-dropdown-item" data-testid="nav-pdf-rotate">PDF Rotate</a>
+                        <a href="/pdf-watermark.html" class="nav-dropdown-item" data-testid="nav-pdf-watermark">PDF Watermark</a>
+                        <a href="/pdf-to-word.html" class="nav-dropdown-item" data-testid="nav-pdf-to-word">PDF to Word</a>
+                    </div>
+                </div>
+
+                <!-- Audio/Video Tools -->
+                <div class="nav-dropdown">
+                    <button class="nav-dropdown-trigger" data-testid="nav-media-trigger">
+                        Audio/Video Tools
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    <div class="nav-dropdown-content">
+                        <a href="/mp4-to-mp3.html" class="nav-dropdown-item" data-testid="nav-mp4-mp3">MP4 to MP3</a>
+                        <a href="/audio-converter.html" class="nav-dropdown-item" data-testid="nav-audio-convert">Audio Converter</a>
+                        <a href="/video-compress.html" class="nav-dropdown-item" data-testid="nav-video-compress">Video Compress</a>
+                        <a href="/gif-maker.html" class="nav-dropdown-item" data-testid="nav-gif-maker">GIF Maker</a>
+                        <a href="/video-trim.html" class="nav-dropdown-item" data-testid="nav-video-trim">Video Trim</a>
+                        <a href="/video-merger.html" class="nav-dropdown-item" data-testid="nav-video-merge">Video Merger</a>
+                    </div>
+                </div>
+            </div>
+            
+            <button class="mobile-nav-toggle" data-testid="mobile-nav-toggle">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
         </div>
     </nav>
 
