@@ -3,103 +3,111 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDF Merge Tool - FileFlow | Combine PDF Files</title>
-    <meta name="description" content="Merge multiple PDF files into one document. Drag & drop ordering, unlimited files, preserves formatting. Free online PDF merger.">
-    <link rel="canonical" href="https://fileflow.com/pdf-merge">
-    
-    <!-- Open Graph Meta Tags -->
-    <meta property="og:title" content="PDF Merge Tool - FileFlow">
-    <meta property="og:description" content="Merge multiple PDF files into one document. Drag & drop ordering, unlimited files.">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://fileflow.com/pdf-merge">
-    
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Styles -->
-    <link rel="stylesheet" href="/styles.css">
-    
-    <!-- Navigation Script -->
-    <script src="/js/navigation.js" defer></script>
-    
-    <!-- PDF-lib Library -->
-    <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <title>PDF Merge Tool - FileFlow</title>
+    <meta name="description" content="Combine multiple PDF files into a single document. Fast, free, and secure PDF merging tool with drag and drop support.">
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- Top AdSense Banner -->
-    <div class="ad-placeholder ad-banner-top">
-        <span class="ad-text">Advertisement Banner (728x90)</span>
-    </div>
-
-    <!-- Sticky Navigation Bar -->
-    <nav class="sticky-nav">
+    <!-- Navigation -->
+    <nav class="navbar">
         <div class="nav-container">
-            <div class="nav-brand">
-                <a href="/" data-testid="nav-brand">FileFlow</a>
+            <div class="nav-content">
+                <div class="nav-left">
+                    <a href="/" class="logo">
+                        <span class="logo-text">FileFlow</span>
+                    </a>
+                </div>
+                <div class="nav-center">
+                    <div class="nav-items">
+                        <div class="nav-item dropdown">
+                            <button class="nav-link dropdown-toggle" type="button">
+                                Image Tools
+                                <svg class="dropdown-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="6,9 12,15 18,9"></polyline>
+                                </svg>
+                            </button>
+                            <div class="dropdown-menu">
+                                <a href="/heic-to-jpg.html" class="dropdown-item">HEIC to JPG</a>
+                                <a href="/jpg-to-png.html" class="dropdown-item">JPG to PNG</a>
+                                <a href="/universal-to-jpeg.html" class="dropdown-item">Universal to JPEG</a>
+                            </div>
+                        </div>
+                        <div class="nav-item dropdown">
+                            <button class="nav-link dropdown-toggle" type="button">
+                                PDF Tools
+                                <svg class="dropdown-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="6,9 12,15 18,9"></polyline>
+                                </svg>
+                            </button>
+                            <div class="dropdown-menu">
+                                <a href="/pdf-merge.html" class="dropdown-item">PDF Merge</a>
+                                <a href="/pdf-split.html" class="dropdown-item">PDF Split</a>
+                                <a href="/pdf-compress.html" class="dropdown-item">PDF Compress</a>
+                                <a href="/pdf-to-word.html" class="dropdown-item">PDF to Word</a>
+                                <a href="/pdf-rotate.html" class="dropdown-item">PDF Rotate</a>
+                                <a href="/pdf-watermark.html" class="dropdown-item">PDF Watermark</a>
+                            </div>
+                        </div>
+                        <div class="nav-item dropdown">
+                            <button class="nav-link dropdown-toggle" type="button">
+                                Audio/Video Tools
+                                <svg class="dropdown-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="6,9 12,15 18,9"></polyline>
+                                </svg>
+                            </button>
+                            <div class="dropdown-menu">
+                                <a href="/mp4-to-mp3.html" class="dropdown-item">MP4 to MP3</a>
+                                <a href="/audio-converter.html" class="dropdown-item">Audio Converter</a>
+                                <a href="/video-compress.html" class="dropdown-item">Video Compress</a>
+                                <a href="/video-trim.html" class="dropdown-item">Video Trim</a>
+                                <a href="/gif-maker.html" class="dropdown-item">GIF Maker</a>
+                                <a href="/video-merger.html" class="dropdown-item">Video Merger</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="nav-right">
+                    <button class="mobile-menu-toggle" type="button">
+                        <span class="hamburger-line"></span>
+                        <span class="hamburger-line"></span>
+                        <span class="hamburger-line"></span>
+                    </button>
+                </div>
             </div>
-            
-            <div class="nav-menu">
-                <!-- Image Tools -->
-                <div class="nav-dropdown">
-                    <button class="nav-dropdown-trigger" data-testid="nav-image-trigger">
-                        Image Tools
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                        </svg>
-                    </button>
-                    <div class="nav-dropdown-content">
-                        <a href="/convert-to-jpeg.html" class="nav-dropdown-item" data-testid="nav-convert-jpeg">Convert to JPEG</a>
-                        <a href="/heic-to-jpg.html" class="nav-dropdown-item" data-testid="nav-heic-jpg">HEIC to JPG</a>
-                        <a href="/jpg-to-png.html" class="nav-dropdown-item" data-testid="nav-jpg-png">JPG to PNG</a>
-                    </div>
-                </div>
-
-                <!-- PDF Tools -->
-                <div class="nav-dropdown">
-                    <button class="nav-dropdown-trigger" data-testid="nav-pdf-trigger">
-                        PDF Tools
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                        </svg>
-                    </button>
-                    <div class="nav-dropdown-content">
-                        <a href="/pdf-merge.html" class="nav-dropdown-item" data-testid="nav-pdf-merge">PDF Merge</a>
-                        <a href="/pdf-split.html" class="nav-dropdown-item" data-testid="nav-pdf-split">PDF Split</a>
-                        <a href="/pdf-compress.html" class="nav-dropdown-item" data-testid="nav-pdf-compress">PDF Compress</a>
-                        <a href="/pdf-rotate.html" class="nav-dropdown-item" data-testid="nav-pdf-rotate">PDF Rotate</a>
-                        <a href="/pdf-watermark.html" class="nav-dropdown-item" data-testid="nav-pdf-watermark">PDF Watermark</a>
-                        <a href="/pdf-to-word.html" class="nav-dropdown-item" data-testid="nav-pdf-to-word">PDF to Word</a>
-                    </div>
-                </div>
-
-                <!-- Audio/Video Tools -->
-                <div class="nav-dropdown">
-                    <button class="nav-dropdown-trigger" data-testid="nav-media-trigger">
-                        Audio/Video Tools
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                        </svg>
-                    </button>
-                    <div class="nav-dropdown-content">
-                        <a href="/mp4-to-mp3.html" class="nav-dropdown-item" data-testid="nav-mp4-mp3">MP4 to MP3</a>
-                        <a href="/audio-converter.html" class="nav-dropdown-item" data-testid="nav-audio-convert">Audio Converter</a>
-                        <a href="/video-compress.html" class="nav-dropdown-item" data-testid="nav-video-compress">Video Compress</a>
-                        <a href="/gif-maker.html" class="nav-dropdown-item" data-testid="nav-gif-maker">GIF Maker</a>
-                        <a href="/video-trim.html" class="nav-dropdown-item" data-testid="nav-video-trim">Video Trim</a>
-                        <a href="/video-merger.html" class="nav-dropdown-item" data-testid="nav-video-merge">Video Merger</a>
-                    </div>
-                </div>
-            </div>
-            
-            <button class="mobile-nav-toggle" data-testid="mobile-nav-toggle">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-                </svg>
-            </button>
         </div>
     </nav>
 
-    <div class="layout-wrapper">
+    <!-- Mobile Menu -->
+    <div class="mobile-menu">
+        <div class="mobile-menu-content">
+            <div class="mobile-menu-section">
+                <h3 class="mobile-menu-title">Image Tools</h3>
+                <a href="/heic-to-jpg.html" class="mobile-menu-item">HEIC to JPG</a>
+                <a href="/jpg-to-png.html" class="mobile-menu-item">JPG to PNG</a>
+                <a href="/universal-to-jpeg.html" class="mobile-menu-item">Universal to JPEG</a>
+            </div>
+            <div class="mobile-menu-section">
+                <h3 class="mobile-menu-title">PDF Tools</h3>
+                <a href="/pdf-merge.html" class="mobile-menu-item">PDF Merge</a>
+                <a href="/pdf-split.html" class="mobile-menu-item">PDF Split</a>
+                <a href="/pdf-compress.html" class="mobile-menu-item">PDF Compress</a>
+                <a href="/pdf-to-word.html" class="mobile-menu-item">PDF to Word</a>
+                <a href="/pdf-rotate.html" class="mobile-menu-item">PDF Rotate</a>
+                <a href="/pdf-watermark.html" class="mobile-menu-item">PDF Watermark</a>
+            </div>
+            <div class="mobile-menu-section">
+                <h3 class="mobile-menu-title">Audio/Video Tools</h3>
+                <a href="/mp4-to-mp3.html" class="mobile-menu-item">MP4 to MP3</a>
+                <a href="/audio-converter.html" class="mobile-menu-item">Audio Converter</a>
+                <a href="/video-compress.html" class="mobile-menu-item">Video Compress</a>
+                <a href="/video-trim.html" class="mobile-menu-item">Video Trim</a>
+                <a href="/gif-maker.html" class="mobile-menu-item">GIF Maker</a>
+                <a href="/video-merger.html" class="mobile-menu-item">Video Merger</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="layout-container">
         <!-- Desktop Sidebar Ad Left -->
         <div class="sidebar-ad desktop-only">
             <div class="ad-placeholder ad-sidebar">
@@ -133,7 +141,7 @@
             </div>
 
             <div class="converter-container">
-                <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()" data-testid="upload-area-pdf">
+                <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
                     <div class="upload-icon">
                         <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -225,224 +233,6 @@
             </div>
         </main>
 
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
-        <script src="js/advanced-options.js"></script>
-        <script src="js/converters/pdf-merge.js"></script>
-    </body>
-    </html>
-                                        <div class="setting-item">
-                                            <label class="setting-label" for="merge-mode">Merge Strategy</label>
-                                            <div class="custom-select-wrapper">
-                                                <select id="merge-mode" class="premium-select" data-testid="select-merge-mode">
-                                                    <option value="append" selected>Sequential - Preserve file order</option>
-                                                    <option value="interleave">Interleave - Alternate pages</option>
-                                                    <option value="custom">Custom - Advanced arrangement</option>
-                                                    <option value="split-merge">Split & Merge - Organize by sections</option>
-                                                </select>
-                                                <div class="select-icon">
-                                                    <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                                                    </svg>
-                                                </div>
-                                            </div>
-                                            <p class="setting-hint">Choose how to combine pages from multiple PDFs</p>
-                                        </div>
-
-                                        <div class="setting-item">
-                                            <label class="setting-label" for="page-orientation">Page Orientation</label>
-                                            <div class="custom-select-wrapper">
-                                                <select id="page-orientation" class="premium-select">
-                                                    <option value="preserve" selected>Preserve original</option>
-                                                    <option value="portrait">Force portrait</option>
-                                                    <option value="landscape">Force landscape</option>
-                                                    <option value="auto-rotate">Auto-rotate for best fit</option>
-                                                </select>
-                                                <div class="select-icon">
-                                                    <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                                                    </svg>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Quality & Optimization -->
-                                <div class="settings-category">
-                                    <h4 class="category-title">Quality & Optimization</h4>
-                                    <div class="settings-row">
-                                        <div class="setting-item">
-                                            <label class="setting-label" for="output-quality">Output Quality</label>
-                                            <div class="custom-select-wrapper">
-                                                <select id="output-quality" class="premium-select" data-testid="select-output-quality">
-                                                    <option value="highest">Highest - No compression</option>
-                                                    <option value="high" selected>High - Minimal compression</option>
-                                                    <option value="balanced">Balanced - Optimize size/quality</option>
-                                                    <option value="compact">Compact - Prioritize small size</option>
-                                                </select>
-                                                <div class="select-icon">
-                                                    <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                                                    </svg>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="setting-item">
-                                            <label class="setting-label" for="color-mode">Color Processing</label>
-                                            <div class="custom-select-wrapper">
-                                                <select id="color-mode" class="premium-select">
-                                                    <option value="preserve" selected>Preserve original</option>
-                                                    <option value="optimize-rgb">Optimize RGB</option>
-                                                    <option value="convert-grayscale">Convert to grayscale</option>
-                                                    <option value="enhance-contrast">Enhance contrast</option>
-                                                </select>
-                                                <div class="select-icon">
-                                                    <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                                                    </svg>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Document Structure -->
-                                <div class="settings-category">
-                                    <h4 class="category-title">Document Structure</h4>
-                                    <div class="settings-row">
-                                        <div class="setting-item">
-                                            <label class="setting-label" for="bookmark-handling">Bookmark Management</label>
-                                            <div class="custom-select-wrapper">
-                                                <select id="bookmark-handling" class="premium-select" data-testid="select-bookmark-handling">
-                                                    <option value="preserve" selected>Preserve all bookmarks</option>
-                                                    <option value="merge-smart">Smart merge & organize</option>
-                                                    <option value="create-index">Create file index</option>
-                                                    <option value="remove">Remove all bookmarks</option>
-                                                </select>
-                                                <div class="select-icon">
-                                                    <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                                                    </svg>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="setting-item">
-                                            <label class="setting-label" for="page-numbering">Page Numbering</label>
-                                            <div class="custom-select-wrapper">
-                                                <select id="page-numbering" class="premium-select">
-                                                    <option value="none" selected>No changes</option>
-                                                    <option value="continuous">Continuous numbering</option>
-                                                    <option value="restart-each">Restart for each file</option>
-                                                    <option value="add-footer">Add page numbers in footer</option>
-                                                </select>
-                                                <div class="select-icon">
-                                                    <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                                                    </svg>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Metadata & Security -->
-                                <div class="settings-category">
-                                    <h4 class="category-title">Metadata & Security</h4>
-                                    <div class="settings-row">
-                                        <div class="setting-item">
-                                            <label class="setting-label" for="metadata-handling">Metadata Handling</label>
-                                            <div class="custom-select-wrapper">
-                                                <select id="metadata-handling" class="premium-select" data-testid="select-metadata-handling">
-                                                    <option value="first" selected>Use first PDF metadata</option>
-                                                    <option value="merge-all">Merge all metadata</option>
-                                                    <option value="custom">Custom metadata</option>
-                                                    <option value="clean">Remove all metadata</option>
-                                                </select>
-                                                <div class="select-icon">
-                                                    <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                                                    </svg>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="setting-item">
-                                            <label class="setting-label" for="security-mode">Security Options</label>
-                                            <div class="custom-select-wrapper">
-                                                <select id="security-mode" class="premium-select">
-                                                    <option value="none" selected>No restrictions</option>
-                                                    <option value="print-only">Allow printing only</option>
-                                                    <option value="view-only">View only (no editing)</option>
-                                                    <option value="password-protect">Password protection</option>
-                                                </select>
-                                                <div class="select-icon">
-                                                    <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                                                    </svg>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Progress Section -->
-                    <div id="progress-section" class="progress-section hidden">
-                        <div class="progress-header">
-                            <span class="progress-label">Merging PDFs...</span>
-                            <span id="progress-text" class="progress-text" data-testid="text-progress">0%</span>
-                        </div>
-                        <div class="progress-bar-container">
-                            <div id="progress-bar" class="progress-bar" data-testid="progress-bar" style="width: 0%"></div>
-                        </div>
-                    </div>
-
-                    <!-- Action Buttons -->
-                    <div id="action-buttons" class="action-buttons hidden">
-                        <button id="convert-btn" class="btn btn-primary" data-testid="button-merge">
-                            Merge PDFs
-                        </button>
-                        <button id="clear-btn" class="btn btn-secondary" data-testid="button-clear">
-                            Clear All
-                        </button>
-                    </div>
-
-                    <!-- Download Section -->
-                    <div id="download-section" class="download-section hidden">
-                        <div class="success-message">
-                            <div class="success-header">
-                                <svg class="success-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                                <h3 class="success-title">Merge Complete!</h3>
-                            </div>
-                            <p class="success-text">Your PDF files have been successfully merged.</p>
-                            <div id="download-links" class="download-links" data-testid="download-links">
-                                <!-- Download links will be inserted here -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Tool Information -->
-                <div class="tool-info-section">
-                    <h3 class="info-title">How it works</h3>
-                    <div class="info-content">
-                        <ul class="info-list">
-                            <li>Merge unlimited PDF files into one document</li>
-                            <li>Drag and drop to reorder files before merging</li>
-                            <li>Preserves all formatting and embedded content</li>
-                            <li>No file size limits or watermarks</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </main>
-
         <!-- Desktop Sidebar Ad Right -->
         <div class="sidebar-ad desktop-only">
             <div class="ad-placeholder ad-sidebar">
@@ -451,39 +241,8 @@
         </div>
     </div>
 
-    <!-- Bottom AdSense Banner -->
-    <div class="ad-placeholder ad-banner-bottom">
-        <span class="ad-text">Advertisement Banner (728x90)</span>
-    </div>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h3 class="footer-title">FileFlow</h3>
-                    <p class="footer-description">Professional file conversion tools for everyone.</p>
-                </div>
-                <div class="footer-section">
-                    <h4 class="footer-subtitle">Related Tools</h4>
-                    <ul class="footer-links">
-                        <li><a href="/heic-to-jpg.html" class="footer-link">HEIC to JPG</a></li>
-                        <li><a href="/jpg-to-png.html" class="footer-link">JPG to PNG</a></li>
-                        <li><a href="/mp4-to-mp3.html" class="footer-link">MP4 to MP3</a></li>
-                    </ul>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2024 FileFlow. All rights reserved.</p>
-            </div>
-        </div>
-    </footer>
-
-    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
-    <script src="/js/main.js"></script>
-    <script src="/js/advanced-options.js"></script>
-    <script src="/js/pdf-merge-handler.js"></script>
-    <script src="/js/converters/pdf-converter.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+    <script src="js/advanced-options.js"></script>
+    <script src="js/converters/pdf-merge.js"></script>
 </body>
 </html>
