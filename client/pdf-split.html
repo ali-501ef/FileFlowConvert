@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PDF Split - FileFlow</title>
-    <meta name="description" content="Split PDF files into separate pages or sections with FileFlow's PDF Split tool. Fast, secure, and free online PDF splitting.">
+    <meta name="description" content="Split PDF files into separate pages or custom ranges with FileFlow's PDF Split tool. Fast, secure server processing with automatic file deletion.">
     <link rel="stylesheet" href="styles.css">
     
     <!-- Navigation Script -->
@@ -46,9 +46,9 @@
                         <a href="/pdf-merge.html" class="nav-dropdown-item" data-testid="nav-pdf-merge">PDF Merge</a>
                         <a href="/pdf-split.html" class="nav-dropdown-item" data-testid="nav-pdf-split">PDF Split</a>
                         <a href="/pdf-compress.html" class="nav-dropdown-item" data-testid="nav-pdf-compress">PDF Compress</a>
-                        <a href="/pdf-to-word.html" class="nav-dropdown-item" data-testid="nav-pdf-to-word">PDF to Word</a>
                         <a href="/pdf-rotate.html" class="nav-dropdown-item" data-testid="nav-pdf-rotate">PDF Rotate</a>
                         <a href="/pdf-watermark.html" class="nav-dropdown-item" data-testid="nav-pdf-watermark">PDF Watermark</a>
+                        <a href="/pdf-to-word.html" class="nav-dropdown-item" data-testid="nav-pdf-to-word">PDF to Word</a>
                     </div>
                 </div>
 
@@ -62,211 +62,173 @@
                     </button>
                     <div class="nav-dropdown-content">
                         <a href="/mp4-to-mp3.html" class="nav-dropdown-item" data-testid="nav-mp4-mp3">MP4 to MP3</a>
+                        <a href="/audio-converter.html" class="nav-dropdown-item" data-testid="nav-audio-convert">Audio Converter</a>
                         <a href="/video-compress.html" class="nav-dropdown-item" data-testid="nav-video-compress">Video Compress</a>
-                        <a href="/audio-converter.html" class="nav-dropdown-item" data-testid="nav-audio-converter">Audio Converter</a>
-                        <a href="/video-trim.html" class="nav-dropdown-item" data-testid="nav-video-trim">Video Trim</a>
                         <a href="/gif-maker.html" class="nav-dropdown-item" data-testid="nav-gif-maker">GIF Maker</a>
-                        <a href="/video-merger.html" class="nav-dropdown-item" data-testid="nav-video-merger">Video Merger</a>
+                        <a href="/video-trim.html" class="nav-dropdown-item" data-testid="nav-video-trim">Video Trim</a>
+                        <a href="/video-merger.html" class="nav-dropdown-item" data-testid="nav-video-merge">Video Merger</a>
                     </div>
                 </div>
             </div>
+            
+            <button class="mobile-nav-toggle" data-testid="mobile-nav-toggle">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
         </div>
     </nav>
 
-    <!-- Tool Header Section -->
-    <section class="tool-header-section">
-        <div class="container">
-            <div class="breadcrumb">
-                <a href="/" class="breadcrumb-link" data-testid="breadcrumb-home">Home</a> / 
-                <span data-testid="breadcrumb-current">PDF Split</span>
-            </div>
-            <h1 class="tool-page-title">PDF Split Tool</h1>
-            <p class="tool-page-description">
-                Split your PDF files into separate pages or sections quickly and securely
-            </p>
-        </div>
-    </section>
-
-    <!-- Main Tool Container -->
-    <div class="container">
-        <div class="main-content-wrapper">
-            <!-- Tool Section -->
-            <div class="tool-section">
-                <!-- Upload Section -->
-                <div class="upload-section">
-                    <div class="tool-container">
-                        <h2 class="section-title">Upload PDF File</h2>
-                        <div class="file-drop-zone" id="file-drop-zone" data-testid="file-drop-zone">
-                            <div class="upload-icon">
-                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
-                                </svg>
-                            </div>
-                            <h3 class="upload-title">Drop PDF file here or click to browse</h3>
-                            <p class="upload-instructions">Select a PDF file to split into separate pages</p>
-                            <input type="file" id="file-input" class="file-input" accept=".pdf" data-testid="file-input">
-                        </div>
+    <main class="main">
+        <div class="hero-section">
+            <div class="hero-content">
+                <div class="hero-badge">
+                    <div class="tool-icon bg-orange">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M16 3h5v5"></path>
+                            <path d="m21 3-5 5"></path>
+                            <path d="M8 3H3v5"></path>
+                            <path d="m3 3 5 5"></path>
+                            <path d="M16 21h5v-5"></path>
+                            <path d="m21 21-5-5"></path>
+                            <path d="M8 21H3v-5"></path>
+                            <path d="m3 21 5-5"></path>
+                        </svg>
                     </div>
+                    <span>PDF Tools</span>
                 </div>
-
-                <!-- File List Section -->
-                <div id="file-list" class="file-list-section hidden">
-                    <div class="tool-container">
-                        <h3 class="section-title">Selected File</h3>
-                        <div id="file-cards" class="file-cards" data-testid="file-cards">
-                            <!-- File cards will be inserted here -->
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Split Options -->
-                <div id="split-options" class="options-section hidden">
-                    <div class="tool-container">
-                        <h3 class="section-title">Split Options</h3>
-                        <div class="split-method-selector">
-                            <label class="radio-option">
-                                <input type="radio" name="split-method" value="all-pages" checked>
-                                <span class="radio-label">Split into individual pages</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="split-method" value="page-range">
-                                <span class="radio-label">Extract specific page range</span>
-                            </label>
-                        </div>
-                        
-                        <div id="page-range-options" class="page-range-options hidden">
-                            <div class="input-group">
-                                <label>From page:</label>
-                                <input type="number" id="start-page" min="1" value="1">
-                            </div>
-                            <div class="input-group">
-                                <label>To page:</label>
-                                <input type="number" id="end-page" min="1" value="1">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Action Buttons -->
-                <div id="action-buttons" class="action-section hidden">
-                    <div class="tool-container">
-                        <div class="button-group">
-                            <button id="split-btn" class="btn btn-primary" data-testid="split-btn">
-                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
-                                </svg>
-                                Split PDF
-                            </button>
-                            <button id="clear-files" class="btn btn-secondary" data-testid="clear-files">Clear Files</button>
-                        </div>
-                    </div>
+                <h1 class="hero-title">PDF Split</h1>
+                <p class="hero-description">Split PDF into separate pages or custom ranges</p>
+                <div class="hero-features">
+                    <span class="feature-tag">✓ Custom page ranges</span>
+                    <span class="feature-tag">✓ Individual pages</span>
+                    <span class="feature-tag">✓ Preview splitting</span>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <!-- Branding Section -->
-                <div class="footer-section">
-                    <h3 class="footer-title">FileFlow</h3>
-                    <p class="footer-description">Professional file conversion tools for everyone.</p>
+        <div class="converter-container">
+            <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()" data-testid="upload-area-pdf-split">
+                <div class="upload-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+                        <polyline points="14,2 14,8 20,8"></polyline>
+                    </svg>
                 </div>
-                
-                <!-- PDF Tools -->
-                <div class="footer-section">
-                    <h4 class="footer-subtitle">PDF Tools</h4>
-                    <ul class="footer-links">
-                        <li><a href="/pdf-merge.html" class="footer-link" data-testid="footer-pdf-merge">PDF Merge</a></li>
-                        <li><a href="/pdf-split.html" class="footer-link" data-testid="footer-pdf-split">PDF Split</a></li>
-                        <li><a href="/pdf-compress.html" class="footer-link" data-testid="footer-pdf-compress">PDF Compress</a></li>
-                        <li><a href="/pdf-to-word.html" class="footer-link" data-testid="footer-pdf-to-word">PDF to Word</a></li>
-                        <li><a href="/pdf-rotate.html" class="footer-link" data-testid="footer-pdf-rotate">PDF Rotate</a></li>
-                        <li><a href="/pdf-watermark.html" class="footer-link" data-testid="footer-pdf-watermark">PDF Watermark</a></li>
-                    </ul>
+                <h3>Drop your PDF file here</h3>
+                <p>or click anywhere to browse files</p>
+                <p class="supported-formats">PDF files only</p>
+                <input type="file" id="fileInput" accept=".pdf" hidden>
+            </div>
+
+            <div class="advanced-options" id="advancedOptions">
+                <div class="options-header" id="optionsToggle">
+                    <div class="options-title">
+                        <svg class="options-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z"/>
+                            <path d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/>
+                            <path d="M12 2v2"/>
+                            <path d="M12 20v2"/>
+                            <path d="m4.93 4.93 1.41 1.41"/>
+                            <path d="m17.66 17.66 1.41 1.41"/>
+                            <path d="M2 12h2"/>
+                            <path d="M20 12h2"/>
+                            <path d="m6.34 17.66-1.41 1.41"/>
+                            <path d="m19.07 4.93-1.41 1.41"/>
+                        </svg>
+                        <span>Advanced Options</span>
+                    </div>
+                    <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m6 9 6 6 6-6"/>
+                    </svg>
                 </div>
-                
-                <!-- Image Tools -->
-                <div class="footer-section">
-                    <h4 class="footer-subtitle">Image Tools</h4>
-                    <ul class="footer-links">
-                        <li><a href="/convert-to-jpeg.html" class="footer-link" data-testid="footer-convert-jpeg">Convert to JPEG</a></li>
-                        <li><a href="/heic-to-jpg.html" class="footer-link" data-testid="footer-heic-jpg">HEIC to JPG</a></li>
-                        <li><a href="/jpg-to-png.html" class="footer-link" data-testid="footer-jpg-png">JPG to PNG</a></li>
-                    </ul>
-                </div>
-                
-                <!-- Audio/Video Tools -->
-                <div class="footer-section">
-                    <h4 class="footer-subtitle">Audio/Video Tools</h4>
-                    <ul class="footer-links">
-                        <li><a href="/mp4-to-mp3.html" class="footer-link" data-testid="footer-mp4-mp3">MP4 to MP3</a></li>
-                        <li><a href="/video-compress.html" class="footer-link" data-testid="footer-video-compress">Video Compress</a></li>
-                        <li><a href="/audio-converter.html" class="footer-link" data-testid="footer-audio-converter">Audio Converter</a></li>
-                        <li><a href="/video-trim.html" class="footer-link" data-testid="footer-video-trim">Video Trim</a></li>
-                        <li><a href="/gif-maker.html" class="footer-link" data-testid="footer-gif-maker">GIF Maker</a></li>
-                        <li><a href="/video-merger.html" class="footer-link" data-testid="footer-video-merger">Video Merger</a></li>
-                    </ul>
-                </div>
-                
-                <!-- Support Links -->
-                <div class="footer-section">
-                    <h4 class="footer-subtitle">Support</h4>
-                    <ul class="footer-links">
-                        <li><a href="mailto:support@fileflow.com" class="footer-link" data-testid="footer-contact">Contact</a></li>
-                        <li><a href="#" class="footer-link" data-testid="footer-help">Help Center</a></li>
-                    </ul>
-                </div>
-                
-                <!-- Legal Links -->
-                <div class="footer-section">
-                    <h4 class="footer-subtitle">Legal</h4>
-                    <ul class="footer-links">
-                        <li><a href="/privacy-policy.html" class="footer-link" data-testid="footer-privacy">Privacy Policy</a></li>
-                        <li><a href="/terms-of-use.html" class="footer-link" data-testid="footer-terms">Terms of Use</a></li>
-                    </ul>
+                <div class="options-content" id="optionsContent">
+                    <div class="option-group">
+                        <label for="splitMode">Split Mode</label>
+                        <select id="splitMode">
+                            <option value="all">Split into individual pages</option>
+                            <option value="range">Split by page range</option>
+                            <option value="interval">Split by interval</option>
+                        </select>
+                    </div>
+                    <div class="option-group" id="rangeGroup" style="display: none;">
+                        <label for="pageRange">Page Range (e.g., 1-5, 8, 10-12)</label>
+                        <input type="text" id="pageRange" placeholder="1-5, 8, 10-12">
+                    </div>
+                    <div class="option-group" id="intervalGroup" style="display: none;">
+                        <label for="intervalSize">Pages per file</label>
+                        <input type="number" id="intervalSize" min="1" value="1">
+                    </div>
                 </div>
             </div>
-            <div class="footer-bottom">
-                <p>&copy; 2024 FileFlow. All rights reserved.</p>
+
+            <div class="file-preview" id="filePreview" style="display: none;">
+                <div class="preview-header">
+                    <h3 id="fileName"></h3>
+                    <span id="fileSize"></span>
+                </div>
+                <div class="pdf-info" id="pdfInfo"></div>
+            </div>
+
+            <button class="convert-btn" id="convertBtn" disabled>
+                <span class="btn-text">Split PDF</span>
+                <div class="btn-loader" style="display: none;"></div>
+            </button>
+
+            <!-- Tool Information Section -->
+            <div class="tool-info-section">
+                <div class="info-grid">
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+                                <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+                                <path d="M12 11h4"/>
+                                <path d="M12 16h4"/>
+                                <path d="M8 11h.01"/>
+                                <path d="M8 16h.01"/>
+                            </svg>
+                        </div>
+                        <h3>Extract Pages</h3>
+                        <p>Extract specific pages or page ranges from large PDF documents. Perfect for sharing individual sections or chapters from reports and manuals.</p>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+                                <path d="M7 8h10v8H7z"/>
+                            </svg>
+                        </div>
+                        <h3>Flexible Options</h3>
+                        <p>Split by individual pages, specific ranges, or equal intervals. Our tool adapts to your workflow whether you need single pages or grouped sections.</p>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                <polyline points="7,10 12,15 17,10"/>
+                                <line x1="12" y1="15" x2="12" y2="3"/>
+                            </svg>
+                        </div>
+                        <h3>Batch Download</h3>
+                        <p>Download all split files at once or individually. Each extracted page maintains its original quality and formatting for professional results.</p>
+                    </div>
+                </div>
+                <div class="tool-benefits">
+                    <h3>Why Split PDFs?</h3>
+                    <p>PDF splitting is crucial for document organization and sharing efficiency. Large documents often contain multiple sections that serve different purposes or audiences. By splitting PDFs, you can share relevant sections without overwhelming recipients, reduce file sizes for faster transmission, and organize content for better accessibility and navigation.</p>
+                </div>
+            </div>
+
+            <div class="results" id="results" style="display: none;">
+                <h3>Split Results</h3>
+                <div class="results-list" id="resultsList"></div>
             </div>
         </div>
-    </footer>
+    </main>
 
-    <script src="/js/main.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const dropZone = document.querySelector('.file-drop-zone');
-            const fileInput = document.getElementById('file-input');
-            const splitBtn = document.getElementById('split-btn');
-            
-            dropZone.addEventListener('click', () => fileInput.click());
-            
-            fileInput.addEventListener('change', function(e) {
-                const files = Array.from(e.target.files);
-                if (files.length > 0) {
-                    document.getElementById('file-list').classList.remove('hidden');
-                    document.getElementById('split-options').classList.remove('hidden');
-                    document.getElementById('action-buttons').classList.remove('hidden');
-                    
-                    const fileCards = document.getElementById('file-cards');
-                    fileCards.innerHTML = files.map(file => `
-                        <div class="file-card">
-                            <div class="file-info">
-                                <div class="file-name">${file.name}</div>
-                                <div class="file-size">${(file.size / 1024 / 1024).toFixed(2)} MB</div>
-                            </div>
-                        </div>
-                    `).join('');
-                }
-            });
-            
-            splitBtn.addEventListener('click', function() {
-                alert('PDF Split functionality will be implemented.');
-            });
-        });
-    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+    <script src="js/advanced-options.js"></script>
+    <script src="js/converters/pdf-split.js"></script>
 </body>
 </html>
