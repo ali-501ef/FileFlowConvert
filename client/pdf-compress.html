@@ -116,53 +116,71 @@
                 <input type="file" id="fileInput" accept=".pdf" hidden>
             </div>
 
-            <div class="advanced-options" id="advancedOptions">
-                <div class="options-header" id="optionsToggle">
-                    <div class="options-title">
-                        <svg class="options-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z"/>
-                            <path d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/>
-                            <path d="M12 2v2"/>
-                            <path d="M12 20v2"/>
-                            <path d="m4.93 4.93 1.41 1.41"/>
-                            <path d="m17.66 17.66 1.41 1.41"/>
-                            <path d="M2 12h2"/>
-                            <path d="M20 12h2"/>
-                            <path d="m6.34 17.66-1.41 1.41"/>
-                            <path d="m19.07 4.93-1.41 1.41"/>
+            <div id="advanced-options-section" class="premium-advanced-section">
+                <button id="advanced-toggle" class="advanced-toggle" data-testid="button-advanced-toggle">
+                    <span class="advanced-toggle-text">
+                        <svg class="advanced-toggle-icon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                         </svg>
-                        <span>Advanced Options</span>
-                    </div>
-                    <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="m6 9 6 6 6-6"/>
+                        Advanced Options
+                    </span>
+                    <svg class="advanced-chevron" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
-                </div>
-                <div class="options-content" id="optionsContent">
-                    <div class="option-group">
-                        <label for="compressionLevel">Compression Level</label>
-                        <select id="compressionLevel">
-                            <option value="low">Low (Better quality, larger size)</option>
-                            <option value="medium" selected>Medium (Balanced)</option>
-                            <option value="high">High (Smaller size, some quality loss)</option>
-                            <option value="maximum">Maximum (Smallest size)</option>
-                        </select>
-                    </div>
-                    <div class="option-group">
-                        <label for="imageQuality">Image Quality</label>
-                        <select id="imageQuality">
-                            <option value="90">High (90%)</option>
-                            <option value="75" selected>Medium (75%)</option>
-                            <option value="60">Low (60%)</option>
-                            <option value="45">Very Low (45%)</option>
-                        </select>
-                    </div>
-                    <div class="option-group">
-                        <input type="checkbox" id="removeMetadata" checked>
-                        <label for="removeMetadata">Remove metadata to reduce size</label>
-                    </div>
-                    <div class="option-group">
-                        <input type="checkbox" id="optimizeImages" checked>
-                        <label for="optimizeImages">Optimize embedded images</label>
+                </button>
+                
+                <div id="advanced-content" class="premium-content" style="display: none;">
+                    <div class="settings-categories">
+                        <div class="settings-category">
+                            <h4 class="category-title">Compression Settings</h4>
+                            <div class="settings-row">
+                                <div class="setting-item">
+                                    <label class="setting-label" for="compressionLevel">Compression Level</label>
+                                    <div class="custom-select-wrapper">
+                                        <select id="compressionLevel" class="premium-select">
+                                            <option value="medium" selected>Medium (Balanced)</option>
+                                            <option value="low">Low (Better quality, larger size)</option>
+                                            <option value="high">High (Smaller size, some quality loss)</option>
+                                            <option value="maximum">Maximum (Smallest size)</option>
+                                        </select>
+                                        <div class="select-icon">
+                                            <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="setting-item">
+                                    <label class="setting-label" for="imageQuality">Image Quality</label>
+                                    <div class="custom-select-wrapper">
+                                        <select id="imageQuality" class="premium-select">
+                                            <option value="75" selected>Medium (75%)</option>
+                                            <option value="90">High (90%)</option>
+                                            <option value="60">Low (60%)</option>
+                                            <option value="45">Very Low (45%)</option>
+                                        </select>
+                                        <div class="select-icon">
+                                            <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="settings-row">
+                                <div class="checkbox-group">
+                                    <div class="premium-checkbox-item">
+                                        <input type="checkbox" id="removeMetadata" class="premium-checkbox" checked>
+                                        <label for="removeMetadata" class="checkbox-label">Remove metadata to reduce size</label>
+                                    </div>
+                                    <div class="premium-checkbox-item">
+                                        <input type="checkbox" id="optimizeImages" class="premium-checkbox" checked>
+                                        <label for="optimizeImages" class="checkbox-label">Optimize embedded images</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
