@@ -726,6 +726,8 @@ body {
     margin-right: 0.75rem;
     accent-color: var(--primary);
     cursor: pointer;
+    vertical-align: middle;
+    margin-top: 2px;
 }
 
 .option-group input[type="checkbox"] + label {
@@ -733,6 +735,7 @@ body {
     cursor: pointer;
     margin-bottom: 0;
     vertical-align: middle;
+    line-height: 1.4;
 }
 
 .options-grid {
