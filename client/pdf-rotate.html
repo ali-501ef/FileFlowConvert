@@ -4,22 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PDF Rotate - FileFlow</title>
-    <meta name="description" content="Rotate PDF pages to correct orientation with FileFlow's PDF Rotate tool. Individual pages or batch rotation with 90° increments.">
+    <meta name="description" content="Rotate PDF pages clockwise or counterclockwise with FileFlow's PDF Rotate tool. Adjust page orientation easily.">
     <link rel="stylesheet" href="styles.css">
-    
-    <!-- Navigation Script -->
     <script src="/js/navigation.js" defer></script>
 </head>
 <body>
-    <!-- Sticky Navigation Bar -->
     <nav class="sticky-nav">
         <div class="nav-container">
             <div class="nav-brand">
                 <a href="/" data-testid="nav-brand">FileFlow</a>
             </div>
-            
             <div class="nav-menu">
-                <!-- Image Tools -->
                 <div class="nav-dropdown">
                     <button class="nav-dropdown-trigger" data-testid="nav-image-trigger">
                         Image Tools
@@ -33,8 +28,6 @@
                         <a href="/jpg-to-png.html" class="nav-dropdown-item" data-testid="nav-jpg-png">JPG to PNG</a>
                     </div>
                 </div>
-
-                <!-- PDF Tools -->
                 <div class="nav-dropdown">
                     <button class="nav-dropdown-trigger" data-testid="nav-pdf-trigger">
                         PDF Tools
@@ -46,13 +39,11 @@
                         <a href="/pdf-merge.html" class="nav-dropdown-item" data-testid="nav-pdf-merge">PDF Merge</a>
                         <a href="/pdf-split.html" class="nav-dropdown-item" data-testid="nav-pdf-split">PDF Split</a>
                         <a href="/pdf-compress.html" class="nav-dropdown-item" data-testid="nav-pdf-compress">PDF Compress</a>
+                        <a href="/pdf-to-word.html" class="nav-dropdown-item" data-testid="nav-pdf-to-word">PDF to Word</a>
                         <a href="/pdf-rotate.html" class="nav-dropdown-item" data-testid="nav-pdf-rotate">PDF Rotate</a>
                         <a href="/pdf-watermark.html" class="nav-dropdown-item" data-testid="nav-pdf-watermark">PDF Watermark</a>
-                        <a href="/pdf-to-word.html" class="nav-dropdown-item" data-testid="nav-pdf-to-word">PDF to Word</a>
                     </div>
                 </div>
-
-                <!-- Audio/Video Tools -->
                 <div class="nav-dropdown">
                     <button class="nav-dropdown-trigger" data-testid="nav-media-trigger">
                         Audio/Video Tools
@@ -62,194 +53,110 @@
                     </button>
                     <div class="nav-dropdown-content">
                         <a href="/mp4-to-mp3.html" class="nav-dropdown-item" data-testid="nav-mp4-mp3">MP4 to MP3</a>
-                        <a href="/audio-converter.html" class="nav-dropdown-item" data-testid="nav-audio-convert">Audio Converter</a>
                         <a href="/video-compress.html" class="nav-dropdown-item" data-testid="nav-video-compress">Video Compress</a>
-                        <a href="/gif-maker.html" class="nav-dropdown-item" data-testid="nav-gif-maker">GIF Maker</a>
+                        <a href="/audio-converter.html" class="nav-dropdown-item" data-testid="nav-audio-converter">Audio Converter</a>
                         <a href="/video-trim.html" class="nav-dropdown-item" data-testid="nav-video-trim">Video Trim</a>
-                        <a href="/video-merger.html" class="nav-dropdown-item" data-testid="nav-video-merge">Video Merger</a>
+                        <a href="/gif-maker.html" class="nav-dropdown-item" data-testid="nav-gif-maker">GIF Maker</a>
+                        <a href="/video-merger.html" class="nav-dropdown-item" data-testid="nav-video-merger">Video Merger</a>
                     </div>
                 </div>
             </div>
-            
-            <button class="mobile-nav-toggle" data-testid="mobile-nav-toggle">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-                </svg>
-            </button>
         </div>
     </nav>
 
-    <main class="main">
-        <div class="hero-section">
-            <div class="hero-content">
-                <div class="hero-badge">
-                    <div class="tool-icon bg-purple">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/>
-                            <path d="M21 3v5h-5"/>
-                        </svg>
+    <section class="tool-header-section">
+        <div class="container">
+            <div class="breadcrumb">
+                <a href="/" class="breadcrumb-link" data-testid="breadcrumb-home">Home</a> / 
+                <span data-testid="breadcrumb-current">PDF Rotate</span>
+            </div>
+            <h1 class="tool-page-title">PDF Rotate Tool</h1>
+            <p class="tool-page-description">
+                Rotate PDF pages clockwise or counterclockwise to fix orientation
+            </p>
+        </div>
+    </section>
+
+    <div class="container">
+        <div class="main-content-wrapper">
+            <div class="tool-section">
+                <div class="upload-section">
+                    <div class="tool-container">
+                        <h2 class="section-title">Upload PDF File</h2>
+                        <div class="file-drop-zone" id="file-drop-zone" data-testid="file-drop-zone">
+                            <div class="upload-icon">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                                </svg>
+                            </div>
+                            <h3 class="upload-title">Drop PDF file here or click to browse</h3>
+                            <p class="upload-instructions">Select a PDF file to rotate pages</p>
+                            <input type="file" id="file-input" class="file-input" accept=".pdf" data-testid="file-input">
+                        </div>
                     </div>
-                    <span>PDF Tools</span>
-                </div>
-                <h1 class="hero-title">PDF Rotate</h1>
-                <p class="hero-description">Rotate PDF pages to fix orientation issues</p>
-                <div class="hero-features">
-                    <span class="feature-tag">✓ Individual page control</span>
-                    <span class="feature-tag">✓ Batch rotation</span>
-                    <span class="feature-tag">✓ Real-time preview</span>
                 </div>
             </div>
         </div>
+    </div>
 
-        <div class="converter-container">
-            <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()" data-testid="upload-area-pdf-rotate">
-                <div class="upload-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
-                        <polyline points="14,2 14,8 20,8"></polyline>
-                    </svg>
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3 class="footer-title">FileFlow</h3>
+                    <p class="footer-description">Professional file conversion tools for everyone.</p>
                 </div>
-                <h3>Drop your PDF file here</h3>
-                <p>or click anywhere to browse files</p>
-                <p class="supported-formats">PDF files only</p>
-                <input type="file" id="fileInput" accept=".pdf" hidden>
-            </div>
-
-            <div class="page-preview" id="pagePreview" style="display: none;">
-                <h3>PDF Pages</h3>
-                <div class="pages-grid" id="pagesGrid"></div>
-                <div class="rotation-controls">
-                    <button class="rotate-all-btn" id="rotateAllLeft">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
-                            <path d="M3 3v5h5"/>
-                        </svg>
-                        Rotate All Left
-                    </button>
-                    <button class="rotate-all-btn" id="rotateAllRight">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/>
-                            <path d="M21 3v5h-5"/>
-                        </svg>
-                        Rotate All Right
-                    </button>
+                <div class="footer-section">
+                    <h4 class="footer-subtitle">PDF Tools</h4>
+                    <ul class="footer-links">
+                        <li><a href="/pdf-merge.html" class="footer-link" data-testid="footer-pdf-merge">PDF Merge</a></li>
+                        <li><a href="/pdf-split.html" class="footer-link" data-testid="footer-pdf-split">PDF Split</a></li>
+                        <li><a href="/pdf-compress.html" class="footer-link" data-testid="footer-pdf-compress">PDF Compress</a></li>
+                        <li><a href="/pdf-to-word.html" class="footer-link" data-testid="footer-pdf-to-word">PDF to Word</a></li>
+                        <li><a href="/pdf-rotate.html" class="footer-link" data-testid="footer-pdf-rotate">PDF Rotate</a></li>
+                        <li><a href="/pdf-watermark.html" class="footer-link" data-testid="footer-pdf-watermark">PDF Watermark</a></li>
+                    </ul>
                 </div>
-            </div>
-
-            <div class="advanced-options" id="advancedOptions">
-                <div class="options-header" id="optionsToggle">
-                    <div class="options-title">
-                        <svg class="options-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z"/>
-                            <path d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/>
-                            <path d="M12 2v2"/>
-                            <path d="M12 20v2"/>
-                            <path d="m4.93 4.93 1.41 1.41"/>
-                            <path d="m17.66 17.66 1.41 1.41"/>
-                            <path d="M2 12h2"/>
-                            <path d="M20 12h2"/>
-                            <path d="m6.34 17.66-1.41 1.41"/>
-                            <path d="m19.07 4.93-1.41 1.41"/>
-                        </svg>
-                        <span>Advanced Options</span>
-                    </div>
-                    <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="m6 9 6 6 6-6"/>
-                    </svg>
+                <div class="footer-section">
+                    <h4 class="footer-subtitle">Image Tools</h4>
+                    <ul class="footer-links">
+                        <li><a href="/convert-to-jpeg.html" class="footer-link" data-testid="footer-convert-jpeg">Convert to JPEG</a></li>
+                        <li><a href="/heic-to-jpg.html" class="footer-link" data-testid="footer-heic-jpg">HEIC to JPG</a></li>
+                        <li><a href="/jpg-to-png.html" class="footer-link" data-testid="footer-jpg-png">JPG to PNG</a></li>
+                    </ul>
                 </div>
-                <div class="options-content" id="optionsContent">
-                    <div class="option-group">
-                        <label for="rotationAngle">Default Rotation</label>
-                        <select id="rotationAngle">
-                            <option value="90">90° Clockwise</option>
-                            <option value="180">180° (Upside down)</option>
-                            <option value="270">270° (90° Counter-clockwise)</option>
-                        </select>
-                    </div>
-                    <div class="checkbox-group">
-                        <div class="premium-checkbox-item">
-                            <input type="checkbox" id="autoDetect" class="premium-checkbox">
-                            <label for="autoDetect" class="checkbox-label">Auto-detect page orientation</label>
-                        </div>
-                        <div class="premium-checkbox-item">
-                            <input type="checkbox" id="preserveAspectRatio" class="premium-checkbox" checked>
-                            <label for="preserveAspectRatio" class="checkbox-label">Preserve aspect ratio</label>
-                        </div>
-                    </div>
+                <div class="footer-section">
+                    <h4 class="footer-subtitle">Audio/Video Tools</h4>
+                    <ul class="footer-links">
+                        <li><a href="/mp4-to-mp3.html" class="footer-link" data-testid="footer-mp4-mp3">MP4 to MP3</a></li>
+                        <li><a href="/video-compress.html" class="footer-link" data-testid="footer-video-compress">Video Compress</a></li>
+                        <li><a href="/audio-converter.html" class="footer-link" data-testid="footer-audio-converter">Audio Converter</a></li>
+                        <li><a href="/video-trim.html" class="footer-link" data-testid="footer-video-trim">Video Trim</a></li>
+                        <li><a href="/gif-maker.html" class="footer-link" data-testid="footer-gif-maker">GIF Maker</a></li>
+                        <li><a href="/video-merger.html" class="footer-link" data-testid="footer-video-merger">Video Merger</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4 class="footer-subtitle">Support</h4>
+                    <ul class="footer-links">
+                        <li><a href="mailto:support@fileflow.com" class="footer-link" data-testid="footer-contact">Contact</a></li>
+                        <li><a href="#" class="footer-link" data-testid="footer-help">Help Center</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4 class="footer-subtitle">Legal</h4>
+                    <ul class="footer-links">
+                        <li><a href="/privacy-policy.html" class="footer-link" data-testid="footer-privacy">Privacy Policy</a></li>
+                        <li><a href="/terms-of-use.html" class="footer-link" data-testid="footer-terms">Terms of Use</a></li>
+                    </ul>
                 </div>
             </div>
-
-            <button class="convert-btn" id="convertBtn" disabled>
-                <span class="btn-text">Apply Rotations</span>
-                <div class="btn-loader" style="display: none;"></div>
-            </button>
-
-            <!-- Tool Information Section -->
-            <div class="tool-info-section">
-                <div class="info-grid">
-                    <div class="info-card">
-                        <div class="info-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
-                                <path d="M3 3v5h5"/>
-                            </svg>
-                        </div>
-                        <h3>Fix Orientation</h3>
-                        <p>Correct improperly oriented PDF pages that appear upside down or sideways. Essential for documents scanned at wrong angles.</p>
-                    </div>
-                    <div class="info-card">
-                        <div class="info-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
-                                <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
-                                <path d="M9 14l2 2 4-4"/>
-                            </svg>
-                        </div>
-                        <h3>Page-by-Page Control</h3>
-                        <p>Rotate individual pages independently or apply bulk rotations to all pages. Perfect precision for mixed-orientation documents.</p>
-                    </div>
-                    <div class="info-card">
-                        <div class="info-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z"/>
-                                <path d="M12 6v6l4 2"/>
-                            </svg>
-                        </div>
-                        <h3>Standard Angles</h3>
-                        <p>Supports 90°, 180°, and 270° rotations with visual preview. Ensures professional document presentation and readability.</p>
-                    </div>
-                </div>
-                <div class="tool-benefits">
-                    <h3>Why Rotate PDFs?</h3>
-                    <p>PDF rotation is crucial for document readability and professional presentation. Scanned documents often have incorrect orientations, making them difficult to read or print properly. Our rotation tool fixes these issues while preserving document quality, ensuring your PDFs display correctly across all devices and applications.</p>
-                </div>
-            </div>
-
-            <div class="progress-container" id="progressContainer" style="display: none;">
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progressFill"></div>
-                </div>
-                <div class="progress-text" id="progressText">0%</div>
-            </div>
-
-            <div class="results" id="results" style="display: none;">
-                <h3>Rotation Complete</h3>
-                <div class="result-actions">
-                    <button class="download-btn" id="downloadBtn">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                            <polyline points="7,10 12,15 17,10"></polyline>
-                            <line x1="12" y1="15" x2="12" y2="3"></line>
-                        </svg>
-                        Download Rotated PDF
-                    </button>
-                </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 FileFlow. All rights reserved.</p>
             </div>
         </div>
-    </main>
+    </footer>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
-    <script src="js/advanced-options.js"></script>
-    <script src="js/converters/pdf-rotate.js"></script>
+    <script src="/js/main.js"></script>
 </body>
 </html>

@@ -4,22 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PDF to Word - FileFlow</title>
-    <meta name="description" content="Convert PDF documents to editable Word files with FileFlow's PDF to Word converter. Preserve layout and formatting with advanced text recognition.">
+    <meta name="description" content="Convert PDF files to Word documents (.docx) with FileFlow's PDF to Word tool. Maintain formatting and layout.">
     <link rel="stylesheet" href="styles.css">
-    
-    <!-- Navigation Script -->
     <script src="/js/navigation.js" defer></script>
 </head>
 <body>
-    <!-- Sticky Navigation Bar -->
     <nav class="sticky-nav">
         <div class="nav-container">
             <div class="nav-brand">
                 <a href="/" data-testid="nav-brand">FileFlow</a>
             </div>
-            
             <div class="nav-menu">
-                <!-- Image Tools -->
                 <div class="nav-dropdown">
                     <button class="nav-dropdown-trigger" data-testid="nav-image-trigger">
                         Image Tools
@@ -33,8 +28,6 @@
                         <a href="/jpg-to-png.html" class="nav-dropdown-item" data-testid="nav-jpg-png">JPG to PNG</a>
                     </div>
                 </div>
-
-                <!-- PDF Tools -->
                 <div class="nav-dropdown">
                     <button class="nav-dropdown-trigger" data-testid="nav-pdf-trigger">
                         PDF Tools
@@ -46,13 +39,11 @@
                         <a href="/pdf-merge.html" class="nav-dropdown-item" data-testid="nav-pdf-merge">PDF Merge</a>
                         <a href="/pdf-split.html" class="nav-dropdown-item" data-testid="nav-pdf-split">PDF Split</a>
                         <a href="/pdf-compress.html" class="nav-dropdown-item" data-testid="nav-pdf-compress">PDF Compress</a>
+                        <a href="/pdf-to-word.html" class="nav-dropdown-item" data-testid="nav-pdf-to-word">PDF to Word</a>
                         <a href="/pdf-rotate.html" class="nav-dropdown-item" data-testid="nav-pdf-rotate">PDF Rotate</a>
                         <a href="/pdf-watermark.html" class="nav-dropdown-item" data-testid="nav-pdf-watermark">PDF Watermark</a>
-                        <a href="/pdf-to-word.html" class="nav-dropdown-item" data-testid="nav-pdf-to-word">PDF to Word</a>
                     </div>
                 </div>
-
-                <!-- Audio/Video Tools -->
                 <div class="nav-dropdown">
                     <button class="nav-dropdown-trigger" data-testid="nav-media-trigger">
                         Audio/Video Tools
@@ -62,198 +53,110 @@
                     </button>
                     <div class="nav-dropdown-content">
                         <a href="/mp4-to-mp3.html" class="nav-dropdown-item" data-testid="nav-mp4-mp3">MP4 to MP3</a>
-                        <a href="/audio-converter.html" class="nav-dropdown-item" data-testid="nav-audio-convert">Audio Converter</a>
                         <a href="/video-compress.html" class="nav-dropdown-item" data-testid="nav-video-compress">Video Compress</a>
-                        <a href="/gif-maker.html" class="nav-dropdown-item" data-testid="nav-gif-maker">GIF Maker</a>
+                        <a href="/audio-converter.html" class="nav-dropdown-item" data-testid="nav-audio-converter">Audio Converter</a>
                         <a href="/video-trim.html" class="nav-dropdown-item" data-testid="nav-video-trim">Video Trim</a>
-                        <a href="/video-merger.html" class="nav-dropdown-item" data-testid="nav-video-merge">Video Merger</a>
+                        <a href="/gif-maker.html" class="nav-dropdown-item" data-testid="nav-gif-maker">GIF Maker</a>
+                        <a href="/video-merger.html" class="nav-dropdown-item" data-testid="nav-video-merger">Video Merger</a>
                     </div>
                 </div>
             </div>
-            
-            <button class="mobile-nav-toggle" data-testid="mobile-nav-toggle">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-                </svg>
-            </button>
         </div>
     </nav>
 
-    <main class="main">
-        <div class="hero-section">
-            <div class="hero-content">
-                <div class="hero-badge">
-                    <div class="tool-icon bg-blue">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                        </svg>
+    <section class="tool-header-section">
+        <div class="container">
+            <div class="breadcrumb">
+                <a href="/" class="breadcrumb-link" data-testid="breadcrumb-home">Home</a> / 
+                <span data-testid="breadcrumb-current">PDF to Word</span>
+            </div>
+            <h1 class="tool-page-title">PDF to Word Converter</h1>
+            <p class="tool-page-description">
+                Convert PDF documents to editable Word files while maintaining formatting
+            </p>
+        </div>
+    </section>
+
+    <div class="container">
+        <div class="main-content-wrapper">
+            <div class="tool-section">
+                <div class="upload-section">
+                    <div class="tool-container">
+                        <h2 class="section-title">Upload PDF File</h2>
+                        <div class="file-drop-zone" id="file-drop-zone" data-testid="file-drop-zone">
+                            <div class="upload-icon">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                                </svg>
+                            </div>
+                            <h3 class="upload-title">Drop PDF file here or click to browse</h3>
+                            <p class="upload-instructions">Select a PDF file to convert to Word document</p>
+                            <input type="file" id="file-input" class="file-input" accept=".pdf" data-testid="file-input">
+                        </div>
                     </div>
-                    <span>PDF Tools</span>
-                </div>
-                <h1 class="hero-title">PDF to Word</h1>
-                <p class="hero-description">Convert PDF documents to editable Word files</p>
-                <div class="hero-features">
-                    <span class="feature-tag">✓ Format preservation</span>
-                    <span class="feature-tag">✓ OCR text recognition</span>
-                    <span class="feature-tag">✓ Font retention</span>
                 </div>
             </div>
         </div>
+    </div>
 
-        <div class="converter-container">
-            <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()" data-testid="upload-area-pdf-to-word">
-                <div class="upload-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
-                        <polyline points="14,2 14,8 20,8"></polyline>
-                    </svg>
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3 class="footer-title">FileFlow</h3>
+                    <p class="footer-description">Professional file conversion tools for everyone.</p>
                 </div>
-                <h3>Drop your PDF file here</h3>
-                <p>or click anywhere to browse files</p>
-                <p class="supported-formats">PDF files only</p>
-                <input type="file" id="fileInput" accept=".pdf" hidden>
-            </div>
-
-            <div class="advanced-options" id="advancedOptions">
-                <div class="options-header" id="optionsToggle">
-                    <div class="options-title">
-                        <svg class="options-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z"/>
-                            <path d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/>
-                            <path d="M12 2v2"/>
-                            <path d="M12 20v2"/>
-                            <path d="m4.93 4.93 1.41 1.41"/>
-                            <path d="m17.66 17.66 1.41 1.41"/>
-                            <path d="M2 12h2"/>
-                            <path d="M20 12h2"/>
-                            <path d="m6.34 17.66-1.41 1.41"/>
-                            <path d="m19.07 4.93-1.41 1.41"/>
-                        </svg>
-                        <span>Advanced Options</span>
-                    </div>
-                    <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="m6 9 6 6 6-6"/>
-                    </svg>
+                <div class="footer-section">
+                    <h4 class="footer-subtitle">PDF Tools</h4>
+                    <ul class="footer-links">
+                        <li><a href="/pdf-merge.html" class="footer-link" data-testid="footer-pdf-merge">PDF Merge</a></li>
+                        <li><a href="/pdf-split.html" class="footer-link" data-testid="footer-pdf-split">PDF Split</a></li>
+                        <li><a href="/pdf-compress.html" class="footer-link" data-testid="footer-pdf-compress">PDF Compress</a></li>
+                        <li><a href="/pdf-to-word.html" class="footer-link" data-testid="footer-pdf-to-word">PDF to Word</a></li>
+                        <li><a href="/pdf-rotate.html" class="footer-link" data-testid="footer-pdf-rotate">PDF Rotate</a></li>
+                        <li><a href="/pdf-watermark.html" class="footer-link" data-testid="footer-pdf-watermark">PDF Watermark</a></li>
+                    </ul>
                 </div>
-                <div class="options-content" id="optionsContent">
-                    <div class="option-group">
-                        <label for="outputFormat">Output Format</label>
-                        <select id="outputFormat">
-                            <option value="docx">DOCX (Word 2007+)</option>
-                            <option value="doc">DOC (Word 97-2003)</option>
-                            <option value="rtf">RTF (Rich Text Format)</option>
-                        </select>
-                    </div>
-                    <div class="option-group">
-                        <label for="conversionMode">Conversion Mode</label>
-                        <select id="conversionMode">
-                            <option value="layout">Preserve Layout (Best for forms)</option>
-                            <option value="flowing" selected>Flowing Text (Best for editing)</option>
-                            <option value="mixed">Mixed Mode (Balanced)</option>
-                        </select>
-                    </div>
-                    <div class="checkbox-group">
-                        <div class="premium-checkbox-item">
-                            <input type="checkbox" id="includeImages" class="premium-checkbox" checked>
-                            <label for="includeImages" class="checkbox-label">Include images in conversion</label>
-                        </div>
-                        <div class="premium-checkbox-item">
-                            <input type="checkbox" id="recognizeText" class="premium-checkbox" checked>
-                            <label for="recognizeText" class="checkbox-label">OCR text recognition for scanned PDFs</label>
-                        </div>
-                        <div class="premium-checkbox-item">
-                            <input type="checkbox" id="preserveFormatting" class="premium-checkbox" checked>
-                            <label for="preserveFormatting" class="checkbox-label">Preserve fonts and formatting</label>
-                        </div>
-                    </div>
+                <div class="footer-section">
+                    <h4 class="footer-subtitle">Image Tools</h4>
+                    <ul class="footer-links">
+                        <li><a href="/convert-to-jpeg.html" class="footer-link" data-testid="footer-convert-jpeg">Convert to JPEG</a></li>
+                        <li><a href="/heic-to-jpg.html" class="footer-link" data-testid="footer-heic-jpg">HEIC to JPG</a></li>
+                        <li><a href="/jpg-to-png.html" class="footer-link" data-testid="footer-jpg-png">JPG to PNG</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4 class="footer-subtitle">Audio/Video Tools</h4>
+                    <ul class="footer-links">
+                        <li><a href="/mp4-to-mp3.html" class="footer-link" data-testid="footer-mp4-mp3">MP4 to MP3</a></li>
+                        <li><a href="/video-compress.html" class="footer-link" data-testid="footer-video-compress">Video Compress</a></li>
+                        <li><a href="/audio-converter.html" class="footer-link" data-testid="footer-audio-converter">Audio Converter</a></li>
+                        <li><a href="/video-trim.html" class="footer-link" data-testid="footer-video-trim">Video Trim</a></li>
+                        <li><a href="/gif-maker.html" class="footer-link" data-testid="footer-gif-maker">GIF Maker</a></li>
+                        <li><a href="/video-merger.html" class="footer-link" data-testid="footer-video-merger">Video Merger</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4 class="footer-subtitle">Support</h4>
+                    <ul class="footer-links">
+                        <li><a href="mailto:support@fileflow.com" class="footer-link" data-testid="footer-contact">Contact</a></li>
+                        <li><a href="#" class="footer-link" data-testid="footer-help">Help Center</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4 class="footer-subtitle">Legal</h4>
+                    <ul class="footer-links">
+                        <li><a href="/privacy-policy.html" class="footer-link" data-testid="footer-privacy">Privacy Policy</a></li>
+                        <li><a href="/terms-of-use.html" class="footer-link" data-testid="footer-terms">Terms of Use</a></li>
+                    </ul>
                 </div>
             </div>
-
-            <div class="file-preview" id="filePreview" style="display: none;">
-                <div class="preview-header">
-                    <h3 id="fileName"></h3>
-                    <span id="fileSize"></span>
-                </div>
-                <div class="pdf-info" id="pdfInfo"></div>
-            </div>
-
-            <button class="convert-btn" id="convertBtn" disabled>
-                <span class="btn-text">Convert to Word</span>
-                <div class="btn-loader" style="display: none;"></div>
-            </button>
-
-            <!-- Tool Information Section -->
-            <div class="tool-info-section">
-                <div class="info-grid">
-                    <div class="info-card">
-                        <div class="info-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                                <polyline points="14,2 14,8 20,8"/>
-                                <path d="M16 13H8"/>
-                                <path d="M16 17H8"/>
-                                <path d="M10 9H8"/>
-                            </svg>
-                        </div>
-                        <h3>Editable Documents</h3>
-                        <p>Transform static PDFs into fully editable Word documents. Perfect for updating contracts, editing reports, or collaborating on documents.</p>
-                    </div>
-                    <div class="info-card">
-                        <div class="info-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M9 12l2 2 4-4"/>
-                                <path d="M21 12c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1z"/>
-                                <path d="M3 12c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1z"/>
-                            </svg>
-                        </div>
-                        <h3>OCR Technology</h3>
-                        <p>Advanced OCR recognizes text from scanned PDFs and images, converting them into searchable and editable Word documents with accurate formatting.</p>
-                    </div>
-                    <div class="info-card">
-                        <div class="info-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                                <rect x="7" y="7" width="3" height="9"/>
-                                <rect x="14" y="7" width="3" height="5"/>
-                            </svg>
-                        </div>
-                        <h3>Preserves Layout</h3>
-                        <p>Maintains original formatting, fonts, images, and document structure during conversion for professional-quality Word documents.</p>
-                    </div>
-                </div>
-                <div class="tool-benefits">
-                    <h3>Why Convert PDF to Word?</h3>
-                    <p>Converting PDFs to Word format enables document editing and collaboration that's impossible with static PDFs. Whether you need to update legal documents, modify reports, or incorporate PDF content into new projects, Word conversion provides the flexibility to make changes while preserving the original document's structure and appearance.</p>
-                </div>
-            </div>
-
-            <div class="progress-container" id="progressContainer" style="display: none;">
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progressFill"></div>
-                </div>
-                <div class="progress-text" id="progressText">0%</div>
-                <div class="progress-stage" id="progressStage">Analyzing document...</div>
-            </div>
-
-            <div class="results" id="results" style="display: none;">
-                <h3>Conversion Complete</h3>
-                <div class="conversion-info" id="conversionInfo"></div>
-                <div class="result-actions">
-                    <button class="download-btn" id="downloadBtn">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                            <polyline points="7,10 12,15 17,10"></polyline>
-                            <line x1="12" y1="15" x2="12" y2="3"></line>
-                        </svg>
-                        Download Word Document
-                    </button>
-                </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 FileFlow. All rights reserved.</p>
             </div>
         </div>
-    </main>
+    </footer>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
-    <script src="js/advanced-options.js"></script>
-    <script src="js/converters/pdf-to-word.js"></script>
+    <script src="/js/main.js"></script>
 </body>
 </html>

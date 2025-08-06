@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PDF Compress - FileFlow</title>
-    <meta name="description" content="Reduce PDF file size without quality loss using FileFlow's PDF Compress tool. Smart compression with quality control and batch processing.">
+    <meta name="description" content="Compress PDF files to reduce file size without losing quality. Free online PDF compression tool by FileFlow.">
     <link rel="stylesheet" href="styles.css">
     
     <!-- Navigation Script -->
@@ -46,9 +46,9 @@
                         <a href="/pdf-merge.html" class="nav-dropdown-item" data-testid="nav-pdf-merge">PDF Merge</a>
                         <a href="/pdf-split.html" class="nav-dropdown-item" data-testid="nav-pdf-split">PDF Split</a>
                         <a href="/pdf-compress.html" class="nav-dropdown-item" data-testid="nav-pdf-compress">PDF Compress</a>
+                        <a href="/pdf-to-word.html" class="nav-dropdown-item" data-testid="nav-pdf-to-word">PDF to Word</a>
                         <a href="/pdf-rotate.html" class="nav-dropdown-item" data-testid="nav-pdf-rotate">PDF Rotate</a>
                         <a href="/pdf-watermark.html" class="nav-dropdown-item" data-testid="nav-pdf-watermark">PDF Watermark</a>
-                        <a href="/pdf-to-word.html" class="nav-dropdown-item" data-testid="nav-pdf-to-word">PDF to Word</a>
                     </div>
                 </div>
 
@@ -62,209 +62,204 @@
                     </button>
                     <div class="nav-dropdown-content">
                         <a href="/mp4-to-mp3.html" class="nav-dropdown-item" data-testid="nav-mp4-mp3">MP4 to MP3</a>
-                        <a href="/audio-converter.html" class="nav-dropdown-item" data-testid="nav-audio-convert">Audio Converter</a>
                         <a href="/video-compress.html" class="nav-dropdown-item" data-testid="nav-video-compress">Video Compress</a>
-                        <a href="/gif-maker.html" class="nav-dropdown-item" data-testid="nav-gif-maker">GIF Maker</a>
+                        <a href="/audio-converter.html" class="nav-dropdown-item" data-testid="nav-audio-converter">Audio Converter</a>
                         <a href="/video-trim.html" class="nav-dropdown-item" data-testid="nav-video-trim">Video Trim</a>
-                        <a href="/video-merger.html" class="nav-dropdown-item" data-testid="nav-video-merge">Video Merger</a>
+                        <a href="/gif-maker.html" class="nav-dropdown-item" data-testid="nav-gif-maker">GIF Maker</a>
+                        <a href="/video-merger.html" class="nav-dropdown-item" data-testid="nav-video-merger">Video Merger</a>
                     </div>
                 </div>
             </div>
-            
-            <button class="mobile-nav-toggle" data-testid="mobile-nav-toggle">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-                </svg>
-            </button>
         </div>
     </nav>
 
-    <main class="main">
-        <div class="hero-section">
-            <div class="hero-content">
-                <div class="hero-badge">
-                    <div class="tool-icon bg-green">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                            <polyline points="7,10 12,15 17,10"></polyline>
-                            <line x1="12" y1="15" x2="12" y2="3"></line>
-                        </svg>
+    <!-- Tool Header Section -->
+    <section class="tool-header-section">
+        <div class="container">
+            <div class="breadcrumb">
+                <a href="/" class="breadcrumb-link" data-testid="breadcrumb-home">Home</a> / 
+                <span data-testid="breadcrumb-current">PDF Compress</span>
+            </div>
+            <h1 class="tool-page-title">PDF Compress Tool</h1>
+            <p class="tool-page-description">
+                Reduce PDF file size without losing quality using advanced compression algorithms
+            </p>
+        </div>
+    </section>
+
+    <!-- Main Tool Container -->
+    <div class="container">
+        <div class="main-content-wrapper">
+            <!-- Tool Section -->
+            <div class="tool-section">
+                <!-- Upload Section -->
+                <div class="upload-section">
+                    <div class="tool-container">
+                        <h2 class="section-title">Upload PDF File</h2>
+                        <div class="file-drop-zone" id="file-drop-zone" data-testid="file-drop-zone">
+                            <div class="upload-icon">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                                </svg>
+                            </div>
+                            <h3 class="upload-title">Drop PDF file here or click to browse</h3>
+                            <p class="upload-instructions">Select a PDF file to compress and reduce file size</p>
+                            <input type="file" id="file-input" class="file-input" accept=".pdf" data-testid="file-input">
+                        </div>
                     </div>
-                    <span>PDF Tools</span>
                 </div>
-                <h1 class="hero-title">PDF Compress</h1>
-                <p class="hero-description">Reduce PDF file size while maintaining quality</p>
-                <div class="hero-features">
-                    <span class="feature-tag">✓ Smart compression</span>
-                    <span class="feature-tag">✓ Quality preservation</span>
-                    <span class="feature-tag">✓ Size preview</span>
+
+                <!-- File List Section -->
+                <div id="file-list" class="file-list-section hidden">
+                    <div class="tool-container">
+                        <h3 class="section-title">Selected File</h3>
+                        <div id="file-cards" class="file-cards" data-testid="file-cards">
+                            <!-- File cards will be inserted here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Compression Options -->
+                <div id="compression-options" class="options-section hidden">
+                    <div class="tool-container">
+                        <h3 class="section-title">Compression Level</h3>
+                        <div class="compression-selector">
+                            <label class="radio-option">
+                                <input type="radio" name="compression-level" value="low" checked>
+                                <span class="radio-label">Low Compression (Best Quality)</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="compression-level" value="medium">
+                                <span class="radio-label">Medium Compression (Balanced)</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="compression-level" value="high">
+                                <span class="radio-label">High Compression (Smallest Size)</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div id="action-buttons" class="action-section hidden">
+                    <div class="tool-container">
+                        <div class="button-group">
+                            <button id="compress-btn" class="btn btn-primary" data-testid="compress-btn">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                                </svg>
+                                Compress PDF
+                            </button>
+                            <button id="clear-files" class="btn btn-secondary" data-testid="clear-files">Clear Files</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <div class="converter-container">
-            <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()" data-testid="upload-area-pdf-compress">
-                <div class="upload-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
-                        <polyline points="14,2 14,8 20,8"></polyline>
-                    </svg>
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <!-- Branding Section -->
+                <div class="footer-section">
+                    <h3 class="footer-title">FileFlow</h3>
+                    <p class="footer-description">Professional file conversion tools for everyone.</p>
                 </div>
-                <h3>Drop your PDF file here</h3>
-                <p>or click anywhere to browse files</p>
-                <p class="supported-formats">PDF files only</p>
-                <input type="file" id="fileInput" accept=".pdf" hidden>
-            </div>
-
-            <div id="advanced-options-section" class="premium-advanced-section">
-                <button id="advanced-toggle" class="advanced-toggle" data-testid="button-advanced-toggle">
-                    <span class="advanced-toggle-text">
-                        <svg class="advanced-toggle-icon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                        </svg>
-                        Advanced Options
-                    </span>
-                    <svg class="advanced-chevron" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                    </svg>
-                </button>
                 
-                <div id="advanced-content" class="premium-content" style="display: none;">
-                    <div class="settings-categories">
-                        <div class="settings-category">
-                            <h4 class="category-title">Compression Settings</h4>
-                            <div class="settings-row">
-                                <div class="setting-item">
-                                    <label class="setting-label" for="compressionLevel">Compression Level</label>
-                                    <div class="custom-select-wrapper">
-                                        <select id="compressionLevel" class="premium-select">
-                                            <option value="medium" selected>Medium (Balanced)</option>
-                                            <option value="low">Low (Better quality, larger size)</option>
-                                            <option value="high">High (Smaller size, some quality loss)</option>
-                                            <option value="maximum">Maximum (Smallest size)</option>
-                                        </select>
-                                        <div class="select-icon">
-                                            <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                                            </svg>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="setting-item">
-                                    <label class="setting-label" for="imageQuality">Image Quality</label>
-                                    <div class="custom-select-wrapper">
-                                        <select id="imageQuality" class="premium-select">
-                                            <option value="75" selected>Medium (75%)</option>
-                                            <option value="90">High (90%)</option>
-                                            <option value="60">Low (60%)</option>
-                                            <option value="45">Very Low (45%)</option>
-                                        </select>
-                                        <div class="select-icon">
-                                            <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                                            </svg>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="settings-row">
-                                <div class="checkbox-group">
-                                    <div class="premium-checkbox-item">
-                                        <input type="checkbox" id="removeMetadata" class="premium-checkbox" checked>
-                                        <label for="removeMetadata" class="checkbox-label">Remove metadata to reduce size</label>
-                                    </div>
-                                    <div class="premium-checkbox-item">
-                                        <input type="checkbox" id="optimizeImages" class="premium-checkbox" checked>
-                                        <label for="optimizeImages" class="checkbox-label">Optimize embedded images</label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                <!-- PDF Tools -->
+                <div class="footer-section">
+                    <h4 class="footer-subtitle">PDF Tools</h4>
+                    <ul class="footer-links">
+                        <li><a href="/pdf-merge.html" class="footer-link" data-testid="footer-pdf-merge">PDF Merge</a></li>
+                        <li><a href="/pdf-split.html" class="footer-link" data-testid="footer-pdf-split">PDF Split</a></li>
+                        <li><a href="/pdf-compress.html" class="footer-link" data-testid="footer-pdf-compress">PDF Compress</a></li>
+                        <li><a href="/pdf-to-word.html" class="footer-link" data-testid="footer-pdf-to-word">PDF to Word</a></li>
+                        <li><a href="/pdf-rotate.html" class="footer-link" data-testid="footer-pdf-rotate">PDF Rotate</a></li>
+                        <li><a href="/pdf-watermark.html" class="footer-link" data-testid="footer-pdf-watermark">PDF Watermark</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Image Tools -->
+                <div class="footer-section">
+                    <h4 class="footer-subtitle">Image Tools</h4>
+                    <ul class="footer-links">
+                        <li><a href="/convert-to-jpeg.html" class="footer-link" data-testid="footer-convert-jpeg">Convert to JPEG</a></li>
+                        <li><a href="/heic-to-jpg.html" class="footer-link" data-testid="footer-heic-jpg">HEIC to JPG</a></li>
+                        <li><a href="/jpg-to-png.html" class="footer-link" data-testid="footer-jpg-png">JPG to PNG</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Audio/Video Tools -->
+                <div class="footer-section">
+                    <h4 class="footer-subtitle">Audio/Video Tools</h4>
+                    <ul class="footer-links">
+                        <li><a href="/mp4-to-mp3.html" class="footer-link" data-testid="footer-mp4-mp3">MP4 to MP3</a></li>
+                        <li><a href="/video-compress.html" class="footer-link" data-testid="footer-video-compress">Video Compress</a></li>
+                        <li><a href="/audio-converter.html" class="footer-link" data-testid="footer-audio-converter">Audio Converter</a></li>
+                        <li><a href="/video-trim.html" class="footer-link" data-testid="footer-video-trim">Video Trim</a></li>
+                        <li><a href="/gif-maker.html" class="footer-link" data-testid="footer-gif-maker">GIF Maker</a></li>
+                        <li><a href="/video-merger.html" class="footer-link" data-testid="footer-video-merger">Video Merger</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Support Links -->
+                <div class="footer-section">
+                    <h4 class="footer-subtitle">Support</h4>
+                    <ul class="footer-links">
+                        <li><a href="mailto:support@fileflow.com" class="footer-link" data-testid="footer-contact">Contact</a></li>
+                        <li><a href="#" class="footer-link" data-testid="footer-help">Help Center</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Legal Links -->
+                <div class="footer-section">
+                    <h4 class="footer-subtitle">Legal</h4>
+                    <ul class="footer-links">
+                        <li><a href="/privacy-policy.html" class="footer-link" data-testid="footer-privacy">Privacy Policy</a></li>
+                        <li><a href="/terms-of-use.html" class="footer-link" data-testid="footer-terms">Terms of Use</a></li>
+                    </ul>
                 </div>
             </div>
-
-            <div class="file-preview" id="filePreview" style="display: none;">
-                <div class="preview-header">
-                    <h3 id="fileName"></h3>
-                    <span id="fileSize"></span>
-                </div>
-                <div class="pdf-info" id="pdfInfo"></div>
-            </div>
-
-            <button class="convert-btn" id="convertBtn" disabled>
-                <span class="btn-text">Compress PDF</span>
-                <div class="btn-loader" style="display: none;"></div>
-            </button>
-
-            <!-- Tool Information Section -->
-            <div class="tool-info-section">
-                <div class="info-grid">
-                    <div class="info-card">
-                        <div class="info-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-                            </svg>
-                        </div>
-                        <h3>Reduce File Size</h3>
-                        <p>Significantly decrease PDF file sizes while maintaining readability. Perfect for email attachments, uploads, and storage optimization.</p>
-                    </div>
-                    <div class="info-card">
-                        <div class="info-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                                <polyline points="14,2 14,8 20,8"/>
-                                <path d="M16 13a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2z"/>
-                            </svg>
-                        </div>
-                        <h3>Smart Optimization</h3>
-                        <p>Advanced algorithms compress images and remove unnecessary metadata while preserving document structure and text quality.</p>
-                    </div>
-                    <div class="info-card">
-                        <div class="info-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M12 1L3 5l9 4 9-4-9-4z"/>
-                                <path d="M3 17l6-3 6 3-6 3-6-3z"/>
-                                <path d="M3 12l6-3 6 3-6 3-6-3z"/>
-                            </svg>
-                        </div>
-                        <h3>Multiple Levels</h3>
-                        <p>Choose from different compression levels to balance file size and quality based on your specific needs and use case.</p>
-                    </div>
-                </div>
-                <div class="tool-benefits">
-                    <h3>Why Compress PDFs?</h3>
-                    <p>PDF compression is essential for efficient document management. Large PDFs can be difficult to share via email, slow to load on websites, and consume excessive storage space. Our compression tool reduces file sizes by up to 90% while maintaining professional quality, making your documents faster to share and easier to manage across all platforms.</p>
-                </div>
-            </div>
-
-            <div class="progress-container" id="progressContainer" style="display: none;">
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progressFill"></div>
-                </div>
-                <div class="progress-text" id="progressText">0%</div>
-            </div>
-
-            <div class="results" id="results" style="display: none;">
-                <h3>Compression Complete</h3>
-                <div class="compression-stats" id="compressionStats"></div>
-                <div class="result-actions">
-                    <button class="download-btn" id="downloadBtn">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                            <polyline points="7,10 12,15 17,10"></polyline>
-                            <line x1="12" y1="15" x2="12" y2="3"></line>
-                        </svg>
-                        Download Compressed PDF
-                    </button>
-                </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 FileFlow. All rights reserved.</p>
             </div>
         </div>
-    </main>
+    </footer>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
-    <script src="js/advanced-options.js"></script>
-    <script src="js/converters/pdf-compress.js"></script>
+    <script src="/js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const dropZone = document.querySelector('.file-drop-zone');
+            const fileInput = document.getElementById('file-input');
+            const compressBtn = document.getElementById('compress-btn');
+            
+            dropZone.addEventListener('click', () => fileInput.click());
+            
+            fileInput.addEventListener('change', function(e) {
+                const files = Array.from(e.target.files);
+                if (files.length > 0) {
+                    document.getElementById('file-list').classList.remove('hidden');
+                    document.getElementById('compression-options').classList.remove('hidden');
+                    document.getElementById('action-buttons').classList.remove('hidden');
+                    
+                    const fileCards = document.getElementById('file-cards');
+                    fileCards.innerHTML = files.map(file => `
+                        <div class="file-card">
+                            <div class="file-info">
+                                <div class="file-name">${file.name}</div>
+                                <div class="file-size">${(file.size / 1024 / 1024).toFixed(2)} MB</div>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            });
+            
+            compressBtn.addEventListener('click', function() {
+                alert('PDF Compress functionality will be implemented.');
+            });
+        });
+    </script>
 </body>
 </html>
