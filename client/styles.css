@@ -726,8 +726,8 @@ body {
     margin-right: 0.75rem;
     accent-color: var(--primary);
     cursor: pointer;
-    vertical-align: middle;
-    margin-top: 2px;
+    vertical-align: baseline;
+    transform: translateY(3px);
 }
 
 .option-group input[type="checkbox"] + label {
