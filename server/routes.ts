@@ -379,6 +379,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         await access(outputPath, fs.constants.F_OK);
         const stats = await stat(outputPath);
         if (success && stats.size > 100) { // Ensure file has content
+          // Only cleanup input file after successful conversion
+          if (tempPath) {
+            await cleanupFile(tempPath);
+          }
           res.json({
             success: true,
             output_file: outputFilename,
@@ -387,19 +391,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
         } else {
           await cleanupFile(outputPath); // Clean up failed conversion
+          // Cleanup input file on failed conversion
+          if (tempPath) {
+            await cleanupFile(tempPath);
+          }
           res.status(500).json({ error: "Conversion failed - output file is empty or invalid" });
         }
       } catch {
+        // Cleanup input file on conversion failure
+        if (tempPath) {
+          await cleanupFile(tempPath);
+        }
         res.status(500).json({ error: "Conversion failed - output file not found" });
       }
     } catch (error) {
       console.error('Conversion error:', error);
-      res.status(500).json({ error: "Conversion failed" });
-    } finally {
-      // Always clean up input file
+      // Cleanup input file on error
       if (tempPath) {
         await cleanupFile(tempPath);
       }
+      res.status(500).json({ error: "Conversion failed" });
     }
   });
 
