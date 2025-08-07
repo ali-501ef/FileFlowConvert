@@ -53,13 +53,13 @@ OUTPUT_DIR.mkdir(exist_ok=True)
 SUPPORTED_CONVERSIONS = {
     "heic": ["jpg", "jpeg", "png", "webp"],
     "heif": ["jpg", "jpeg", "png", "webp"],
-    "jpg": ["png", "webp", "pdf", "gif", "bmp", "tiff"],
-    "jpeg": ["png", "webp", "pdf", "gif", "bmp", "tiff"],
-    "png": ["jpg", "jpeg", "webp", "pdf", "gif", "bmp", "tiff"],
-    "webp": ["jpg", "jpeg", "png", "pdf", "gif", "bmp", "tiff"],
-    "gif": ["jpg", "jpeg", "png", "webp", "pdf"],
-    "bmp": ["jpg", "jpeg", "png", "webp", "pdf"],
-    "tiff": ["jpg", "jpeg", "png", "webp", "pdf"],
+    "jpg": ["png", "webp", "gif", "bmp", "tiff"],
+    "jpeg": ["png", "webp", "gif", "bmp", "tiff"],
+    "png": ["jpg", "jpeg", "webp", "gif", "bmp", "tiff"],
+    "webp": ["jpg", "jpeg", "png", "gif", "bmp", "tiff"],
+    "gif": ["jpg", "jpeg", "png", "webp"],
+    "bmp": ["jpg", "jpeg", "png", "webp"],
+    "tiff": ["jpg", "jpeg", "png", "webp"],
     "pdf": ["jpg", "jpeg", "png", "webp", "docx"],
     "mp4": ["mp3", "wav", "jpg", "png"],
     "avi": ["mp3", "wav", "jpg", "png"],
@@ -151,11 +151,6 @@ class FileConverter:
                         rgb_image.paste(image, mask=image.split()[-1] if image.mode == 'RGBA' else None)
                         image = rgb_image
                     image.save(output_path, 'JPEG', quality=92, optimize=True)
-                elif output_format.lower() == 'pdf':
-                    # Convert to RGB for PDF
-                    if image.mode != 'RGB':
-                        image = image.convert('RGB')
-                    image.save(output_path, 'PDF', resolution=100.0)
                 else:
                     image.save(output_path, output_format.upper(), optimize=True)
             
