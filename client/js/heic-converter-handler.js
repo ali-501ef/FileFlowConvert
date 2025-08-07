@@ -276,7 +276,9 @@ function showResults(downloadUrls) {
     }
     
     results.style.display = 'block';
-    results.scrollIntoView({ behavior: 'smooth' });
+    // Scroll to the download button specifically to keep it visible
+    const downloadBtn = document.getElementById('downloadBtn');
+    downloadBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
 async function handleDownload() {
