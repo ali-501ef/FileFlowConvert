@@ -56,20 +56,41 @@ export class PDFConverter {
         return { valid: false, error: "That file isn't a valid PDF. Please upload a .pdf file." };
       }
 
-      // Check if PDF is encrypted
+      // Check if PDF is encrypted using pdfinfo
+      let isPasswordProtected = false;
       try {
-        const { stdout, stderr } = await execAsync(`pdfinfo "${filePath}"`);
-        if (stdout.includes('Encrypted:') && stdout.includes('yes')) {
-          return { valid: false, error: "This PDF is password-protected. Please decrypt it and try again." };
+        const { stdout } = await execAsync(`pdfinfo "${filePath}"`);
+        
+        // Parse pdfinfo output to specifically check the Encrypted field
+        const lines = stdout.split('\n');
+        const encryptLine = lines.find(line => line.trim().startsWith('Encrypted:'));
+        
+        if (encryptLine) {
+          const encryptValue = encryptLine.split(':')[1]?.trim().toLowerCase();
+          // Only consider it password-protected if Encrypted field is not "no"
+          isPasswordProtected = encryptValue !== 'no';
         }
       } catch (error) {
-        // If pdfinfo fails, try pdftoppm to check encryption
+        // If pdfinfo fails completely, we'll test conversion directly
+        console.log('pdfinfo failed, will test conversion directly:', error);
+      }
+
+      // If pdfinfo indicates encryption, verify by attempting conversion
+      if (isPasswordProtected) {
         try {
-          await execAsync(`pdftoppm -jpeg -r 72 -f 1 -l 1 "${filePath}" /dev/null`);
-        } catch (pdfError: any) {
-          if (pdfError.message.includes('Incorrect password')) {
+          await execAsync(`pdftoppm -jpeg -r 72 -f 1 -l 1 "${filePath}" /dev/null`, { timeout: 10000 });
+          // If conversion succeeds, the PDF isn't actually password-protected for our purposes
+          console.log('PDF has encryption flags but is convertible');
+        } catch (conversionError: any) {
+          // Check if the error is specifically about incorrect password
+          if (conversionError.message.includes('Incorrect password') || 
+              conversionError.message.includes('Command not allowed') ||
+              conversionError.message.includes('Permission denied')) {
             return { valid: false, error: "This PDF is password-protected. Please decrypt it and try again." };
           }
+          // For other conversion errors, return a generic message
+          console.log('Conversion test failed with non-password error:', conversionError.message);
+          return { valid: false, error: "Unable to process this PDF file. Please try a different file." };
         }
       }
 
