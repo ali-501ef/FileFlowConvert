@@ -351,11 +351,14 @@
         </div>
     </footer>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="js/advanced-options.js"></script>
     <script src="js/main.js"></script>
     <script src="js/pdf-to-jpg-handler.js"></script>
     <script>
+        // Configure PDF.js worker
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        
         // Initialize PDF to JPG converter
         document.addEventListener('DOMContentLoaded', () => {
             // Show/hide custom page range input
