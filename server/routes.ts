@@ -199,75 +199,132 @@ const upload = multer({
   }
 });
 
-// PDF conversion helper function
-async function convertPDFWithPython(inputPath: string, outputPath: string, outputFormat: string): Promise<boolean> {
-  return new Promise((resolve) => {
-    const pdfConverterPath = path.join(process.cwd(), 'server', 'pdf_converter.py');
-    console.log('Running PDF conversion:', pdfConverterPath, inputPath, outputPath, outputFormat);
+// PDF conversion helper function with retry logic and better error handling
+async function convertPDFWithPython(inputPath: string, outputPath: string, outputFormat: string, maxRetries: number = 3): Promise<boolean> {
+  const pdfConverterPath = path.join(process.cwd(), 'server', 'pdf_converter.py');
+  
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    console.log(`PDF conversion attempt ${attempt}/${maxRetries}:`, inputPath, '->', outputPath, `(${outputFormat})`);
     
-    const pythonProcess = spawn('python3', [pdfConverterPath, inputPath, outputPath, outputFormat]);
-    
-    let output = '';
-    let error = '';
-    
-    pythonProcess.stdout.on('data', (data) => {
-      output += data.toString();
-    });
-    
-    pythonProcess.stderr.on('data', (data) => {
-      error += data.toString();
-    });
-    
-    pythonProcess.on('close', (code) => {
-      console.log('PDF Python process closed with code:', code);
-      console.log('PDF Python output:', output);
-      console.log('PDF Python error:', error);
+    try {
+      const success = await new Promise<boolean>((resolve, reject) => {
+        const pythonProcess = spawn('python3', [pdfConverterPath, inputPath, outputPath, outputFormat], {
+          timeout: 120000, // 2 minute timeout
+          stdio: ['pipe', 'pipe', 'pipe']
+        });
+        
+        let output = '';
+        let error = '';
+        
+        pythonProcess.stdout.on('data', (data) => {
+          output += data.toString();
+        });
+        
+        pythonProcess.stderr.on('data', (data) => {
+          error += data.toString();
+        });
+        
+        pythonProcess.on('close', (code) => {
+          console.log(`PDF conversion attempt ${attempt} closed with code:`, code);
+          if (output) console.log('PDF output:', output.trim());
+          if (error) console.log('PDF error:', error.trim());
+          
+          if (code === 0 && output.includes('SUCCESS')) {
+            resolve(true);
+          } else {
+            reject(new Error(`PDF conversion failed (code ${code}): ${error || 'No error output'}`));
+          }
+        });
+        
+        pythonProcess.on('error', (err) => {
+          reject(new Error(`PDF process error: ${err.message}`));
+        });
+      });
       
-      if (code === 0 && output.includes('SUCCESS')) {
-        resolve(true);
-      } else {
-        console.error('PDF conversion error:', error || 'No error output');
-        resolve(false);
+      if (success) {
+        console.log(`PDF conversion succeeded on attempt ${attempt}`);
+        return true;
       }
-    });
-  });
+    } catch (error) {
+      console.error(`PDF conversion attempt ${attempt} failed:`, error instanceof Error ? error.message : error);
+      
+      if (attempt === maxRetries) {
+        console.error('PDF conversion failed after all retry attempts');
+        return false;
+      }
+      
+      // Wait before retry (exponential backoff)
+      const delay = Math.min(1000 * Math.pow(2, attempt - 1), 5000);
+      console.log(`Retrying PDF conversion in ${delay}ms...`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+  
+  return false;
 }
 
-// Conversion helper function using Python with HEIC support
-async function convertImageWithPython(inputPath: string, outputPath: string, outputFormat: string): Promise<boolean> {
-  return new Promise((resolve) => {
-    const imageConverterPath = path.join(process.cwd(), 'server', 'image_converter.py');
-    console.log('Running image conversion:', imageConverterPath, inputPath, outputPath, outputFormat);
+// Image conversion helper function with retry logic and better error handling
+async function convertImageWithPython(inputPath: string, outputPath: string, outputFormat: string, maxRetries: number = 3): Promise<boolean> {
+  const imageConverterPath = path.join(process.cwd(), 'server', 'image_converter.py');
+  
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    console.log(`Image conversion attempt ${attempt}/${maxRetries}:`, inputPath, '->', outputPath, `(${outputFormat})`);
     
-    const pythonProcess = spawn('python3', [imageConverterPath, inputPath, outputPath, outputFormat], {
-      stdio: ['pipe', 'pipe', 'pipe']
-    });
-
-    let output = '';
-    let error = '';
-
-    pythonProcess.stdout.on('data', (data) => {
-      output += data.toString();
-    });
-
-    pythonProcess.stderr.on('data', (data) => {
-      error += data.toString();
-    });
-
-    pythonProcess.on('close', (code) => {
-      console.log('Python process closed with code:', code);
-      console.log('Python output:', output);
-      console.log('Python error:', error);
-
-      if (code === 0 && output.includes('SUCCESS')) {
-        resolve(true);
-      } else {
-        console.error('Python conversion error:', error || 'No error output');
-        console.error('Python stdout:', output || 'No stdout');
-        resolve(false);
+    try {
+      const success = await new Promise<boolean>((resolve, reject) => {
+        const pythonProcess = spawn('python3', [imageConverterPath, inputPath, outputPath, outputFormat], {
+          timeout: 60000, // 1 minute timeout
+          stdio: ['pipe', 'pipe', 'pipe']
+        });
+        
+        let output = '';
+        let error = '';
+        
+        pythonProcess.stdout.on('data', (data) => {
+          output += data.toString();
+        });
+        
+        pythonProcess.stderr.on('data', (data) => {
+          error += data.toString();
+        });
+        
+        pythonProcess.on('close', (code) => {
+          console.log(`Image conversion attempt ${attempt} closed with code:`, code);
+          if (output) console.log('Image output:', output.trim());
+          if (error) console.log('Image error:', error.trim());
+          
+          if (code === 0 && output.includes('SUCCESS')) {
+            resolve(true);
+          } else {
+            reject(new Error(`Image conversion failed (code ${code}): ${error || 'No error output'}`));
+          }
+        });
+        
+        pythonProcess.on('error', (err) => {
+          reject(new Error(`Image process error: ${err.message}`));
+        });
+      });
+      
+      if (success) {
+        console.log(`Image conversion succeeded on attempt ${attempt}`);
+        return true;
       }
-    });
-  });
+    } catch (error) {
+      console.error(`Image conversion attempt ${attempt} failed:`, error instanceof Error ? error.message : error);
+      
+      if (attempt === maxRetries) {
+        console.error('Image conversion failed after all retry attempts');
+        return false;
+      }
+      
+      // Wait before retry (exponential backoff)
+      const delay = Math.min(1000 * Math.pow(2, attempt - 1), 5000);
+      console.log(`Retrying image conversion in ${delay}ms...`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+  
+  return false;
 }
 
 function getSupportedFormats(extension: string): string[] {
@@ -312,7 +369,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const speedLimiter = slowDown({
     windowMs: 15 * 60 * 1000, // 15 minutes
     delayAfter: 10, // Allow 10 requests per windowMs without delay
-    delayMs: 500, // Add 500ms delay per request after delayAfter
+    delayMs: () => 500, // Add 500ms delay per request after delayAfter (fixed for v2)
     maxDelayMs: 10000, // Maximum delay of 10 seconds
   });
   
