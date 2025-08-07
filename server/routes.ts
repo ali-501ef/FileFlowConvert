@@ -274,6 +274,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Missing temp_path parameter" });
       }
 
+      // Security: Validate that temp_path is within uploads directory to prevent path traversal
+      const normalizedTempPath = path.normalize(temp_path);
+      const normalizedUploadsDir = path.normalize(uploadsDir);
+      if (!normalizedTempPath.startsWith(normalizedUploadsDir)) {
+        return res.status(400).json({ error: "Invalid file path" });
+      }
+
       console.log('Checking file at path:', temp_path);
       if (!fs.existsSync(temp_path)) {
         console.log('Available files in uploads:', fs.readdirSync(uploadsDir));
