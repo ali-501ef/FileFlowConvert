@@ -4,9 +4,18 @@ import path from "path";
 import express from "express";
 import multer, { type Multer } from "multer";
 import fs from "fs";
+import { promisify } from "util";
 import { spawn } from "child_process";
+import rateLimit from "express-rate-limit";
+import slowDown from "express-slow-down";
 import { insertConversionSchema } from "@shared/schema";
 import { storage } from "./storage";
+
+// Promisify fs functions for async usage
+const readdir = promisify(fs.readdir);
+const stat = promisify(fs.stat);
+const unlink = promisify(fs.unlink);
+const access = promisify(fs.access);
 
 // Extended Request interface for multer
 interface MulterRequest extends Request {
@@ -24,8 +33,22 @@ const outputDir = path.join(process.cwd(), 'output');
   }
 });
 
-// File cleanup utility
-function cleanupFile(filePath: string): void {
+// Async file cleanup utility
+async function cleanupFile(filePath: string): Promise<void> {
+  try {
+    await access(filePath, fs.constants.F_OK);
+    await unlink(filePath);
+    console.log('Cleaned up file:', filePath);
+  } catch (error) {
+    // File doesn't exist or couldn't be deleted - this is often acceptable
+    if ((error as any).code !== 'ENOENT') {
+      console.error('Error cleaning up file:', filePath, error);
+    }
+  }
+}
+
+// Sync cleanup for backwards compatibility
+function cleanupFileSync(filePath: string): void {
   try {
     if (fs.existsSync(filePath)) {
       fs.unlinkSync(filePath);
@@ -36,28 +59,36 @@ function cleanupFile(filePath: string): void {
   }
 }
 
-// Periodic cleanup function
-function cleanupOldFiles(): void {
+// Async periodic cleanup function
+async function cleanupOldFiles(): Promise<void> {
   const cutoffTime = Date.now() - (2 * 60 * 60 * 1000); // 2 hours ago
   
-  [uploadsDir, outputDir].forEach(dir => {
+  for (const dir of [uploadsDir, outputDir]) {
     try {
-      const files = fs.readdirSync(dir);
-      files.forEach(file => {
-        const filePath = path.join(dir, file);
-        const stats = fs.statSync(filePath);
-        if (stats.mtimeMs < cutoffTime) {
-          cleanupFile(filePath);
+      const files = await readdir(dir);
+      await Promise.all(files.map(async (file) => {
+        try {
+          const filePath = path.join(dir, file);
+          const stats = await stat(filePath);
+          if (stats.mtimeMs < cutoffTime) {
+            await cleanupFile(filePath);
+          }
+        } catch (error) {
+          console.error('Error cleaning individual file:', file, error);
         }
-      });
+      }));
     } catch (error) {
-      console.error('Error during periodic cleanup:', error);
+      console.error('Error during periodic cleanup in directory:', dir, error);
     }
-  });
+  }
 }
 
 // Run cleanup every hour
-setInterval(cleanupOldFiles, 60 * 60 * 1000);
+setInterval(() => {
+  cleanupOldFiles().catch(error => {
+    console.error('Error in periodic cleanup:', error);
+  });
+}, 60 * 60 * 1000);
 
 // Input validation utilities
 const ALLOWED_MIME_TYPES = {
@@ -324,12 +355,41 @@ function getSupportedFormats(extension: string): string[] {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Rate limiting middleware
+  const uploadLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 50, // Limit each IP to 50 upload requests per windowMs
+    message: {
+      error: "Too many uploads from this IP, please try again later."
+    },
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
+  
+  const conversionLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes  
+    max: 30, // Limit each IP to 30 conversion requests per windowMs
+    message: {
+      error: "Too many conversion requests from this IP, please try again later."
+    },
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
+  
+  // Slow down middleware for repeated requests
+  const speedLimiter = slowDown({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    delayAfter: 10, // Allow 10 requests per windowMs without delay
+    delayMs: 500, // Add 500ms delay per request after delayAfter
+    maxDelayMs: 10000, // Maximum delay of 10 seconds
+  });
+  
   // Serve static files from client directory
   const clientPath = path.resolve(import.meta.dirname, "../client");
   app.use(express.static(clientPath));
 
   // File conversion API endpoints
-  app.post('/api/upload', upload.single('file'), async (req: MulterRequest, res) => {
+  app.post('/api/upload', uploadLimiter, speedLimiter, upload.single('file'), async (req: MulterRequest, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ error: "No file uploaded" });
@@ -338,7 +398,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Additional file validation
       const validation = validateFileType(req.file);
       if (!validation.valid) {
-        cleanupFile(req.file.path);
+        cleanupFileSync(req.file.path);
         return res.status(400).json({ error: validation.error });
       }
 
@@ -359,13 +419,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Upload error:', error);
       if (req.file) {
-        cleanupFile(req.file.path);
+        cleanupFileSync(req.file.path);
       }
-      res.status(500).json({ error: "Upload failed" });
+      res.status(500).json({ 
+        error: "Upload failed", 
+        details: error instanceof Error ? error.message : "Unknown error" 
+      });
     }
   });
 
-  app.post('/api/convert', async (req, res) => {
+  app.post('/api/convert', conversionLimiter, speedLimiter, async (req, res) => {
     let tempPath: string | null = null;
     let outputPath: string | null = null;
     
@@ -385,6 +448,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       tempPath = temp_path;
+      
+      if (!tempPath) {
+        return res.status(400).json({ error: "Invalid temp_path" });
+      }
 
       // Security: Validate that temp_path is within uploads directory to prevent path traversal
       const normalizedTempPath = path.normalize(tempPath);
@@ -394,8 +461,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       console.log('Checking file at path:', tempPath);
-      if (!fs.existsSync(tempPath)) {
-        console.log('Available files in uploads:', fs.readdirSync(uploadsDir));
+      try {
+        await access(tempPath, fs.constants.F_OK);
+      } catch {
+        console.log('Available files in uploads:', await readdir(uploadsDir));
         return res.status(404).json({ error: "Input file not found" });
       }
 
@@ -413,16 +482,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         success = await convertImageWithPython(tempPath, outputPath, output_format);
       }
 
-      if (success && fs.existsSync(outputPath)) {
-        const stats = fs.statSync(outputPath);
-        res.json({
-          success: true,
-          output_file: outputFilename,
-          download_url: `/api/download/${outputFilename}`,
-          file_size: stats.size
-        });
-      } else {
-        res.status(500).json({ error: "Conversion failed" });
+      try {
+        await access(outputPath, fs.constants.F_OK);
+        const stats = await stat(outputPath);
+        if (success && stats.size > 100) { // Ensure file has content
+          res.json({
+            success: true,
+            output_file: outputFilename,
+            download_url: `/api/download/${outputFilename}`,
+            file_size: stats.size
+          });
+        } else {
+          await cleanupFile(outputPath); // Clean up failed conversion
+          res.status(500).json({ error: "Conversion failed - output file is empty or invalid" });
+        }
+      } catch {
+        res.status(500).json({ error: "Conversion failed - output file not found" });
       }
     } catch (error) {
       console.error('Conversion error:', error);
@@ -430,21 +505,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } finally {
       // Always clean up input file
       if (tempPath) {
-        cleanupFile(tempPath);
-      }
-      // Clean up output file if conversion failed  
-      if (outputPath && fs.existsSync(outputPath)) {
-        const stats = fs.statSync(outputPath);
-        // If file is empty or very small, it likely failed
-        if (stats.size < 100) {
-          cleanupFile(outputPath);
-        }
+        await cleanupFile(tempPath);
       }
     }
   });
 
   // Media conversion endpoint with validation
-  app.post('/api/convert-media', (req, res) => {
+  app.post('/api/convert-media', conversionLimiter, speedLimiter, (req, res) => {
     const { file_id, conversion_type, options = {} } = req.body;
     
     // Validate required parameters
@@ -556,7 +623,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // API Routes for database operations
-  app.post('/api/conversions', async (req, res) => {
+  app.post('/api/conversions', conversionLimiter, async (req, res) => {
     try {
       const conversionData = insertConversionSchema.parse(req.body);
       const conversion = await storage.createConversion(conversionData);
