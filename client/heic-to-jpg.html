@@ -110,7 +110,7 @@
         </div>
     </nav>
 
-    <div class="layout-wrapper">
+    <div class="layout-container">
         <!-- Desktop Sidebar Ad Left -->
         <div class="sidebar-ad desktop-only">
             <div class="ad-placeholder ad-sidebar">
@@ -118,49 +118,97 @@
             </div>
         </div>
 
-        <!-- Main Content -->
-        <main class="main-content">
-            <div class="container">
-                <!-- Tool Header -->
-                <div class="tool-header-section">
-                    <nav class="breadcrumb">
-                        <a href="/" class="breadcrumb-link" data-testid="link-back-home">← Back to Tools</a>
-                    </nav>
-                    <h1 class="tool-page-title">HEIC to JPG Converter</h1>
-                    <p class="tool-page-description">Convert iPhone HEIC photos to universal JPG format while maintaining quality.</p>
+        <main class="main">
+            <div class="hero-section">
+                <div class="hero-content">
+                    <div class="hero-badge">
+                        <div class="tool-icon bg-green">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                                <circle cx="9" cy="9" r="2"/>
+                                <path d="M21 15l-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+                            </svg>
+                        </div>
+                        <span>Image Tools</span>
+                    </div>
+                    <h1 class="hero-title">HEIC to JPG</h1>
+                    <p class="hero-description">Convert your HEIC photos to universal JPG format</p>
+                    <div class="hero-features">
+                        <span class="feature-tag">✓ High quality conversion</span>
+                        <span class="feature-tag">✓ Batch processing</span>
+                        <span class="feature-tag">✓ Universal compatibility</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="converter-container">
+                <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+                    <div class="upload-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                            <circle cx="9" cy="9" r="2"/>
+                            <path d="M21 15l-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+                        </svg>
+                    </div>
+                    <h3>Drop your HEIC files here</h3>
+                    <p>or click anywhere to browse files</p>
+                    <p class="supported-formats">Supports HEIC files only</p>
+                    <input type="file" id="fileInput" multiple accept=".heic,.HEIC" hidden>
                 </div>
 
-                <!-- Upload Section -->
-                <div class="tool-container">
-                    <div id="upload-section" class="upload-section">
-                        <div class="upload-area" id="heic-drop-zone" data-testid="drop-zone-heic" onclick="document.getElementById('heic-file-input').click()">
-                            <div class="upload-icon">
-                                <svg width="64" height="64" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-                                </svg>
-                            </div>
-                            <h3>Drop HEIC files here</h3>
-                            <p>or click anywhere to select files</p>
-                            <p class="supported-formats">Supports HEIC, HEIF files from iPhone/iPad</p>
-                            <input type="file" id="heic-file-input" accept=".heic,.heif,image/*" hidden data-testid="input-heic-files">
+                <div class="advanced-options" id="advancedOptions">
+                    <div class="options-header" id="optionsToggle">
+                        <div class="options-title">
+                            <svg class="options-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z"/>
+                                <path d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/>
+                                <path d="M12 2v2"/>
+                                <path d="M12 20v2"/>
+                                <path d="m4.93 4.93 1.41 1.41"/>
+                                <path d="m17.66 17.66 1.41 1.41"/>
+                                <path d="M2 12h2"/>
+                                <path d="M20 12h2"/>
+                                <path d="m6.34 17.66-1.41 1.41"/>
+                                <path d="m19.07 4.93-1.41 1.41"/>
+                            </svg>
+                            <span>Advanced Options</span>
                         </div>
-                        <div class="converter-controls">
-                            <select id="heic-format-select" class="format-select" data-testid="select-output-format">
-                                <option value="jpg">JPG</option>
-                                <option value="png">PNG</option>
-                                <option value="webp">WebP</option>
+                        <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="m6 9 6 6 6-6"/>
+                        </svg>
+                    </div>
+                    <div class="options-content" id="optionsContent" style="display: none;">
+                        <div class="option-group">
+                            <label for="outputFormat">Output Format</label>
+                            <select id="outputFormat">
+                                <option value="jpg" selected>JPG (Best compatibility)</option>
+                                <option value="png">PNG (Lossless)</option>
+                                <option value="webp">WebP (Modern)</option>
                             </select>
-                            <button id="heic-convert-btn" class="btn btn-primary btn-large" data-testid="button-convert-now">
-                                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                                </svg>
-                                Convert Now
-                            </button>
+                        </div>
+                        <div class="option-group">
+                            <label for="imageQuality">Image Quality</label>
+                            <select id="imageQuality">
+                                <option value="high" selected>High Quality (95%)</option>
+                                <option value="medium">Medium (85%)</option>
+                                <option value="low">Low (75%)</option>
+                            </select>
                         </div>
                     </div>
-
-                    <!-- File Preview (will be populated by JavaScript) -->
                 </div>
+
+                <div class="file-preview" id="filePreview" style="display: none;">
+                    <div class="preview-header">
+                        <h3 id="fileName"></h3>
+                        <span id="fileSize"></span>
+                    </div>
+                    <div class="file-list" id="fileList"></div>
+                </div>
+
+                <button class="convert-btn" id="convertBtn" disabled>
+                    <span class="btn-text">Convert to JPG</span>
+                    <div class="btn-loader" style="display: none;"></div>
+                </button>
 
                 <!-- Tool Information Section -->
                 <div class="tool-info-section">
@@ -168,11 +216,63 @@
                         <div class="info-card">
                             <div class="info-icon">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                                    <circle cx="9" cy="9" r="2"/>
-                                    <path d="M21 15l-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                                 </svg>
                             </div>
+                            <h3>Universal Compatibility</h3>
+                            <p>Convert HEIC photos to JPG format that works on all devices, browsers, and platforms. Share your images without compatibility issues.</p>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="3" width="7" height="7"/>
+                                    <rect x="14" y="3" width="7" height="7"/>
+                                    <rect x="14" y="14" width="7" height="7"/>
+                                    <rect x="3" y="14" width="7" height="7"/>
+                                </svg>
+                            </div>
+                            <h3>Batch Processing</h3>
+                            <p>Convert multiple HEIC files simultaneously with our efficient batch processing. Save time when converting entire photo albums.</p>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                                    <path d="M9 12l2 2 4-4"/>
+                                </svg>
+                            </div>
+                            <h3>Quality Preserved</h3>
+                            <p>Advanced conversion algorithms maintain image quality while reducing file size. Your photos look great in the new format.</p>
+                        </div>
+                    </div>
+                    <div class="tool-benefits">
+                        <h3>Why Convert HEIC to JPG?</h3>
+                        <p>HEIC (High Efficiency Image Container) is Apple's modern image format that saves space but isn't universally supported. Converting to JPG ensures your photos work everywhere - on Windows PCs, Android devices, older browsers, and web platforms. This conversion is essential for sharing photos with non-Apple users and uploading to websites that don't support HEIC format.</p>
+                    </div>
+                </div>
+
+                <div class="progress-container" id="progressContainer" style="display: none;">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="progress-text" id="progressText">0%</div>
+                </div>
+
+                <div class="results" id="results" style="display: none;">
+                    <h3>Conversion Complete</h3>
+                    <div class="result-actions">
+                        <button class="download-btn" id="downloadBtn">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7,10 12,15 17,10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                            Download JPG Files
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
                             <h3>iPhone Photos</h3>
                             <p>Convert Apple HEIC photos to universal JPG format for compatibility across all devices and platforms. Essential for sharing iPhone photos.</p>
                         </div>

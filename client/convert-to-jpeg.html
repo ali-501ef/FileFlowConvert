@@ -116,7 +116,7 @@
         </div>
     </nav>
 
-    <div class="layout-wrapper">
+    <div class="layout-container">
         <!-- Desktop Sidebar Ad Left -->
         <div class="sidebar-ad desktop-only">
             <div class="ad-placeholder ad-sidebar">
@@ -124,65 +124,164 @@
             </div>
         </div>
 
-        <!-- Main Content -->
-        <main class="main-content">
-            <div class="container">
-                <!-- Tool Header -->
-                <div class="tool-header-section">
-                    <nav class="breadcrumb">
-                        <a href="/" class="breadcrumb-link" data-testid="link-back-home">← Back to Tools</a>
-                    </nav>
-                    <h1 class="tool-page-title">Universal to JPEG Converter</h1>
-                    <p class="tool-page-description">Convert any file format to JPEG images. Supports PDF, HEIC, PNG, WEBP, AVIF, BMP and more.</p>
+        <main class="main">
+            <div class="hero-section">
+                <div class="hero-content">
+                    <div class="hero-badge">
+                        <div class="tool-icon bg-green">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                                <circle cx="9" cy="9" r="2"/>
+                                <path d="M21 15l-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+                            </svg>
+                        </div>
+                        <span>Image Tools</span>
+                    </div>
+                    <h1 class="hero-title">Convert to JPEG</h1>
+                    <p class="hero-description">Universal converter for any file format to JPEG</p>
+                    <div class="hero-features">
+                        <span class="feature-tag">✓ Multi-format support</span>
+                        <span class="feature-tag">✓ Quality control</span>
+                        <span class="feature-tag">✓ Batch processing</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="converter-container">
+                <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+                    <div class="upload-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                            <circle cx="9" cy="9" r="2"/>
+                            <path d="M21 15l-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+                        </svg>
+                    </div>
+                    <h3>Drop any files here</h3>
+                    <p>or click anywhere to browse files</p>
+                    <p class="supported-formats">Supports PDF, HEIC, PNG, WEBP, AVIF, Video files</p>
+                    <input type="file" id="fileInput" multiple accept="image/*,.pdf,.heic,.webp,.avif,video/*" hidden>
                 </div>
 
-                <!-- Upload Section -->
-                <div class="tool-container">
-                    <div id="upload-section" class="upload-section">
-                        <div class="file-drop-zone" data-testid="drop-zone-universal" onclick="document.getElementById('file-input').click()">
-                            <svg class="upload-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                <div class="advanced-options" id="advancedOptions">
+                    <div class="options-header" id="optionsToggle">
+                        <div class="options-title">
+                            <svg class="options-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z"/>
+                                <path d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/>
+                                <path d="M12 2v2"/>
+                                <path d="M12 20v2"/>
+                                <path d="m4.93 4.93 1.41 1.41"/>
+                                <path d="m17.66 17.66 1.41 1.41"/>
+                                <path d="M2 12h2"/>
+                                <path d="M20 12h2"/>
+                                <path d="m6.34 17.66-1.41 1.41"/>
+                                <path d="m19.07 4.93-1.41 1.41"/>
                             </svg>
-                            <h3 class="upload-title">Drop any files here or click to upload</h3>
-                            <p class="upload-instructions">Supports PDF, HEIC, PNG, WEBP, AVIF, BMP, video frames and more</p>
+                            <span>Advanced Options</span>
                         </div>
-                        <input type="file" id="file-input" multiple class="file-input" accept="*/*" data-testid="input-universal-files">
+                        <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="m6 9 6 6 6-6"/>
+                        </svg>
                     </div>
-
-                    <!-- Quality Settings -->
-                    <div id="quality-settings" class="quality-settings hidden">
-                        <h3 class="section-subtitle">JPEG Quality</h3>
-                        <div class="quality-options">
-                            <label class="quality-option">
-                                <input type="radio" name="quality" value="0.7" data-testid="radio-quality-70">
-                                <span class="quality-label">Standard (70%)</span>
-                            </label>
-                            <label class="quality-option">
-                                <input type="radio" name="quality" value="0.85" checked data-testid="radio-quality-85">
-                                <span class="quality-label">High (85%)</span>
-                            </label>
-                            <label class="quality-option">
-                                <input type="radio" name="quality" value="0.95" data-testid="radio-quality-95">
-                                <span class="quality-label">Maximum (95%)</span>
-                            </label>
+                    <div class="options-content" id="optionsContent" style="display: none;">
+                        <div class="option-group">
+                            <label for="qualityLevel">JPEG Quality</label>
+                            <select id="qualityLevel">
+                                <option value="95" selected>High Quality (95%)</option>
+                                <option value="85">Good Quality (85%)</option>
+                                <option value="75">Medium Quality (75%)</option>
+                                <option value="60">Low Quality (60%)</option>
+                            </select>
                         </div>
-                    </div>
-
-                    <!-- File List -->
-                    <div id="file-list" class="file-list hidden">
-                        <h3 class="section-subtitle">Selected Files</h3>
-                        <div id="file-cards" class="file-cards">
-                            <!-- File cards will be inserted here -->
+                        <div class="option-group">
+                            <label for="outputSize">Output Size</label>
+                            <select id="outputSize">
+                                <option value="original" selected>Original size</option>
+                                <option value="1920x1080">1920×1080 (HD)</option>
+                                <option value="1280x720">1280×720 (720p)</option>
+                                <option value="640x480">640×480 (VGA)</option>
+                            </select>
                         </div>
                     </div>
+                </div>
 
-                    <!-- Progress Section -->
-                    <div id="progress-section" class="progress-section hidden">
-                        <div class="progress-header">
-                            <span class="progress-label">Converting to JPEG...</span>
-                            <span id="progress-text" class="progress-text" data-testid="text-progress">0%</span>
+                <div class="file-preview" id="filePreview" style="display: none;">
+                    <div class="preview-header">
+                        <h3 id="fileName"></h3>
+                        <span id="fileSize"></span>
+                    </div>
+                    <div class="file-list" id="fileList"></div>
+                </div>
+
+                <button class="convert-btn" id="convertBtn" disabled>
+                    <span class="btn-text">Convert to JPEG</span>
+                    <div class="btn-loader" style="display: none;"></div>
+                </button>
+
+                <!-- Tool Information Section -->
+                <div class="tool-info-section">
+                    <div class="info-grid">
+                        <div class="info-card">
+                            <div class="info-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                </svg>
+                            </div>
+                            <h3>Universal Support</h3>
+                            <p>Convert from any format to JPEG - PDFs, HEIC photos, PNG/WEBP/AVIF images, and even extract frames from video files.</p>
                         </div>
-                        <div class="progress-bar-container">
+                        <div class="info-card">
+                            <div class="info-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                                    <path d="M12 8v8"/>
+                                    <path d="M8 12h8"/>
+                                </svg>
+                            </div>
+                            <h3>Quality Control</h3>
+                            <p>Choose from multiple quality levels to balance file size and image quality. Perfect for web use or high-quality printing.</p>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="3" width="7" height="7"/>
+                                    <rect x="14" y="3" width="7" height="7"/>
+                                    <rect x="14" y="14" width="7" height="7"/>
+                                    <rect x="3" y="14" width="7" height="7"/>
+                                </svg>
+                            </div>
+                            <h3>Batch Processing</h3>
+                            <p>Convert multiple files simultaneously from different formats. Supports quality settings to balance file size and image quality.</p>
+                        </div>
+                    </div>
+                    <div class="tool-benefits">
+                        <h3>Why Use Universal JPEG Conversion?</h3>
+                        <p>JPEG is the most widely supported image format across all devices, browsers, and applications. Converting various file types to JPEG ensures compatibility everywhere while reducing file sizes for faster loading and easier sharing. This universal converter handles formats that other tools cannot, making it essential for comprehensive file management.</p>
+                    </div>
+                </div>
+
+                <div class="progress-container" id="progressContainer" style="display: none;">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="progress-text" id="progressText">0%</div>
+                </div>
+
+                <div class="results" id="results" style="display: none;">
+                    <h3>Conversion Complete</h3>
+                    <div class="result-actions">
+                        <button class="download-btn" id="downloadBtn">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7,10 12,15 17,10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                            Download JPEG Files
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
                             <div id="progress-bar" class="progress-bar" data-testid="progress-bar" style="width: 0%"></div>
                         </div>
                         <div id="conversion-status" class="ffmpeg-status" data-testid="text-conversion-status">

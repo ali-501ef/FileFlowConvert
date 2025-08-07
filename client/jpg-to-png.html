@@ -96,7 +96,7 @@
         </div>
     </nav>
 
-    <div class="layout-wrapper">
+    <div class="layout-container">
         <!-- Desktop Sidebar Ad Left -->
         <div class="sidebar-ad desktop-only">
             <div class="ad-placeholder ad-sidebar">
@@ -104,55 +104,162 @@
             </div>
         </div>
 
-        <!-- Main Content -->
-        <main class="main-content">
-            <div class="container">
-                <!-- Tool Header -->
-                <div class="tool-header-section">
-                    <nav class="breadcrumb">
-                        <a href="/" class="breadcrumb-link" data-testid="link-back-home">← Back to Tools</a>
-                    </nav>
-                    <h1 class="tool-page-title">JPG to PNG Converter</h1>
-                    <p class="tool-page-description">Convert JPG images to PNG format with transparency support.</p>
+        <main class="main">
+            <div class="hero-section">
+                <div class="hero-content">
+                    <div class="hero-badge">
+                        <div class="tool-icon bg-green">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                                <circle cx="9" cy="9" r="2"/>
+                                <path d="M21 15l-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+                            </svg>
+                        </div>
+                        <span>Image Tools</span>
+                    </div>
+                    <h1 class="hero-title">JPG to PNG</h1>
+                    <p class="hero-description">Convert JPG images to PNG format for lossless quality</p>
+                    <div class="hero-features">
+                        <span class="feature-tag">✓ Lossless quality</span>
+                        <span class="feature-tag">✓ Transparency support</span>
+                        <span class="feature-tag">✓ Batch conversion</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="converter-container">
+                <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+                    <div class="upload-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                            <circle cx="9" cy="9" r="2"/>
+                            <path d="M21 15l-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+                        </svg>
+                    </div>
+                    <h3>Drop your JPG files here</h3>
+                    <p>or click anywhere to browse files</p>
+                    <p class="supported-formats">Supports JPG, JPEG files only</p>
+                    <input type="file" id="fileInput" multiple accept=".jpg,.jpeg" hidden>
                 </div>
 
-                <!-- Upload Section -->
-                <div class="tool-container">
-                    <div id="upload-section" class="upload-section">
-                        <div class="upload-area" data-testid="drop-zone-jpg" onclick="document.getElementById('file-input').click()">
-                            <div class="upload-icon">
-                                <svg width="64" height="64" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                <div class="advanced-options" id="advancedOptions">
+                    <div class="options-header" id="optionsToggle">
+                        <div class="options-title">
+                            <svg class="options-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z"/>
+                                <path d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/>
+                                <path d="M12 2v2"/>
+                                <path d="M12 20v2"/>
+                                <path d="m4.93 4.93 1.41 1.41"/>
+                                <path d="m17.66 17.66 1.41 1.41"/>
+                                <path d="M2 12h2"/>
+                                <path d="M20 12h2"/>
+                                <path d="m6.34 17.66-1.41 1.41"/>
+                                <path d="m19.07 4.93-1.41 1.41"/>
+                            </svg>
+                            <span>Advanced Options</span>
+                        </div>
+                        <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="m6 9 6 6 6-6"/>
+                        </svg>
+                    </div>
+                    <div class="options-content" id="optionsContent" style="display: none;">
+                        <div class="option-group">
+                            <label for="compressionLevel">Compression Level</label>
+                            <select id="compressionLevel">
+                                <option value="0" selected>No compression (Largest)</option>
+                                <option value="6">Default (Balanced)</option>
+                                <option value="9">Maximum (Smallest)</option>
+                            </select>
+                        </div>
+                        <div class="option-group">
+                            <label for="transparencyHandling">Background</label>
+                            <select id="transparencyHandling">
+                                <option value="preserve" selected>Preserve as-is</option>
+                                <option value="white">White background</option>
+                                <option value="transparent">Transparent</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="file-preview" id="filePreview" style="display: none;">
+                    <div class="preview-header">
+                        <h3 id="fileName"></h3>
+                        <span id="fileSize"></span>
+                    </div>
+                    <div class="file-list" id="fileList"></div>
+                </div>
+
+                <button class="convert-btn" id="convertBtn" disabled>
+                    <span class="btn-text">Convert to PNG</span>
+                    <div class="btn-loader" style="display: none;"></div>
+                </button>
+
+                <!-- Tool Information Section -->
+                <div class="tool-info-section">
+                    <div class="info-grid">
+                        <div class="info-card">
+                            <div class="info-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                                 </svg>
                             </div>
-                            <h3>Drop JPG files here</h3>
-                            <p>or click anywhere to upload files</p>
-                            <p class="supported-formats">Select JPG files to convert to PNG format</p>
+                            <h3>Lossless Quality</h3>
+                            <p>PNG format preserves image quality without compression artifacts. Ideal for graphics, screenshots, and images requiring crisp details.</p>
                         </div>
-                        <input type="file" id="file-input" multiple class="file-input" accept=".jpg,.jpeg,.JPG,.JPEG" data-testid="input-jpg-files">
-                    </div>
-
-                    <!-- File List -->
-                    <div id="file-list" class="file-list hidden">
-                        <h3 class="section-subtitle">Selected Files</h3>
-                        <div id="file-cards" class="file-cards">
-                            <!-- File cards will be inserted here -->
+                        <div class="info-card">
+                            <div class="info-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                                    <path d="M12 8v8"/>
+                                    <path d="M8 12h8"/>
+                                </svg>
+                            </div>
+                            <h3>Transparency Support</h3>
+                            <p>PNG images support transparent backgrounds, perfect for logos, icons, and graphics that need to blend seamlessly with different backgrounds.</p>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="3" width="7" height="7"/>
+                                    <rect x="14" y="3" width="7" height="7"/>
+                                    <rect x="14" y="14" width="7" height="7"/>
+                                    <rect x="3" y="14" width="7" height="7"/>
+                                </svg>
+                            </div>
+                            <h3>Web Ready</h3>
+                            <p>PNG images are perfect for web use, offering superior quality for graphics, icons, and images with text or sharp edges.</p>
                         </div>
                     </div>
+                    <div class="tool-benefits">
+                        <h3>Why Convert JPG to PNG?</h3>
+                        <p>Converting JPG to PNG is essential when you need transparency, lossless quality, or better web compatibility. PNG format excels with graphics, logos, and images with text, providing crisp edges and supporting transparent backgrounds that JPG cannot offer. This conversion is crucial for professional design work and web development.</p>
+                    </div>
+                </div>
 
-                    <!-- Advanced Options -->
-                    <div id="advanced-options-section" class="advanced-options-section hidden">
-                        <button id="advanced-toggle" class="advanced-toggle" data-testid="button-advanced-toggle">
-                            <span class="advanced-toggle-text">Advanced Options</span>
-                            <span class="advanced-toggle-icon">⚙️</span>
-                            <svg class="advanced-chevron" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                <div class="progress-container" id="progressContainer" style="display: none;">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="progress-text" id="progressText">0%</div>
+                </div>
+
+                <div class="results" id="results" style="display: none;">
+                    <h3>Conversion Complete</h3>
+                    <div class="result-actions">
+                        <button class="download-btn" id="downloadBtn">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7,10 12,15 17,10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
                             </svg>
+                            Download PNG Files
                         </button>
-                        
-                        <div id="advanced-content" class="advanced-content">
-                            <div class="advanced-grid">
-                                <div class="advanced-option">
+                    </div>
+                </div>
+            </div>
+        </main>
                                     <label class="advanced-label">Resize Image</label>
                                     <div class="resize-inputs">
                                         <input type="number" id="width" class="advanced-input" placeholder="Width" min="1" max="10000" data-testid="input-width">

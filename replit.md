@@ -17,6 +17,7 @@ Preferred communication style: Simple, everyday language.
 - **Universal Converter**: Drag-and-drop interface with intelligent format detection available on homepage without redirects.
 - **Advanced Options**: Tool-specific settings with smooth toggle animations.
 - **UI/UX Decisions**: Larger heading fonts, refined labels, optimized whitespace, vibrant blue primary actions, soft grays, clean contrast ratios, and absolute positioning for brand logo and mobile toggle with centered menu items.
+- **Universal Design Pattern**: Standardized hero section with tool badges, features tags, upload areas, collapsible advanced options, tool information cards, and progress indicators across all image and PDF tools for consistent user experience.
 
 ### Backend Architecture
 - **Framework**: Express.js with TypeScript.
