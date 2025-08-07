@@ -438,7 +438,7 @@ window.removeFile = function(index) {
 document.addEventListener('DOMContentLoaded', function() {
     // Only initialize if we're on a tool page (not homepage) and no specific converter will be loaded
     const hasFileInput = document.getElementById('file-input');
-    const isConverterPage = window.location.pathname.includes('convert-to-jpeg') || 
+    const isConverterPage = window.location.pathname.includes('pdf-to-jpg') || 
                            window.location.pathname.includes('heic-to-jpg') ||
                            window.location.pathname.includes('jpg-to-png') ||
                            window.location.pathname.includes('pdf-merge') ||
