@@ -277,7 +277,6 @@ function showResults(downloadUrls) {
     
     results.style.display = 'block';
     // Scroll to the download button specifically to keep it visible
-    const downloadBtn = document.getElementById('downloadBtn');
     downloadBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
