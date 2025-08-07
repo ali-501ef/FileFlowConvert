@@ -165,7 +165,8 @@ class PDFToJPGHandler {
 
         } catch (error) {
             console.error('Conversion failed:', error);
-            alert('Conversion failed. Please try again.');
+            console.error('Error details:', error.message, error.stack);
+            alert(`Conversion failed: ${error.message || 'Unknown error'}. Please check console for details.`);
             this.hideProgress();
         } finally {
             this.isConverting = false;
@@ -175,9 +176,18 @@ class PDFToJPGHandler {
     async convertSingleFile(file, options) {
         return new Promise(async (resolve, reject) => {
             try {
+                // Check if PDF.js is available
+                if (typeof pdfjsLib === 'undefined') {
+                    throw new Error('PDF.js library not loaded. Please refresh the page.');
+                }
+                
+                console.log('Starting conversion for:', file.name);
                 // Use PDF.js to render PDF pages to canvas and convert to JPG
                 const arrayBuffer = await file.arrayBuffer();
+                console.log('File loaded, size:', arrayBuffer.byteLength);
+                
                 const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
+                console.log('PDF loaded, pages:', pdf.numPages);
                 
                 const pageRange = this.getPageRange(pdf.numPages, options);
                 const images = [];
@@ -209,10 +219,12 @@ class PDFToJPGHandler {
                 }
 
                 // Download all images
+                console.log('Conversion complete, downloading', images.length, 'images');
                 this.downloadImages(images);
                 resolve();
 
             } catch (error) {
+                console.error('Single file conversion error:', error);
                 reject(error);
             }
         });

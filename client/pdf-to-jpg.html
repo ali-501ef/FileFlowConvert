@@ -356,11 +356,16 @@
     <script src="js/main.js"></script>
     <script src="js/pdf-to-jpg-handler.js"></script>
     <script>
-        // Configure PDF.js worker
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-        
-        // Initialize PDF to JPG converter
+        // Configure PDF.js worker and initialize
         document.addEventListener('DOMContentLoaded', () => {
+            // Wait for PDF.js to be available
+            if (typeof pdfjsLib !== 'undefined') {
+                console.log('PDF.js loaded successfully');
+                pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+            } else {
+                console.error('PDF.js not loaded!');
+            }
+            
             // Show/hide custom page range input
             const pageRangeSelect = document.getElementById('pageRange');
             const customRangeGroup = document.getElementById('customRangeGroup');
