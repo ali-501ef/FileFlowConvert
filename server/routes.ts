@@ -197,112 +197,10 @@ async function convertPDFWithPython(inputPath: string, outputPath: string, outpu
 // Conversion helper function using Python with HEIC support
 async function convertImageWithPython(inputPath: string, outputPath: string, outputFormat: string): Promise<boolean> {
   return new Promise((resolve) => {
-    const pythonScript = `
-import sys
-from PIL import Image, ImageOps
-import os
-
-def convert_heic_to_pil(input_path):
-    """Convert HEIC/HEIF to PIL Image using pyheif"""
-    try:
-        import pyheif
-        print(f"Reading HEIC file: {input_path}")
-        heif_file = pyheif.read(input_path)
-        print(f"HEIC file read successfully. Mode: {heif_file.mode}, Size: {heif_file.size}")
-        img = Image.frombytes(
-            heif_file.mode,
-            heif_file.size,
-            heif_file.data,
-            "raw",
-            heif_file.mode,
-            heif_file.stride,
-        )
-        print("HEIC to PIL conversion successful")
-        return img
-    except ImportError as e:
-        print(f"pyheif import error: {e}")
-        # Fallback: try using pillow-heif
-        try:
-            from pillow_heif import register_heif_opener
-            print("Using pillow-heif fallback")
-            register_heif_opener()
-            img = Image.open(input_path)
-            print("pillow-heif conversion successful")
-            return img
-        except ImportError as e2:
-            print(f"pillow-heif import error: {e2}")
-            raise Exception(f"HEIC support requires pyheif or pillow-heif library. pyheif error: {e}, pillow-heif error: {e2}")
-    except Exception as e:
-        print(f"HEIC conversion error: {e}")
-        raise Exception(f"Failed to convert HEIC file: {e}")
-
-try:
-    input_path = sys.argv[1]
-    output_path = sys.argv[2]
-    output_format = sys.argv[3].upper()
+    const imageConverterPath = path.join(process.cwd(), 'server', 'image_converter.py');
+    console.log('Running image conversion:', imageConverterPath, inputPath, outputPath, outputFormat);
     
-    print(f"Starting conversion: {input_path} -> {output_path} ({output_format})")
-    
-    # Check if input file exists
-    if not os.path.exists(input_path):
-        raise Exception(f"Input file not found: {input_path}")
-    
-    # Check if input is HEIC/HEIF
-    input_ext = os.path.splitext(input_path)[1].lower()
-    print(f"Input file extension: {input_ext}")
-    
-    if input_ext in ['.heic', '.heif']:
-        print("Processing HEIC/HEIF file")
-        img = convert_heic_to_pil(input_path)
-    else:
-        print("Processing standard image file")
-        img = Image.open(input_path)
-    
-    print(f"Image loaded. Mode: {img.mode}, Size: {img.size}")
-    
-    # Apply EXIF orientation
-    img = ImageOps.exif_transpose(img)
-    print("EXIF orientation applied")
-    
-    # Handle format conversion
-    if output_format in ['JPG', 'JPEG']:
-        print("Converting to JPEG")
-        if img.mode in ('RGBA', 'LA', 'P'):
-            print(f"Converting {img.mode} to RGB")
-            background = Image.new('RGB', img.size, (255, 255, 255))
-            if img.mode == 'P':
-                img = img.convert('RGBA')
-            if img.mode == 'RGBA':
-                background.paste(img, mask=img.split()[-1])
-            img = background
-        img.save(output_path, 'JPEG', quality=85, optimize=True, progressive=True)
-    elif output_format == 'PNG':
-        print("Converting to PNG")
-        img.save(output_path, 'PNG', optimize=True, compress_level=9)
-    else:
-        print(f"Converting to {output_format}")
-        img.save(output_path, output_format, optimize=True)
-    
-    # Verify output file was created
-    if os.path.exists(output_path):
-        file_size = os.path.getsize(output_path)
-        print(f"Conversion successful. Output file size: {file_size} bytes")
-        print("SUCCESS")
-    else:
-        raise Exception("Output file was not created")
-        
-except Exception as e:
-    print(f"ERROR: {e}")
-    import traceback
-    traceback.print_exc()
-    sys.exit(1)
-`;
-
-    const tempScriptPath = path.join(process.cwd(), 'temp_convert.py');
-    fs.writeFileSync(tempScriptPath, pythonScript);
-
-    console.log('Running Python conversion:', tempScriptPath, inputPath, outputPath, outputFormat);
-    const pythonProcess = spawn('python3', [tempScriptPath, inputPath, outputPath, outputFormat], {
+    const pythonProcess = spawn('python3', [imageConverterPath, inputPath, outputPath, outputFormat], {
       stdio: ['pipe', 'pipe', 'pipe']
     });
 
@@ -321,11 +219,6 @@ except Exception as e:
       console.log('Python process closed with code:', code);
       console.log('Python output:', output);
       console.log('Python error:', error);
-      
-      // Clean up temp script
-      try {
-        fs.unlinkSync(tempScriptPath);
-      } catch {}
 
       if (code === 0 && output.includes('SUCCESS')) {
         resolve(true);
