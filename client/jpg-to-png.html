@@ -354,12 +354,18 @@
 
     <script src="/js/main.js"></script>
     <script src="/js/advanced-options.js"></script>
-    <!-- JPG to PNG Tool - Use server-side converter -->
+    <script src="/js/converters/universal-image-converter.js"></script>
     <script>
+        // Initialize Universal Image Converter for JPG to PNG
         document.addEventListener('DOMContentLoaded', function() {
-            const dropZone = document.querySelector('.file-drop-zone');
-            const fileInput = document.getElementById('file-input');
-            const convertBtn = document.getElementById('convert-btn');
+            window.imageConverter = new ImageConverter({
+                inputFormat: 'jpg',
+                outputFormat: 'png',
+                acceptedTypes: '.jpg,.jpeg',
+                toolName: 'JPG to PNG'
+            });
+        });
+    </script>
             
             // Click handler for drop zone
             dropZone.addEventListener('click', function() {

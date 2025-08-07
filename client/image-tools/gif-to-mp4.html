@@ -297,7 +297,18 @@
     </footer>
 
     <script src="../js/advanced-options.js"></script>
-    <script src="../js/converters/video-converter.js"></script>
+    <script src="../js/converters/universal-image-converter.js"></script>
+    <script>
+        // Initialize Universal Image Converter for GIF to MP4
+        document.addEventListener('DOMContentLoaded', function() {
+            window.imageConverter = new ImageConverter({
+                inputFormat: 'gif',
+                outputFormat: 'mp4',
+                acceptedTypes: '.gif',
+                toolName: 'GIF to MP4'
+            });
+        });
+    </script>
     <script>
         // Initialize GIF to MP4 converter
         document.addEventListener('DOMContentLoaded', () => {

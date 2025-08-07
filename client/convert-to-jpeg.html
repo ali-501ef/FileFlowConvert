@@ -376,7 +376,18 @@
 
     <script src="/js/main.js"></script>
     <script src="/js/advanced-options.js"></script>
-    <!-- Universal to JPEG Tool - Use server-side converter -->
+    <script src="/js/converters/universal-image-converter.js"></script>
+    <script>
+        // Initialize Universal Image Converter for Convert to JPEG
+        document.addEventListener('DOMContentLoaded', function() {
+            window.imageConverter = new ImageConverter({
+                inputFormat: 'any',
+                outputFormat: 'jpeg',
+                acceptedTypes: '.jpg,.jpeg,.png,.webp,.bmp,.tiff,.heic,.avif,.pdf',
+                toolName: 'Convert to JPEG'
+            });
+        });
+    </script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const dropZone = document.querySelector('.file-drop-zone');

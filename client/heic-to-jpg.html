@@ -367,11 +367,18 @@
 
     <script src="/js/main.js"></script>
     <script src="/js/advanced-options.js"></script>
-    <!-- HEIC Tool - Simple click handler for file upload -->
+    <script src="/js/converters/universal-image-converter.js"></script>
     <script>
+        // Initialize Universal Image Converter for HEIC to JPG
         document.addEventListener('DOMContentLoaded', function() {
-            const dropZone = document.getElementById('heic-drop-zone');
-            const fileInput = document.getElementById('heic-file-input');
+            window.imageConverter = new ImageConverter({
+                inputFormat: 'heic',
+                outputFormat: 'jpg',
+                acceptedTypes: '.heic,.heif',
+                toolName: 'HEIC to JPG'
+            });
+        });
+    </script>
             const formatSelect = document.getElementById('heic-format-select');
             const convertBtn = document.getElementById('heic-convert-btn');
             
