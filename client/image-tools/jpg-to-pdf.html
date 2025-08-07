@@ -299,11 +299,12 @@
         </div>
     </footer>
 
-    <script src="../js/converters/image-converter.js"></script>
+    <script src="../js/advanced-options.js"></script>
+    <script src="../js/converters/universal-image-converter.js"></script>
     <script>
         // Initialize JPG to PDF converter
         document.addEventListener('DOMContentLoaded', () => {
-            window.imageConverter = new ImageConverter({
+            window.imageConverter = window.initImageConverter({
                 inputFormat: 'jpg',
                 outputFormat: 'pdf',
                 acceptedTypes: '.jpg,.jpeg',

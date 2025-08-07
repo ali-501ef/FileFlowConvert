@@ -3,11 +3,143 @@
  * Uses FFmpeg WebAssembly for client-side video to audio conversion
  */
 
-class VideoConverter extends FileHandler {
-    constructor() {
-        super();
+class VideoConverter {
+    constructor(config = {}) {
+        this.inputFormat = config.inputFormat || 'mp4';
+        this.outputFormat = config.outputFormat || 'mp3';
+        this.acceptedTypes = config.acceptedTypes || '.mp4,.mov,.avi';
+        this.toolName = config.toolName || 'Video Converter';
+        
+        this.selectedFiles = [];
         this.ffmpeg = null;
         this.isFFmpegReady = false;
+        
+        this.init();
+    }
+    
+    init() {
+        this.setupFileInput();
+        this.setupDropZone();
+        this.setupConvertButton();
+    }
+    
+    setupFileInput() {
+        const fileInput = document.getElementById('fileInput');
+        if (fileInput) {
+            fileInput.addEventListener('change', (e) => {
+                this.handleFiles(e.target.files);
+            });
+        }
+    }
+    
+    setupDropZone() {
+        const uploadArea = document.getElementById('uploadArea');
+        if (uploadArea) {
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, this.preventDefaults, false);
+            });
+            
+            ['dragenter', 'dragover'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, () => uploadArea.classList.add('drag-over'), false);
+            });
+            
+            ['dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, () => uploadArea.classList.remove('drag-over'), false);
+            });
+            
+            uploadArea.addEventListener('drop', (e) => {
+                const files = e.dataTransfer.files;
+                this.handleFiles(files);
+            }, false);
+        }
+    }
+    
+    setupConvertButton() {
+        const convertBtn = document.getElementById('convertBtn');
+        if (convertBtn) {
+            convertBtn.addEventListener('click', () => {
+                this.convertFiles();
+            });
+        }
+    }
+    
+    preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+    
+    handleFiles(files) {
+        const fileArray = Array.from(files);
+        
+        // Filter files based on accepted types
+        const validFiles = fileArray.filter(file => {
+            return this.isValidFileType(file);
+        });
+        
+        if (validFiles.length === 0) {
+            alert(`Please select valid ${this.inputFormat.toUpperCase()} files.`);
+            return;
+        }
+        
+        this.selectedFiles = validFiles;
+        this.displayFilePreview(validFiles);
+        this.enableConvertButton();
+    }
+    
+    isValidFileType(file) {
+        const fileName = file.name.toLowerCase();
+        const acceptedExtensions = this.acceptedTypes.split(',').map(ext => ext.trim());
+        
+        return acceptedExtensions.some(ext => {
+            const cleanExt = ext.replace('.', '');
+            return fileName.endsWith('.' + cleanExt) || file.type.includes(cleanExt);
+        });
+    }
+    
+    displayFilePreview(files) {
+        const filePreview = document.getElementById('filePreview');
+        const fileList = document.getElementById('fileList');
+        const fileName = document.getElementById('fileName');
+        const fileSize = document.getElementById('fileSize');
+        
+        if (filePreview) {
+            filePreview.style.display = 'block';
+        }
+        
+        if (files.length === 1) {
+            if (fileName) fileName.textContent = files[0].name;
+            if (fileSize) fileSize.textContent = this.formatFileSize(files[0].size);
+        } else {
+            if (fileName) fileName.textContent = `${files.length} files selected`;
+            const totalSize = files.reduce((sum, file) => sum + file.size, 0);
+            if (fileSize) fileSize.textContent = this.formatFileSize(totalSize);
+        }
+        
+        if (fileList) {
+            fileList.innerHTML = files.map(file => `
+                <div class="file-item">
+                    <div class="file-info">
+                        <div class="file-name">${file.name}</div>
+                        <div class="file-size">${this.formatFileSize(file.size)}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+    }
+    
+    formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+    
+    enableConvertButton() {
+        const convertBtn = document.getElementById('convertBtn');
+        if (convertBtn) {
+            convertBtn.disabled = false;
+        }
     }
 
     /**

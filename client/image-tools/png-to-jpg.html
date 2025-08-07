@@ -342,7 +342,18 @@
         </div>
     </footer>
 
-    <script src="../js/main.js"></script>
-    <script src="../js/png-to-jpg-converter.js"></script>
+    <script src="../js/advanced-options.js"></script>
+    <script src="../js/converters/universal-image-converter.js"></script>
+    <script>
+        // Initialize PNG to JPG converter
+        document.addEventListener('DOMContentLoaded', () => {
+            window.imageConverter = window.initImageConverter({
+                inputFormat: 'png',
+                outputFormat: 'jpg',
+                acceptedTypes: '.png',
+                toolName: 'PNG to JPG'
+            });
+        });
+    </script>
 </body>
 </html>

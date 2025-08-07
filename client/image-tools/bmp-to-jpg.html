@@ -303,11 +303,12 @@
         </div>
     </footer>
 
-    <script src="../js/converters/image-converter.js"></script>
+    <script src="../js/advanced-options.js"></script>
+    <script src="../js/converters/universal-image-converter.js"></script>
     <script>
         // Initialize BMP to JPG converter
         document.addEventListener('DOMContentLoaded', () => {
-            window.imageConverter = new ImageConverter({
+            window.imageConverter = window.initImageConverter({
                 inputFormat: 'bmp',
                 outputFormat: 'jpg',
                 acceptedTypes: '.bmp',
