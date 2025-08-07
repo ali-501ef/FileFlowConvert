@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PNG to JPG Converter - FileFlow | Convert PNG Images to JPG Format</title>
+    <meta name="description" content="Convert PNG images to JPG format with quality control. Fast, secure PNG to JPEG conversion with background options and compression settings.">
+    <link rel="canonical" href="https://fileflow.com/image-tools/png-to-jpg">
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="PNG to JPG Converter - FileFlow">
+    <meta property="og:description" content="Convert PNG images to JPG format with quality control and background options.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://fileflow.com/image-tools/png-to-jpg">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="../styles.css">
+    
+    <!-- Navigation Script -->
+    <script src="../js/navigation.js" defer></script>
+</head>
+<body>
+    <!-- Sticky Navigation Bar -->
+    <nav class="sticky-nav">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <a href="/" data-testid="nav-brand">FileFlow</a>
+            </div>
+            
+            <div class="nav-menu">
+                <!-- Image Tools -->
+                <div class="nav-dropdown">
+                    <button class="nav-dropdown-trigger" data-testid="nav-image-trigger">
+                        Image Tools
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    <div class="nav-dropdown-content">
+                        <a href="../convert-to-jpeg.html" class="nav-dropdown-item" data-testid="nav-convert-jpeg">Convert to JPEG</a>
+                        <a href="../heic-to-jpg.html" class="nav-dropdown-item" data-testid="nav-heic-jpg">HEIC to JPG</a>
+                        <a href="../jpg-to-png.html" class="nav-dropdown-item" data-testid="nav-jpg-png">JPG to PNG</a>
+                    </div>
+                </div>
+
+                <!-- PDF Tools -->
+                <div class="nav-dropdown">
+                    <button class="nav-dropdown-trigger" data-testid="nav-pdf-trigger">
+                        PDF Tools
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    <div class="nav-dropdown-content">
+                        <a href="../pdf-merge.html" class="nav-dropdown-item" data-testid="nav-pdf-merge">PDF Merge</a>
+                        <a href="../pdf-split.html" class="nav-dropdown-item" data-testid="nav-pdf-split">PDF Split</a>
+                        <a href="../pdf-compress.html" class="nav-dropdown-item" data-testid="nav-pdf-compress">PDF Compress</a>
+                        <a href="../pdf-rotate.html" class="nav-dropdown-item" data-testid="nav-pdf-rotate">PDF Rotate</a>
+                        <a href="../pdf-watermark.html" class="nav-dropdown-item" data-testid="nav-pdf-watermark">PDF Watermark</a>
+                        <a href="../pdf-to-word.html" class="nav-dropdown-item" data-testid="nav-pdf-to-word">PDF to Word</a>
+                    </div>
+                </div>
+
+                <!-- Audio/Video Tools -->
+                <div class="nav-dropdown">
+                    <button class="nav-dropdown-trigger" data-testid="nav-media-trigger">
+                        Audio/Video Tools
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    <div class="nav-dropdown-content">
+                        <a href="../mp4-to-mp3.html" class="nav-dropdown-item" data-testid="nav-mp4-mp3">MP4 to MP3</a>
+                        <a href="../audio-converter.html" class="nav-dropdown-item" data-testid="nav-audio-convert">Audio Converter</a>
+                        <a href="../video-compress.html" class="nav-dropdown-item" data-testid="nav-video-compress">Video Compress</a>
+                        <a href="../gif-maker.html" class="nav-dropdown-item" data-testid="nav-gif-maker">GIF Maker</a>
+                        <a href="../video-trim.html" class="nav-dropdown-item" data-testid="nav-video-trim">Video Trim</a>
+                        <a href="../video-merger.html" class="nav-dropdown-item" data-testid="nav-video-merge">Video Merger</a>
+                    </div>
+                </div>
+            </div>
+            
+            <button class="mobile-nav-toggle" data-testid="mobile-nav-toggle">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
+        </div>
+    </nav>
+
+    <div class="layout-container">
+        <!-- Desktop Sidebar Ad Left -->
+        <div class="sidebar-ad desktop-only">
+            <div class="ad-placeholder ad-sidebar">
+                <span class="ad-text">Sidebar<br>Advertisement<br>(160x600)</span>
+            </div>
+        </div>
+
+        <main class="main">
+            <div class="hero-section">
+                <div class="hero-content">
+                    <div class="hero-badge">
+                        <div class="tool-icon bg-blue">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                                <circle cx="9" cy="9" r="2"/>
+                                <path d="M21 15l-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+                            </svg>
+                        </div>
+                        <span>Image Tools</span>
+                    </div>
+                    <h1 class="hero-title">PNG to JPG</h1>
+                    <p class="hero-description">Convert PNG images to JPG format with quality control</p>
+                    <div class="hero-features">
+                        <span class="feature-tag">✓ Quality control</span>
+                        <span class="feature-tag">✓ Background options</span>
+                        <span class="feature-tag">✓ Batch processing</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="converter-container">
+                <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+                    <div class="upload-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                            <circle cx="9" cy="9" r="2"/>
+                            <path d="M21 15l-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+                        </svg>
+                    </div>
+                    <h3>Drop your PNG files here</h3>
+                    <p>or click anywhere to browse files</p>
+                    <p class="supported-formats">Supports PNG files only</p>
+                    <input type="file" id="fileInput" multiple accept=".png,.PNG" hidden>
+                </div>
+
+                <div class="advanced-options" id="advancedOptions">
+                    <div class="options-header" id="optionsToggle">
+                        <div class="options-title">
+                            <svg class="options-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z"/>
+                                <path d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/>
+                                <path d="M12 2v2"/>
+                                <path d="M12 20v2"/>
+                                <path d="m4.93 4.93 1.41 1.41"/>
+                                <path d="m17.66 17.66 1.41 1.41"/>
+                                <path d="M2 12h2"/>
+                                <path d="M20 12h2"/>
+                                <path d="m6.34 17.66-1.41 1.41"/>
+                                <path d="m19.07 4.93-1.41 1.41"/>
+                            </svg>
+                            <span>Advanced Options</span>
+                        </div>
+                        <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="m6 9 6 6 6-6"/>
+                        </svg>
+                    </div>
+                    <div class="options-content" id="optionsContent" style="display: none;">
+                        <div class="option-group">
+                            <label for="jpegQuality">JPEG Quality</label>
+                            <select id="jpegQuality">
+                                <option value="95" selected>High Quality (95%)</option>
+                                <option value="85">Good Quality (85%)</option>
+                                <option value="75">Medium Quality (75%)</option>
+                                <option value="60">Low Quality (60%)</option>
+                            </select>
+                        </div>
+                        <div class="option-group">
+                            <label for="backgroundMode">Background Handling</label>
+                            <select id="backgroundMode">
+                                <option value="white" selected>White background</option>
+                                <option value="black">Black background</option>
+                                <option value="transparent">Keep transparent (if supported)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="file-preview" id="filePreview" style="display: none;">
+                    <div class="preview-header">
+                        <h3 id="fileName"></h3>
+                        <span id="fileSize"></span>
+                    </div>
+                    <div class="file-list" id="fileList"></div>
+                </div>
+
+                <button class="convert-btn" id="convertBtn" disabled>
+                    <span class="btn-text">Convert to JPG</span>
+                    <div class="btn-loader" style="display: none;"></div>
+                </button>
+
+                <!-- Tool Information Section -->
+                <div class="tool-info-section">
+                    <div class="info-grid">
+                        <div class="info-card">
+                            <div class="info-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="7,10 12,15 17,10"></polyline>
+                                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                                </svg>
+                            </div>
+                            <h3>Size Reduction</h3>
+                            <p>Convert PNG to JPG for significantly smaller file sizes. Perfect for web use and storage optimization while maintaining good image quality.</p>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z"/>
+                                    <path d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/>
+                                </svg>
+                            </div>
+                            <h3>Quality Control</h3>
+                            <p>Choose from multiple quality levels to balance file size and image quality. Adjust compression settings for your specific needs.</p>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                                    <path d="M9 12l2 2 4-4"/>
+                                </svg>
+                            </div>
+                            <h3>Background Options</h3>
+                            <p>Handle PNG transparency intelligently with options for white, black, or preserved transparent backgrounds in supported formats.</p>
+                        </div>
+                    </div>
+                    <div class="tool-benefits">
+                        <h3>Why Convert PNG to JPG?</h3>
+                        <p>Converting PNG to JPG reduces file sizes significantly, making images perfect for web use, email sharing, and storage optimization. JPG format is universally supported and ideal for photographs and images without transparency needs. This conversion maintains visual quality while dramatically reducing file sizes for faster loading and easier sharing.</p>
+                    </div>
+                </div>
+
+                <div class="progress-container" id="progressContainer" style="display: none;">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="progress-text" id="progressText">0%</div>
+                </div>
+
+                <div class="results" id="results" style="display: none;">
+                    <h3>Conversion Complete</h3>
+                    <div class="result-actions">
+                        <button class="download-btn" id="downloadBtn">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7,10 12,15 17,10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                            Download JPG Files
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Desktop Sidebar Ad Right -->
+        <div class="sidebar-ad desktop-only">
+            <div class="ad-placeholder ad-sidebar">
+                <span class="ad-text">Sidebar<br>Advertisement<br>(160x600)</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <!-- Branding Section -->
+                <div class="footer-section">
+                    <h3 class="footer-title">FileFlow</h3>
+                    <p class="footer-description">Professional file conversion tools for everyone.</p>
+                </div>
+                
+                <!-- PDF Tools -->
+                <div class="footer-section">
+                    <h4 class="footer-subtitle">PDF Tools</h4>
+                    <ul class="footer-links">
+                        <li><a href="../pdf-merge.html" class="footer-link" data-testid="footer-pdf-merge">PDF Merge</a></li>
+                        <li><a href="../pdf-split.html" class="footer-link" data-testid="footer-pdf-split">PDF Split</a></li>
+                        <li><a href="../pdf-compress.html" class="footer-link" data-testid="footer-pdf-compress">PDF Compress</a></li>
+                        <li><a href="../pdf-to-word.html" class="footer-link" data-testid="footer-pdf-to-word">PDF to Word</a></li>
+                        <li><a href="../pdf-rotate.html" class="footer-link" data-testid="footer-pdf-rotate">PDF Rotate</a></li>
+                        <li><a href="../pdf-watermark.html" class="footer-link" data-testid="footer-pdf-watermark">PDF Watermark</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Image Tools -->
+                <div class="footer-section">
+                    <h4 class="footer-subtitle">Image Tools</h4>
+                    <ul class="footer-links">
+                        <li><a href="../convert-to-jpeg.html" class="footer-link" data-testid="footer-convert-jpeg">Convert to JPEG</a></li>
+                        <li><a href="../heic-to-jpg.html" class="footer-link" data-testid="footer-heic-jpg">HEIC to JPG</a></li>
+                        <li><a href="../jpg-to-png.html" class="footer-link" data-testid="footer-jpg-png">JPG to PNG</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Audio/Video Tools -->
+                <div class="footer-section">
+                    <h4 class="footer-subtitle">Audio/Video Tools</h4>
+                    <ul class="footer-links">
+                        <li><a href="../mp4-to-mp3.html" class="footer-link" data-testid="footer-mp4-mp3">MP4 to MP3</a></li>
+                        <li><a href="../video-compress.html" class="footer-link" data-testid="footer-video-compress">Video Compress</a></li>
+                        <li><a href="../audio-converter.html" class="footer-link" data-testid="footer-audio-converter">Audio Converter</a></li>
+                        <li><a href="../video-trim.html" class="footer-link" data-testid="footer-video-trim">Video Trim</a></li>
+                        <li><a href="../gif-maker.html" class="footer-link" data-testid="footer-gif-maker">GIF Maker</a></li>
+                        <li><a href="../video-merger.html" class="footer-link" data-testid="footer-video-merger">Video Merger</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Support Links -->
+                <div class="footer-section">
+                    <h4 class="footer-subtitle">Support</h4>
+                    <ul class="footer-links">
+                        <li><a href="mailto:support@fileflow.com" class="footer-link" data-testid="footer-contact">Contact</a></li>
+                        <li><a href="#" class="footer-link" data-testid="footer-help">Help Center</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Legal Links -->
+                <div class="footer-section">
+                    <h4 class="footer-subtitle">Legal</h4>
+                    <ul class="footer-links">
+                        <li><a href="../privacy-policy.html" class="footer-link" data-testid="footer-privacy">Privacy Policy</a></li>
+                        <li><a href="../terms-of-use.html" class="footer-link" data-testid="footer-terms">Terms of Use</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 FileFlow. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../js/main.js"></script>
+    <script src="../js/png-to-jpg-converter.js"></script>
+</body>
+</html>
