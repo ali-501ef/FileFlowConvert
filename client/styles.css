@@ -1244,6 +1244,57 @@ body {
     box-shadow: var(--shadow-sm);
 }
 
+/* Wide Card for More Image Tools */
+.tool-card.wide-card {
+    grid-column: 1 / -1;
+    background: linear-gradient(135deg, rgba(147, 51, 234, 0.08), rgba(99, 102, 241, 0.05));
+    border: 2px solid var(--primary);
+    position: relative;
+    overflow: hidden;
+}
+
+.tool-card.wide-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.6s;
+}
+
+.tool-card.wide-card:hover::before {
+    left: 100%;
+}
+
+.tool-card.wide-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 30px 60px -12px rgba(147, 51, 234, 0.25);
+    border-color: rgba(147, 51, 234, 0.4);
+}
+
+.tool-card.wide-card .tool-header {
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.tool-card.wide-card .tool-icon {
+    transform: scale(1.1);
+}
+
+.tool-card.wide-card .tool-features {
+    font-weight: 500;
+    color: var(--primary);
+}
+
+/* Responsive behavior for wide card */
+@media (max-width: 767px) {
+    .tool-card.wide-card {
+        grid-column: 1;
+    }
+}
+
 .coming-soon-badge {
     position: absolute;
     top: 1rem;
@@ -4810,6 +4861,165 @@ body {
 
 .animate-spin {
     animation: spin 1s linear infinite;
+}
+
+/* Premium Extended Tools Page Styles */
+.premium-page {
+    background: linear-gradient(135deg, 
+        rgba(147, 51, 234, 0.03) 0%, 
+        rgba(99, 102, 241, 0.02) 50%, 
+        rgba(59, 130, 246, 0.03) 100%);
+    min-height: 100vh;
+}
+
+.premium-hero {
+    background: linear-gradient(135deg, 
+        rgba(147, 51, 234, 0.1) 0%, 
+        rgba(99, 102, 241, 0.05) 100%);
+    border-bottom: 1px solid rgba(147, 51, 234, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.premium-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><defs><radialGradient id="g" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="%23ffffff" stop-opacity="0.1"/><stop offset="100%" stop-color="%23ffffff" stop-opacity="0"/></radialGradient></defs><circle cx="500" cy="500" r="400" fill="url(%23g)"/></svg>') center/800px 800px no-repeat;
+    opacity: 0.5;
+    animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+}
+
+.premium-tools-grid {
+    display: grid;
+    gap: 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    margin: 2rem 0;
+}
+
+.premium-tool-card {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-xl);
+    padding: var(--card-spacing);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.premium-tool-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--primary), transparent);
+    transform: translateX(-100%);
+    transition: transform 0.6s ease;
+}
+
+.premium-tool-card:hover::before {
+    transform: translateX(100%);
+}
+
+.premium-tool-card:hover {
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    background: rgba(255, 255, 255, 0.8);
+    border-color: rgba(147, 51, 234, 0.2);
+}
+
+.premium-section-divider {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(147, 51, 234, 0.2), transparent);
+    margin: 3rem 0;
+    position: relative;
+}
+
+.premium-section-divider::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 6px;
+    height: 6px;
+    background: var(--primary);
+    border-radius: 50%;
+    box-shadow: 0 0 10px rgba(147, 51, 234, 0.3);
+}
+
+.premium-benefits-section {
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(8px);
+    border-radius: var(--radius-xl);
+    padding: 3rem 2rem;
+    margin: 4rem 0;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.premium-benefits-grid {
+    display: grid;
+    gap: 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    margin-top: 2rem;
+}
+
+.premium-benefit-card {
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    transition: all 0.3s ease;
+}
+
+.premium-benefit-card:hover {
+    background: rgba(255, 255, 255, 0.8);
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.premium-title {
+    background: linear-gradient(135deg, var(--primary), rgba(147, 51, 234, 0.8));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 700;
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    position: relative;
+}
+
+.premium-title::after {
+    content: '';
+    position: absolute;
+    bottom: -0.5rem;
+    left: 0;
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary), transparent);
+    border-radius: 2px;
+}
+
+.premium-subtitle {
+    color: var(--foreground);
+    font-size: 1.25rem;
+    font-weight: 500;
+    margin-bottom: 2rem;
+    opacity: 0.8;
 }
 
 
