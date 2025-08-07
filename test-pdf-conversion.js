@@ -4,9 +4,9 @@
  * Tests various PDF scenarios as specified in the requirements
  */
 
-const fs = require('fs');
-const path = require('path');
-const FormData = require('form-data');
+import fs from 'fs';
+import path from 'path';
+import FormData from 'form-data';
 
 const API_BASE = 'http://localhost:5000/api/pdf-to-jpg';
 
@@ -45,7 +45,7 @@ class PDFConverterTester {
     async testValidSinglePagePDF() {
         // Create a minimal valid PDF
         const pdfBuffer = this.createMinimalPDF();
-        const tempFile = path.join(__dirname, 'temp-single-page.pdf');
+        const tempFile = path.join(process.cwd(), 'temp-single-page.pdf');
         fs.writeFileSync(tempFile, pdfBuffer);
 
         try {
@@ -78,7 +78,7 @@ class PDFConverterTester {
     async testInvalidPDFFile() {
         // Create a fake PDF (text file renamed as .pdf)
         const fakeContent = 'This is not a PDF file';
-        const tempFile = path.join(__dirname, 'temp-fake.pdf');
+        const tempFile = path.join(process.cwd(), 'temp-fake.pdf');
         fs.writeFileSync(tempFile, fakeContent);
 
         try {
@@ -100,7 +100,7 @@ class PDFConverterTester {
     }
 
     async testEmptyFile() {
-        const tempFile = path.join(__dirname, 'temp-empty.pdf');
+        const tempFile = path.join(process.cwd(), 'temp-empty.pdf');
         fs.writeFileSync(tempFile, '');
 
         try {
@@ -123,7 +123,7 @@ class PDFConverterTester {
     async testLargeFile() {
         // Create a large dummy file (over 50MB would be too much for testing)
         const largeContent = Buffer.alloc(1024 * 1024, 'A'); // 1MB of 'A's
-        const tempFile = path.join(__dirname, 'temp-large.pdf');
+        const tempFile = path.join(process.cwd(), 'temp-large.pdf');
         fs.writeFileSync(tempFile, largeContent);
 
         try {
@@ -142,7 +142,7 @@ class PDFConverterTester {
 
     async testAdvancedOptions() {
         const pdfBuffer = this.createMinimalPDF();
-        const tempFile = path.join(__dirname, 'temp-options.pdf');
+        const tempFile = path.join(process.cwd(), 'temp-options.pdf');
         fs.writeFileSync(tempFile, pdfBuffer);
 
         try {
@@ -267,13 +267,11 @@ if (typeof fetch === 'undefined') {
     process.exit(1);
 }
 
-// Run tests if this file is executed directly
-if (require.main === module) {
-    const tester = new PDFConverterTester();
-    tester.runTests().catch(error => {
-        console.error('Test runner failed:', error);
-        process.exit(1);
-    });
-}
+// Run tests - ES module version
+const tester = new PDFConverterTester();
+tester.runTests().catch(error => {
+    console.error('Test runner failed:', error);
+    process.exit(1);
+});
 
-module.exports = PDFConverterTester;
+export default PDFConverterTester;

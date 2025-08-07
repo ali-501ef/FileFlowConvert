@@ -2,6 +2,8 @@ import { exec } from 'child_process';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { promisify } from 'util';
+import { formatOutputFilename, generateUniqueFilename } from './utils/filename';
+import { validatePDF, logConversion } from './utils/validate';
 
 const execAsync = promisify(exec);
 
@@ -36,9 +38,9 @@ export class PDFConverter {
     }
   }
 
-  async validatePDF(filePath: string): Promise<{ valid: boolean; error?: string }> {
+  async validatePDF(filePath: string): Promise<{ valid: boolean; error?: string; metadata?: any }> {
     try {
-      // Check file size
+      // Check file size first
       const stats = await fs.stat(filePath);
       if (stats.size === 0) {
         return { valid: false, error: "The uploaded file is empty." };
@@ -48,90 +50,68 @@ export class PDFConverter {
         return { valid: false, error: "File too large. Maximum size is 50MB." };
       }
 
-      // Check PDF magic bytes
-      const buffer = await fs.readFile(filePath, { encoding: null });
-      const header = buffer.subarray(0, 5).toString('ascii');
+      // Use shared validation utility
+      const validationResult = await validatePDF(filePath);
       
-      if (!header.startsWith('%PDF-')) {
-        return { valid: false, error: "That file isn't a valid PDF. Please upload a .pdf file." };
+      if (!validationResult.valid) {
+        return { 
+          valid: false, 
+          error: validationResult.error || "PDF validation failed",
+          metadata: validationResult.metadata 
+        };
       }
 
-      // Check if PDF is encrypted using pdfinfo
-      let isPasswordProtected = false;
-      try {
-        const { stdout } = await execAsync(`pdfinfo "${filePath}"`);
-        
-        // Parse pdfinfo output to specifically check the Encrypted field
-        const lines = stdout.split('\n');
-        const encryptLine = lines.find(line => line.trim().startsWith('Encrypted:'));
-        
-        if (encryptLine) {
-          const encryptValue = encryptLine.split(':')[1]?.trim().toLowerCase();
-          // Only consider it password-protected if Encrypted field is not "no"
-          isPasswordProtected = encryptValue !== 'no';
-        }
-      } catch (error) {
-        // If pdfinfo fails completely, we'll test conversion directly
-        console.log('pdfinfo failed, will test conversion directly:', error);
-      }
-
-      // If pdfinfo indicates encryption, verify by attempting conversion
-      if (isPasswordProtected) {
-        try {
-          await execAsync(`pdftoppm -jpeg -r 72 -f 1 -l 1 "${filePath}" /dev/null`, { timeout: 10000 });
-          // If conversion succeeds, the PDF isn't actually password-protected for our purposes
-          console.log('PDF has encryption flags but is convertible');
-        } catch (conversionError: any) {
-          // Check if the error is specifically about incorrect password
-          if (conversionError.message.includes('Incorrect password') || 
-              conversionError.message.includes('Command not allowed') ||
-              conversionError.message.includes('Permission denied')) {
-            return { valid: false, error: "This PDF is password-protected. Please decrypt it and try again." };
-          }
-          // For other conversion errors, return a generic message
-          console.log('Conversion test failed with non-password error:', conversionError.message);
-          return { valid: false, error: "Unable to process this PDF file. Please try a different file." };
-        }
-      }
-
-      return { valid: true };
+      return { 
+        valid: true, 
+        metadata: validationResult.metadata 
+      };
     } catch (error: any) {
       return { valid: false, error: `PDF validation failed: ${error.message}` };
     }
   }
 
-  async convertPDFToJPG(filePath: string, options: ConversionOptions = {}): Promise<ConversionResult> {
-    const timestamp = Date.now();
-    const outputPrefix = path.join(this.tempDir, `converted_${timestamp}`);
+  async convertPDFToJPG(filePath: string, options: ConversionOptions = {}, originalFilename = ''): Promise<ConversionResult> {
+    const startTime = Date.now();
     const outputFiles: string[] = [];
 
     try {
-      // Build pdftoppm command
-      const dpi = options.dpi || 150;
+      // Get input file info for logging
+      const inputStats = await fs.stat(filePath);
+      const inputInfo = {
+        filename: originalFilename || path.basename(filePath),
+        mime: 'application/pdf',
+        size: inputStats.size
+      };
+
+      // Generate unique output prefix using new filename utility
+      const outputPrefix = path.join(this.tempDir, generateUniqueFilename('pdf_conversion', 'jpg').replace('.jpg', ''));
+
+      // Build pdftoppm command with validation
+      const dpi = Math.max(72, Math.min(300, options.dpi || 150)); // Clamp DPI between 72-300
       let command = `pdftoppm -jpeg -r ${dpi}`;
 
-      // Add page range if specified
+      // Add page range if specified (with validation)
       if (options.pageRange) {
-        if (options.pageRange.first) {
+        if (options.pageRange.first && options.pageRange.first > 0) {
           command += ` -f ${options.pageRange.first}`;
         }
-        if (options.pageRange.last) {
+        if (options.pageRange.last && options.pageRange.last > 0) {
           command += ` -l ${options.pageRange.last}`;
         }
       }
 
-      // Add quality settings
+      // Add quality settings with validation
       if (options.quality) {
         const qualityMap = { low: 70, medium: 85, high: 95 };
-        const qualityValue = qualityMap[options.quality];
+        const qualityValue = qualityMap[options.quality] || 85;
         command += ` -jpegopt quality=${qualityValue}`;
       }
 
       command += ` "${filePath}" "${outputPrefix}"`;
 
-      console.log('Running command:', command);
+      console.log('🔄 Running PDF conversion command:', command);
 
-      // Execute conversion
+      // Execute conversion with timeout
       const { stdout, stderr } = await execAsync(command, { timeout: 120000 });
 
       if (stderr && stderr.includes('Error')) {
@@ -140,8 +120,9 @@ export class PDFConverter {
 
       // Find generated files
       const tempFiles = await fs.readdir(this.tempDir);
+      const baseFilename = path.basename(outputPrefix);
       const generatedFiles = tempFiles.filter(file => 
-        file.startsWith(`converted_${timestamp}`) && file.endsWith('.jpg')
+        file.startsWith(baseFilename) && file.endsWith('.jpg')
       );
 
       if (generatedFiles.length === 0) {
@@ -158,18 +139,64 @@ export class PDFConverter {
         return a.localeCompare(b);
       });
 
+      // Create output file list
       for (const file of generatedFiles) {
         outputFiles.push(path.join(this.tempDir, file));
       }
 
+      // Validate output files
+      for (const outputFile of outputFiles) {
+        const outputStats = await fs.stat(outputFile);
+        if (outputStats.size === 0) {
+          throw new Error(`Generated file is empty: ${path.basename(outputFile)}`);
+        }
+      }
+
+      const isMultiPage = outputFiles.length > 1;
+      const duration = Date.now() - startTime;
+
+      // Log successful conversion
+      const outputInfo = {
+        filename: isMultiPage ? `${path.basename(filePath, '.pdf')}_images.zip` : formatOutputFilename(inputInfo.filename, 'jpg'),
+        mime: isMultiPage ? 'application/zip' : 'image/jpeg',
+        size: outputFiles.reduce(async (acc, file) => {
+          const stats = await fs.stat(file);
+          return (await acc) + stats.size;
+        }, Promise.resolve(0))
+      };
+
+      logConversion('pdf-to-jpg', inputInfo, {
+        ...outputInfo,
+        size: await outputInfo.size
+      }, options, {
+        success: true,
+        duration
+      });
+
       return {
         success: true,
         files: outputFiles,
-        isMultiPage: outputFiles.length > 1
+        isMultiPage
       };
 
     } catch (error: any) {
-      console.error('PDF conversion error:', error);
+      const duration = Date.now() - startTime;
+      console.error('❌ PDF conversion error:', error);
+      
+      // Log failed conversion
+      logConversion('pdf-to-jpg', {
+        filename: originalFilename || path.basename(filePath),
+        mime: 'application/pdf',
+        size: 0
+      }, {
+        filename: 'failed',
+        mime: 'image/jpeg',
+        size: 0
+      }, options, {
+        success: false,
+        error: error.message,
+        duration
+      });
       
       // Clean up any partial files
       await this.cleanupFiles(outputFiles);
@@ -201,7 +228,12 @@ export class PDFConverter {
   }
 
   generateOutputFilename(originalName: string, isMultiPage: boolean): string {
-    const baseName = originalName.replace(/\.pdf$/i, '');
-    return isMultiPage ? `${baseName}_images.zip` : `${baseName}.jpg`;
+    if (isMultiPage) {
+      // For multi-page, use ZIP with consistent naming
+      return formatOutputFilename(originalName, 'zip');
+    } else {
+      // For single page, use JPG with consistent naming
+      return formatOutputFilename(originalName, 'jpg');
+    }
   }
 }

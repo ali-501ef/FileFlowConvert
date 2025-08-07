@@ -12,6 +12,8 @@ import { insertConversionSchema } from "@shared/schema";
 import { storage } from "./storage";
 import { randomUUID } from "crypto";
 import { PDFConverter } from "./pdf-converter";
+import { formatOutputFilename, generateUniqueFilename } from "./utils/filename";
+import { validateFile, logConversion } from "./utils/validate";
 
 // Track active conversions to prevent duplicates
 const activeConversions = new Map<string, { timestamp: number; promise: Promise<any> }>();
@@ -837,6 +839,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // PDF to JPG conversion API endpoints
   app.post('/api/pdf-to-jpg/upload', upload.single('file'), async (req, res) => {
+    const startTime = Date.now();
+    
     try {
       if (!req.file) {
         return res.status(400).json({ error: 'No file uploaded' });
@@ -844,14 +848,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const filePath = req.file.path;
       
-      // Validate PDF
-      const validation = await pdfConverter.validatePDF(filePath);
+      // Validate PDF using shared utility
+      const validation = await validateFile(filePath, 'application/pdf');
       if (!validation.valid) {
         // Clean up invalid file
         try {
           await fs.promises.unlink(filePath);
         } catch {}
-        return res.status(400).json({ error: validation.error });
+        
+        // Return appropriate error message
+        let errorMessage = validation.error || 'File validation failed';
+        if (errorMessage.includes('password-protected')) {
+          errorMessage = 'This PDF is password-protected. Please decrypt it and try again.';
+        } else if (errorMessage.includes('Not a valid PDF')) {
+          errorMessage = "That file isn't a valid PDF. Please upload a .pdf file.";
+        }
+        
+        return res.status(400).json({ error: errorMessage });
       }
 
       // Store file info for conversion
@@ -860,7 +873,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         id: fileId,
         originalName: req.file.originalname,
         path: filePath,
-        uploadTime: Date.now()
+        uploadTime: Date.now(),
+        actualType: validation.actualType,
+        metadata: validation.metadata
       };
 
       // Store in memory (you could use a database here)
@@ -869,14 +884,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
         promise: Promise.resolve(fileInfo)
       });
 
+      // Log successful upload
+      logConversion('pdf-to-jpg-upload', {
+        filename: req.file.originalname,
+        mime: validation.actualType || req.file.mimetype,
+        size: req.file.size
+      }, {
+        filename: fileId,
+        mime: validation.actualType || req.file.mimetype,
+        size: req.file.size
+      }, {}, {
+        success: true,
+        duration: Date.now() - startTime
+      });
+
       res.json({ 
         success: true, 
         fileId: fileId,
-        originalName: req.file.originalname 
+        originalName: req.file.originalname,
+        actualType: validation.actualType
       });
 
     } catch (error: any) {
-      console.error('Upload error:', error);
+      console.error('❌ Upload error:', error);
+      
+      // Log failed upload
+      logConversion('pdf-to-jpg-upload', {
+        filename: req.file?.originalname || 'unknown',
+        mime: req.file?.mimetype || 'unknown',
+        size: req.file?.size || 0
+      }, {
+        filename: 'failed',
+        mime: 'unknown',
+        size: 0
+      }, {}, {
+        success: false,
+        error: error.message,
+        duration: Date.now() - startTime
+      });
+      
       res.status(500).json({ error: 'Upload failed' });
     }
   });
@@ -902,8 +948,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (options.pageRange.last) conversionOptions.pageRange.last = parseInt(options.pageRange.last);
       }
 
-      // Convert PDF
-      const result = await pdfConverter.convertPDFToJPG(fileInfo.path, conversionOptions);
+      // Convert PDF with original filename for proper logging
+      const result = await pdfConverter.convertPDFToJPG(fileInfo.path, conversionOptions, fileInfo.originalName);
       
       if (!result.success) {
         // Clean up
@@ -971,9 +1017,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: 'Download file not found' });
       }
 
-      // Set appropriate headers
+      // Set appropriate headers with validated content type
+      const contentType = fileInfo.isMultiPage ? 'application/zip' : 'image/jpeg';
       res.setHeader('Content-Disposition', `attachment; filename="${fileInfo.filename}"`);
-      res.setHeader('Content-Type', fileInfo.isMultiPage ? 'application/zip' : 'image/jpeg');
+      res.setHeader('Content-Type', contentType);
+      
+      console.log(`📥 Serving download: ${fileInfo.filename} (${contentType})`);
 
       // Stream file
       const fileStream = fs.createReadStream(fileInfo.downloadPath);

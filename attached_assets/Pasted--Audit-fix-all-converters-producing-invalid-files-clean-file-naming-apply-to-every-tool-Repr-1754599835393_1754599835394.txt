@@ -1,0 +1,83 @@
+“Audit & fix all converters producing invalid files + clean file naming (apply to every tool).
+
+Reproduce + log
+
+For each converter endpoint (images, PDF, audio/video), run at least 2 sample jobs (small & large) and log: input mime, detected format, chosen pipeline, output mime, and final filename.
+
+Add server-side try/catch + structured logs around conversions so we can see errors instead of silent fails.
+
+Validate real output types (not renamed files)
+
+PDF outputs: use a proper PDF generator (e.g., Ghostscript, img2pdf, pdf-lib, or pdfcpu) and verify with a PDF probe (pdfinfo or pdfcpu validate). Reject any output that fails validation and show a helpful error.
+
+Image outputs: probe with sharp/imagemagick identify to confirm mime/extension alignment.
+
+Audio/Video: probe with ffprobe to ensure container/codec match the requested format.
+
+Make the server return Content-Type that matches the actual file.
+
+Fix false password/structure errors
+
+Only claim “password-protected” after checking with a real PDF password probe; don’t infer from generic parse failures.
+
+On generic parse errors, show: “PDF parse failed. The file might be corrupted or exported incorrectly. Please try re-exporting or send us the file.”
+
+Unify filename rules (no weird double extensions)
+
+Implement a shared formatOutputFilename(originalName, targetExt) utility and use it everywhere.
+
+Strip path + unsafe chars, slugify base.
+
+Remove any existing extension(s).
+
+New pattern: <base>_to_<targetExt>_<yyyyMMdd-HHmm>.<targetExt>
+
+Example: invoice_to_jpg_20250807-2125.jpg
+
+Absolutely no leftover source extensions inside the name (e.g., drop …png_…jpg).
+
+Apply to every download/response and to any temporary file we show in the UI.
+
+Advanced options actually applied
+
+For each tool with “Advanced Options,” verify the options map to real CLI/SDK flags (e.g., quality, DPI, page ranges, frame rate). Add unit tests per option set.
+
+If an option isn’t supported in a given path, hide/disable it for that case.
+
+Consistent storage & cleanup
+
+Ensure temp files are stored in a single temp dir and auto-deleted after TTL (e.g., 60 min).
+
+Return a clear error if a temp file is missing/expired.
+
+Acceptance criteria (must pass)
+
+Converting PNG→PDF then using PDF→JPG works and pdfinfo reports a valid PDF.
+
+No output filename contains another filetype in the middle (e.g., …png…jpg).
+
+Content-Type headers match actual file types across all endpoints.
+
+Advanced options (quality/DPI/page range/frame rate/loop, etc.) produce different outputs when changed.
+
+UI error messages are accurate (password vs. corrupted vs. unsupported).
+
+Touch points
+
+Server conversion handlers (all endpoints).
+
+Add utils/filename.ts (or .js) and a utils/validate.ts with PDF/image/video validators.
+
+Update any client-side download naming to use the server-provided filename only.
+
+Make the fixes, run a full pass, and post a short report listing: tools tested, sample inputs, validation results, and example output filenames. Do not change visual layout or add new tools—this is strictly correctness + naming.”
+
+
+
+
+
+
+
+
+
+Ask ChatGPT
