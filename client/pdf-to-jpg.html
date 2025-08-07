@@ -133,7 +133,7 @@
                     <h3>Drop your PDF files here</h3>
                     <p>or click anywhere to browse files</p>
                     <p class="supported-formats">Supports PDF files only</p>
-                    <input type="file" id="fileInput" multiple accept=".pdf,.PDF" hidden>
+                    <input type="file" id="fileInput" accept="application/pdf,.pdf" hidden>
                 </div>
 
                 <div class="advanced-options" id="advancedOptions">
@@ -185,8 +185,9 @@
                             </select>
                         </div>
                         <div class="option-group" id="customRangeGroup" style="display: none;">
-                            <label for="customPages">Pages (e.g., 1-3, 5, 7-10)</label>
-                            <input type="text" id="customPages" placeholder="1-3, 5, 7-10">
+                            <label for="customPages">Page Range (e.g., 1-5 or 3)</label>
+                            <input type="text" id="customPages" placeholder="1-5 or 3">
+                            <small style="color: #666; font-size: 12px;">Enter a range like "1-5" or a single page like "3"</small>
                         </div>
                     </div>
                 </div>
@@ -351,35 +352,8 @@
         </div>
     </footer>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="js/advanced-options.js"></script>
     <script src="js/main.js"></script>
-    <script src="js/pdf-to-jpg-handler.js"></script>
-    <script>
-        // Configure PDF.js worker and initialize
-        document.addEventListener('DOMContentLoaded', () => {
-            // Wait for PDF.js to be available
-            if (typeof pdfjsLib !== 'undefined') {
-                console.log('PDF.js loaded successfully');
-                pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-            } else {
-                console.error('PDF.js not loaded!');
-            }
-            
-            // Show/hide custom page range input
-            const pageRangeSelect = document.getElementById('pageRange');
-            const customRangeGroup = document.getElementById('customRangeGroup');
-            
-            if (pageRangeSelect) {
-                pageRangeSelect.addEventListener('change', (e) => {
-                    if (e.target.value === 'custom') {
-                        customRangeGroup.style.display = 'block';
-                    } else {
-                        customRangeGroup.style.display = 'none';
-                    }
-                });
-            }
-        });
-    </script>
+    <script src="js/pdf-to-jpg-server-handler.js"></script>
 </body>
 </html>

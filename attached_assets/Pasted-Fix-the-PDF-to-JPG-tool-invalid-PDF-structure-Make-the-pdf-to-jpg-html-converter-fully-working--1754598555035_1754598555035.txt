@@ -1,0 +1,85 @@
+Fix the “PDF to JPG” tool (invalid PDF structure)
+
+Make the pdf-to-jpg.html converter fully working end-to-end.
+
+Do this exactly:
+
+Verify uploads are binary & valid PDFs
+
+Ensure the upload form uses enctype="multipart/form-data" and the server uses a binary upload middleware (e.g., multer/busboy).
+
+On the server route for PDF→JPG:
+
+Reject empty files.
+
+Read first 5 bytes; if not %PDF-, return 400 with JSON: { error: "That file isn’t a valid PDF. Please upload a .pdf file." }.
+
+Detect encrypted PDFs from the converter’s exit code/stdout and return { error: "This PDF is password-protected. Please decrypt it and try again." }.
+
+Install conversion tools in Replit (Nix)
+
+Update replit.nix and rebuild:
+
+nginx
+Copy
+Edit
+{ pkgs }: {
+  deps = [
+    pkgs.poppler          # provides pdftoppm
+    pkgs.ghostscript
+    pkgs.imagemagick
+    pkgs.zip
+  ];
+}
+Implement conversion with Poppler
+
+Save upload to a temp path.
+
+Run (DPI default 150):
+pdftoppm -jpeg -r <DPI> <input.pdf> <outprefix>
+
+If multiple pages are produced (<outprefix>-1.jpg, -2.jpg, …), zip them and return the ZIP; if only one page, return the single JPG.
+
+Clean up temp files in a finally block.
+
+Wire Advanced Options
+
+DPI: map UI (72 / 150 default / 300) → -r <dpi>.
+
+Page range (optional): map to -f <first> -l <last>.
+
+JPG quality (Low/Med/High): if using ImageMagick post-process, apply -quality 70/85/95 (or Poppler -jpegopt quality=<n>).
+
+Frontend UX (pdf-to-jpg.html)
+
+<input accept="application/pdf,.pdf">
+
+Replace alert popups with inline error under the dropzone; show the server’s error string.
+
+Show staged progress: “Uploading… Converting… Zipping…”.
+
+If multi-page, label the download as images.zip; if single page, page-1.jpg.
+
+Timeouts & limits
+
+Add a conversion timeout (e.g., 120s) and a friendly error if exceeded.
+
+Limit max file size and respond with a clear message if exceeded.
+
+Add quick integration tests (can be a simple script)
+
+1-page valid PDF → 200, JPG returned.
+
+10-page PDF → 200, ZIP with 10 JPGs.
+
+Renamed non-PDF → 400, “not a valid PDF”.
+
+Encrypted PDF → friendly “password-protected” error.
+
+Acceptance criteria (must pass before done):
+
+Valid PDFs convert reliably; options affect output.
+
+Non-PDF/empty/encrypted files return clear inline errors.
+
+No leftover temp files after each run.

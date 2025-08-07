@@ -11,9 +11,13 @@ import slowDown from "express-slow-down";
 import { insertConversionSchema } from "@shared/schema";
 import { storage } from "./storage";
 import { randomUUID } from "crypto";
+import { PDFConverter } from "./pdf-converter";
 
 // Track active conversions to prevent duplicates
 const activeConversions = new Map<string, { timestamp: number; promise: Promise<any> }>();
+
+// Initialize PDF converter
+const pdfConverter = new PDFConverter();
 
 // File operation semaphore to control concurrent file operations
 class FileSemaphore {
@@ -829,6 +833,167 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/convert-to-jpeg', (req, res) => {
     res.sendFile(path.join(clientPath, 'convert-to-jpeg.html'));
+  });
+
+  // PDF to JPG conversion API endpoints
+  app.post('/api/pdf-to-jpg/upload', upload.single('file'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: 'No file uploaded' });
+      }
+
+      const filePath = req.file.path;
+      
+      // Validate PDF
+      const validation = await pdfConverter.validatePDF(filePath);
+      if (!validation.valid) {
+        // Clean up invalid file
+        try {
+          await fs.promises.unlink(filePath);
+        } catch {}
+        return res.status(400).json({ error: validation.error });
+      }
+
+      // Store file info for conversion
+      const fileId = randomUUID();
+      const fileInfo = {
+        id: fileId,
+        originalName: req.file.originalname,
+        path: filePath,
+        uploadTime: Date.now()
+      };
+
+      // Store in memory (you could use a database here)
+      activeConversions.set(fileId, {
+        timestamp: Date.now(),
+        promise: Promise.resolve(fileInfo)
+      });
+
+      res.json({ 
+        success: true, 
+        fileId: fileId,
+        originalName: req.file.originalname 
+      });
+
+    } catch (error: any) {
+      console.error('Upload error:', error);
+      res.status(500).json({ error: 'Upload failed' });
+    }
+  });
+
+  app.post('/api/pdf-to-jpg/convert', async (req, res) => {
+    try {
+      const { fileId, options = {} } = req.body;
+      
+      if (!fileId || !activeConversions.has(fileId)) {
+        return res.status(400).json({ error: 'Invalid or expired file ID' });
+      }
+
+      const conversionData = activeConversions.get(fileId)!;
+      const fileInfo = await conversionData.promise;
+
+      // Parse conversion options
+      const conversionOptions: any = {};
+      if (options.dpi) conversionOptions.dpi = parseInt(options.dpi);
+      if (options.quality) conversionOptions.quality = options.quality;
+      if (options.pageRange) {
+        conversionOptions.pageRange = {};
+        if (options.pageRange.first) conversionOptions.pageRange.first = parseInt(options.pageRange.first);
+        if (options.pageRange.last) conversionOptions.pageRange.last = parseInt(options.pageRange.last);
+      }
+
+      // Convert PDF
+      const result = await pdfConverter.convertPDFToJPG(fileInfo.path, conversionOptions);
+      
+      if (!result.success) {
+        // Clean up
+        try {
+          await fs.promises.unlink(fileInfo.path);
+        } catch {}
+        activeConversions.delete(fileId);
+        return res.status(500).json({ error: result.error });
+      }
+
+      let downloadPath = '';
+      let filename = '';
+
+      if (result.isMultiPage) {
+        // Create ZIP file
+        const zipPath = path.join(process.cwd(), 'uploads', 'temp', `${fileId}.zip`);
+        await pdfConverter.createZip(result.files, zipPath);
+        
+        downloadPath = zipPath;
+        filename = pdfConverter.generateOutputFilename(fileInfo.originalName, true);
+        
+        // Clean up individual JPG files
+        await pdfConverter.cleanupFiles(result.files);
+      } else {
+        downloadPath = result.files[0];
+        filename = pdfConverter.generateOutputFilename(fileInfo.originalName, false);
+      }
+
+      // Update conversion data with download info
+      activeConversions.set(fileId, {
+        timestamp: Date.now(),
+        promise: Promise.resolve({
+          ...fileInfo,
+          downloadPath,
+          filename,
+          isMultiPage: result.isMultiPage
+        })
+      });
+
+      res.json({
+        success: true,
+        filename,
+        isMultiPage: result.isMultiPage,
+        downloadUrl: `/api/pdf-to-jpg/download/${fileId}`
+      });
+
+    } catch (error: any) {
+      console.error('Conversion error:', error);
+      res.status(500).json({ error: 'Conversion failed' });
+    }
+  });
+
+  app.get('/api/pdf-to-jpg/download/:fileId', async (req, res) => {
+    try {
+      const { fileId } = req.params;
+      
+      if (!activeConversions.has(fileId)) {
+        return res.status(404).json({ error: 'File not found or expired' });
+      }
+
+      const conversionData = activeConversions.get(fileId)!;
+      const fileInfo = await conversionData.promise;
+
+      if (!fileInfo.downloadPath || !fs.existsSync(fileInfo.downloadPath)) {
+        return res.status(404).json({ error: 'Download file not found' });
+      }
+
+      // Set appropriate headers
+      res.setHeader('Content-Disposition', `attachment; filename="${fileInfo.filename}"`);
+      res.setHeader('Content-Type', fileInfo.isMultiPage ? 'application/zip' : 'image/jpeg');
+
+      // Stream file
+      const fileStream = fs.createReadStream(fileInfo.downloadPath);
+      fileStream.pipe(res);
+
+      // Cleanup after download
+      fileStream.on('end', async () => {
+        try {
+          await fs.promises.unlink(fileInfo.path); // Original PDF
+          await fs.promises.unlink(fileInfo.downloadPath); // Converted file
+          activeConversions.delete(fileId);
+        } catch (error) {
+          console.error('Cleanup error:', error);
+        }
+      });
+
+    } catch (error: any) {
+      console.error('Download error:', error);
+      res.status(500).json({ error: 'Download failed' });
+    }
   });
 
   // Fallback to index.html for other routes
