@@ -31,14 +31,19 @@ class ServerFileConverter {
             }
         });
         
-        // Choose file button
+        // Choose file button - only trigger from the actual button
         this.chooseFileBtn.addEventListener('click', (e) => {
-            e.stopPropagation(); // Prevent event bubbling
+            e.preventDefault();
+            e.stopPropagation();
             this.fileInput.click();
         });
         
-        // Drop zone click (for clicking anywhere in the drop zone)
+        // Drop zone click - only for areas that are NOT the button
         this.dropZone.addEventListener('click', (e) => {
+            // Don't trigger if the click is on the button or its children
+            if (e.target === this.chooseFileBtn || this.chooseFileBtn.contains(e.target)) {
+                return;
+            }
             e.preventDefault();
             e.stopPropagation();
             this.fileInput.click();
@@ -72,6 +77,15 @@ class ServerFileConverter {
     
     async handleFileSelection(file) {
         console.log('File selected:', file.name, file.type, file.size);
+        
+        // Prevent duplicate processing of the same file
+        if (this.selectedFile && 
+            this.selectedFile.name === file.name && 
+            this.selectedFile.size === file.size && 
+            this.selectedFile.lastModified === file.lastModified) {
+            console.log('Same file already selected, skipping duplicate upload');
+            return;
+        }
         
         this.selectedFile = file;
         this.uploadedFileData = null;
