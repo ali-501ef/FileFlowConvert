@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WEBP to JPG Converter - FileFlow</title>
+    <meta name="description" content="Convert WEBP images to JPG format with FileFlow's WEBP to JPG tool. Fast, secure server processing with automatic file deletion.">
+    <link rel="stylesheet" href="../styles.css">
+    
+    <!-- Navigation Script -->
+    <script src="../js/navigation.js" defer></script>
+</head>
+<body>
+    <!-- Sticky Navigation Bar -->
+    <nav class="sticky-nav">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <a href="/" data-testid="nav-brand">FileFlow</a>
+            </div>
+            
+            <div class="nav-menu">
+                <!-- Image Tools -->
+                <div class="nav-dropdown">
+                    <button class="nav-dropdown-trigger" data-testid="nav-image-trigger">
+                        Image Tools
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    <div class="nav-dropdown-content">
+                        <a href="../convert-to-jpeg.html" class="nav-dropdown-item" data-testid="nav-convert-jpeg">Convert to JPEG</a>
+                        <a href="../heic-to-jpg.html" class="nav-dropdown-item" data-testid="nav-heic-jpg">HEIC to JPG</a>
+                        <a href="../jpg-to-png.html" class="nav-dropdown-item" data-testid="nav-jpg-png">JPG to PNG</a>
+                    </div>
+                </div>
+
+                <!-- PDF Tools -->
+                <div class="nav-dropdown">
+                    <button class="nav-dropdown-trigger" data-testid="nav-pdf-trigger">
+                        PDF Tools
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    <div class="nav-dropdown-content">
+                        <a href="../pdf-merge.html" class="nav-dropdown-item" data-testid="nav-pdf-merge">PDF Merge</a>
+                        <a href="../pdf-split.html" class="nav-dropdown-item" data-testid="nav-pdf-split">PDF Split</a>
+                        <a href="../pdf-compress.html" class="nav-dropdown-item" data-testid="nav-pdf-compress">PDF Compress</a>
+                        <a href="../pdf-rotate.html" class="nav-dropdown-item" data-testid="nav-pdf-rotate">PDF Rotate</a>
+                        <a href="../pdf-watermark.html" class="nav-dropdown-item" data-testid="nav-pdf-watermark">PDF Watermark</a>
+                        <a href="../pdf-to-word.html" class="nav-dropdown-item" data-testid="nav-pdf-to-word">PDF to Word</a>
+                    </div>
+                </div>
+
+                <!-- Audio/Video Tools -->
+                <div class="nav-dropdown">
+                    <button class="nav-dropdown-trigger" data-testid="nav-media-trigger">
+                        Audio/Video Tools
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    <div class="nav-dropdown-content">
+                        <a href="../mp4-to-mp3.html" class="nav-dropdown-item" data-testid="nav-mp4-mp3">MP4 to MP3</a>
+                        <a href="../audio-converter.html" class="nav-dropdown-item" data-testid="nav-audio-convert">Audio Converter</a>
+                        <a href="../video-compress.html" class="nav-dropdown-item" data-testid="nav-video-compress">Video Compress</a>
+                        <a href="../gif-maker.html" class="nav-dropdown-item" data-testid="nav-gif-maker">GIF Maker</a>
+                        <a href="../video-trim.html" class="nav-dropdown-item" data-testid="nav-video-trim">Video Trim</a>
+                        <a href="../video-merger.html" class="nav-dropdown-item" data-testid="nav-video-merge">Video Merger</a>
+                    </div>
+                </div>
+            </div>
+            
+            <button class="mobile-nav-toggle" data-testid="mobile-nav-toggle">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
+        </div>
+    </nav>
+
+    <main class="main">
+        <div class="hero-section">
+            <div class="hero-content">
+                <div class="hero-badge">
+                    <div class="tool-icon bg-green">
+                        <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            <text x="12" y="9" text-anchor="middle" font-size="6" font-weight="bold" fill="currentColor">W</text>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 11l2 2-2 2"/>
+                        </svg>
+                    </div>
+                    <span>Image Tools</span>
+                </div>
+                <h1 class="hero-title">WEBP to JPG</h1>
+                <p class="hero-description">Convert modern WEBP images to universal JPG format</p>
+                <div class="hero-features">
+                    <span class="feature-tag">✓ Modern format support</span>
+                    <span class="feature-tag">✓ Quality preservation</span>
+                    <span class="feature-tag">✓ Universal compatibility</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="converter-container">
+            <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()" data-testid="upload-area-webp-to-jpg">
+                <div class="upload-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                        <circle cx="9" cy="9" r="2"/>
+                        <path d="M21 15l-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+                    </svg>
+                </div>
+                <h3>Drop your WEBP files here</h3>
+                <p>or click anywhere to browse files</p>
+                <p class="supported-formats">WEBP files only</p>
+                <input type="file" id="fileInput" accept=".webp" multiple hidden>
+            </div>
+
+            <div class="advanced-options" id="advancedOptions">
+                <div class="options-header" id="optionsToggle">
+                    <div class="options-title">
+                        <svg class="options-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z"/>
+                            <path d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/>
+                            <path d="M12 2v2"/>
+                            <path d="M12 20v2"/>
+                            <path d="m4.93 4.93 1.41 1.41"/>
+                            <path d="m17.66 17.66 1.41 1.41"/>
+                            <path d="M2 12h2"/>
+                            <path d="M20 12h2"/>
+                            <path d="m6.34 17.66-1.41 1.41"/>
+                            <path d="m19.07 4.93-1.41 1.41"/>
+                        </svg>
+                        <span>Advanced Options</span>
+                    </div>
+                    <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m6 9 6 6 6-6"/>
+                    </svg>
+                </div>
+                <div class="options-content" id="optionsContent">
+                    <div class="option-group">
+                        <label for="jpgQuality">JPG Quality</label>
+                        <select id="jpgQuality">
+                            <option value="95">High Quality (95%)</option>
+                            <option value="85" selected>Good Quality (85%)</option>
+                            <option value="75">Medium Quality (75%)</option>
+                            <option value="60">Low Quality (60%)</option>
+                        </select>
+                    </div>
+                    <div class="option-group">
+                        <label for="outputSize">Output Size</label>
+                        <select id="outputSize">
+                            <option value="original" selected>Original size</option>
+                            <option value="1920x1080">1920×1080 (HD)</option>
+                            <option value="1280x720">1280×720 (720p)</option>
+                            <option value="640x480">640×480 (VGA)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="file-preview" id="filePreview" style="display: none;">
+                <div class="preview-header">
+                    <h3 id="fileName"></h3>
+                    <span id="fileSize"></span>
+                </div>
+                <div class="image-preview" id="imagePreview"></div>
+            </div>
+
+            <button class="convert-btn" id="convertBtn" disabled>
+                <span class="btn-text">Convert to JPG</span>
+                <div class="btn-loader" style="display: none;"></div>
+            </button>
+
+            <!-- Tool Information Section -->
+            <div class="tool-info-section">
+                <div class="info-grid">
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>
+                        </div>
+                        <h3>Universal Support</h3>
+                        <p>Convert modern WEBP images to widely-supported JPG format for maximum compatibility across all devices and platforms.</p>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 8v8"/>
+                                <path d="M8 12h8"/>
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                            </svg>
+                        </div>
+                        <h3>Quality Control</h3>
+                        <p>Choose from multiple quality levels to balance file size and image quality. Perfect for web use or high-quality printing needs.</p>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="7" height="7"/>
+                                <rect x="14" y="3" width="7" height="7"/>
+                                <rect x="14" y="14" width="7" height="7"/>
+                                <rect x="3" y="14" width="7" height="7"/>
+                            </svg>
+                        </div>
+                        <h3>Batch Processing</h3>
+                        <p>Convert multiple WEBP files simultaneously with our efficient batch processing. Save time when converting entire photo collections.</p>
+                    </div>
+                </div>
+                <div class="tool-benefits">
+                    <h3>Why Convert WEBP to JPG?</h3>
+                    <p>WEBP is Google's modern image format that offers superior compression but isn't universally supported. Converting to JPG ensures your images work everywhere - on older browsers, email clients, and legacy software. JPG remains the most compatible image format across all platforms and applications, making this conversion essential for broad accessibility.</p>
+                </div>
+            </div>
+
+            <div class="results" id="results" style="display: none;">
+                <h3>Conversion Results</h3>
+                <div class="results-list" id="resultsList"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <!-- Branding Section -->
+                <div class="footer-section">
+                    <h3 class="footer-title">FileFlow</h3>
+                    <p class="footer-description">Professional file conversion tools for everyone.</p>
+                </div>
+                
+                <!-- PDF Tools -->
+                <div class="footer-section">
+                    <h4 class="footer-subtitle">PDF Tools</h4>
+                    <ul class="footer-links">
+                        <li><a href="../pdf-merge.html" class="footer-link" data-testid="footer-pdf-merge">PDF Merge</a></li>
+                        <li><a href="../pdf-split.html" class="footer-link" data-testid="footer-pdf-split">PDF Split</a></li>
+                        <li><a href="../pdf-compress.html" class="footer-link" data-testid="footer-pdf-compress">PDF Compress</a></li>
+                        <li><a href="../pdf-to-word.html" class="footer-link" data-testid="footer-pdf-to-word">PDF to Word</a></li>
+                        <li><a href="../pdf-rotate.html" class="footer-link" data-testid="footer-pdf-rotate">PDF Rotate</a></li>
+                        <li><a href="../pdf-watermark.html" class="footer-link" data-testid="footer-pdf-watermark">PDF Watermark</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Image Tools -->
+                <div class="footer-section">
+                    <h4 class="footer-subtitle">Image Tools</h4>
+                    <ul class="footer-links">
+                        <li><a href="../convert-to-jpeg.html" class="footer-link" data-testid="footer-convert-jpeg">Convert to JPEG</a></li>
+                        <li><a href="../heic-to-jpg.html" class="footer-link" data-testid="footer-heic-jpg">HEIC to JPG</a></li>
+                        <li><a href="../jpg-to-png.html" class="footer-link" data-testid="footer-jpg-png">JPG to PNG</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Audio/Video Tools -->
+                <div class="footer-section">
+                    <h4 class="footer-subtitle">Audio/Video Tools</h4>
+                    <ul class="footer-links">
+                        <li><a href="../mp4-to-mp3.html" class="footer-link" data-testid="footer-mp4-mp3">MP4 to MP3</a></li>
+                        <li><a href="../video-compress.html" class="footer-link" data-testid="footer-video-compress">Video Compress</a></li>
+                        <li><a href="../audio-converter.html" class="footer-link" data-testid="footer-audio-converter">Audio Converter</a></li>
+                        <li><a href="../video-trim.html" class="footer-link" data-testid="footer-video-trim">Video Trim</a></li>
+                        <li><a href="../gif-maker.html" class="footer-link" data-testid="footer-gif-maker">GIF Maker</a></li>
+                        <li><a href="../video-merger.html" class="footer-link" data-testid="footer-video-merger">Video Merger</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Support Links -->
+                <div class="footer-section">
+                    <h4 class="footer-subtitle">Support</h4>
+                    <ul class="footer-links">
+                        <li><a href="mailto:support@fileflow.com" class="footer-link" data-testid="footer-contact">Contact</a></li>
+                        <li><a href="#" class="footer-link" data-testid="footer-help">Help Center</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Legal Links -->
+                <div class="footer-section">
+                    <h4 class="footer-subtitle">Legal</h4>
+                    <ul class="footer-links">
+                        <li><a href="../privacy-policy.html" class="footer-link" data-testid="footer-privacy">Privacy Policy</a></li>
+                        <li><a href="../terms-of-use.html" class="footer-link" data-testid="footer-terms">Terms of Use</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 FileFlow. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../js/advanced-options.js"></script>
+    <script src="../js/converters/webp-to-jpg.js"></script>
+</body>
+</html>
