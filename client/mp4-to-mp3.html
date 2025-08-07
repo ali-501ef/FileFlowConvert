@@ -27,9 +27,12 @@
     <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.1/dist/umd/util.js"></script>
 </head>
 <body>
-    <!-- Top AdSense Banner -->
-    <div class="ad-placeholder ad-banner-top">
-        <span class="ad-text">Advertisement Banner (728x90)</span>
+    <!-- Audio Quality Banner -->
+    <div class="audio-quality-banner">
+        <div class="quality-content">
+            <span class="quality-icon">🎧</span>
+            <span class="quality-text">Extract high-quality audio from videos - supports multiple bitrates for any purpose</span>
+        </div>
     </div>
 
     <!-- Sticky Navigation Bar -->
@@ -109,10 +112,42 @@
     </nav>
 
     <div class="layout-wrapper">
-        <!-- Desktop Sidebar Ad Left -->
-        <div class="sidebar-ad desktop-only">
-            <div class="ad-placeholder ad-sidebar">
-                <span class="ad-text">Sidebar<br>Advertisement<br>(160x600)</span>
+        <!-- Media Tools Left -->
+        <div class="tool-shortcuts desktop-only">
+            <div class="shortcuts-container">
+                <h4 class="shortcuts-title">Popular Media Tools</h4>
+                <div class="shortcut-links">
+                    <a href="/video-compress.html" class="shortcut-link" data-testid="shortcut-video-compress">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+                        </svg>
+                        Video Compress
+                    </a>
+                    <a href="/audio-converter.html" class="shortcut-link" data-testid="shortcut-audio-converter">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l4-4-4-4v13M5 8v6M19 8v6"/>
+                        </svg>
+                        Audio Converter
+                    </a>
+                    <a href="/video-trim.html" class="shortcut-link" data-testid="shortcut-video-trim">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/>
+                        </svg>
+                        Video Trim
+                    </a>
+                    <a href="/gif-maker.html" class="shortcut-link" data-testid="shortcut-gif-maker">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h6m2 5H7a2 2 0 01-2-2V7a2 2 0 012-2h10a2 2 0 012 2v10a2 2 0 01-2 2z"/>
+                        </svg>
+                        GIF Maker
+                    </a>
+                    <a href="/video-merger.html" class="shortcut-link" data-testid="shortcut-video-merger">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3 3-3M12 12l-3 3h6l-3-3z"/>
+                        </svg>
+                        Video Merger
+                    </a>
+                </div>
             </div>
         </div>
 
