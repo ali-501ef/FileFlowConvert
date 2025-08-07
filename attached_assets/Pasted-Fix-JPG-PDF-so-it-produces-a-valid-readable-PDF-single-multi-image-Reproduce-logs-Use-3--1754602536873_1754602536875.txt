@@ -1,0 +1,78 @@
+Fix JPG → PDF so it produces a valid, readable PDF (single & multi-image).
+
+Reproduce + logs
+
+Use 3 test images (small JPG, large JPG, PNG with transparency).
+
+Enable debug logs at the start of the JPG→PDF route: input mime, dimensions, DPI, chosen lib, output size, first 8 bytes, last 8 bytes.
+
+Implement with a robust PDF library
+
+If Node: switch to pdf-lib (or PDFKit).
+
+If Python: switch to reportlab.
+
+Embed images properly (no “write raw bytes” hacks).
+
+For multipage: one image per page; auto-fit with margins; preserve aspect; optional DPI scaling.
+
+Write binary correctly
+
+Produce a binary buffer, not base64 text.
+
+Do not prepend BOM or extra newlines.
+
+If streaming, end() the stream after doc.end() (Node) / canvas.save() (reportlab).
+
+Ensure the route awaits completion before sending the response.
+
+Headers must match body
+
+Content-Type: application/pdf
+
+Content-Disposition: attachment; filename="<base>_to_pdf_<timestamp>.pdf"
+
+Disable gzip for this response (common cause of “Failed to load PDF” with partial streams).
+
+Return the raw PDF bytes (no JSON wrapper).
+
+Validate the produced PDF bytes
+
+Programmatic checks:
+
+Starts with %PDF-
+
+Contains xref and trailer
+
+Ends with %%EOF (no bytes after it)
+
+If any check fails, log and return a 500 with a clear message; do not send a broken file.
+
+Common bug filters (fix if present)
+
+Don’t send HTML/JSON with a .pdf extension.
+
+Don’t base64-encode the PDF unless the client explicitly expects it.
+
+Remove any UTF-8 BOM from responses.
+
+Ensure no mixing of res.json() / res.send() with a binary stream.
+
+Don’t double-convert images (JPG→PNG→PDF) unless necessary.
+
+Tests to prove it’s fixed
+
+Open output in Chrome/Firefox PDF viewers and Adobe Reader without errors.
+
+Feed the generated PDF into PDF → JPG and PDF → Word; both must succeed.
+
+Test multi-image → multi-page ordering is correct.
+
+Filenames: <base>_to_pdf_<timestamp>.pdf (no source extensions inside the name).
+
+Add a guard so bad PDFs never leave the server
+
+After generation, run the validation in (5); if it fails, delete the file, log the reason, and return a friendly error.
+
+Apply only to JPG → PDF right now. Post logs of the first successful/failed attempts in the console for verification.
+

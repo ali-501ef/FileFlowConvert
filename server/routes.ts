@@ -291,6 +291,23 @@ const upload = multer({
   }
 });
 
+// Separate multer config for JPG to PDF (allows multiple files)
+const uploadMultiple = multer({ 
+  storage: storage_multer,
+  limits: { 
+    fileSize: 50 * 1024 * 1024, // 50MB limit per file
+    files: 10 // Allow up to 10 files for JPG to PDF
+  },
+  fileFilter: (req: any, file: Express.Multer.File, cb: any) => {
+    // Only accept JPG/JPEG files for JPG to PDF
+    const extension = path.extname(file.originalname).toLowerCase();
+    if (!['.jpg', '.jpeg'].includes(extension) || !file.mimetype.startsWith('image/')) {
+      return cb(new Error(`Only JPG/JPEG files are supported. Got: ${extension}`), false);
+    }
+    cb(null, true);
+  }
+});
+
 // PDF conversion helper function with retry logic and better error handling
 async function convertPDFWithPython(inputPath: string, outputPath: string, outputFormat: string, maxRetries: number = 3): Promise<boolean> {
   const pdfConverterPath = path.join(process.cwd(), 'server', 'pdf_converter.py');
@@ -421,8 +438,8 @@ async function convertImageWithPython(inputPath: string, outputPath: string, out
 
 function getSupportedFormats(extension: string): string[] {
   const formatMap: Record<string, string[]> = {
-    'jpg': ['png', 'webp', 'gif', 'bmp', 'tiff'],
-    'jpeg': ['png', 'webp', 'gif', 'bmp', 'tiff'],
+    'jpg': ['png', 'webp', 'gif', 'bmp', 'tiff', 'pdf'],
+    'jpeg': ['png', 'webp', 'gif', 'bmp', 'tiff', 'pdf'],
     'png': ['jpg', 'jpeg', 'webp', 'gif', 'bmp', 'tiff'],
     'webp': ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'tiff'],
     'gif': ['jpg', 'jpeg', 'png', 'webp', 'bmp', 'tiff'],
@@ -1041,6 +1058,328 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     } catch (error: any) {
       console.error('Download error:', error);
+      res.status(500).json({ error: 'Download failed' });
+    }
+  });
+
+  // JPG to PDF conversion API endpoints
+  app.post('/api/jpg-to-pdf/upload', uploadMultiple.array('files', 10), async (req, res) => {
+    const startTime = Date.now();
+    
+    try {
+      const files = req.files as Express.Multer.File[];
+      if (!files || files.length === 0) {
+        return res.status(400).json({ error: 'No files uploaded' });
+      }
+
+      // Validate all uploaded files are images
+      const validFiles = [];
+      for (const file of files) {
+        const validation = await validateFile(file.path, file.mimetype);
+        if (!validation.valid || !file.mimetype.startsWith('image/')) {
+          // Clean up invalid file
+          try {
+            await fs.promises.unlink(file.path);
+          } catch {}
+          
+          return res.status(400).json({ 
+            error: `Invalid file: ${file.originalname}. Only JPG/JPEG images are supported.` 
+          });
+        }
+        
+        // Additional check for JPG/JPEG specifically
+        const extension = path.extname(file.originalname).toLowerCase();
+        if (!['.jpg', '.jpeg'].includes(extension)) {
+          try {
+            await fs.promises.unlink(file.path);
+          } catch {}
+          
+          return res.status(400).json({ 
+            error: `Only JPG/JPEG files are supported. Got: ${extension}` 
+          });
+        }
+        
+        validFiles.push({
+          path: file.path,
+          originalName: file.originalname,
+          size: file.size,
+          mimetype: file.mimetype
+        });
+      }
+
+      // Store file info for conversion
+      const fileId = randomUUID();
+      const fileInfo = {
+        id: fileId,
+        files: validFiles,
+        uploadTime: Date.now()
+      };
+
+      // Store in memory
+      activeConversions.set(fileId, {
+        timestamp: Date.now(),
+        promise: Promise.resolve(fileInfo)
+      });
+
+      // Log successful upload with detailed info
+      logConversion('jpg-to-pdf-upload', {
+        filename: validFiles.length > 1 ? `${validFiles.length}_images` : validFiles[0].originalName,
+        mime: 'image/jpeg',
+        size: validFiles.reduce((sum, f) => sum + f.size, 0)
+      }, {
+        filename: fileId,
+        mime: 'application/pdf',
+        size: validFiles.reduce((sum, f) => sum + f.size, 0)
+      }, {}, {
+        success: true,
+        duration: Date.now() - startTime
+      });
+
+      res.json({ 
+        success: true, 
+        fileId: fileId,
+        fileCount: validFiles.length,
+        originalNames: validFiles.map(f => f.originalName)
+      });
+
+    } catch (error: any) {
+      console.error('❌ JPG to PDF Upload error:', error);
+      
+      // Cleanup uploaded files on error
+      if (req.files) {
+        const files = req.files as Express.Multer.File[];
+        for (const file of files) {
+          try {
+            await fs.promises.unlink(file.path);
+          } catch {}
+        }
+      }
+      
+      // Log failed upload
+      logConversion('jpg-to-pdf-upload', {
+        filename: 'unknown',
+        mime: 'image/jpeg',
+        size: 0
+      }, {
+        filename: 'failed',
+        mime: 'application/pdf', 
+        size: 0
+      }, {}, {
+        success: false,
+        error: error.message,
+        duration: Date.now() - startTime
+      });
+      
+      res.status(500).json({ error: 'Upload failed' });
+    }
+  });
+
+  app.post('/api/jpg-to-pdf/convert', async (req, res) => {
+    const startTime = Date.now();
+    
+    try {
+      const { fileId, options = {} } = req.body;
+      
+      if (!fileId || !activeConversions.has(fileId)) {
+        return res.status(400).json({ error: 'Invalid or expired file ID' });
+      }
+
+      const conversionData = activeConversions.get(fileId)!;
+      const fileInfo = await conversionData.promise;
+
+      // Parse conversion options with defaults
+      const conversionOptions = {
+        page_size: options.pageSize || 'A4',
+        orientation: options.orientation || 'portrait',
+        image_layout: options.imageLayout || 'fit',
+        margin: options.margin || '20',
+        quality: options.quality || '85'
+      };
+
+      console.log('🔄 Starting JPG → PDF conversion with options:', conversionOptions);
+
+      // Prepare Python conversion
+      const outputPath = path.join(process.cwd(), 'uploads', 'temp', `${fileId}.pdf`);
+      const pythonScript = path.join(process.cwd(), 'server', 'jpg_to_pdf_converter.py');
+      
+      // Prepare image paths as JSON
+      const imagePaths = fileInfo.files.map((f: any) => f.path);
+      const imagePathsJson = JSON.stringify(imagePaths);
+      const optionsJson = JSON.stringify(conversionOptions);
+
+      console.log(`🔄 Converting ${imagePaths.length} images to PDF:`, imagePaths.map((p: string) => path.basename(p)));
+
+      // Execute Python conversion
+      const success = await new Promise<boolean>((resolve, reject) => {
+        const pythonProcess = spawn('python3', [pythonScript, imagePathsJson, outputPath, optionsJson], {
+          timeout: 120000, // 2 minute timeout
+          stdio: ['pipe', 'pipe', 'pipe']
+        });
+        
+        let output = '';
+        let error = '';
+        
+        pythonProcess.stdout.on('data', (data) => {
+          const text = data.toString();
+          output += text;
+          // Forward debug output immediately
+          console.log(text.replace(/\n$/, ''));
+        });
+        
+        pythonProcess.stderr.on('data', (data) => {
+          error += data.toString();
+          console.error('Python stderr:', data.toString());
+        });
+        
+        pythonProcess.on('close', (code) => {
+          console.log(`JPG → PDF conversion closed with code: ${code}`);
+          
+          if (code === 0 && output.includes('SUCCESS')) {
+            resolve(true);
+          } else {
+            reject(new Error(`JPG → PDF conversion failed (code ${code}): ${error || 'No error output'}`));
+          }
+        });
+        
+        pythonProcess.on('error', (err) => {
+          reject(new Error(`JPG → PDF process error: ${err.message}`));
+        });
+      });
+      
+      if (!success) {
+        throw new Error('JPG → PDF conversion failed');
+      }
+
+      // Validate output file exists and has content
+      if (!fs.existsSync(outputPath)) {
+        throw new Error('Output PDF file was not created');
+      }
+
+      const outputStats = await fs.promises.stat(outputPath);
+      if (outputStats.size < 100) {
+        throw new Error('Generated PDF is too small (likely corrupt)');
+      }
+
+      // Generate output filename
+      const outputFilename = formatOutputFilename(
+        fileInfo.files.length > 1 ? 'images' : fileInfo.files[0].originalName, 
+        'pdf'
+      );
+
+      // Update conversion data with download info
+      activeConversions.set(fileId, {
+        timestamp: Date.now(),
+        promise: Promise.resolve({
+          ...fileInfo,
+          downloadPath: outputPath,
+          filename: outputFilename
+        })
+      });
+
+      // Log successful conversion
+      logConversion('jpg-to-pdf', {
+        filename: fileInfo.files.length > 1 ? `${fileInfo.files.length}_images` : fileInfo.files[0].originalName,
+        mime: 'image/jpeg',
+        size: fileInfo.files.reduce((sum: number, f: any) => sum + f.size, 0)
+      }, {
+        filename: outputFilename,
+        mime: 'application/pdf',
+        size: outputStats.size
+      }, conversionOptions, {
+        success: true,
+        duration: Date.now() - startTime
+      });
+
+      res.json({
+        success: true,
+        filename: outputFilename,
+        fileSize: outputStats.size,
+        downloadUrl: `/api/jpg-to-pdf/download/${fileId}`
+      });
+
+    } catch (error: any) {
+      console.error('❌ JPG → PDF conversion error:', error);
+      
+      // Log failed conversion
+      logConversion('jpg-to-pdf', {
+        filename: 'unknown',
+        mime: 'image/jpeg',
+        size: 0
+      }, {
+        filename: 'failed',
+        mime: 'application/pdf',
+        size: 0
+      }, {}, {
+        success: false,
+        error: error.message,
+        duration: Date.now() - startTime
+      });
+      
+      res.status(500).json({ error: 'Conversion failed' });
+    }
+  });
+
+  app.get('/api/jpg-to-pdf/download/:fileId', async (req, res) => {
+    try {
+      const { fileId } = req.params;
+      
+      if (!activeConversions.has(fileId)) {
+        return res.status(404).json({ error: 'File not found or expired' });
+      }
+
+      const conversionData = activeConversions.get(fileId)!;
+      const fileInfo = await conversionData.promise;
+
+      if (!fileInfo.downloadPath || !fs.existsSync(fileInfo.downloadPath)) {
+        return res.status(404).json({ error: 'Download file not found' });
+      }
+
+      // Validate PDF before serving (server-side guard)
+      try {
+        const pdfBuffer = await fs.promises.readFile(fileInfo.downloadPath);
+        if (!pdfBuffer.subarray(0, 5).equals(Buffer.from('%PDF-'))) {
+          console.error('❌ BAD PDF BLOCKED: Invalid PDF header detected');
+          return res.status(500).json({ error: 'Generated PDF is corrupted' });
+        }
+        
+        const pdfTail = pdfBuffer.subarray(-50);
+        if (!pdfTail.includes(Buffer.from('%%EOF'))) {
+          console.error('❌ BAD PDF BLOCKED: Missing PDF EOF marker');
+          return res.status(500).json({ error: 'Generated PDF is incomplete' });
+        }
+      } catch (validationError) {
+        console.error('❌ BAD PDF BLOCKED: PDF validation failed:', validationError);
+        return res.status(500).json({ error: 'Generated PDF failed validation' });
+      }
+
+      // Set appropriate headers for PDF download
+      res.setHeader('Content-Disposition', `attachment; filename="${fileInfo.filename}"`);
+      res.setHeader('Content-Type', 'application/pdf');
+      
+      console.log(`📥 Serving JPG → PDF download: ${fileInfo.filename} (application/pdf)`);
+
+      // Stream PDF file
+      const fileStream = fs.createReadStream(fileInfo.downloadPath);
+      fileStream.pipe(res);
+
+      // Cleanup after download
+      fileStream.on('end', async () => {
+        try {
+          // Clean up original image files
+          for (const file of fileInfo.files) {
+            await fs.promises.unlink(file.path);
+          }
+          // Clean up generated PDF
+          await fs.promises.unlink(fileInfo.downloadPath);
+          activeConversions.delete(fileId);
+          console.log('✅ Cleaned up JPG → PDF files');
+        } catch (error) {
+          console.error('Cleanup error:', error);
+        }
+      });
+
+    } catch (error: any) {
+      console.error('❌ JPG → PDF download error:', error);
       res.status(500).json({ error: 'Download failed' });
     }
   });
