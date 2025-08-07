@@ -204,6 +204,10 @@ const ALLOWED_MIME_TYPES = {
   'image/png': ['.png'],
   'image/webp': ['.webp'],
   'image/heic': ['.heic', '.heif'],
+  'image/heif': ['.heic', '.heif'],
+  'image/x-heic': ['.heic', '.heif'],
+  'image/x-heif': ['.heic', '.heif'],
+  'image/avif': ['.heic', '.heif'],
   'application/pdf': ['.pdf'],
   'video/mp4': ['.mp4'],
   'audio/mpeg': ['.mp3'],
@@ -216,8 +220,21 @@ function validateFileType(file: Express.Multer.File): { valid: boolean; error?: 
   const extension = path.extname(file.originalname).toLowerCase();
   const mimeType = file.mimetype;
   
+  // Special handling for HEIC files which often have incorrect MIME types
+  if (extension === '.heic' || extension === '.heif') {
+    // Accept HEIC files regardless of MIME type reported by browser
+    console.log(`HEIC file detected: ${file.originalname}, MIME: ${mimeType}`);
+    return { valid: true };
+  }
+  
   // Check if mime type is allowed
   if (!Object.keys(ALLOWED_MIME_TYPES).includes(mimeType)) {
+    // Fallback: check if extension is supported even if MIME type is wrong
+    const allSupportedExtensions = Object.values(ALLOWED_MIME_TYPES).flat();
+    if (allSupportedExtensions.includes(extension)) {
+      console.log(`File accepted based on extension: ${extension}, MIME: ${mimeType}`);
+      return { valid: true };
+    }
     return { valid: false, error: `Unsupported file type: ${mimeType}` };
   }
   
@@ -398,15 +415,15 @@ async function convertImageWithPython(inputPath: string, outputPath: string, out
 
 function getSupportedFormats(extension: string): string[] {
   const formatMap: Record<string, string[]> = {
-    'jpg': ['png', 'webp', 'gif', 'bmp'],
-    'jpeg': ['png', 'webp', 'gif', 'bmp'],
-    'png': ['jpg', 'jpeg', 'webp', 'gif', 'bmp'],
-    'webp': ['jpg', 'jpeg', 'png', 'gif', 'bmp'],
-    'gif': ['jpg', 'jpeg', 'png', 'webp', 'bmp'],
-    'bmp': ['jpg', 'jpeg', 'png', 'webp', 'gif'],
-    'tiff': ['jpg', 'jpeg', 'png', 'webp', 'gif'],
-    'heic': ['jpg', 'jpeg', 'png', 'webp'],
-    'heif': ['jpg', 'jpeg', 'png', 'webp'],
+    'jpg': ['png', 'webp', 'gif', 'bmp', 'tiff'],
+    'jpeg': ['png', 'webp', 'gif', 'bmp', 'tiff'],
+    'png': ['jpg', 'jpeg', 'webp', 'gif', 'bmp', 'tiff'],
+    'webp': ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'tiff'],
+    'gif': ['jpg', 'jpeg', 'png', 'webp', 'bmp', 'tiff'],
+    'bmp': ['jpg', 'jpeg', 'png', 'webp', 'gif', 'tiff'],
+    'tiff': ['jpg', 'jpeg', 'png', 'webp', 'gif', 'bmp'],
+    'heic': ['jpg', 'jpeg', 'png', 'webp', 'gif', 'bmp', 'tiff'],
+    'heif': ['jpg', 'jpeg', 'png', 'webp', 'gif', 'bmp', 'tiff'],
     'pdf': ['jpg', 'jpeg', 'png', 'docx', 'txt']
   };
   return formatMap[extension.toLowerCase()] || [];

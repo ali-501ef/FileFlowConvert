@@ -9,10 +9,26 @@ from PIL import Image, ImageOps
 import os
 
 def convert_heic_to_pil(input_path):
-    """Convert HEIC/HEIF to PIL Image using pyheif"""
+    """Convert HEIC/HEIF to PIL Image using multiple fallback methods"""
+    print(f"Attempting to convert HEIC file: {input_path}")
+    
+    # Method 1: Try pillow-heif first (more reliable)
+    try:
+        from pillow_heif import register_heif_opener
+        print("Trying pillow-heif method...")
+        register_heif_opener()
+        img = Image.open(input_path)
+        print(f"pillow-heif conversion successful. Mode: {img.mode}, Size: {img.size}")
+        return img
+    except ImportError as e1:
+        print(f"pillow-heif not available: {e1}")
+    except Exception as e1:
+        print(f"pillow-heif conversion failed: {e1}")
+    
+    # Method 2: Try pyheif as fallback
     try:
         import pyheif
-        print(f"Reading HEIC file: {input_path}")
+        print("Trying pyheif method...")
         heif_file = pyheif.read(input_path)
         print(f"HEIC file read successfully. Mode: {heif_file.mode}, Size: {heif_file.size}")
         img = Image.frombytes(
@@ -23,24 +39,15 @@ def convert_heic_to_pil(input_path):
             heif_file.mode,
             heif_file.stride,
         )
-        print("HEIC to PIL conversion successful")
+        print("pyheif conversion successful")
         return img
-    except ImportError as e:
-        print(f"pyheif import error: {e}")
-        # Fallback: try using pillow-heif
-        try:
-            from pillow_heif import register_heif_opener
-            print("Using pillow-heif fallback")
-            register_heif_opener()
-            img = Image.open(input_path)
-            print("pillow-heif conversion successful")
-            return img
-        except ImportError as e2:
-            print(f"pillow-heif import error: {e2}")
-            raise Exception(f"HEIC support requires pyheif or pillow-heif library. pyheif error: {e}, pillow-heif error: {e2}")
-    except Exception as e:
-        print(f"HEIC conversion error: {e}")
-        raise Exception(f"Failed to convert HEIC file: {e}")
+    except ImportError as e2:
+        print(f"pyheif not available: {e2}")
+    except Exception as e2:
+        print(f"pyheif conversion failed: {e2}")
+    
+    # If both methods fail, provide detailed error
+    raise Exception(f"Failed to convert HEIC file using all available methods. Ensure file is valid HEIC/HEIF format.")
 
 def main():
     """Main conversion function"""
