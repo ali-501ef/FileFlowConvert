@@ -375,6 +375,7 @@
     </footer>
 
     <script src="/js/main.js"></script>
+    <script src="/js/advanced-options.js"></script>
     <!-- Universal to JPEG Tool - Use server-side converter -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -435,7 +436,9 @@
                             body: JSON.stringify({
                                 file_id: uploadResult.file_id,
                                 output_format: 'jpg',
-                                temp_path: uploadResult.temp_path
+                                temp_path: uploadResult.temp_path,
+                                quality: document.getElementById('qualityLevel')?.value || '85',
+                                output_size: document.getElementById('outputSize')?.value || 'original'
                             })
                         });
                         

@@ -423,7 +423,9 @@
                             body: JSON.stringify({
                                 file_id: uploadResult.file_id,
                                 output_format: 'png',
-                                temp_path: uploadResult.temp_path
+                                temp_path: uploadResult.temp_path,
+                                compression: document.getElementById('compressionLevel')?.value || '6',
+                                background: document.getElementById('transparencyHandling')?.value || 'preserve'
                             })
                         });
                         

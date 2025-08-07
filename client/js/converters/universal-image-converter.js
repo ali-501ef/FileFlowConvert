@@ -245,21 +245,31 @@ class ImageConverter {
     getAdvancedOptions() {
         const options = {};
         
-        // Quality settings
+        // Quality settings - capture all possible quality variable names
         const qualitySelect = document.getElementById('jpgQuality') || 
+                            document.getElementById('jpegQuality') ||
+                            document.getElementById('qualityLevel') ||
+                            document.getElementById('imageQuality') ||
                             document.getElementById('pngQuality') || 
                             document.getElementById('compressionLevel');
         if (qualitySelect) {
-            options.quality = parseFloat(qualitySelect.value);
+            const value = qualitySelect.value;
+            // Handle different quality formats
+            if (value === 'high') options.quality = 95;
+            else if (value === 'medium') options.quality = 85;
+            else if (value === 'low') options.quality = 75;
+            else options.quality = parseFloat(value);
         }
         
-        // Background settings
+        // Background settings - capture all possible background variable names
         const backgroundSelect = document.getElementById('backgroundColor') || 
-                               document.getElementById('preserveTransparency');
+                               document.getElementById('preserveTransparency') ||
+                               document.getElementById('transparencyHandling');
         if (backgroundSelect) {
             const value = backgroundSelect.value;
             if (value === 'white') options.backgroundColor = '#ffffff';
             else if (value === 'black') options.backgroundColor = '#000000';
+            else if (value === 'transparent') options.preserveTransparency = true;
             else if (value === 'preserve') options.preserveTransparency = true;
         }
         
@@ -279,6 +289,39 @@ class ImageConverter {
         const widthSelect = document.getElementById('outputWidth');
         if (widthSelect && widthSelect.value !== 'auto') {
             options.outputWidth = parseInt(widthSelect.value);
+        }
+        
+        // ICO-specific options
+        const sizeSelect = document.getElementById('sizeSelection');
+        if (sizeSelect) {
+            options.sizeSelection = sizeSelect.value;
+        }
+        
+        const namingSelect = document.getElementById('namingScheme');
+        if (namingSelect) {
+            options.namingScheme = namingSelect.value;
+        }
+        
+        // PDF-specific options
+        const pageOrientationSelect = document.getElementById('pageOrientation');
+        if (pageOrientationSelect) {
+            options.pageOrientation = pageOrientationSelect.value;
+        }
+        
+        const pageSizeSelect = document.getElementById('pageSize');
+        if (pageSizeSelect) {
+            options.pageSize = pageSizeSelect.value;
+        }
+        
+        const imageLayoutSelect = document.getElementById('imageLayout');
+        if (imageLayoutSelect) {
+            options.imageLayout = imageLayoutSelect.value;
+        }
+        
+        // Output size settings
+        const outputSizeSelect = document.getElementById('outputSize');
+        if (outputSizeSelect && outputSizeSelect.value !== 'original') {
+            options.outputSize = outputSizeSelect.value;
         }
         
         return options;
