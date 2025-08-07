@@ -11,6 +11,45 @@ import slowDown from "express-slow-down";
 import { insertConversionSchema } from "@shared/schema";
 import { storage } from "./storage";
 
+// Track active conversions to prevent duplicates
+const activeConversions = new Map<string, { timestamp: number; promise: Promise<any> }>();
+
+// Generate unique key for conversion tracking
+function getConversionKey(fileId: string, outputFormat: string): string {
+  return `${fileId}_${outputFormat}`;
+}
+
+// Check if conversion is already in progress
+function isConversionActive(fileId: string, outputFormat: string): boolean {
+  const key = getConversionKey(fileId, outputFormat);
+  const active = activeConversions.get(key);
+  
+  if (!active) return false;
+  
+  // Clean up stale entries (older than 5 minutes)
+  const STALE_TIMEOUT = 5 * 60 * 1000;
+  if (Date.now() - active.timestamp > STALE_TIMEOUT) {
+    activeConversions.delete(key);
+    return false;
+  }
+  
+  return true;
+}
+
+// Track a new conversion
+function trackConversion(fileId: string, outputFormat: string, promise: Promise<any>): void {
+  const key = getConversionKey(fileId, outputFormat);
+  activeConversions.set(key, {
+    timestamp: Date.now(),
+    promise
+  });
+  
+  // Auto-cleanup when promise resolves/rejects
+  promise.finally(() => {
+    activeConversions.delete(key);
+  });
+}
+
 // Promisify fs functions for async usage
 const readdir = promisify(fs.readdir);
 const stat = promisify(fs.stat);
@@ -334,6 +373,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Missing required parameters: file_id, output_format, temp_path" });
       }
 
+      // Check for duplicate conversion requests
+      if (isConversionActive(file_id, output_format)) {
+        return res.status(429).json({ 
+          error: "Conversion already in progress for this file and format",
+          message: "Please wait for the current conversion to complete before starting a new one."
+        });
+      }
+
       // Validate output format
       const formatValidation = validateOutputFormat(output_format);
       if (!formatValidation.valid) {
@@ -367,13 +414,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Determine conversion method based on file type
       const fileExtension = path.extname(tempPath).toLowerCase().substring(1);
-      let success: boolean;
       
-      if (fileExtension === 'pdf') {
-        success = await convertPDFWithPython(tempPath, outputPath, output_format);
-      } else {
-        success = await convertImageWithPython(tempPath, outputPath, output_format);
-      }
+      // Create conversion promise and track it
+      const conversionPromise = (async () => {
+        if (fileExtension === 'pdf') {
+          return await convertPDFWithPython(tempPath, outputPath, output_format);
+        } else {
+          return await convertImageWithPython(tempPath, outputPath, output_format);
+        }
+      })();
+      
+      // Track this conversion to prevent duplicates
+      trackConversion(file_id, output_format, conversionPromise);
+      
+      // Await the conversion result
+      const success = await conversionPromise;
 
       try {
         await access(outputPath, fs.constants.F_OK);
@@ -423,14 +478,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(400).json({ error: "Missing required parameters: file_id, conversion_type" });
     }
     
+    // Check for duplicate conversion requests
+    if (isConversionActive(file_id, conversion_type)) {
+      return res.status(429).json({ 
+        error: "Media conversion already in progress for this file and type",
+        message: "Please wait for the current conversion to complete before starting a new one."
+      });
+    }
+    
     // Validate conversion type
     const allowedConversions = ['mp4-to-mp3', 'video-compress', 'audio-convert', 'video-trim', 'gif-make', 'video-merge'];
     if (!allowedConversions.includes(conversion_type)) {
       return res.status(400).json({ error: `Unsupported conversion type: ${conversion_type}` });
-    }
-    
-    if (!file_id || !conversion_type) {
-      return res.status(400).json({ error: 'Missing required parameters' });
     }
 
     const tempPath = path.join(uploadsDir, file_id);
@@ -451,46 +510,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
     console.log(`Running media conversion: ${conversion_type}`);
     console.log(`Input: ${tempPath}, Output: ${outputPath}`);
     
-    const pythonProcess = spawn('python3', [pythonScript, tempPath, outputPath, conversion_type, optionsJson]);
-    
-    let output = '';
-    let error = '';
-    
-    pythonProcess.stdout.on('data', (data) => {
-      output += data.toString();
-    });
-    
-    pythonProcess.stderr.on('data', (data) => {
-      error += data.toString();
-    });
-    
-    pythonProcess.on('close', (code) => {
-      console.log(`Media conversion process closed with code: ${code}`);
-      console.log('Python output:', output);
-      console.log('Python error:', error);
+    // Create media conversion promise and track it
+    const conversionPromise = new Promise<void>((resolve, reject) => {
+      const pythonProcess = spawn('python3', [pythonScript, tempPath, outputPath, conversion_type, optionsJson]);
       
-      if (code === 0) {
-        try {
-          const result = JSON.parse(output.trim());
-          if (result.success) {
-            const stats = fs.statSync(outputPath);
-            res.json({
-              success: true,
-              output_file: outputFile,
-              download_url: `/api/download/${outputFile}`,
-              file_size: stats.size,
-              ...result
-            });
-          } else {
-            res.status(500).json(result);
+      let output = '';
+      let error = '';
+      
+      pythonProcess.stdout.on('data', (data) => {
+        output += data.toString();
+      });
+      
+      pythonProcess.stderr.on('data', (data) => {
+        error += data.toString();
+      });
+      
+      pythonProcess.on('close', (code) => {
+        console.log(`Media conversion process closed with code: ${code}`);
+        console.log('Python output:', output);
+        console.log('Python error:', error);
+        
+        if (code === 0) {
+          try {
+            const result = JSON.parse(output.trim());
+            if (result.success) {
+              const stats = fs.statSync(outputPath);
+              res.json({
+                success: true,
+                output_file: outputFile,
+                download_url: `/api/download/${outputFile}`,
+                file_size: stats.size,
+                ...result
+              });
+              resolve();
+            } else {
+              res.status(500).json(result);
+              reject(new Error('Conversion failed'));
+            }
+          } catch (parseError) {
+            res.status(500).json({ error: 'Failed to parse conversion result' });
+            reject(parseError);
           }
-        } catch (parseError) {
-          res.status(500).json({ error: 'Failed to parse conversion result' });
+        } else {
+          res.status(500).json({ error: error || 'Media conversion failed' });
+          reject(new Error('Media conversion failed'));
         }
-      } else {
-        res.status(500).json({ error: error || 'Media conversion failed' });
-      }
+      });
     });
+    
+    // Track this conversion to prevent duplicates
+    trackConversion(file_id, conversion_type, conversionPromise);
   });
 
   function getOutputExtension(conversionType: string, format?: string): string {
