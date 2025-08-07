@@ -10,9 +10,62 @@ import rateLimit from "express-rate-limit";
 import slowDown from "express-slow-down";
 import { insertConversionSchema } from "@shared/schema";
 import { storage } from "./storage";
+import { randomUUID } from "crypto";
 
 // Track active conversions to prevent duplicates
 const activeConversions = new Map<string, { timestamp: number; promise: Promise<any> }>();
+
+// File operation semaphore to control concurrent file operations
+class FileSemaphore {
+  private running: number = 0;
+  private readonly maxConcurrent: number;
+  private readonly queue: Array<() => void> = [];
+
+  constructor(maxConcurrent: number = 5) {
+    this.maxConcurrent = maxConcurrent;
+  }
+
+  async acquire(): Promise<void> {
+    if (this.running < this.maxConcurrent) {
+      this.running++;
+      return Promise.resolve();
+    }
+
+    return new Promise<void>((resolve) => {
+      this.queue.push(() => {
+        this.running++;
+        resolve();
+      });
+    });
+  }
+
+  release(): void {
+    this.running--;
+    if (this.queue.length > 0) {
+      const next = this.queue.shift();
+      if (next) next();
+    }
+  }
+}
+
+const fileSemaphore = new FileSemaphore(3); // Allow max 3 concurrent file operations
+
+// Generate unique output filename with timestamp and UUID
+function generateUniqueOutputFilename(fileId: string, outputFormat: string): string {
+  const timestamp = Date.now();
+  const uuid = randomUUID().substring(0, 8); // Use first 8 chars of UUID
+  return `${fileId}_${timestamp}_${uuid}.${outputFormat}`;
+}
+
+// Atomic file operation wrapper
+async function atomicFileOperation<T>(operation: () => Promise<T>): Promise<T> {
+  await fileSemaphore.acquire();
+  try {
+    return await operation();
+  } finally {
+    fileSemaphore.release();
+  }
+}
 
 // Generate unique key for conversion tracking
 function getConversionKey(fileId: string, outputFormat: string): string {
@@ -72,18 +125,20 @@ const outputDir = path.join(process.cwd(), 'output');
   }
 });
 
-// Async file cleanup utility
+// Async file cleanup utility with concurrency control
 async function cleanupFile(filePath: string): Promise<void> {
-  try {
-    await access(filePath, fs.constants.F_OK);
-    await unlink(filePath);
-    console.log('Cleaned up file:', filePath);
-  } catch (error) {
-    // File doesn't exist or couldn't be deleted - this is often acceptable
-    if ((error as any).code !== 'ENOENT') {
-      console.error('Error cleaning up file:', filePath, error);
+  return atomicFileOperation(async () => {
+    try {
+      await access(filePath, fs.constants.F_OK);
+      await unlink(filePath);
+      console.log('Cleaned up file:', filePath);
+    } catch (error) {
+      // File doesn't exist or couldn't be deleted - this is often acceptable
+      if ((error as any).code !== 'ENOENT') {
+        console.error('Error cleaning up file:', filePath, error);
+      }
     }
-  }
+  });
 }
 
 // Sync cleanup for backwards compatibility
@@ -98,28 +153,42 @@ function cleanupFileSync(filePath: string): void {
   }
 }
 
-// Async periodic cleanup function
+// Async periodic cleanup function with concurrency control
 async function cleanupOldFiles(): Promise<void> {
   const cutoffTime = Date.now() - (2 * 60 * 60 * 1000); // 2 hours ago
+  console.log('Starting periodic cleanup of old files...');
   
   for (const dir of [uploadsDir, outputDir]) {
     try {
-      const files = await readdir(dir);
-      await Promise.all(files.map(async (file) => {
-        try {
-          const filePath = path.join(dir, file);
-          const stats = await stat(filePath);
-          if (stats.mtimeMs < cutoffTime) {
-            await cleanupFile(filePath);
+      const files = await atomicFileOperation(async () => {
+        return await readdir(dir);
+      });
+      
+      console.log(`Checking ${files.length} files in ${dir} for cleanup`);
+      
+      // Process files in batches to avoid overwhelming the system
+      const batchSize = 10;
+      for (let i = 0; i < files.length; i += batchSize) {
+        const batch = files.slice(i, i + batchSize);
+        await Promise.allSettled(batch.map(async (file) => {
+          try {
+            const filePath = path.join(dir, file);
+            const stats = await stat(filePath);
+            if (stats.mtimeMs < cutoffTime) {
+              console.log(`Cleaning up old file: ${file} (${new Date(stats.mtimeMs).toISOString()})`);
+              await cleanupFile(filePath);
+            }
+          } catch (error) {
+            console.error('Error cleaning individual file:', file, error);
           }
-        } catch (error) {
-          console.error('Error cleaning individual file:', file, error);
-        }
-      }));
+        }));
+      }
     } catch (error) {
       console.error('Error during periodic cleanup in directory:', dir, error);
     }
   }
+  
+  console.log('Periodic cleanup completed');
 }
 
 // Run cleanup every hour
@@ -465,8 +534,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Input file not found" });
       }
 
-      // Generate output path
-      const outputFilename = `${file_id}_converted.${output_format}`;
+      // Generate unique output path to prevent conflicts
+      const outputFilename = generateUniqueOutputFilename(file_id, output_format);
       outputPath = path.join(outputDir, outputFilename);
 
       // Determine conversion method based on file type
@@ -502,11 +571,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             file_size: stats.size
           });
         } else {
-          await cleanupFile(outputPath); // Clean up failed conversion
-          // Cleanup input file on failed conversion
-          if (tempPath) {
-            await cleanupFile(tempPath);
-          }
+          // Clean up failed conversion and input file concurrently
+          await Promise.allSettled([
+            cleanupFile(outputPath),
+            tempPath ? cleanupFile(tempPath) : Promise.resolve()
+          ]);
           res.status(500).json({ error: "Conversion failed - output file is empty or invalid" });
         }
       } catch {
@@ -555,9 +624,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(404).json({ error: 'Input file not found' });
     }
 
-    // Generate output filename with appropriate extension
+    // Generate unique output filename with appropriate extension
     const outputExtension = getOutputExtension(conversion_type, options.format);
-    const outputFile = `${file_id}_converted.${outputExtension}`;
+    const outputFile = generateUniqueOutputFilename(file_id, outputExtension);
     const outputPath = path.join(outputDir, outputFile);
 
     // Prepare Python command
@@ -636,20 +705,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }
 
-  app.get('/api/download/:filename', (req, res) => {
+  app.get('/api/download/:filename', async (req, res) => {
     const filename = req.params.filename;
     const filePath = path.join(outputDir, filename);
 
-    if (!fs.existsSync(filePath)) {
-      return res.status(404).json({ error: "File not found" });
-    }
+    try {
+      // Use atomic operation to check file existence
+      await atomicFileOperation(async () => {
+        await access(filePath, fs.constants.F_OK);
+      });
 
-    res.download(filePath, filename, (err) => {
-      if (err) {
-        console.error('Download error:', err);
-        res.status(500).json({ error: "Download failed" });
-      }
-    });
+      res.download(filePath, filename, (err) => {
+        if (err) {
+          console.error('Download error:', err);
+          if (!res.headersSent) {
+            res.status(500).json({ error: "Download failed" });
+          }
+        }
+      });
+    } catch {
+      res.status(404).json({ error: "File not found" });
+    }
   });
 
   // API Routes for database operations
