@@ -186,7 +186,16 @@ class PDFToJPGHandler {
                 const arrayBuffer = await file.arrayBuffer();
                 console.log('File loaded, size:', arrayBuffer.byteLength);
                 
-                const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
+                // Convert ArrayBuffer to Uint8Array for PDF.js
+                const uint8Array = new Uint8Array(arrayBuffer);
+                
+                // Load PDF with proper options for PDF.js
+                const pdf = await pdfjsLib.getDocument({
+                    data: uint8Array,
+                    cMapUrl: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/cmaps/',
+                    cMapPacked: true,
+                    standardFontDataUrl: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/standard_fonts/'
+                }).promise;
                 console.log('PDF loaded, pages:', pdf.numPages);
                 
                 const pageRange = this.getPageRange(pdf.numPages, options);
