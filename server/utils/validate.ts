@@ -194,9 +194,23 @@ export async function validateMedia(filePath: string): Promise<ValidationResult>
  */
 export async function validateFile(filePath: string, expectedType?: string): Promise<ValidationResult> {
   try {
+    // Check if file exists and has content
+    const stats = await fs.stat(filePath);
+    if (stats.size === 0) {
+      return { valid: false, error: 'File is empty' };
+    }
+
     // Read first few bytes to detect type
     const buffer = await fs.readFile(filePath, { encoding: null });
     const header = buffer.subarray(0, 20);
+    
+    // If expecting a specific type, be more strict
+    if (expectedType === 'application/pdf') {
+      if (!header.subarray(0, 4).toString('ascii').startsWith('%PDF')) {
+        return { valid: false, error: 'Not a valid PDF file' };
+      }
+      return validatePDF(filePath);
+    }
     
     // PDF magic bytes
     if (header.subarray(0, 4).toString('ascii') === '%PDF') {
@@ -208,6 +222,11 @@ export async function validateFile(filePath: string, expectedType?: string): Pro
     if (header.subarray(0, 8).toString('hex') === '89504e470d0a1a0a') return validateImage(filePath); // PNG
     if (header.subarray(0, 3).toString('ascii') === 'GIF') return validateImage(filePath); // GIF
     if (header.subarray(0, 4).toString('ascii') === 'RIFF') return validateImage(filePath); // WebP
+    
+    // If we expected a PDF but didn't find one, be explicit
+    if (expectedType === 'application/pdf') {
+      return { valid: false, error: 'Not a valid PDF file' };
+    }
     
     // Try media validation for other files
     return validateMedia(filePath);

@@ -214,14 +214,31 @@ startxref
 
     async uploadFile(filePath) {
         const form = new FormData();
-        form.append('file', fs.createReadStream(filePath));
-
-        const response = await fetch(`${API_BASE}/upload`, {
-            method: 'POST',
-            body: form
+        form.append('file', fs.createReadStream(filePath), {
+            filename: path.basename(filePath),
+            contentType: 'application/pdf'
         });
 
-        return await response.json();
+        // Use form-data's built-in submit method for proper file upload
+        return new Promise((resolve, reject) => {
+            form.submit(`${API_BASE}/upload`, (err, res) => {
+                if (err) {
+                    reject(err);
+                    return;
+                }
+
+                let body = '';
+                res.on('data', chunk => body += chunk);
+                res.on('end', () => {
+                    try {
+                        const result = JSON.parse(body);
+                        resolve(result);
+                    } catch (parseErr) {
+                        reject(new Error(`Failed to parse response: ${body}`));
+                    }
+                });
+            });
+        });
     }
 
     async convertFile(fileId, options = {}) {
