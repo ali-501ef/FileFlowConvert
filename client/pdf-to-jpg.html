@@ -3,31 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JPG to PNG Converter - FileFlow | Convert Images with Transparency</title>
-    <meta name="description" content="Convert JPG images to PNG format with transparency support. High-quality lossless conversion for web graphics and logos.">
-    <link rel="canonical" href="https://fileflow.com/jpg-to-png">
-    
-    <!-- Open Graph Meta Tags -->
-    <meta property="og:title" content="JPG to PNG Converter - FileFlow">
-    <meta property="og:description" content="Convert JPG images to PNG format with transparency support. High-quality lossless conversion.">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://fileflow.com/jpg-to-png">
-    
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Styles -->
-    <link rel="stylesheet" href="/styles.css">
+    <title>PDF to JPG Converter - FileFlow</title>
+    <meta name="description" content="Convert PDF pages to JPG images with high quality. Extract images from PDF documents with custom resolution and quality settings.">
+    <link rel="stylesheet" href="styles.css">
     
     <!-- Navigation Script -->
     <script src="/js/navigation.js" defer></script>
 </head>
 <body>
-    <!-- Top AdSense Banner -->
-    <div class="ad-placeholder ad-banner-top">
-        <span class="ad-text">Advertisement Banner (728x90)</span>
-    </div>
-
     <!-- Sticky Navigation Bar -->
     <nav class="sticky-nav">
         <div class="nav-container">
@@ -116,38 +99,41 @@
             <div class="hero-section">
                 <div class="hero-content">
                     <div class="hero-badge">
-                        <div class="tool-icon bg-green">
+                        <div class="tool-icon bg-red">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                                <circle cx="9" cy="9" r="2"/>
-                                <path d="M21 15l-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14,2 14,8 20,8"></polyline>
+                                <rect x="8" y="12" width="8" height="6" rx="1" stroke="currentColor" stroke-width="1" fill="currentColor" opacity="0.3"/>
+                                <circle cx="10" cy="14" r="1" fill="white"/>
+                                <path d="M18 16l-2-2-2 2-2-2" stroke="white" stroke-width="1" fill="none"/>
                             </svg>
                         </div>
-                        <span>Image Tools</span>
+                        <span>PDF Tools</span>
                     </div>
-                    <h1 class="hero-title">JPG to PNG</h1>
-                    <p class="hero-description">Convert JPG images to PNG format for lossless quality</p>
+                    <h1 class="hero-title">PDF to JPG</h1>
+                    <p class="hero-description">Convert PDF pages to high-quality JPG images</p>
                     <div class="hero-features">
-                        <span class="feature-tag">✓ Lossless quality</span>
-                        <span class="feature-tag">✓ Transparency support</span>
-                        <span class="feature-tag">✓ Batch conversion</span>
+                        <span class="feature-tag">✓ High resolution</span>
+                        <span class="feature-tag">✓ Multiple pages</span>
+                        <span class="feature-tag">✓ Quality control</span>
                     </div>
                 </div>
             </div>
 
             <div class="converter-container">
-                <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+                <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()" data-testid="upload-area-pdf-to-jpg">
                     <div class="upload-icon">
                         <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                            <circle cx="9" cy="9" r="2"/>
-                            <path d="M21 15l-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14,2 14,8 20,8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
                         </svg>
                     </div>
-                    <h3>Drop your JPG files here</h3>
+                    <h3>Drop your PDF files here</h3>
                     <p>or click anywhere to browse files</p>
-                    <p class="supported-formats">Supports JPG, JPEG files only</p>
-                    <input type="file" id="fileInput" multiple accept=".jpg,.jpeg" hidden>
+                    <p class="supported-formats">Supports PDF files only</p>
+                    <input type="file" id="fileInput" multiple accept=".pdf,.PDF" hidden>
                 </div>
 
                 <div class="advanced-options" id="advancedOptions">
@@ -173,20 +159,34 @@
                     </div>
                     <div class="options-content" id="optionsContent" style="display: none;">
                         <div class="option-group">
-                            <label for="compressionLevel">Compression Level</label>
-                            <select id="compressionLevel">
-                                <option value="0" selected>No compression (Largest)</option>
-                                <option value="6">Default (Balanced)</option>
-                                <option value="9">Maximum (Smallest)</option>
+                            <label for="jpgQuality">JPG Quality</label>
+                            <select id="jpgQuality">
+                                <option value="95">High Quality (95%)</option>
+                                <option value="85" selected>Good Quality (85%)</option>
+                                <option value="75">Medium Quality (75%)</option>
+                                <option value="60">Low Quality (60%)</option>
                             </select>
                         </div>
                         <div class="option-group">
-                            <label for="transparencyHandling">Background</label>
-                            <select id="transparencyHandling">
-                                <option value="preserve" selected>Preserve as-is</option>
-                                <option value="white">White background</option>
-                                <option value="transparent">Transparent</option>
+                            <label for="outputResolution">Output Resolution</label>
+                            <select id="outputResolution">
+                                <option value="150">150 DPI (Web)</option>
+                                <option value="300" selected>300 DPI (Print)</option>
+                                <option value="600">600 DPI (High Quality)</option>
+                                <option value="72">72 DPI (Screen)</option>
                             </select>
+                        </div>
+                        <div class="option-group">
+                            <label for="pageRange">Page Range</label>
+                            <select id="pageRange">
+                                <option value="all" selected>All Pages</option>
+                                <option value="first">First Page Only</option>
+                                <option value="custom">Custom Range</option>
+                            </select>
+                        </div>
+                        <div class="option-group" id="customRangeGroup" style="display: none;">
+                            <label for="customPages">Pages (e.g., 1-3, 5, 7-10)</label>
+                            <input type="text" id="customPages" placeholder="1-3, 5, 7-10">
                         </div>
                     </div>
                 </div>
@@ -199,8 +199,8 @@
                     <div class="file-list" id="fileList"></div>
                 </div>
 
-                <button class="convert-btn" id="convertBtn" disabled>
-                    <span class="btn-text">Convert to PNG</span>
+                <button class="convert-btn" id="convertBtn" disabled data-testid="convert-btn-pdf-to-jpg">
+                    <span class="btn-text">Convert to JPG</span>
                     <div class="btn-loader" style="display: none;"></div>
                 </button>
 
@@ -210,22 +210,13 @@
                         <div class="info-card">
                             <div class="info-icon">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                    <path d="M9 12l2 2 4-4"/>
+                                    <path d="M21 12c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1z"/>
+                                    <path d="M3 12c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1z"/>
                                 </svg>
                             </div>
-                            <h3>Lossless Quality</h3>
-                            <p>PNG format preserves image quality without compression artifacts. Ideal for graphics, screenshots, and images requiring crisp details.</p>
-                        </div>
-                        <div class="info-card">
-                            <div class="info-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                                    <path d="M12 8v8"/>
-                                    <path d="M8 12h8"/>
-                                </svg>
-                            </div>
-                            <h3>Transparency Support</h3>
-                            <p>PNG images support transparent backgrounds, perfect for logos, icons, and graphics that need to blend seamlessly with different backgrounds.</p>
+                            <h3>High Quality Conversion</h3>
+                            <p>Convert PDF pages to crisp, high-resolution JPG images with customizable quality settings. Perfect for presentations, web use, and printing.</p>
                         </div>
                         <div class="info-card">
                             <div class="info-icon">
@@ -236,13 +227,23 @@
                                     <rect x="3" y="14" width="7" height="7"/>
                                 </svg>
                             </div>
-                            <h3>Web Ready</h3>
-                            <p>PNG images are perfect for web use, offering superior quality for graphics, icons, and images with text or sharp edges.</p>
+                            <h3>Multiple Pages</h3>
+                            <p>Extract all pages or select specific page ranges from your PDF documents. Each page is converted to a separate JPG image with consistent quality.</p>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                                    <path d="M9 12l2 2 4-4"/>
+                                </svg>
+                            </div>
+                            <h3>Resolution Control</h3>
+                            <p>Choose from multiple DPI settings for different use cases - from web-optimized 72 DPI to print-ready 600 DPI for professional publishing needs.</p>
                         </div>
                     </div>
                     <div class="tool-benefits">
-                        <h3>Why Convert JPG to PNG?</h3>
-                        <p>Converting JPG to PNG is essential when you need transparency, lossless quality, or better web compatibility. PNG format excels with graphics, logos, and images with text, providing crisp edges and supporting transparent backgrounds that JPG cannot offer. This conversion is crucial for professional design work and web development.</p>
+                        <h3>Why Convert PDF to JPG?</h3>
+                        <p>Converting PDF pages to JPG images makes content more accessible and versatile for various applications. JPG images are universally supported, load quickly on websites, and are ideal for sharing individual pages, creating thumbnails, or incorporating PDF content into presentations and documents. This conversion is perfect for extracting charts, diagrams, or text-heavy pages for web use or further editing.</p>
                     </div>
                 </div>
 
@@ -256,13 +257,13 @@
                 <div class="results" id="results" style="display: none;">
                     <h3>Conversion Complete</h3>
                     <div class="result-actions">
-                        <button class="download-btn" id="downloadBtn">
+                        <button class="download-btn" id="downloadBtn" data-testid="download-btn-pdf-to-jpg">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                                 <polyline points="7,10 12,15 17,10"></polyline>
                                 <line x1="12" y1="15" x2="12" y2="3"></line>
                             </svg>
-                            Download PNG Files
+                            Download JPG Images
                         </button>
                     </div>
                 </div>
@@ -275,11 +276,6 @@
                 <span class="ad-text">Sidebar<br>Advertisement<br>(160x600)</span>
             </div>
         </div>
-    </div>
-
-    <!-- Bottom AdSense Banner -->
-    <div class="ad-placeholder ad-banner-bottom">
-        <span class="ad-text">Advertisement Banner (728x90)</span>
     </div>
 
     <!-- Footer -->
@@ -355,18 +351,26 @@
         </div>
     </footer>
 
-    <script src="/js/main.js"></script>
-    <script src="/js/advanced-options.js"></script>
-    <script src="/js/converters/universal-image-converter.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+    <script src="js/advanced-options.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/pdf-to-jpg-handler.js"></script>
     <script>
-        // Initialize Universal Image Converter for JPG to PNG
-        document.addEventListener('DOMContentLoaded', function() {
-            window.imageConverter = new ImageConverter({
-                inputFormat: 'jpg',
-                outputFormat: 'png',
-                acceptedTypes: '.jpg,.jpeg',
-                toolName: 'JPG to PNG'
-            });
+        // Initialize PDF to JPG converter
+        document.addEventListener('DOMContentLoaded', () => {
+            // Show/hide custom page range input
+            const pageRangeSelect = document.getElementById('pageRange');
+            const customRangeGroup = document.getElementById('customRangeGroup');
+            
+            if (pageRangeSelect) {
+                pageRangeSelect.addEventListener('change', (e) => {
+                    if (e.target.value === 'custom') {
+                        customRangeGroup.style.display = 'block';
+                    } else {
+                        customRangeGroup.style.display = 'none';
+                    }
+                });
+            }
         });
     </script>
 </body>
