@@ -1276,20 +1276,16 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    background: conic-gradient(from 0deg at 50% 50%, transparent, rgba(147, 51, 234, 0.05), transparent, rgba(99, 102, 241, 0.03), transparent);
-    animation: wideCardSpin 20s linear infinite;
+    background: radial-gradient(circle at 25% 25%, rgba(147, 51, 234, 0.04) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(99, 102, 241, 0.03) 0%, transparent 50%);
     opacity: 0;
-    transition: opacity 0.5s ease;
+    transition: opacity 0.6s ease;
     pointer-events: none;
+    border-radius: 20px;
 }
 
 .tool-card.wide-card:hover::after {
     opacity: 1;
-}
-
-@keyframes wideCardSpin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
 }
 
 .tool-card.wide-card::before {
@@ -1332,10 +1328,10 @@ body {
 
 @keyframes wideIconPulse {
     0%, 100% {
-        box-shadow: 0 6px 16px rgba(147, 51, 234, 0.2);
+        box-shadow: 0 6px 16px rgba(147, 51, 234, 0.15);
     }
     50% {
-        box-shadow: 0 8px 20px rgba(147, 51, 234, 0.3);
+        box-shadow: 0 8px 20px rgba(147, 51, 234, 0.25);
     }
 }
 
@@ -1362,6 +1358,34 @@ body {
 @media (max-width: 767px) {
     .tool-card.wide-card {
         grid-column: 1;
+        padding: 2rem 1.5rem;
+    }
+    
+    .tool-card.wide-card .tool-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+        text-align: left;
+    }
+    
+    .tool-card.wide-card .tool-icon {
+        transform: scale(1);
+        align-self: flex-start;
+    }
+}
+
+@media (max-width: 480px) {
+    .tool-card.wide-card {
+        padding: 1.5rem 1rem;
+        margin: 0 0.5rem;
+    }
+    
+    .tool-card.wide-card .tool-title {
+        font-size: 1.25rem;
+    }
+    
+    .tool-card.wide-card .tool-description {
+        font-size: 0.95rem;
     }
 }
 
@@ -4936,9 +4960,9 @@ body {
 /* Premium Extended Tools Page Styles */
 .premium-page {
     background: linear-gradient(135deg, 
-        rgba(147, 51, 234, 0.02) 0%, 
-        rgba(99, 102, 241, 0.015) 50%, 
-        rgba(59, 130, 246, 0.02) 100%);
+        rgba(147, 51, 234, 0.015) 0%, 
+        rgba(99, 102, 241, 0.01) 50%, 
+        rgba(59, 130, 246, 0.015) 100%);
     min-height: 100vh;
     padding: 0 1rem;
     position: relative;
@@ -4953,17 +4977,27 @@ body {
     right: 0;
     bottom: 0;
     background: 
-        radial-gradient(circle at 20% 20%, rgba(147, 51, 234, 0.03) 0%, transparent 50%),
-        radial-gradient(circle at 80% 80%, rgba(99, 102, 241, 0.03) 0%, transparent 50%),
-        radial-gradient(circle at 40% 60%, rgba(59, 130, 246, 0.02) 0%, transparent 50%);
-    animation: backgroundShift 20s ease-in-out infinite;
+        radial-gradient(circle at 15% 15%, rgba(147, 51, 234, 0.02) 0%, transparent 60%),
+        radial-gradient(circle at 85% 85%, rgba(99, 102, 241, 0.02) 0%, transparent 60%),
+        radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.015) 0%, transparent 70%);
+    animation: backgroundShift 25s ease-in-out infinite;
     pointer-events: none;
     z-index: -1;
 }
 
 @keyframes backgroundShift {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.8; transform: scale(1.05); }
+    0%, 100% { 
+        opacity: 0.6; 
+        transform: scale(1) rotate(0deg); 
+    }
+    33% { 
+        opacity: 0.8; 
+        transform: scale(1.02) rotate(0.5deg); 
+    }
+    66% { 
+        opacity: 0.4; 
+        transform: scale(1.01) rotate(-0.5deg); 
+    }
 }
 
 /* Premium container with ad space */
@@ -4974,6 +5008,37 @@ body {
     position: relative;
 }
 
+/* Scroll-triggered animations */
+@media (prefers-reduced-motion: no-preference) {
+    .premium-hero,
+    .premium-tool-card,
+    .premium-benefits-section {
+        animation-duration: 0.8s;
+        animation-fill-mode: both;
+        animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    
+    .premium-hero {
+        animation-name: fadeInUp;
+    }
+    
+    .premium-benefits-section {
+        animation-name: fadeInUp;
+        animation-delay: 0.2s;
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 /* Enhanced ad space margins for desktop */
 @media (min-width: 1200px) {
     .premium-container {
@@ -4982,9 +5047,9 @@ body {
     }
 }
 
-@media (min-width: 1400px) {
+@media (min-width: 1366px) {
     .premium-page {
-        padding: 0 200px; /* Enhanced space for premium ads */
+        padding: 0 160px; /* Space for 140px ads + margins */
     }
     
     .premium-container {
@@ -4992,43 +5057,63 @@ body {
     }
 }
 
+@media (min-width: 1440px) {
+    .premium-page {
+        padding: 0 180px; /* Enhanced space for premium ads */
+    }
+}
+
 @media (min-width: 1600px) {
     .premium-page {
-        padding: 0 240px; /* More generous premium ad space */
+        padding: 0 200px; /* More generous premium ad space */
+    }
+}
+
+@media (min-width: 1920px) {
+    .premium-page {
+        padding: 0 240px; /* Ultra-wide premium ad space */
     }
 }
 
 .premium-hero {
-    background: rgba(255, 255, 255, 0.4);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
     border-radius: 24px;
     margin: 2rem 0 3rem 0;
     padding: 4rem 3rem;
     position: relative;
     overflow: hidden;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04), 
-                0 1px 2px rgba(0, 0, 0, 0.02),
-                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.03), 
+                0 2px 8px rgba(0, 0, 0, 0.02),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
     text-align: center;
 }
 
 .premium-hero::after {
     content: '';
     position: absolute;
-    top: -50%;
-    left: -50%;
-    right: -50%;
-    bottom: -50%;
-    background: conic-gradient(from 0deg, transparent, rgba(147, 51, 234, 0.1), transparent, rgba(99, 102, 241, 0.08), transparent);
-    animation: heroSpin 30s linear infinite;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 30% 20%, rgba(147, 51, 234, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 70% 80%, rgba(99, 102, 241, 0.02) 0%, transparent 50%);
+    animation: heroGlow 8s ease-in-out infinite alternate;
     pointer-events: none;
     z-index: -1;
+    border-radius: 24px;
 }
 
-@keyframes heroSpin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+@keyframes heroGlow {
+    from { 
+        opacity: 0.3;
+        transform: scale(1);
+    }
+    to { 
+        opacity: 0.6;
+        transform: scale(1.02);
+    }
 }
 
 .premium-hero::before {
@@ -5110,11 +5195,11 @@ body {
 @keyframes cardSlideUp {
     from {
         opacity: 0;
-        transform: translateY(30px);
+        transform: translateY(20px) scale(0.98);
     }
     to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateY(0) scale(1);
     }
 }
 
@@ -5222,9 +5307,15 @@ body {
 .premium-section-divider {
     width: 100%;
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(147, 51, 234, 0.15), transparent);
+    background: linear-gradient(90deg, transparent, rgba(147, 51, 234, 0.12), transparent);
     margin: 4rem 0 3rem 0;
     position: relative;
+}
+
+@media (max-width: 768px) {
+    .premium-section-divider {
+        margin: 3rem 0 2rem 0;
+    }
 }
 
 .premium-section-divider::before {
@@ -5233,22 +5324,22 @@ body {
     top: -2px;
     left: 50%;
     transform: translateX(-50%);
-    width: 4px;
-    height: 4px;
-    background: rgba(147, 51, 234, 0.4);
+    width: 3px;
+    height: 3px;
+    background: rgba(147, 51, 234, 0.3);
     border-radius: 50%;
-    box-shadow: 0 0 8px rgba(147, 51, 234, 0.2);
+    box-shadow: 0 0 6px rgba(147, 51, 234, 0.15);
 }
 
 .premium-benefits-section {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.4));
-    backdrop-filter: blur(20px);
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(24px);
     border-radius: 24px;
     padding: 4rem 3rem;
     margin: 5rem 0;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04), 
-                0 1px 2px rgba(0, 0, 0, 0.02),
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.03), 
+                0 2px 8px rgba(0, 0, 0, 0.02),
                 inset 0 1px 0 rgba(255, 255, 255, 0.4);
     position: relative;
     overflow: hidden;
@@ -5257,21 +5348,23 @@ body {
 .premium-benefits-section::before {
     content: '';
     position: absolute;
-    top: -50%;
-    left: -50%;
-    right: -50%;
-    bottom: -50%;
-    background: linear-gradient(45deg, transparent, rgba(147, 51, 234, 0.03), transparent);
-    animation: benefitsShimmer 8s ease-in-out infinite;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 20% 30%, rgba(147, 51, 234, 0.02) 0%, transparent 60%),
+                radial-gradient(circle at 80% 70%, rgba(99, 102, 241, 0.015) 0%, transparent 60%);
+    animation: benefitsGlow 12s ease-in-out infinite alternate;
     pointer-events: none;
+    border-radius: 24px;
 }
 
-@keyframes benefitsShimmer {
-    0%, 100% {
-        transform: translateX(-100%) translateY(-100%);
+@keyframes benefitsGlow {
+    from { 
+        opacity: 0.4;
     }
-    50% {
-        transform: translateX(100%) translateY(100%);
+    to { 
+        opacity: 0.7;
     }
 }
 
@@ -5317,10 +5410,12 @@ body {
 
 @keyframes titleGlow {
     from {
-        filter: brightness(1);
+        filter: brightness(1) saturate(1);
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
     to {
-        filter: brightness(1.05) saturate(1.1);
+        filter: brightness(1.02) saturate(1.05);
+        text-shadow: 0 4px 8px rgba(147, 51, 234, 0.15);
     }
 }
 
@@ -5421,9 +5516,16 @@ body {
     line-height: 1.4;
     color: var(--primary);
     padding: 0.75rem 1rem;
-    background: rgba(147, 51, 234, 0.05);
+    background: rgba(147, 51, 234, 0.04);
     border-radius: 12px;
-    border: 1px solid rgba(147, 51, 234, 0.1);
+    border: 1px solid rgba(147, 51, 234, 0.08);
+    backdrop-filter: blur(8px);
+    transition: all 0.3s ease;
+}
+
+.premium-tool-card:hover .tool-features {
+    background: rgba(147, 51, 234, 0.06);
+    border-color: rgba(147, 51, 234, 0.12);
 }
 
 /* Coming soon enhancements */
@@ -5449,11 +5551,11 @@ body {
 @keyframes comingSoonPulse {
     0%, 100% {
         transform: scale(1);
-        box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+        box-shadow: 0 2px 8px rgba(59, 130, 246, 0.25);
     }
     50% {
-        transform: scale(1.05);
-        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        transform: scale(1.02);
+        box-shadow: 0 3px 10px rgba(59, 130, 246, 0.35);
     }
 }
 
@@ -5548,26 +5650,60 @@ body {
         gap: 1.5rem;
         grid-template-columns: 1fr;
         padding: 0;
+        margin: 2rem 0;
     }
     
     .premium-tool-card {
         padding: 1.5rem;
+        margin: 0 0.25rem;
     }
     
     .premium-hero {
         padding: 2.5rem 1.5rem;
         margin: 1rem 0 2rem 0;
+        border-radius: 20px;
     }
     
     .premium-benefits-section {
         padding: 2.5rem 1.5rem;
+        border-radius: 20px;
+        margin: 3rem 0;
+    }
+    
+    .premium-title {
+        font-size: 2rem;
+        line-height: 1.1;
+    }
+    
+    .premium-section-title {
+        font-size: 1.5rem;
     }
 }
 
 /* Enhanced mobile responsiveness */
-@media (max-width: 1200px) {
+@media (max-width: 1366px) {
     .premium-page {
         padding: 0 1rem;
+    }
+}
+
+@media (max-width: 1024px) {
+    .premium-page {
+        padding: 0 1.5rem;
+    }
+    
+    .premium-container {
+        padding: 0 1rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .premium-page {
+        padding: 0 1rem;
+    }
+    
+    .premium-container {
+        padding: 0 0.5rem;
     }
 }
 
