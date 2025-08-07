@@ -10,11 +10,9 @@ dependencies = [
     "pillow-heif>=1.1.0",
     "pillow>=11.3.0",
     "pyheif>=0.8.0",
-    "pymupdf>=1.26.3",
     "python-docx>=1.2.0",
     "python-multipart>=0.0.20",
     "uvicorn>=0.35.0",
     "pdf2docx>=0.5.8",
     "pdfplumber>=0.11.7",
-    "fitz>=0.0.1.dev2",
 ]

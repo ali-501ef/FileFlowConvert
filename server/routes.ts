@@ -24,6 +24,86 @@ const outputDir = path.join(process.cwd(), 'output');
   }
 });
 
+// File cleanup utility
+function cleanupFile(filePath: string): void {
+  try {
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+      console.log('Cleaned up file:', filePath);
+    }
+  } catch (error) {
+    console.error('Error cleaning up file:', filePath, error);
+  }
+}
+
+// Periodic cleanup function
+function cleanupOldFiles(): void {
+  const cutoffTime = Date.now() - (2 * 60 * 60 * 1000); // 2 hours ago
+  
+  [uploadsDir, outputDir].forEach(dir => {
+    try {
+      const files = fs.readdirSync(dir);
+      files.forEach(file => {
+        const filePath = path.join(dir, file);
+        const stats = fs.statSync(filePath);
+        if (stats.mtimeMs < cutoffTime) {
+          cleanupFile(filePath);
+        }
+      });
+    } catch (error) {
+      console.error('Error during periodic cleanup:', error);
+    }
+  });
+}
+
+// Run cleanup every hour
+setInterval(cleanupOldFiles, 60 * 60 * 1000);
+
+// Input validation utilities
+const ALLOWED_MIME_TYPES = {
+  'image/jpeg': ['.jpg', '.jpeg'],
+  'image/png': ['.png'],
+  'image/webp': ['.webp'],
+  'image/heic': ['.heic', '.heif'],
+  'application/pdf': ['.pdf'],
+  'video/mp4': ['.mp4'],
+  'audio/mpeg': ['.mp3'],
+  'audio/wav': ['.wav']
+};
+
+const ALLOWED_OUTPUT_FORMATS = ['jpeg', 'jpg', 'png', 'webp', 'gif', 'bmp', 'tiff', 'mp3', 'wav', 'docx'];
+
+function validateFileType(file: Express.Multer.File): { valid: boolean; error?: string } {
+  const extension = path.extname(file.originalname).toLowerCase();
+  const mimeType = file.mimetype;
+  
+  // Check if mime type is allowed
+  if (!Object.keys(ALLOWED_MIME_TYPES).includes(mimeType)) {
+    return { valid: false, error: `Unsupported file type: ${mimeType}` };
+  }
+  
+  // Check if extension matches mime type
+  const allowedExtensions = ALLOWED_MIME_TYPES[mimeType as keyof typeof ALLOWED_MIME_TYPES];
+  if (!allowedExtensions.includes(extension)) {
+    return { valid: false, error: `File extension ${extension} doesn't match mime type ${mimeType}` };
+  }
+  
+  return { valid: true };
+}
+
+function validateOutputFormat(format: string): { valid: boolean; error?: string } {
+  if (!format || typeof format !== 'string') {
+    return { valid: false, error: 'Output format is required' };
+  }
+  
+  const normalizedFormat = format.toLowerCase().trim();
+  if (!ALLOWED_OUTPUT_FORMATS.includes(normalizedFormat)) {
+    return { valid: false, error: `Unsupported output format: ${format}` };
+  }
+  
+  return { valid: true };
+}
+
 const storage_multer = multer.diskStorage({
   destination: function (req: any, file: any, cb: any) {
     cb(null, uploadsDir);
@@ -36,7 +116,17 @@ const storage_multer = multer.diskStorage({
 
 const upload = multer({ 
   storage: storage_multer,
-  limits: { fileSize: 50 * 1024 * 1024 } // 50MB limit
+  limits: { 
+    fileSize: 50 * 1024 * 1024, // 50MB limit
+    files: 1 // Only allow 1 file at a time
+  },
+  fileFilter: (req: any, file: Express.Multer.File, cb: any) => {
+    const validation = validateFileType(file);
+    if (!validation.valid) {
+      return cb(new Error(validation.error), false);
+    }
+    cb(null, true);
+  }
 });
 
 // PDF conversion helper function
@@ -245,6 +335,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "No file uploaded" });
       }
 
+      // Additional file validation
+      const validation = validateFileType(req.file);
+      if (!validation.valid) {
+        cleanupFile(req.file.path);
+        return res.status(400).json({ error: validation.error });
+      }
+
       const fileExtension = path.extname(req.file.originalname).toLowerCase().substring(1);
       console.log('File extension detected:', fileExtension);
       const supportedFormats = getSupportedFormats(fileExtension);
@@ -261,50 +358,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error('Upload error:', error);
+      if (req.file) {
+        cleanupFile(req.file.path);
+      }
       res.status(500).json({ error: "Upload failed" });
     }
   });
 
   app.post('/api/convert', async (req, res) => {
+    let tempPath: string | null = null;
+    let outputPath: string | null = null;
+    
     try {
       console.log('Convert request body:', req.body);
       const { file_id, output_format, temp_path } = req.body;
 
-      if (!temp_path) {
-        return res.status(400).json({ error: "Missing temp_path parameter" });
+      // Validate required parameters
+      if (!file_id || !output_format || !temp_path) {
+        return res.status(400).json({ error: "Missing required parameters: file_id, output_format, temp_path" });
       }
 
+      // Validate output format
+      const formatValidation = validateOutputFormat(output_format);
+      if (!formatValidation.valid) {
+        return res.status(400).json({ error: formatValidation.error });
+      }
+
+      tempPath = temp_path;
+
       // Security: Validate that temp_path is within uploads directory to prevent path traversal
-      const normalizedTempPath = path.normalize(temp_path);
+      const normalizedTempPath = path.normalize(tempPath);
       const normalizedUploadsDir = path.normalize(uploadsDir);
       if (!normalizedTempPath.startsWith(normalizedUploadsDir)) {
         return res.status(400).json({ error: "Invalid file path" });
       }
 
-      console.log('Checking file at path:', temp_path);
-      if (!fs.existsSync(temp_path)) {
+      console.log('Checking file at path:', tempPath);
+      if (!fs.existsSync(tempPath)) {
         console.log('Available files in uploads:', fs.readdirSync(uploadsDir));
         return res.status(404).json({ error: "Input file not found" });
       }
 
       // Generate output path
       const outputFilename = `${file_id}_converted.${output_format}`;
-      const outputPath = path.join(outputDir, outputFilename);
+      outputPath = path.join(outputDir, outputFilename);
 
       // Determine conversion method based on file type
-      const fileExtension = path.extname(temp_path).toLowerCase().substring(1);
+      const fileExtension = path.extname(tempPath).toLowerCase().substring(1);
       let success: boolean;
       
       if (fileExtension === 'pdf') {
-        success = await convertPDFWithPython(temp_path, outputPath, output_format);
+        success = await convertPDFWithPython(tempPath, outputPath, output_format);
       } else {
-        success = await convertImageWithPython(temp_path, outputPath, output_format);
+        success = await convertImageWithPython(tempPath, outputPath, output_format);
       }
-
-      // Clean up input file
-      try {
-        fs.unlinkSync(temp_path);
-      } catch {}
 
       if (success && fs.existsSync(outputPath)) {
         const stats = fs.statSync(outputPath);
@@ -320,12 +427,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Conversion error:', error);
       res.status(500).json({ error: "Conversion failed" });
+    } finally {
+      // Always clean up input file
+      if (tempPath) {
+        cleanupFile(tempPath);
+      }
+      // Clean up output file if conversion failed  
+      if (outputPath && fs.existsSync(outputPath)) {
+        const stats = fs.statSync(outputPath);
+        // If file is empty or very small, it likely failed
+        if (stats.size < 100) {
+          cleanupFile(outputPath);
+        }
+      }
     }
   });
 
-  // Media conversion endpoint
+  // Media conversion endpoint with validation
   app.post('/api/convert-media', (req, res) => {
     const { file_id, conversion_type, options = {} } = req.body;
+    
+    // Validate required parameters
+    if (!file_id || !conversion_type) {
+      return res.status(400).json({ error: "Missing required parameters: file_id, conversion_type" });
+    }
+    
+    // Validate conversion type
+    const allowedConversions = ['mp4-to-mp3', 'video-compress', 'audio-convert', 'video-trim', 'gif-make', 'video-merge'];
+    if (!allowedConversions.includes(conversion_type)) {
+      return res.status(400).json({ error: `Unsupported conversion type: ${conversion_type}` });
+    }
     
     if (!file_id || !conversion_type) {
       return res.status(400).json({ error: 'Missing required parameters' });

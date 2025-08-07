@@ -129,7 +129,7 @@ def pdf_to_docx(input_path: str, output_path: str):
         
         # Convert PDF to DOCX
         cv = Converter(input_path)
-        cv.convert(output_path, start=0, end=None)
+        cv.convert(output_path, start=0)
         cv.close()
         return True
         
