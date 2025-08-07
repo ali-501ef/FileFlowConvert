@@ -1184,8 +1184,8 @@ body {
 }
 
 .tool-icon.bg-purple {
-    background-color: var(--accent-purple);
-    color: hsl(268, 85%, 53%);
+    background-color: hsl(268, 70%, 65%);
+    color: hsl(268, 40%, 95%);
 }
 
 .tool-icon.bg-orange {
@@ -1244,9 +1244,17 @@ body {
     box-shadow: var(--shadow-sm);
 }
 
+/* Full Width Tool Container */
+.full-width-tool-container {
+    width: 100%;
+    max-width: 1000px;
+    margin: 1rem auto 0;
+    padding: 0;
+}
+
 /* Wide Card for More Image Tools */
 .tool-card.wide-card {
-    grid-column: 1 / -1;
+    width: 100%;
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.6));
     backdrop-filter: blur(20px);
     border: 1px solid rgba(147, 51, 234, 0.15);
@@ -1259,7 +1267,8 @@ body {
     padding: 2rem 2.5rem;
     animation: wideCardFloat 6s ease-in-out infinite;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    margin-top: 1rem;
+    margin: 0;
+    max-width: none;
 }
 
 .tool-card.wide-card:hover {
