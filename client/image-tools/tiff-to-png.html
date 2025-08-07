@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TIFF to PNG Converter - FileFlow</title>
+    <meta name="description" content="Convert high-quality TIFF images to PNG format with FileFlow's TIFF to PNG tool. Preserve transparency and maintain quality.">
+    <link rel="stylesheet" href="../styles.css">
+    
+    <!-- Navigation Script -->
+    <script src="../js/navigation.js" defer></script>
+</head>
+<body>
+    <!-- Sticky Navigation Bar -->
+    <nav class="sticky-nav">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <a href="/" data-testid="nav-brand">FileFlow</a>
+            </div>
+            
+            <div class="nav-menu">
+                <!-- Image Tools -->
+                <div class="nav-dropdown">
+                    <button class="nav-dropdown-trigger" data-testid="nav-image-trigger">
+                        Image Tools
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    <div class="nav-dropdown-content">
+                        <a href="../convert-to-jpeg.html" class="nav-dropdown-item" data-testid="nav-convert-jpeg">Convert to JPEG</a>
+                        <a href="../heic-to-jpg.html" class="nav-dropdown-item" data-testid="nav-heic-jpg">HEIC to JPG</a>
+                        <a href="../jpg-to-png.html" class="nav-dropdown-item" data-testid="nav-jpg-png">JPG to PNG</a>
+                    </div>
+                </div>
+
+                <!-- PDF Tools -->
+                <div class="nav-dropdown">
+                    <button class="nav-dropdown-trigger" data-testid="nav-pdf-trigger">
+                        PDF Tools
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    <div class="nav-dropdown-content">
+                        <a href="../pdf-merge.html" class="nav-dropdown-item" data-testid="nav-pdf-merge">PDF Merge</a>
+                        <a href="../pdf-split.html" class="nav-dropdown-item" data-testid="nav-pdf-split">PDF Split</a>
+                        <a href="../pdf-compress.html" class="nav-dropdown-item" data-testid="nav-pdf-compress">PDF Compress</a>
+                        <a href="../pdf-rotate.html" class="nav-dropdown-item" data-testid="nav-pdf-rotate">PDF Rotate</a>
+                        <a href="../pdf-watermark.html" class="nav-dropdown-item" data-testid="nav-pdf-watermark">PDF Watermark</a>
+                        <a href="../pdf-to-word.html" class="nav-dropdown-item" data-testid="nav-pdf-to-word">PDF to Word</a>
+                    </div>
+                </div>
+
+                <!-- Audio/Video Tools -->
+                <div class="nav-dropdown">
+                    <button class="nav-dropdown-trigger" data-testid="nav-media-trigger">
+                        Audio/Video Tools
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    <div class="nav-dropdown-content">
+                        <a href="../mp4-to-mp3.html" class="nav-dropdown-item" data-testid="nav-mp4-mp3">MP4 to MP3</a>
+                        <a href="../audio-converter.html" class="nav-dropdown-item" data-testid="nav-audio-convert">Audio Converter</a>
+                        <a href="../video-compress.html" class="nav-dropdown-item" data-testid="nav-video-compress">Video Compress</a>
+                        <a href="../gif-maker.html" class="nav-dropdown-item" data-testid="nav-gif-maker">GIF Maker</a>
+                        <a href="../video-trim.html" class="nav-dropdown-item" data-testid="nav-video-trim">Video Trim</a>
+                        <a href="../video-merger.html" class="nav-dropdown-item" data-testid="nav-video-merge">Video Merger</a>
+                    </div>
+                </div>
+            </div>
+            
+            <button class="mobile-nav-toggle" data-testid="mobile-nav-toggle">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
+        </div>
+    </nav>
+
+    <main class="main">
+        <div class="hero-section">
+            <div class="hero-content">
+                <div class="hero-badge">
+                    <div class="tool-icon bg-orange">
+                        <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <rect x="2" y="2" width="8" height="6" rx="1" stroke="currentColor" stroke-width="2" fill="none"/>
+                            <rect x="2" y="10" width="8" height="6" rx="1" stroke="currentColor" stroke-width="2" fill="none"/>
+                            <rect x="12" y="16" width="8" height="6" rx="1" stroke="currentColor" stroke-width="2" fill="none"/>
+                            <circle cx="6" cy="5" r="1" fill="currentColor"/>
+                            <circle cx="6" cy="13" r="1" fill="currentColor"/>
+                            <circle cx="16" cy="19" r="1" fill="currentColor"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 5h4l-2 3z"/>
+                        </svg>
+                    </div>
+                    <span>Image Tools</span>
+                </div>
+                <h1 class="hero-title">TIFF to PNG</h1>
+                <p class="hero-description">Convert high-quality TIFF images to PNG format</p>
+                <div class="hero-features">
+                    <span class="feature-tag">✓ High-resolution support</span>
+                    <span class="feature-tag">✓ Transparency preservation</span>
+                    <span class="feature-tag">✓ Multi-page handling</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="converter-container">
+            <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()" data-testid="upload-area-tiff-to-png">
+                <div class="upload-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                        <circle cx="9" cy="9" r="2"/>
+                        <path d="M21 15l-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+                    </svg>
+                </div>
+                <h3>Drop your TIFF files here</h3>
+                <p>or click anywhere to browse files</p>
+                <p class="supported-formats">TIFF, TIF files only</p>
+                <input type="file" id="fileInput" accept=".tiff,.tif" multiple hidden>
+            </div>
+
+            <div class="advanced-options" id="advancedOptions">
+                <div class="options-header" id="optionsToggle">
+                    <div class="options-title">
+                        <svg class="options-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z"/>
+                            <path d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/>
+                            <path d="M12 2v2"/>
+                            <path d="M12 20v2"/>
+                            <path d="m4.93 4.93 1.41 1.41"/>
+                            <path d="m17.66 17.66 1.41 1.41"/>
+                            <path d="M2 12h2"/>
+                            <path d="M20 12h2"/>
+                            <path d="m6.34 17.66-1.41 1.41"/>
+                            <path d="m19.07 4.93-1.41 1.41"/>
+                        </svg>
+                        <span>Advanced Options</span>
+                    </div>
+                    <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m6 9 6 6 6-6"/>
+                    </svg>
+                </div>
+                <div class="options-content" id="optionsContent" style="display: none;">
+                    <div class="option-group">
+                        <label for="compressionLevel">PNG Compression</label>
+                        <select id="compressionLevel">
+                            <option value="9" selected>Maximum (Smallest file)</option>
+                            <option value="6">High</option>
+                            <option value="3">Medium</option>
+                            <option value="0">None (Fastest)</option>
+                        </select>
+                    </div>
+                    <div class="option-group">
+                        <label for="preserveTransparency">Transparency</label>
+                        <select id="preserveTransparency">
+                            <option value="preserve" selected>Preserve transparency</option>
+                            <option value="white">White background</option>
+                            <option value="black">Black background</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="file-preview" id="filePreview" style="display: none;">
+                <div class="preview-header">
+                    <h3 id="fileName"></h3>
+                    <span id="fileSize"></span>
+                </div>
+                <div class="file-list" id="fileList"></div>
+            </div>
+
+            <button class="convert-btn" id="convertBtn" disabled>
+                <span class="btn-text">Convert to PNG</span>
+                <div class="btn-loader" style="display: none;"></div>
+            </button>
+
+            <!-- Tool Information Section -->
+            <div class="tool-info-section">
+                <div class="info-grid">
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M9 12l2 2 4-4"/>
+                                <path d="M21 12c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1z"/>
+                                <path d="M3 12c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1z"/>
+                            </svg>
+                        </div>
+                        <h3>Professional Quality</h3>
+                        <p>Convert professional TIFF images to web-ready PNG format while maintaining the highest quality and preserving transparency channels.</p>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                            </svg>
+                        </div>
+                        <h3>Secure Processing</h3>
+                        <p>Your TIFF files are processed securely on our servers and automatically deleted after conversion. We never store or share your images.</p>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                            </svg>
+                        </div>
+                        <h3>High Resolution</h3>
+                        <p>Handles high-resolution TIFF files and multi-page documents, converting each page to a separate PNG file with optimal compression settings.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="../js/converters/image-converter.js"></script>
+    <script>
+        // Initialize TIFF to PNG converter
+        document.addEventListener('DOMContentLoaded', () => {
+            window.imageConverter = new ImageConverter({
+                inputFormat: 'tiff',
+                outputFormat: 'png',
+                acceptedTypes: '.tiff,.tif',
+                toolName: 'TIFF to PNG'
+            });
+        });
+    </script>
+</body>
+</html>
