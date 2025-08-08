@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDF Merge - FileFlow</title>
-    <meta name="description" content="Combine multiple PDF files into a single document with FileFlow's PDF Merge tool. Fast, secure, and easy PDF merging with drag and drop support.">
+    <title>Video Merger - FileFlow</title>
+    <meta name="description" content="Combine multiple video files into one seamless video with FileFlow's Video Merger. Supports multiple formats with quality preservation.">
     <link rel="stylesheet" href="styles.css">
     
     <!-- Navigation Script -->
@@ -30,6 +30,7 @@
                     <div class="nav-dropdown-content">
                         <a href="/image-tools/heic-to-jpg.html" class="nav-dropdown-item" data-testid="nav-heic-jpg">HEIC to JPG</a>
                         <a href="/jpg-to-png.html" class="nav-dropdown-item" data-testid="nav-jpg-png">JPG to PNG</a>
+                        <a href="/pdf-to-jpg.html" class="nav-dropdown-item" data-testid="nav-pdf-to-jpg">PDF to JPG</a>
                         <a href="/image-tools/png-to-jpg.html" class="nav-dropdown-item" data-testid="nav-png-jpg">PNG to JPG</a>
                         <a href="/image-tools/webp-to-jpg.html" class="nav-dropdown-item" data-testid="nav-webp-jpg">WEBP to JPG</a>
                         <a href="/image-tools/jpg-to-pdf.html" class="nav-dropdown-item" data-testid="nav-jpg-pdf">JPG to PDF</a>
@@ -56,7 +57,6 @@
                         <a href="/pdf-rotate.html" class="nav-dropdown-item" data-testid="nav-pdf-rotate">PDF Rotate</a>
                         <a href="/pdf-watermark.html" class="nav-dropdown-item" data-testid="nav-pdf-watermark">PDF Watermark</a>
                         <a href="/pdf-to-word.html" class="nav-dropdown-item" data-testid="nav-pdf-to-word">PDF to Word</a>
-                        <a href="/pdf-to-jpg.html" class="nav-dropdown-item" data-testid="nav-pdf-jpg">PDF to JPG</a>
                     </div>
                 </div>
 
@@ -91,55 +91,116 @@
         <div class="hero-section">
             <div class="hero-content">
                 <div class="hero-badge">
-                    <div class="tool-icon bg-blue">
+                    <div class="tool-icon bg-teal">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                            <polyline points="14,2 14,8 20,8"></polyline>
-                            <path d="M16 13H8"></path>
-                            <path d="M16 17H8"></path>
-                            <path d="M10 9H8"></path>
+                            <path d="M12 3v6l4-4-4-4"/>
+                            <path d="M12 21v-6l4 4-4 4"/>
+                            <path d="M3 12h6l-4-4 4-4"/>
+                            <path d="M21 12h-6l4 4-4 4"/>
                         </svg>
                     </div>
-                    <span>PDF Tools</span>
+                    <span>Media Tools</span>
                 </div>
-                <h1 class="hero-title">PDF Merge</h1>
-                <p class="hero-description">Combine multiple PDF files into a single document</p>
+                <h1 class="hero-title">Video Merger</h1>
+                <p class="hero-description">Combine multiple video files into one</p>
                 <div class="hero-features">
-                    <span class="feature-tag">✓ Multiple files</span>
-                    <span class="feature-tag">✓ Maintain quality</span>
-                    <span class="feature-tag">✓ Custom order</span>
+                    <span class="feature-tag">✓ Multiple formats</span>
+                    <span class="feature-tag">✓ Seamless joining</span>
+                    <span class="feature-tag">✓ Quality preservation</span>
                 </div>
             </div>
         </div>
 
         <div class="converter-container">
-            <div class="upload-area" id="uploadArea" data-testid="upload-area-pdf-merge">
+            <div class="upload-area" id="uploadArea" data-testid="upload-area-merger">
                 <div class="upload-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
-                        <polyline points="14,2 14,8 20,8"></polyline>
+                        <polygon points="23 7 16 12 23 17 23 7"></polygon>
+                        <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
                     </svg>
                 </div>
-                <h3>Drop multiple PDF files here</h3>
+                <h3>Drop your video files here</h3>
                 <p>or click anywhere to browse files</p>
-                <p class="supported-formats">PDF files only</p>
-                <input type="file" id="fileInput" accept=".pdf" multiple hidden>
+                <p class="supported-formats">Supports MP4, AVI, MOV, WMV, MKV</p>
+                <input type="file" id="fileInput" accept="video/*" multiple hidden>
             </div>
 
-            <div class="files-list" id="filesList" style="display: none;">
-                <h3>Selected Files</h3>
-                <div class="files-container" id="filesContainer"></div>
-                <button class="add-files-btn" id="addFilesBtn">
+            <div class="video-list" id="videoList" style="display: none;">
+                <h3>Videos to Merge</h3>
+                <div class="video-items" id="videoItems"></div>
+                <button class="add-more-btn" id="addMoreBtn">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="12" y1="5" x2="12" y2="19"></line>
                         <line x1="5" y1="12" x2="19" y2="12"></line>
                     </svg>
-                    Add More Files
+                    Add More Videos
                 </button>
             </div>
 
+            <div class="advanced-options" id="advancedOptions">
+                <div class="options-header" id="optionsToggle">
+                    <div class="options-title">
+                        <svg class="options-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z"/>
+                            <path d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/>
+                            <path d="M12 2v2"/>
+                            <path d="M12 20v2"/>
+                            <path d="m4.93 4.93 1.41 1.41"/>
+                            <path d="m17.66 17.66 1.41 1.41"/>
+                            <path d="M2 12h2"/>
+                            <path d="M20 12h2"/>
+                            <path d="m6.34 17.66-1.41 1.41"/>
+                            <path d="m19.07 4.93-1.41 1.41"/>
+                        </svg>
+                        <span>Advanced Options</span>
+                    </div>
+                    <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m6 9 6 6 6-6"/>
+                    </svg>
+                </div>
+                <div class="options-content" id="optionsContent">
+                    <div class="option-group">
+                        <label for="outputFormat">Output Format</label>
+                        <select id="outputFormat">
+                            <option value="mp4" selected>MP4 (Recommended)</option>
+                            <option value="avi">AVI</option>
+                            <option value="mov">MOV</option>
+                            <option value="mkv">MKV</option>
+                        </select>
+                    </div>
+                    <div class="option-group">
+                        <label for="quality">Video Quality</label>
+                        <select id="quality">
+                            <option value="medium" selected>Medium Quality</option>
+                            <option value="original">Keep Original</option>
+                            <option value="high">High Quality</option>
+                            <option value="low">Low Quality</option>
+                        </select>
+                    </div>
+                    <div class="option-group">
+                        <label for="resolution">Output Resolution</label>
+                        <select id="resolution">
+                            <option value="auto" selected>Auto (Match first video)</option>
+                            <option value="1920x1080">1080p (1920×1080)</option>
+                            <option value="1280x720">720p (1280×720)</option>
+                            <option value="854x480">480p (854×480)</option>
+                        </select>
+                    </div>
+                    <div class="checkbox-group">
+                        <div class="premium-checkbox-item">
+                            <input type="checkbox" id="addTransitions" class="premium-checkbox">
+                            <label for="addTransitions" class="checkbox-label">Add fade transitions between videos</label>
+                        </div>
+                        <div class="premium-checkbox-item">
+                            <input type="checkbox" id="normalizeAudio" class="premium-checkbox" checked>
+                            <label for="normalizeAudio" class="checkbox-label">Normalize audio levels</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <button class="convert-btn" id="convertBtn" disabled>
-                <span class="btn-text">Merge PDFs</span>
+                <span class="btn-text">Merge Videos</span>
                 <div class="btn-loader" style="display: none;"></div>
             </button>
 
@@ -148,11 +209,12 @@
                     <div class="progress-fill" id="progressFill"></div>
                 </div>
                 <div class="progress-text" id="progressText">0%</div>
+                <div class="progress-stage" id="progressStage">Processing videos...</div>
             </div>
 
             <div class="results" id="results" style="display: none;">
                 <h3>Merge Complete</h3>
-                <div class="merge-stats" id="mergeStats"></div>
+                <div class="merge-info" id="mergeInfo"></div>
                 <div class="result-actions">
                     <button class="download-btn" id="downloadBtn">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -160,7 +222,7 @@
                             <polyline points="7,10 12,15 17,10"></polyline>
                             <line x1="12" y1="15" x2="12" y2="3"></line>
                         </svg>
-                        Download Merged PDF
+                        Download Merged Video
                     </button>
                 </div>
             </div>
@@ -171,41 +233,43 @@
                     <div class="info-card">
                         <div class="info-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                                <polyline points="14,2 14,8 20,8"/>
-                                <path d="M16 13H8"/>
-                                <path d="M16 17H8"/>
-                                <path d="M10 9H8"/>
+                                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+                                <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+                                <path d="M12 11h4"/>
+                                <path d="M12 16h4"/>
+                                <path d="M8 11h.01"/>
+                                <path d="M8 16h.01"/>
                             </svg>
                         </div>
-                        <h3>Combine Documents</h3>
-                        <p>Merge multiple PDF files into a single, organized document. Perfect for combining reports, contracts, or related documents into one file.</p>
+                        <h3>Seamless Joining</h3>
+                        <p>Combine multiple video files into one continuous movie. Perfect for creating compilations, joining split videos, and content editing.</p>
                     </div>
                     <div class="info-card">
                         <div class="info-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M3 3h18v18H3z"/>
-                                <path d="M9 9h6v6H9z"/>
+                                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+                                <path d="M10 17l5-5-5-5"/>
+                                <path d="M13.8 12H3"/>
                             </svg>
                         </div>
-                        <h3>Custom Order</h3>
-                        <p>Arrange your PDF files in any order before merging. Drag and drop to reorder files and create the perfect document structure.</p>
+                        <h3>Smart Transitions</h3>
+                        <p>Add fade transitions between clips and normalize audio levels for professional results. Supports different resolutions and formats.</p>
                     </div>
                     <div class="info-card">
                         <div class="info-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M12 1L3 5l9 4 9-4-9-4z"/>
-                                <path d="M3 17l6-3 6 3-6 3-6-3z"/>
-                                <path d="M3 12l6-3 6 3-6 3-6-3z"/>
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                <polyline points="7,10 12,15 17,10"/>
+                                <line x1="12" y1="15" x2="12" y2="3"/>
                             </svg>
                         </div>
-                        <h3>Preserve Quality</h3>
-                        <p>All text, images, and formatting are preserved during the merge process. Your merged PDF will maintain the original quality of all source documents.</p>
+                        <h3>Flexible Output</h3>
+                        <p>Choose output format, quality, and resolution. Drag to reorder clips and create exactly the sequence you need.</p>
                     </div>
                 </div>
                 <div class="tool-benefits">
-                    <h3>Why Merge PDFs?</h3>
-                    <p>PDF merging is essential for document management and organization. Whether you're combining multiple reports for a presentation, merging contract pages, or consolidating research materials, our merge tool maintains document integrity while creating a single, professional file that's easier to share and manage.</p>
+                    <h3>Why Merge Videos?</h3>
+                    <p>Video merging is essential for content creation and storytelling. Whether you're combining multiple camera angles, joining split recordings, or creating compilations, merging allows you to create cohesive content from separate clips while maintaining quality and adding professional transitions.</p>
                 </div>
             </div>
 
@@ -242,9 +306,6 @@
                     <ul class="footer-links">
                         <li><a href="/image-tools/heic-to-jpg.html" class="footer-link" data-testid="footer-heic-jpg">HEIC to JPG</a></li>
                         <li><a href="/jpg-to-png.html" class="footer-link" data-testid="footer-jpg-png">JPG to PNG</a></li>
-                        <li><a href="/image-tools/png-to-jpg.html" class="footer-link" data-testid="footer-png-jpg">PNG to JPG</a></li>
-                        <li><a href="/image-tools/webp-to-jpg.html" class="footer-link" data-testid="footer-webp-jpg">WEBP to JPG</a></li>
-                        <li><a href="/image-tools/jpg-to-pdf.html" class="footer-link" data-testid="footer-jpg-pdf">JPG to PDF</a></li>
                     </ul>
                 </div>
                 
@@ -285,7 +346,7 @@
         </div>
     </footer>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
-    <script src="js/converters/pdf-merge.js"></script>
+    <script src="js/advanced-options.js"></script>
+    <script src="js/converters/video-merger.js"></script>
 </body>
 </html>

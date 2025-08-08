@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDF Merge - FileFlow</title>
-    <meta name="description" content="Combine multiple PDF files into a single document with FileFlow's PDF Merge tool. Fast, secure, and easy PDF merging with drag and drop support.">
+    <title>PDF Watermark - FileFlow</title>
+    <meta name="description" content="Add text or image watermarks to PDF documents with FileFlow's PDF Watermark tool. Custom opacity, position control, and batch processing.">
     <link rel="stylesheet" href="styles.css">
     
     <!-- Navigation Script -->
@@ -91,55 +91,167 @@
         <div class="hero-section">
             <div class="hero-content">
                 <div class="hero-badge">
-                    <div class="tool-icon bg-blue">
+                    <div class="tool-icon bg-teal">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                            <polyline points="14,2 14,8 20,8"></polyline>
-                            <path d="M16 13H8"></path>
-                            <path d="M16 17H8"></path>
-                            <path d="M10 9H8"></path>
+                            <path d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"/>
                         </svg>
                     </div>
                     <span>PDF Tools</span>
                 </div>
-                <h1 class="hero-title">PDF Merge</h1>
-                <p class="hero-description">Combine multiple PDF files into a single document</p>
+                <h1 class="hero-title">PDF Watermark</h1>
+                <p class="hero-description">Add professional text or image watermarks to protect your PDFs</p>
                 <div class="hero-features">
-                    <span class="feature-tag">✓ Multiple files</span>
-                    <span class="feature-tag">✓ Maintain quality</span>
-                    <span class="feature-tag">✓ Custom order</span>
+                    <span class="feature-tag">✓ Text & image watermarks</span>
+                    <span class="feature-tag">✓ Custom positioning</span>
+                    <span class="feature-tag">✓ Opacity control</span>
                 </div>
             </div>
         </div>
 
         <div class="converter-container">
-            <div class="upload-area" id="uploadArea" data-testid="upload-area-pdf-merge">
+            <div class="upload-area" id="uploadArea" data-testid="upload-area-pdf-watermark">
                 <div class="upload-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
                         <polyline points="14,2 14,8 20,8"></polyline>
                     </svg>
                 </div>
-                <h3>Drop multiple PDF files here</h3>
+                <h3>Drop your PDF file here</h3>
                 <p>or click anywhere to browse files</p>
                 <p class="supported-formats">PDF files only</p>
-                <input type="file" id="fileInput" accept=".pdf" multiple hidden>
+                <input type="file" id="fileInput" accept=".pdf" hidden>
             </div>
 
-            <div class="files-list" id="filesList" style="display: none;">
-                <h3>Selected Files</h3>
-                <div class="files-container" id="filesContainer"></div>
-                <button class="add-files-btn" id="addFilesBtn">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="12" y1="5" x2="12" y2="19"></line>
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
+            <div class="file-preview" id="filePreview" style="display: none;">
+                <div class="watermark-setup" id="watermarkSetup">
+                <div class="watermark-type-selection">
+                    <h3>Watermark Type</h3>
+                    <div class="type-buttons">
+                        <button class="type-btn active" id="textTypeBtn" data-type="text">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="4,7 4,4 20,4 20,7"></polyline>
+                                <line x1="9" y1="20" x2="15" y2="20"></line>
+                                <line x1="12" y1="4" x2="12" y2="20"></line>
+                            </svg>
+                            Text Watermark
+                        </button>
+                        <button class="type-btn" id="imageTypeBtn" data-type="image">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                                <circle cx="8.5" cy="8.5" r="1.5"/>
+                                <polyline points="21,15 16,10 5,21"/>
+                            </svg>
+                            Image Watermark
+                        </button>
+                    </div>
+                </div>
+
+                    <div class="preview-container" id="previewContainer">
+                        <div class="watermark-preview" id="watermarkPreview"></div>
+                    </div>
+                </div>
+                <div class="watermark-config" id="textConfig">
+                    <div class="config-group">
+                        <label for="watermarkText">Watermark Text</label>
+                        <input type="text" id="watermarkText" placeholder="Enter watermark text" value="CONFIDENTIAL">
+                    </div>
+                    <div class="config-group">
+                        <label for="fontSize">Font Size</label>
+                        <input type="range" id="fontSize" min="12" max="72" value="36">
+                        <span id="fontSizeValue">36px</span>
+                    </div>
+                    <div class="config-group">
+                        <label for="textColor">Text Color</label>
+                        <input type="color" id="textColor" value="#888888">
+                    </div>
+                </div>
+
+                <div class="watermark-config" id="imageConfig" style="display: none;">
+                    <div class="config-group">
+                        <label for="watermarkImage">Select Image</label>
+                        <input type="file" id="watermarkImage" accept="image/*">
+                        <div class="image-preview" id="imagePreview"></div>
+                    </div>
+                </div>
+
+                <div class="position-controls">
+                    <h4>Position & Appearance</h4>
+                    <div class="position-grid">
+                        <button class="position-btn" data-position="top-left">↖</button>
+                        <button class="position-btn" data-position="top-center">↑</button>
+                        <button class="position-btn" data-position="top-right">↗</button>
+                        <button class="position-btn" data-position="middle-left">←</button>
+                        <button class="position-btn active" data-position="center">●</button>
+                        <button class="position-btn" data-position="middle-right">→</button>
+                        <button class="position-btn" data-position="bottom-left">↙</button>
+                        <button class="position-btn" data-position="bottom-center">↓</button>
+                        <button class="position-btn" data-position="bottom-right">↘</button>
+                    </div>
+                    <div class="appearance-controls">
+                        <div class="control-group">
+                            <label for="opacity">Opacity</label>
+                            <input type="range" id="opacity" min="10" max="100" value="30">
+                            <span id="opacityValue">30%</span>
+                        </div>
+                        <div class="control-group">
+                            <label for="rotation">Rotation</label>
+                            <input type="range" id="rotation" min="0" max="360" value="45">
+                            <span id="rotationValue">45°</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="advanced-options" id="advancedOptions">
+                <div class="options-header" id="optionsToggle">
+                    <div class="options-title">
+                        <svg class="options-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z"/>
+                            <path d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/>
+                            <path d="M12 2v2"/>
+                            <path d="M12 20v2"/>
+                            <path d="m4.93 4.93 1.41 1.41"/>
+                            <path d="m17.66 17.66 1.41 1.41"/>
+                            <path d="M2 12h2"/>
+                            <path d="M20 12h2"/>
+                            <path d="m6.34 17.66-1.41 1.41"/>
+                            <path d="m19.07 4.93-1.41 1.41"/>
+                        </svg>
+                        <span>Advanced Options</span>
+                    </div>
+                    <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m6 9 6 6 6-6"/>
                     </svg>
-                    Add More Files
-                </button>
+                </div>
+                <div class="options-content" id="optionsContent">
+                    <div class="option-group">
+                        <label for="pageRange">Apply to Pages</label>
+                        <select id="pageRange">
+                            <option value="all" selected>All Pages</option>
+                            <option value="first">First Page Only</option>
+                            <option value="last">Last Page Only</option>
+                            <option value="custom">Custom Range</option>
+                        </select>
+                    </div>
+                    <div class="option-group" id="customRangeGroup" style="display: none;">
+                        <label for="customPages">Page Range (e.g., 1-5, 8, 10-12)</label>
+                        <input type="text" id="customPages" placeholder="1-5, 8, 10-12">
+                    </div>
+                    <div class="checkbox-group">
+                        <div class="premium-checkbox-item">
+                            <input type="checkbox" id="behindText" class="premium-checkbox">
+                            <label for="behindText" class="checkbox-label">Place watermark behind text</label>
+                        </div>
+                        <div class="premium-checkbox-item">
+                            <input type="checkbox" id="repeatPattern" class="premium-checkbox">
+                            <label for="repeatPattern" class="checkbox-label">Repeat watermark pattern</label>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <button class="convert-btn" id="convertBtn" disabled>
-                <span class="btn-text">Merge PDFs</span>
+                <span class="btn-text">Add Watermark</span>
                 <div class="btn-loader" style="display: none;"></div>
             </button>
 
@@ -151,8 +263,7 @@
             </div>
 
             <div class="results" id="results" style="display: none;">
-                <h3>Merge Complete</h3>
-                <div class="merge-stats" id="mergeStats"></div>
+                <h3>Watermark Added Successfully</h3>
                 <div class="result-actions">
                     <button class="download-btn" id="downloadBtn">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -160,7 +271,7 @@
                             <polyline points="7,10 12,15 17,10"></polyline>
                             <line x1="12" y1="15" x2="12" y2="3"></line>
                         </svg>
-                        Download Merged PDF
+                        Download Watermarked PDF
                     </button>
                 </div>
             </div>
@@ -171,41 +282,37 @@
                     <div class="info-card">
                         <div class="info-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                                <polyline points="14,2 14,8 20,8"/>
-                                <path d="M16 13H8"/>
-                                <path d="M16 17H8"/>
-                                <path d="M10 9H8"/>
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                                <path d="M9 12l2 2 4-4"/>
                             </svg>
                         </div>
-                        <h3>Combine Documents</h3>
-                        <p>Merge multiple PDF files into a single, organized document. Perfect for combining reports, contracts, or related documents into one file.</p>
+                        <h3>Brand Protection</h3>
+                        <p>Add text or image watermarks to protect intellectual property and establish document ownership. Essential for business documents and copyrighted materials.</p>
                     </div>
                     <div class="info-card">
                         <div class="info-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M3 3h18v18H3z"/>
-                                <path d="M9 9h6v6H9z"/>
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                             </svg>
                         </div>
-                        <h3>Custom Order</h3>
-                        <p>Arrange your PDF files in any order before merging. Drag and drop to reorder files and create the perfect document structure.</p>
+                        <h3>Custom Positioning</h3>
+                        <p>Precisely control watermark placement, opacity, rotation, and appearance. Create professional-looking branded documents with subtle or prominent watermarks.</p>
                     </div>
                     <div class="info-card">
                         <div class="info-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M12 1L3 5l9 4 9-4-9-4z"/>
-                                <path d="M3 17l6-3 6 3-6 3-6-3z"/>
-                                <path d="M3 12l6-3 6 3-6 3-6-3z"/>
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                                <circle cx="9" cy="9" r="2"/>
+                                <path d="M21 15l-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
                             </svg>
                         </div>
-                        <h3>Preserve Quality</h3>
-                        <p>All text, images, and formatting are preserved during the merge process. Your merged PDF will maintain the original quality of all source documents.</p>
+                        <h3>Text & Images</h3>
+                        <p>Support for both text watermarks and image logos. Add company branding, copyright notices, or confidential stamps across all pages.</p>
                     </div>
                 </div>
                 <div class="tool-benefits">
-                    <h3>Why Merge PDFs?</h3>
-                    <p>PDF merging is essential for document management and organization. Whether you're combining multiple reports for a presentation, merging contract pages, or consolidating research materials, our merge tool maintains document integrity while creating a single, professional file that's easier to share and manage.</p>
+                    <h3>Why Add Watermarks?</h3>
+                    <p>Watermarking is essential for document security and brand identity. Whether you're protecting confidential information, establishing copyright ownership, or adding professional branding, watermarks provide visual proof of authenticity. Our tool ensures watermarks integrate seamlessly while maintaining document readability and professional appearance.</p>
                 </div>
             </div>
 
@@ -286,6 +393,7 @@
     </footer>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
-    <script src="js/converters/pdf-merge.js"></script>
+    <script src="js/advanced-options.js"></script>
+    <script src="js/converters/pdf-watermark.js"></script>
 </body>
 </html>

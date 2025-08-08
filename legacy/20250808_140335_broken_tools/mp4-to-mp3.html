@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MP4 to MP3 Converter - FileFlow | Extract Audio from Video</title>
+    <meta name="description" content="Extract high-quality audio from MP4 video files. Convert MP4 to MP3 with multiple bitrate options. 50MB file limit for optimal performance.">
+    <link rel="canonical" href="https://fileflow.com/mp4-to-mp3">
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="MP4 to MP3 Converter - FileFlow">
+    <meta property="og:description" content="Extract high-quality audio from MP4 video files. Convert MP4 to MP3 with multiple bitrate options.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://fileflow.com/mp4-to-mp3">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="/styles.css">
+    
+    <!-- Navigation Script -->
+    <script src="/js/navigation.js" defer></script>
+    
+    <!-- FFmpeg WebAssembly -->
+    <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.1/dist/umd/util.js"></script>
+</head>
+<body>
+    <!-- Top AdSense Banner -->
+    <div class="ad-placeholder ad-banner-top">
+        <span class="ad-text">Advertisement Banner (728x90)</span>
+    </div>
+
+    <!-- Sticky Navigation Bar -->
+    <nav class="sticky-nav">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <a href="/" data-testid="nav-brand">FileFlow</a>
+            </div>
+            
+            <div class="nav-menu">
+                <!-- Image Tools -->
+                <div class="nav-dropdown">
+                    <button class="nav-dropdown-trigger" data-testid="nav-image-trigger">
+                        Image Tools
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    <div class="nav-dropdown-content">
+                        <a href="/image-tools/heic-to-jpg.html" class="nav-dropdown-item" data-testid="nav-heic-jpg">HEIC to JPG</a>
+                        <a href="/jpg-to-png.html" class="nav-dropdown-item" data-testid="nav-jpg-png">JPG to PNG</a>
+                        <a href="/pdf-to-jpg.html" class="nav-dropdown-item" data-testid="nav-pdf-to-jpg">PDF to JPG</a>
+                        <a href="/image-tools/png-to-jpg.html" class="nav-dropdown-item" data-testid="nav-png-jpg">PNG to JPG</a>
+                        <a href="/image-tools/webp-to-jpg.html" class="nav-dropdown-item" data-testid="nav-webp-jpg">WEBP to JPG</a>
+                        <a href="/image-tools/jpg-to-pdf.html" class="nav-dropdown-item" data-testid="nav-jpg-pdf">JPG to PDF</a>
+                        <a href="/image-tools/tiff-to-png.html" class="nav-dropdown-item" data-testid="nav-tiff-png">TIFF to PNG</a>
+                        <a href="/image-tools/bmp-to-jpg.html" class="nav-dropdown-item" data-testid="nav-bmp-jpg">BMP to JPG</a>
+                        <a href="/image-tools/svg-to-png.html" class="nav-dropdown-item" data-testid="nav-svg-png">SVG to PNG</a>
+                        <a href="/image-tools/ico-to-png.html" class="nav-dropdown-item" data-testid="nav-ico-png">ICO to PNG</a>
+                        <a href="/image-tools/gif-to-mp4.html" class="nav-dropdown-item" data-testid="nav-gif-mp4">GIF to MP4</a>
+                    </div>
+                </div>
+
+                <!-- PDF Tools -->
+                <div class="nav-dropdown">
+                    <button class="nav-dropdown-trigger" data-testid="nav-pdf-trigger">
+                        PDF Tools
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    <div class="nav-dropdown-content">
+                        <a href="/pdf-merge.html" class="nav-dropdown-item" data-testid="nav-pdf-merge">PDF Merge</a>
+                        <a href="/pdf-split.html" class="nav-dropdown-item" data-testid="nav-pdf-split">PDF Split</a>
+                        <a href="/pdf-compress.html" class="nav-dropdown-item" data-testid="nav-pdf-compress">PDF Compress</a>
+                        <a href="/pdf-rotate.html" class="nav-dropdown-item" data-testid="nav-pdf-rotate">PDF Rotate</a>
+                        <a href="/pdf-watermark.html" class="nav-dropdown-item" data-testid="nav-pdf-watermark">PDF Watermark</a>
+                        <a href="/pdf-to-word.html" class="nav-dropdown-item" data-testid="nav-pdf-to-word">PDF to Word</a>
+                    </div>
+                </div>
+
+                <!-- Audio/Video Tools -->
+                <div class="nav-dropdown">
+                    <button class="nav-dropdown-trigger" data-testid="nav-media-trigger">
+                        Audio/Video Tools
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    <div class="nav-dropdown-content">
+                        <a href="/mp4-to-mp3.html" class="nav-dropdown-item" data-testid="nav-mp4-mp3">MP4 to MP3</a>
+                        <a href="/audio-converter.html" class="nav-dropdown-item" data-testid="nav-audio-convert">Audio Converter</a>
+                        <a href="/video-compress.html" class="nav-dropdown-item" data-testid="nav-video-compress">Video Compress</a>
+                        <a href="/gif-maker.html" class="nav-dropdown-item" data-testid="nav-gif-maker">GIF Maker</a>
+                        <a href="/video-trim.html" class="nav-dropdown-item" data-testid="nav-video-trim">Video Trim</a>
+                        <a href="/video-merger.html" class="nav-dropdown-item" data-testid="nav-video-merge">Video Merger</a>
+                    </div>
+                </div>
+            </div>
+            
+            <button class="mobile-nav-toggle" data-testid="mobile-nav-toggle">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
+        </div>
+    </nav>
+
+    <div class="layout-wrapper">
+        <!-- Desktop Sidebar Ad Left -->
+        <div class="sidebar-ad desktop-only">
+            <div class="ad-placeholder ad-sidebar">
+                <span class="ad-text">Sidebar<br>Advertisement<br>(160x600)</span>
+            </div>
+        </div>
+
+        <main class="main">
+            <div class="hero-section">
+                <div class="hero-content">
+                    <div class="hero-badge">
+                        <div class="tool-icon bg-purple">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                            </svg>
+                        </div>
+                        <span>Audio/Video Tools</span>
+                    </div>
+                    <h1 class="hero-title">MP4 to MP3</h1>
+                    <p class="hero-description">Extract high-quality audio from video files</p>
+                    <div class="hero-features">
+                        <span class="feature-tag">✓ High quality audio</span>
+                        <span class="feature-tag">✓ Multiple formats</span>
+                        <span class="feature-tag">✓ Fast conversion</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="converter-container">
+                <div class="upload-area" id="uploadArea" data-testid="upload-area-video">
+                    <div class="upload-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="23 7 16 12 23 17 23 7"></polygon>
+                            <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+                        </svg>
+                    </div>
+                    <h3>Drop your video file here</h3>
+                    <p>or click anywhere to browse files</p>
+                    <p class="supported-formats">Supports MP4, MOV, AVI (max 50MB)</p>
+                    <input type="file" id="fileInput" accept="video/*" hidden>
+                </div>
+
+                <div class="advanced-options" id="advancedOptions">
+                    <div class="options-header" id="optionsToggle">
+                        <div class="options-title">
+                            <svg class="options-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z"/>
+                                <path d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/>
+                                <path d="M12 2v2"/>
+                                <path d="M12 20v2"/>
+                                <path d="m4.93 4.93 1.41 1.41"/>
+                                <path d="m17.66 17.66 1.41 1.41"/>
+                                <path d="M2 12h2"/>
+                                <path d="M20 12h2"/>
+                                <path d="m6.34 17.66-1.41 1.41"/>
+                                <path d="m19.07 4.93-1.41 1.41"/>
+                            </svg>
+                            <span>Advanced Options</span>
+                        </div>
+                        <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="m6 9 6 6 6-6"/>
+                        </svg>
+                    </div>
+                    <div class="options-content" id="optionsContent">
+                        <div class="option-group">
+                            <label for="audioQuality">Audio Quality</label>
+                            <select id="audioQuality">
+                                <option value="192" selected>192 kbps (Good)</option>
+                                <option value="128">128 kbps (Standard)</option>
+                                <option value="256">256 kbps (Very Good)</option>
+                                <option value="320">320 kbps (Best)</option>
+                            </select>
+                        </div>
+                        <div class="option-group">
+                            <label for="outputFormat">Output Format</label>
+                            <select id="outputFormat">
+                                <option value="mp3" selected>MP3 (Most Compatible)</option>
+                                <option value="wav">WAV (Uncompressed)</option>
+                                <option value="aac">AAC (High Quality)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="file-preview" id="filePreview" style="display: none;">
+                    <div class="preview-header">
+                        <h3 id="fileName"></h3>
+                        <span id="fileSize"></span>
+                    </div>
+                    <div class="video-preview">
+                        <video id="videoPreview" controls style="max-width: 100%; max-height: 300px;"></video>
+                    </div>
+                </div>
+
+                <button class="convert-btn" id="convertBtn" disabled>
+                    <span class="btn-text">Extract Audio</span>
+                    <div class="btn-loader" style="display: none;"></div>
+                </button>
+
+                <div class="progress-container" id="progressContainer" style="display: none;">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="progress-text" id="progressText">0%</div>
+                </div>
+
+                <div class="results" id="results" style="display: none;">
+                    <h3>Extraction Complete</h3>
+                    <div class="result-actions">
+                        <button class="download-btn" id="downloadBtn">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7,10 12,15 17,10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                            Download Audio File
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tool Information Section -->
+                <div class="tool-info-section">
+                    <div class="info-grid">
+                        <div class="info-card">
+                            <div class="info-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M9 18V5l12-2v13"/>
+                                    <circle cx="6" cy="18" r="3"/>
+                                    <circle cx="18" cy="16" r="3"/>
+                                </svg>
+                            </div>
+                            <h3>Audio Extraction</h3>
+                            <p>Extract high-quality audio from any video file. Perfect for creating music files, podcasts, and audio tracks from video content.</p>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                </svg>
+                            </div>
+                            <h3>Quality Control</h3>
+                            <p>Choose from multiple audio quality levels and formats including MP3, WAV, and AAC. Optimize for file size or maximum audio fidelity.</p>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                    <polyline points="7,10 12,15 17,10"/>
+                                    <line x1="12" y1="15" x2="12" y2="3"/>
+                                </svg>
+                            </div>
+                            <h3>Universal Support</h3>
+                            <p>Supports all major video formats including MP4, AVI, MOV, MKV, and more. Extract audio from any video source with ease.</p>
+                        </div>
+                    </div>
+                    <div class="tool-benefits">
+                        <h3>Why Extract Audio from Video?</h3>
+                        <p>Audio extraction is essential for creating music libraries, podcasts, and audio content from video sources. Whether you need to save space, create ringtones, or repurpose content, extracting audio allows you to work with just the sound component while maintaining original quality.</p>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+
+        <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.1/dist/umd/util.js"></script>
+        <script src="js/advanced-options.js"></script>
+        <script src="js/converters/mp4-to-mp3.js"></script>
+    </body>
+    </html>
+</body>
+</html>

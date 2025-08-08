@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDF Merge - FileFlow</title>
-    <meta name="description" content="Combine multiple PDF files into a single document with FileFlow's PDF Merge tool. Fast, secure, and easy PDF merging with drag and drop support.">
+    <title>PDF Rotate - FileFlow</title>
+    <meta name="description" content="Rotate PDF pages to correct orientation with FileFlow's PDF Rotate tool. Individual pages or batch rotation with 90° increments.">
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="css/advanced-options.css">
     
     <!-- Navigation Script -->
     <script src="/js/navigation.js" defer></script>
@@ -91,55 +92,104 @@
         <div class="hero-section">
             <div class="hero-content">
                 <div class="hero-badge">
-                    <div class="tool-icon bg-blue">
+                    <div class="tool-icon bg-purple">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                            <polyline points="14,2 14,8 20,8"></polyline>
-                            <path d="M16 13H8"></path>
-                            <path d="M16 17H8"></path>
-                            <path d="M10 9H8"></path>
+                            <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/>
+                            <path d="M21 3v5h-5"/>
                         </svg>
                     </div>
                     <span>PDF Tools</span>
                 </div>
-                <h1 class="hero-title">PDF Merge</h1>
-                <p class="hero-description">Combine multiple PDF files into a single document</p>
+                <h1 class="hero-title">PDF Rotate</h1>
+                <p class="hero-description">Rotate PDF pages to fix orientation issues</p>
                 <div class="hero-features">
-                    <span class="feature-tag">✓ Multiple files</span>
-                    <span class="feature-tag">✓ Maintain quality</span>
-                    <span class="feature-tag">✓ Custom order</span>
+                    <span class="feature-tag">✓ Individual page control</span>
+                    <span class="feature-tag">✓ Batch rotation</span>
+                    <span class="feature-tag">✓ Real-time preview</span>
                 </div>
             </div>
         </div>
 
         <div class="converter-container">
-            <div class="upload-area" id="uploadArea" data-testid="upload-area-pdf-merge">
+            <div class="upload-area" id="uploadArea" data-testid="upload-area-pdf-rotate">
                 <div class="upload-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
                         <polyline points="14,2 14,8 20,8"></polyline>
                     </svg>
                 </div>
-                <h3>Drop multiple PDF files here</h3>
+                <h3>Drop your PDF file here</h3>
                 <p>or click anywhere to browse files</p>
                 <p class="supported-formats">PDF files only</p>
-                <input type="file" id="fileInput" accept=".pdf" multiple hidden>
+                <input type="file" id="fileInput" accept=".pdf" hidden>
             </div>
 
-            <div class="files-list" id="filesList" style="display: none;">
-                <h3>Selected Files</h3>
-                <div class="files-container" id="filesContainer"></div>
-                <button class="add-files-btn" id="addFilesBtn">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="12" y1="5" x2="12" y2="19"></line>
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
+            <div class="file-preview" id="filePreview" style="display: none;">
+                <h3>PDF Pages</h3>
+                <div class="pages-container" id="pagesContainer"></div>
+                <div class="rotation-controls">
+                    <button class="rotate-all-btn" id="rotateAllLeft">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                            <path d="M3 3v5h5"/>
+                        </svg>
+                        Rotate All Left
+                    </button>
+                    <button class="rotate-all-btn" id="rotateAllRight">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/>
+                            <path d="M21 3v5h-5"/>
+                        </svg>
+                        Rotate All Right
+                    </button>
+                </div>
+            </div>
+
+            <div class="advanced-options" id="advancedOptions">
+                <div class="options-header" id="optionsToggle">
+                    <div class="options-title">
+                        <svg class="options-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z"/>
+                            <path d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/>
+                            <path d="M12 2v2"/>
+                            <path d="M12 20v2"/>
+                            <path d="m4.93 4.93 1.41 1.41"/>
+                            <path d="m17.66 17.66 1.41 1.41"/>
+                            <path d="M2 12h2"/>
+                            <path d="M20 12h2"/>
+                            <path d="m6.34 17.66-1.41 1.41"/>
+                            <path d="m19.07 4.93-1.41 1.41"/>
+                        </svg>
+                        <span>Advanced Options</span>
+                    </div>
+                    <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m6 9 6 6 6-6"/>
                     </svg>
-                    Add More Files
-                </button>
+                </div>
+                <div class="options-content" id="optionsContent">
+                    <div class="option-group">
+                        <label for="rotationAngle">Default Rotation</label>
+                        <select id="rotationAngle">
+                            <option value="90">90° Clockwise</option>
+                            <option value="180">180° (Upside down)</option>
+                            <option value="270">270° (90° Counter-clockwise)</option>
+                        </select>
+                    </div>
+                    <div class="checkbox-group">
+                        <div class="premium-checkbox-item">
+                            <input type="checkbox" id="autoDetect" class="premium-checkbox">
+                            <label for="autoDetect" class="checkbox-label">Auto-detect page orientation</label>
+                        </div>
+                        <div class="premium-checkbox-item">
+                            <input type="checkbox" id="preserveAspectRatio" class="premium-checkbox" checked>
+                            <label for="preserveAspectRatio" class="checkbox-label">Preserve aspect ratio</label>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <button class="convert-btn" id="convertBtn" disabled>
-                <span class="btn-text">Merge PDFs</span>
+                <span class="btn-text">Apply Rotations</span>
                 <div class="btn-loader" style="display: none;"></div>
             </button>
 
@@ -151,8 +201,7 @@
             </div>
 
             <div class="results" id="results" style="display: none;">
-                <h3>Merge Complete</h3>
-                <div class="merge-stats" id="mergeStats"></div>
+                <h3>Rotation Complete</h3>
                 <div class="result-actions">
                     <button class="download-btn" id="downloadBtn">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -160,7 +209,7 @@
                             <polyline points="7,10 12,15 17,10"></polyline>
                             <line x1="12" y1="15" x2="12" y2="3"></line>
                         </svg>
-                        Download Merged PDF
+                        Download Rotated PDF
                     </button>
                 </div>
             </div>
@@ -171,41 +220,38 @@
                     <div class="info-card">
                         <div class="info-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                                <polyline points="14,2 14,8 20,8"/>
-                                <path d="M16 13H8"/>
-                                <path d="M16 17H8"/>
-                                <path d="M10 9H8"/>
+                                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                                <path d="M3 3v5h5"/>
                             </svg>
                         </div>
-                        <h3>Combine Documents</h3>
-                        <p>Merge multiple PDF files into a single, organized document. Perfect for combining reports, contracts, or related documents into one file.</p>
+                        <h3>Fix Orientation</h3>
+                        <p>Correct improperly oriented PDF pages that appear upside down or sideways. Essential for documents scanned at wrong angles.</p>
                     </div>
                     <div class="info-card">
                         <div class="info-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M3 3h18v18H3z"/>
-                                <path d="M9 9h6v6H9z"/>
+                                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+                                <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+                                <path d="M9 14l2 2 4-4"/>
                             </svg>
                         </div>
-                        <h3>Custom Order</h3>
-                        <p>Arrange your PDF files in any order before merging. Drag and drop to reorder files and create the perfect document structure.</p>
+                        <h3>Page-by-Page Control</h3>
+                        <p>Rotate individual pages independently or apply bulk rotations to all pages. Perfect precision for mixed-orientation documents.</p>
                     </div>
                     <div class="info-card">
                         <div class="info-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M12 1L3 5l9 4 9-4-9-4z"/>
-                                <path d="M3 17l6-3 6 3-6 3-6-3z"/>
-                                <path d="M3 12l6-3 6 3-6 3-6-3z"/>
+                                <path d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z"/>
+                                <path d="M12 6v6l4 2"/>
                             </svg>
                         </div>
-                        <h3>Preserve Quality</h3>
-                        <p>All text, images, and formatting are preserved during the merge process. Your merged PDF will maintain the original quality of all source documents.</p>
+                        <h3>Standard Angles</h3>
+                        <p>Supports 90°, 180°, and 270° rotations with visual preview. Ensures professional document presentation and readability.</p>
                     </div>
                 </div>
                 <div class="tool-benefits">
-                    <h3>Why Merge PDFs?</h3>
-                    <p>PDF merging is essential for document management and organization. Whether you're combining multiple reports for a presentation, merging contract pages, or consolidating research materials, our merge tool maintains document integrity while creating a single, professional file that's easier to share and manage.</p>
+                    <h3>Why Rotate PDFs?</h3>
+                    <p>PDF rotation is crucial for document readability and professional presentation. Scanned documents often have incorrect orientations, making them difficult to read or print properly. Our rotation tool fixes these issues while preserving document quality, ensuring your PDFs display correctly across all devices and applications.</p>
                 </div>
             </div>
 
@@ -286,6 +332,8 @@
     </footer>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
-    <script src="js/converters/pdf-merge.js"></script>
+    <script src="js/advanced-options-manager.js"></script>
+    <script src="js/advanced-options.js"></script>
+    <script src="js/converters/pdf-rotate.js"></script>
 </body>
 </html>

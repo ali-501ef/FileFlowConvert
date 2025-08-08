@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PDF Watermark - FileFlow</title>
-    <meta name="description" content="Add text or image watermarks to PDF documents with FileFlow's PDF Watermark tool. Custom opacity, position control, and batch processing.">
+    <meta name="description" content="Add text or image watermarks to PDF files with FileFlow's PDF Watermark tool. Customize position, opacity, and appearance.">
     <link rel="stylesheet" href="styles.css">
     
     <!-- Navigation Script -->
@@ -91,19 +91,21 @@
         <div class="hero-section">
             <div class="hero-content">
                 <div class="hero-badge">
-                    <div class="tool-icon bg-teal">
+                    <div class="tool-icon bg-orange">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"/>
+                            <path d="M12 3a9 9 0 0 1 9 9 9 9 0 0 1-9 9"/>
+                            <path d="M12 3a9 9 0 0 0-9 9 9 9 0 0 0 9 9"/>
+                            <path d="M12 3v18"/>
                         </svg>
                     </div>
                     <span>PDF Tools</span>
                 </div>
                 <h1 class="hero-title">PDF Watermark</h1>
-                <p class="hero-description">Add professional text or image watermarks to protect your PDFs</p>
+                <p class="hero-description">Add text or image watermarks to protect your PDFs</p>
                 <div class="hero-features">
-                    <span class="feature-tag">✓ Text & image watermarks</span>
-                    <span class="feature-tag">✓ Custom positioning</span>
-                    <span class="feature-tag">✓ Opacity control</span>
+                    <span class="feature-tag">✓ Text watermarks</span>
+                    <span class="feature-tag">✓ Image watermarks</span>
+                    <span class="feature-tag">✓ Custom position</span>
                 </div>
             </div>
         </div>
@@ -122,132 +124,72 @@
                 <input type="file" id="fileInput" accept=".pdf" hidden>
             </div>
 
-            <div class="file-preview" id="filePreview" style="display: none;">
-                <div class="watermark-setup" id="watermarkSetup">
-                <div class="watermark-type-selection">
-                    <h3>Watermark Type</h3>
-                    <div class="type-buttons">
-                        <button class="type-btn active" id="textTypeBtn" data-type="text">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <polyline points="4,7 4,4 20,4 20,7"></polyline>
-                                <line x1="9" y1="20" x2="15" y2="20"></line>
-                                <line x1="12" y1="4" x2="12" y2="20"></line>
-                            </svg>
-                            Text Watermark
-                        </button>
-                        <button class="type-btn" id="imageTypeBtn" data-type="image">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                                <circle cx="8.5" cy="8.5" r="1.5"/>
-                                <polyline points="21,15 16,10 5,21"/>
-                            </svg>
-                            Image Watermark
-                        </button>
-                    </div>
+            <div class="watermark-options" id="watermarkOptions" style="display: none;">
+                <div class="options-header">
+                    <h3>Watermark Settings</h3>
                 </div>
-
-                    <div class="preview-container" id="previewContainer">
-                        <div class="watermark-preview" id="watermarkPreview"></div>
+                <div class="watermark-controls">
+                    <div class="watermark-type">
+                        <label>Watermark Type:</label>
+                        <select id="watermarkType">
+                            <option value="text">Text Watermark</option>
+                            <option value="image">Image Watermark</option>
+                        </select>
                     </div>
-                </div>
-                <div class="watermark-config" id="textConfig">
-                    <div class="config-group">
-                        <label for="watermarkText">Watermark Text</label>
-                        <input type="text" id="watermarkText" placeholder="Enter watermark text" value="CONFIDENTIAL">
-                    </div>
-                    <div class="config-group">
-                        <label for="fontSize">Font Size</label>
-                        <input type="range" id="fontSize" min="12" max="72" value="36">
-                        <span id="fontSizeValue">36px</span>
-                    </div>
-                    <div class="config-group">
-                        <label for="textColor">Text Color</label>
-                        <input type="color" id="textColor" value="#888888">
-                    </div>
-                </div>
-
-                <div class="watermark-config" id="imageConfig" style="display: none;">
-                    <div class="config-group">
-                        <label for="watermarkImage">Select Image</label>
-                        <input type="file" id="watermarkImage" accept="image/*">
-                        <div class="image-preview" id="imagePreview"></div>
-                    </div>
-                </div>
-
-                <div class="position-controls">
-                    <h4>Position & Appearance</h4>
-                    <div class="position-grid">
-                        <button class="position-btn" data-position="top-left">↖</button>
-                        <button class="position-btn" data-position="top-center">↑</button>
-                        <button class="position-btn" data-position="top-right">↗</button>
-                        <button class="position-btn" data-position="middle-left">←</button>
-                        <button class="position-btn active" data-position="center">●</button>
-                        <button class="position-btn" data-position="middle-right">→</button>
-                        <button class="position-btn" data-position="bottom-left">↙</button>
-                        <button class="position-btn" data-position="bottom-center">↓</button>
-                        <button class="position-btn" data-position="bottom-right">↘</button>
-                    </div>
-                    <div class="appearance-controls">
-                        <div class="control-group">
-                            <label for="opacity">Opacity</label>
-                            <input type="range" id="opacity" min="10" max="100" value="30">
-                            <span id="opacityValue">30%</span>
+                    
+                    <div class="text-watermark-settings" id="textWatermarkSettings">
+                        <div class="form-group">
+                            <label for="watermarkText">Watermark Text:</label>
+                            <input type="text" id="watermarkText" placeholder="Enter watermark text" value="CONFIDENTIAL">
                         </div>
-                        <div class="control-group">
-                            <label for="rotation">Rotation</label>
-                            <input type="range" id="rotation" min="0" max="360" value="45">
-                            <span id="rotationValue">45°</span>
+                        <div class="form-group">
+                            <label for="fontSize">Font Size:</label>
+                            <select id="fontSize">
+                                <option value="24">Small (24px)</option>
+                                <option value="36" selected>Medium (36px)</option>
+                                <option value="48">Large (48px)</option>
+                                <option value="60">Extra Large (60px)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="fontColor">Font Color:</label>
+                            <input type="color" id="fontColor" value="#ff0000">
+                        </div>
+                    </div>
+                    
+                    <div class="image-watermark-settings" id="imageWatermarkSettings" style="display: none;">
+                        <div class="form-group">
+                            <label for="watermarkImage">Select Image:</label>
+                            <input type="file" id="watermarkImage" accept="image/*">
+                        </div>
+                    </div>
+                    
+                    <div class="common-settings">
+                        <div class="form-group">
+                            <label for="watermarkOpacity">Opacity:</label>
+                            <input type="range" id="watermarkOpacity" min="10" max="100" value="50">
+                            <span id="opacityValue">50%</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="watermarkPosition">Position:</label>
+                            <select id="watermarkPosition">
+                                <option value="center">Center</option>
+                                <option value="top-left">Top Left</option>
+                                <option value="top-right">Top Right</option>
+                                <option value="bottom-left">Bottom Left</option>
+                                <option value="bottom-right">Bottom Right</option>
+                            </select>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="advanced-options" id="advancedOptions">
-                <div class="options-header" id="optionsToggle">
-                    <div class="options-title">
-                        <svg class="options-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z"/>
-                            <path d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/>
-                            <path d="M12 2v2"/>
-                            <path d="M12 20v2"/>
-                            <path d="m4.93 4.93 1.41 1.41"/>
-                            <path d="m17.66 17.66 1.41 1.41"/>
-                            <path d="M2 12h2"/>
-                            <path d="M20 12h2"/>
-                            <path d="m6.34 17.66-1.41 1.41"/>
-                            <path d="m19.07 4.93-1.41 1.41"/>
-                        </svg>
-                        <span>Advanced Options</span>
-                    </div>
-                    <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="m6 9 6 6 6-6"/>
-                    </svg>
+            <div class="file-preview" id="filePreview" style="display: none;">
+                <div class="preview-header">
+                    <h3 id="fileName"></h3>
+                    <span id="fileSize"></span>
                 </div>
-                <div class="options-content" id="optionsContent">
-                    <div class="option-group">
-                        <label for="pageRange">Apply to Pages</label>
-                        <select id="pageRange">
-                            <option value="all" selected>All Pages</option>
-                            <option value="first">First Page Only</option>
-                            <option value="last">Last Page Only</option>
-                            <option value="custom">Custom Range</option>
-                        </select>
-                    </div>
-                    <div class="option-group" id="customRangeGroup" style="display: none;">
-                        <label for="customPages">Page Range (e.g., 1-5, 8, 10-12)</label>
-                        <input type="text" id="customPages" placeholder="1-5, 8, 10-12">
-                    </div>
-                    <div class="checkbox-group">
-                        <div class="premium-checkbox-item">
-                            <input type="checkbox" id="behindText" class="premium-checkbox">
-                            <label for="behindText" class="checkbox-label">Place watermark behind text</label>
-                        </div>
-                        <div class="premium-checkbox-item">
-                            <input type="checkbox" id="repeatPattern" class="premium-checkbox">
-                            <label for="repeatPattern" class="checkbox-label">Repeat watermark pattern</label>
-                        </div>
-                    </div>
-                </div>
+                <div class="pdf-info" id="pdfInfo"></div>
             </div>
 
             <button class="convert-btn" id="convertBtn" disabled>
@@ -263,7 +205,8 @@
             </div>
 
             <div class="results" id="results" style="display: none;">
-                <h3>Watermark Added Successfully</h3>
+                <h3>Watermark Applied</h3>
+                <div class="watermark-stats" id="watermarkStats"></div>
                 <div class="result-actions">
                     <button class="download-btn" id="downloadBtn">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -282,37 +225,40 @@
                     <div class="info-card">
                         <div class="info-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
                                 <path d="M9 12l2 2 4-4"/>
+                                <path d="M21 12c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1z"/>
+                                <path d="M3 12c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1z"/>
                             </svg>
                         </div>
-                        <h3>Brand Protection</h3>
-                        <p>Add text or image watermarks to protect intellectual property and establish document ownership. Essential for business documents and copyrighted materials.</p>
+                        <h3>Document Protection</h3>
+                        <p>Add watermarks to protect your documents from unauthorized use. Text or image watermarks help identify document ownership and prevent misuse.</p>
                     </div>
                     <div class="info-card">
                         <div class="info-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                <path d="M12 3a9 9 0 0 1 9 9 9 9 0 0 1-9 9"/>
+                                <path d="M12 3a9 9 0 0 0-9 9 9 9 0 0 0 9 9"/>
+                                <path d="M12 3v18"/>
                             </svg>
                         </div>
-                        <h3>Custom Positioning</h3>
-                        <p>Precisely control watermark placement, opacity, rotation, and appearance. Create professional-looking branded documents with subtle or prominent watermarks.</p>
+                        <h3>Custom Appearance</h3>
+                        <p>Customize your watermark's position, opacity, size, and color. Choose from multiple positions and adjust transparency to balance visibility with readability.</p>
                     </div>
                     <div class="info-card">
                         <div class="info-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                                <circle cx="9" cy="9" r="2"/>
-                                <path d="M21 15l-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+                                <path d="M12 1L3 5l9 4 9-4-9-4z"/>
+                                <path d="M3 17l6-3 6 3-6 3-6-3z"/>
+                                <path d="M3 12l6-3 6 3-6 3-6-3z"/>
                             </svg>
                         </div>
                         <h3>Text & Images</h3>
-                        <p>Support for both text watermarks and image logos. Add company branding, copyright notices, or confidential stamps across all pages.</p>
+                        <p>Support for both text and image watermarks. Add company logos, copyright notices, or confidential stamps to mark your documents appropriately.</p>
                     </div>
                 </div>
                 <div class="tool-benefits">
-                    <h3>Why Add Watermarks?</h3>
-                    <p>Watermarking is essential for document security and brand identity. Whether you're protecting confidential information, establishing copyright ownership, or adding professional branding, watermarks provide visual proof of authenticity. Our tool ensures watermarks integrate seamlessly while maintaining document readability and professional appearance.</p>
+                    <h3>Why Use Watermarks?</h3>
+                    <p>Watermarks are essential for document security and branding. They help protect intellectual property, establish document authenticity, and provide legal protection against unauthorized reproduction. Whether marking confidential documents, adding copyright notices, or branding materials with your logo, watermarks ensure your documents are properly identified and protected.</p>
                 </div>
             </div>
 
@@ -393,7 +339,6 @@
     </footer>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
-    <script src="js/advanced-options.js"></script>
     <script src="js/converters/pdf-watermark.js"></script>
 </body>
 </html>

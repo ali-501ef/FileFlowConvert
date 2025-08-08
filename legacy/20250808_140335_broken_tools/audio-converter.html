@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDF Merge - FileFlow</title>
-    <meta name="description" content="Combine multiple PDF files into a single document with FileFlow's PDF Merge tool. Fast, secure, and easy PDF merging with drag and drop support.">
+    <title>Audio Converter - FileFlow</title>
+    <meta name="description" content="Convert between audio formats including MP3, WAV, FLAC, AAC, and OGG with FileFlow's Audio Converter tool. High-quality conversions with bitrate control.">
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="css/advanced-options.css">
     
     <!-- Navigation Script -->
     <script src="/js/navigation.js" defer></script>
@@ -30,6 +31,7 @@
                     <div class="nav-dropdown-content">
                         <a href="/image-tools/heic-to-jpg.html" class="nav-dropdown-item" data-testid="nav-heic-jpg">HEIC to JPG</a>
                         <a href="/jpg-to-png.html" class="nav-dropdown-item" data-testid="nav-jpg-png">JPG to PNG</a>
+                        <a href="/pdf-to-jpg.html" class="nav-dropdown-item" data-testid="nav-pdf-to-jpg">PDF to JPG</a>
                         <a href="/image-tools/png-to-jpg.html" class="nav-dropdown-item" data-testid="nav-png-jpg">PNG to JPG</a>
                         <a href="/image-tools/webp-to-jpg.html" class="nav-dropdown-item" data-testid="nav-webp-jpg">WEBP to JPG</a>
                         <a href="/image-tools/jpg-to-pdf.html" class="nav-dropdown-item" data-testid="nav-jpg-pdf">JPG to PDF</a>
@@ -56,7 +58,6 @@
                         <a href="/pdf-rotate.html" class="nav-dropdown-item" data-testid="nav-pdf-rotate">PDF Rotate</a>
                         <a href="/pdf-watermark.html" class="nav-dropdown-item" data-testid="nav-pdf-watermark">PDF Watermark</a>
                         <a href="/pdf-to-word.html" class="nav-dropdown-item" data-testid="nav-pdf-to-word">PDF to Word</a>
-                        <a href="/pdf-to-jpg.html" class="nav-dropdown-item" data-testid="nav-pdf-jpg">PDF to JPG</a>
                     </div>
                 </div>
 
@@ -91,68 +92,118 @@
         <div class="hero-section">
             <div class="hero-content">
                 <div class="hero-badge">
-                    <div class="tool-icon bg-blue">
+                    <div class="tool-icon bg-green">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                            <polyline points="14,2 14,8 20,8"></polyline>
-                            <path d="M16 13H8"></path>
-                            <path d="M16 17H8"></path>
-                            <path d="M10 9H8"></path>
+                            <path d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
+                            <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                         </svg>
                     </div>
-                    <span>PDF Tools</span>
+                    <span>Media Tools</span>
                 </div>
-                <h1 class="hero-title">PDF Merge</h1>
-                <p class="hero-description">Combine multiple PDF files into a single document</p>
+                <h1 class="hero-title">Audio Converter</h1>
+                <p class="hero-description">Convert between audio formats with quality control</p>
                 <div class="hero-features">
-                    <span class="feature-tag">✓ Multiple files</span>
-                    <span class="feature-tag">✓ Maintain quality</span>
-                    <span class="feature-tag">✓ Custom order</span>
+                    <span class="feature-tag">✓ Multiple formats</span>
+                    <span class="feature-tag">✓ Bitrate control</span>
+                    <span class="feature-tag">✓ Metadata preservation</span>
                 </div>
             </div>
         </div>
 
         <div class="converter-container">
-            <div class="upload-area" id="uploadArea" data-testid="upload-area-pdf-merge">
+            <div class="upload-area" id="uploadArea" data-testid="upload-area-audio">
                 <div class="upload-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
-                        <polyline points="14,2 14,8 20,8"></polyline>
+                        <path d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
                     </svg>
                 </div>
-                <h3>Drop multiple PDF files here</h3>
+                <h3>Drop your audio file here</h3>
                 <p>or click anywhere to browse files</p>
-                <p class="supported-formats">PDF files only</p>
-                <input type="file" id="fileInput" accept=".pdf" multiple hidden>
+                <p class="supported-formats">Supports MP3, WAV, FLAC, AAC, OGG, M4A</p>
+                <input type="file" id="fileInput" accept="audio/*" hidden>
             </div>
 
-            <div class="files-list" id="filesList" style="display: none;">
-                <h3>Selected Files</h3>
-                <div class="files-container" id="filesContainer"></div>
-                <button class="add-files-btn" id="addFilesBtn">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="12" y1="5" x2="12" y2="19"></line>
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
+            <div class="advanced-options" id="advancedOptions">
+                <div class="options-header" id="optionsToggle">
+                    <div class="options-title">
+                        <svg class="options-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z"/>
+                            <path d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/>
+                            <path d="M12 2v2"/>
+                            <path d="M12 20v2"/>
+                            <path d="m4.93 4.93 1.41 1.41"/>
+                            <path d="m17.66 17.66 1.41 1.41"/>
+                            <path d="M2 12h2"/>
+                            <path d="M20 12h2"/>
+                            <path d="m6.34 17.66-1.41 1.41"/>
+                            <path d="m19.07 4.93-1.41 1.41"/>
+                        </svg>
+                        <span>Advanced Options</span>
+                    </div>
+                    <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m6 9 6 6 6-6"/>
                     </svg>
-                    Add More Files
-                </button>
+                </div>
+                <div class="options-content" id="optionsContent">
+                    <div class="option-group">
+                        <label for="outputFormat">Output Format</label>
+                        <select id="outputFormat">
+                            <option value="mp3">MP3 (Most Compatible)</option>
+                            <option value="wav">WAV (Uncompressed)</option>
+                            <option value="flac">FLAC (Lossless)</option>
+                            <option value="aac">AAC (High Quality)</option>
+                            <option value="ogg">OGG (Open Source)</option>
+                        </select>
+                    </div>
+                    <div class="option-group">
+                        <label for="audioQuality">Audio Quality</label>
+                        <select id="audioQuality">
+                            <option value="medium" selected>Medium (192 kbps)</option>
+                            <option value="high">High (320 kbps)</option>
+                            <option value="standard">Standard (128 kbps)</option>
+                            <option value="custom">Custom Bitrate</option>
+                        </select>
+                    </div>
+                    <div class="option-group" id="customBitrateGroup" style="display: none;">
+                        <label for="customBitrate">Custom Bitrate (kbps)</label>
+                        <input type="number" id="customBitrate" min="64" max="320" value="192">
+                    </div>
+                    <div class="option-group">
+                        <label for="sampleRate">Sample Rate</label>
+                        <select id="sampleRate">
+                            <option value="keep">Keep Original</option>
+                            <option value="44100">44.1 kHz (CD Quality)</option>
+                            <option value="48000">48 kHz (Professional)</option>
+                            <option value="96000">96 kHz (High Resolution)</option>
+                        </select>
+                    </div>
+                    <div class="checkbox-group">
+                        <div class="premium-checkbox-item">
+                            <input type="checkbox" id="preserveMetadata" class="premium-checkbox" checked>
+                            <label for="preserveMetadata" class="checkbox-label">Preserve metadata (title, artist, album)</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="file-preview" id="filePreview" style="display: none;">
+                <div class="preview-header">
+                    <h3 id="fileName"></h3>
+                    <span id="fileSize"></span>
+                </div>
+                <div class="audio-preview">
+                    <audio id="audioPreview" controls style="width: 100%;"></audio>
+                </div>
+                <div class="audio-info" id="audioInfo"></div>
             </div>
 
             <button class="convert-btn" id="convertBtn" disabled>
-                <span class="btn-text">Merge PDFs</span>
+                <span class="btn-text">Convert Audio</span>
                 <div class="btn-loader" style="display: none;"></div>
             </button>
 
-            <div class="progress-container" id="progressContainer" style="display: none;">
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progressFill"></div>
-                </div>
-                <div class="progress-text" id="progressText">0%</div>
-            </div>
-
             <div class="results" id="results" style="display: none;">
-                <h3>Merge Complete</h3>
-                <div class="merge-stats" id="mergeStats"></div>
+                <h3>Conversion Complete</h3>
                 <div class="result-actions">
                     <button class="download-btn" id="downloadBtn">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -160,7 +211,7 @@
                             <polyline points="7,10 12,15 17,10"></polyline>
                             <line x1="12" y1="15" x2="12" y2="3"></line>
                         </svg>
-                        Download Merged PDF
+                        Download Converted Audio
                     </button>
                 </div>
             </div>
@@ -171,41 +222,47 @@
                     <div class="info-card">
                         <div class="info-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                                <polyline points="14,2 14,8 20,8"/>
-                                <path d="M16 13H8"/>
-                                <path d="M16 17H8"/>
-                                <path d="M10 9H8"/>
+                                <path d="M9 18V5l12-2v13"/>
+                                <circle cx="6" cy="18" r="3"/>
+                                <circle cx="18" cy="16" r="3"/>
                             </svg>
                         </div>
-                        <h3>Combine Documents</h3>
-                        <p>Merge multiple PDF files into a single, organized document. Perfect for combining reports, contracts, or related documents into one file.</p>
+                        <h3>Format Support</h3>
+                        <p>Convert between all major audio formats including MP3, WAV, AAC, FLAC, OGG, and more. Universal compatibility for any audio file.</p>
                     </div>
                     <div class="info-card">
                         <div class="info-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M3 3h18v18H3z"/>
-                                <path d="M9 9h6v6H9z"/>
+                                <path d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z"/>
+                                <path d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/>
+                                <path d="M12 2v2"/>
+                                <path d="M12 20v2"/>
+                                <path d="m4.93 4.93 1.41 1.41"/>
+                                <path d="m17.66 17.66 1.41 1.41"/>
+                                <path d="M2 12h2"/>
+                                <path d="M20 12h2"/>
+                                <path d="m6.34 17.66-1.41 1.41"/>
+                                <path d="m19.07 4.93-1.41 1.41"/>
                             </svg>
                         </div>
-                        <h3>Custom Order</h3>
-                        <p>Arrange your PDF files in any order before merging. Drag and drop to reorder files and create the perfect document structure.</p>
+                        <h3>Quality Control</h3>
+                        <p>Customize bitrate, sample rate, and quality settings. From podcast-ready compression to studio-quality lossless conversion.</p>
                     </div>
                     <div class="info-card">
                         <div class="info-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M12 1L3 5l9 4 9-4-9-4z"/>
-                                <path d="M3 17l6-3 6 3-6 3-6-3z"/>
-                                <path d="M3 12l6-3 6 3-6 3-6-3z"/>
+                                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+                                <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+                                <path d="M9 14l2 2 4-4"/>
                             </svg>
                         </div>
-                        <h3>Preserve Quality</h3>
-                        <p>All text, images, and formatting are preserved during the merge process. Your merged PDF will maintain the original quality of all source documents.</p>
+                        <h3>Metadata Preservation</h3>
+                        <p>Maintain audio metadata including artist, album, title, and artwork during conversion. Perfect for music libraries.</p>
                     </div>
                 </div>
                 <div class="tool-benefits">
-                    <h3>Why Merge PDFs?</h3>
-                    <p>PDF merging is essential for document management and organization. Whether you're combining multiple reports for a presentation, merging contract pages, or consolidating research materials, our merge tool maintains document integrity while creating a single, professional file that's easier to share and manage.</p>
+                    <h3>Why Convert Audio Formats?</h3>
+                    <p>Audio conversion is essential for compatibility across different devices and applications. Whether you need compressed files for streaming, lossless formats for archival, or specific formats for professional audio work, our converter handles all scenarios while preserving quality and metadata.</p>
                 </div>
             </div>
 
@@ -242,9 +299,6 @@
                     <ul class="footer-links">
                         <li><a href="/image-tools/heic-to-jpg.html" class="footer-link" data-testid="footer-heic-jpg">HEIC to JPG</a></li>
                         <li><a href="/jpg-to-png.html" class="footer-link" data-testid="footer-jpg-png">JPG to PNG</a></li>
-                        <li><a href="/image-tools/png-to-jpg.html" class="footer-link" data-testid="footer-png-jpg">PNG to JPG</a></li>
-                        <li><a href="/image-tools/webp-to-jpg.html" class="footer-link" data-testid="footer-webp-jpg">WEBP to JPG</a></li>
-                        <li><a href="/image-tools/jpg-to-pdf.html" class="footer-link" data-testid="footer-jpg-pdf">JPG to PDF</a></li>
                     </ul>
                 </div>
                 
@@ -285,7 +339,8 @@
         </div>
     </footer>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
-    <script src="js/converters/pdf-merge.js"></script>
+    <script src="js/advanced-options-manager.js"></script>
+    <script src="js/advanced-options.js"></script>
+    <script src="js/converters/audio-converter.js"></script>
 </body>
 </html>
