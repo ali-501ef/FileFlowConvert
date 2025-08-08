@@ -109,7 +109,7 @@
         </div>
 
         <div class="converter-container">
-            <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()" data-testid="upload-area-pdf-watermark">
+            <div class="upload-area ff-upload-area" id="uploadArea" data-testid="upload-area-pdf-watermark" data-page-id="pdf-watermark">
                 <div class="upload-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
@@ -117,9 +117,9 @@
                     </svg>
                 </div>
                 <h3>Drop your PDF file here</h3>
-                <p>or click anywhere to browse files</p>
+                <p>or <button class="ff-choose-btn" type="button">Choose a File</button></p>
                 <p class="supported-formats">PDF files only</p>
-                <input type="file" id="fileInput" accept=".pdf" class="file-input">
+                <input class="ff-file-input" type="file" accept=".pdf" hidden />
             </div>
 
             <div class="watermark-setup" id="watermarkSetup" style="display: none;">
@@ -387,6 +387,7 @@
     </footer>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+    <script src="js/utils/file-input-bindings.js"></script>
     <script src="js/utils/fileInput.js"></script>
     <script src="js/advanced-options.js"></script>
     <script src="js/converters/pdf-watermark.js"></script>
