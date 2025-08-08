@@ -122,7 +122,8 @@
                 <input type="file" id="fileInput" accept=".pdf" hidden>
             </div>
 
-            <div class="watermark-setup" id="watermarkSetup" style="display: none;">
+            <div class="file-preview" id="filePreview" style="display: none;">
+                <div class="watermark-setup" id="watermarkSetup">
                 <div class="watermark-type-selection">
                     <h3>Watermark Type</h3>
                     <div class="type-buttons">
@@ -145,6 +146,10 @@
                     </div>
                 </div>
 
+                    <div class="preview-container" id="previewContainer">
+                        <div class="watermark-preview" id="watermarkPreview"></div>
+                    </div>
+                </div>
                 <div class="watermark-config" id="textConfig">
                     <div class="config-group">
                         <label for="watermarkText">Watermark Text</label>
