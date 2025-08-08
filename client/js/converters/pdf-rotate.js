@@ -36,14 +36,11 @@ class PDFRotate {
     }
 
     setupEventListeners() {
-        // Standardized file input handling (prevents duplicate dialogs)
-        if (this.fileInput) {
-            this.fileInputCleanup = window.FileInputUtils.bindFileInputHandler(
-                this.fileInput,
-                this.handleFile.bind(this),
-                { accept: 'application/pdf' }
-            );
-        }
+        // File upload handlers
+        this.uploadArea?.addEventListener('click', () => this.fileInput.click());
+        this.uploadArea?.addEventListener('dragover', this.handleDragOver.bind(this));
+        this.uploadArea?.addEventListener('drop', this.handleDrop.bind(this));
+        this.fileInput?.addEventListener('change', this.handleFileSelect.bind(this));
         
         // Convert button
         this.convertBtn?.addEventListener('click', this.rotatePDF.bind(this));
@@ -74,7 +71,26 @@ class PDFRotate {
         });
     }
 
-    // File handling methods removed - now handled by standardized FileInputUtils
+    handleDragOver(e) {
+        e.preventDefault();
+        this.uploadArea.classList.add('drag-over');
+    }
+
+    handleDrop(e) {
+        e.preventDefault();
+        this.uploadArea.classList.remove('drag-over');
+        const files = e.dataTransfer.files;
+        if (files.length > 0 && files[0].type === 'application/pdf') {
+            this.handleFile(files[0]);
+        }
+    }
+
+    handleFileSelect(e) {
+        const file = e.target.files[0];
+        if (file && file.type === 'application/pdf') {
+            this.handleFile(file);
+        }
+    }
 
     async handleFile(file) {
         this.currentFile = file;

@@ -110,20 +110,18 @@
         </div>
 
         <div class="converter-container">
-            <section class="ff-upload" data-page-id="video-compress">
-                <div class="upload-area ff-dropzone" id="uploadArea" role="button" tabindex="0" aria-label="Upload video files" data-testid="upload-area-video">
-                    <div class="upload-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                            <polygon points="23 7 16 12 23 17 23 7"></polygon>
-                            <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
-                        </svg>
-                    </div>
-                    <h3>Drop your video file here</h3>
-                    <p>or <button class="ff-choose-btn" type="button">Choose a File</button></p>
-                    <p class="supported-formats">Supports MP4, AVI, MOV, WMV, MKV</p>
-                    <input class="ff-file-input" type="file" accept="video/*" hidden />
+            <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()" data-testid="upload-area-video">
+                <div class="upload-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="23 7 16 12 23 17 23 7"></polygon>
+                        <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+                    </svg>
                 </div>
-            </section>
+                <h3>Drop your video file here</h3>
+                <p>or click anywhere to browse files</p>
+                <p class="supported-formats">Supports MP4, AVI, MOV, WMV, MKV</p>
+                <input type="file" id="fileInput" accept="video/*" hidden>
+            </div>
 
             <div class="advanced-options" id="advancedOptions">
                 <div class="options-header" id="optionsToggle">
@@ -348,11 +346,7 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.7/dist/umd/ffmpeg.js"></script>
-    <script src="js/utils/file-input-bindings.js"></script>
-    <script src="js/utils/fileInput.js"></script>
     <script src="js/advanced-options.js"></script>
-    <script src="js/uploader.js"></script>
-    <script src="js/upload-dispatch.js"></script>
     <script src="js/converters/video-compress.js"></script>
 </body>
 </html>

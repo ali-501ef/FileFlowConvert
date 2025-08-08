@@ -19,12 +19,11 @@ class PDFCompressor {
     }
 
     setupEventListeners() {
-        // Standardized file input handling (prevents duplicate dialogs)
-        this.fileInputCleanup = window.FileInputUtils.bindFileInputHandler(
-            this.fileInput,
-            this.handleFile.bind(this),
-            { accept: 'application/pdf' }
-        );
+        // File upload handlers
+        this.uploadArea.addEventListener('click', () => this.fileInput.click());
+        this.uploadArea.addEventListener('dragover', this.handleDragOver.bind(this));
+        this.uploadArea.addEventListener('drop', this.handleDrop.bind(this));
+        this.fileInput.addEventListener('change', this.handleFileSelect.bind(this));
         
         // Convert button
         this.convertBtn.addEventListener('click', this.compressPDF.bind(this));
@@ -33,7 +32,26 @@ class PDFCompressor {
         document.getElementById('downloadBtn').addEventListener('click', this.downloadPDF.bind(this));
     }
 
-    // File handling methods removed - now handled by standardized FileInputUtils
+    handleDragOver(e) {
+        e.preventDefault();
+        this.uploadArea.classList.add('drag-over');
+    }
+
+    handleDrop(e) {
+        e.preventDefault();
+        this.uploadArea.classList.remove('drag-over');
+        const files = e.dataTransfer.files;
+        if (files.length > 0 && files[0].type === 'application/pdf') {
+            this.handleFile(files[0]);
+        }
+    }
+
+    handleFileSelect(e) {
+        const file = e.target.files[0];
+        if (file && file.type === 'application/pdf') {
+            this.handleFile(file);
+        }
+    }
 
     async handleFile(file) {
         this.currentFile = file;
@@ -309,10 +327,4 @@ class PDFCompressor {
 // Initialize the PDF compressor when the page loads
 document.addEventListener('DOMContentLoaded', () => {
     new PDFCompressor();
-});
-
-// Cleanup on page unload
-window.addEventListener('beforeunload', () => {
-    const instances = document.querySelectorAll('[data-file-input-bound="true"]');
-    instances.forEach(input => window.FileInputUtils.cleanupFileInput(input));
 });

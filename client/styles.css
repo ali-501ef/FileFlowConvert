@@ -1835,11 +1835,6 @@ body {
     overflow: hidden;
 }
 
-/* Legacy upload area also acts as ff-upload-area */
-.upload-area {
-    position: relative;
-}
-
 .upload-area::before {
     content: '';
     position: absolute;
@@ -3330,41 +3325,8 @@ body {
     font-size: 0.875rem;
 }
 
-/* FileFlow unified upload component system */
-.ff-upload { 
-    position: relative; 
-}
-
-.ff-dropzone { 
-    position: relative; 
-    z-index: 5; 
-    cursor: pointer; 
-}
-
-.ff-choose-btn { 
-    position: relative; 
-    z-index: 6; 
-}
-
-.ff-file-input { 
-    display: none; 
-}
-
-/* Ensure decorative layers never eat clicks */
-.ff-dropzone .overlay, 
-.decorative-gradient { 
-    pointer-events: none !important; 
-}
-
-/* Drag state styling */
-.ff-dropzone.is-drag {
-    background-color: hsl(213, 100%, 97%);
-    border-color: hsl(213, 100%, 85%);
-}
-
-/* Remove blockers */
-.upload-overlay, .decorative-gradient {
-    pointer-events: none !important;
+.file-input {
+    display: none;
 }
 
 /* Quality settings */
