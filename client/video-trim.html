@@ -172,7 +172,7 @@
                         <path d="m6 9 6 6 6-6"/>
                     </svg>
                 </div>
-                <div class="options-content" id="optionsContent">
+                <div class="options-content" id="optionsContent" style="display: none;">
                     <div class="option-group">
                         <label for="outputFormat">Output Format</label>
                         <select id="outputFormat">
@@ -213,10 +213,12 @@
                     <div class="progress-fill" id="progressFill"></div>
                 </div>
                 <div class="progress-text" id="progressText">0%</div>
+                <div class="progress-stage" id="progressStage"></div>
             </div>
 
             <div class="results" id="results" style="display: none;">
-                <h3>Trim Complete</h3>
+                <h3>Video Trimming Complete</h3>
+                <div class="trim-stats" id="trimStats"></div>
                 <div class="result-actions">
                     <button class="download-btn" id="downloadBtn">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -344,6 +346,8 @@
     </footer>
 
     <script src="js/advanced-options.js"></script>
+    <script src="js/components/uploader.js"></script>
+    <script src="js/components/progress.js"></script>
     <script src="js/converters/video-trim.js"></script>
 </body>
 </html>

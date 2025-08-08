@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Video Compress - FileFlow</title>
-    <meta name="description" content="Compress video files to reduce size while maintaining quality with FileFlow's Video Compress tool. Support for MP4, AVI, MOV and more formats.">
+    <meta name="description" content="Reduce video file size while maintaining quality. Compress MP4, AVI, MOV videos with customizable compression levels.">
     <link rel="stylesheet" href="styles.css">
     
     <!-- Navigation Script -->
@@ -30,7 +30,6 @@
                     <div class="nav-dropdown-content">
                         <a href="/image-tools/heic-to-jpg.html" class="nav-dropdown-item" data-testid="nav-heic-jpg">HEIC to JPG</a>
                         <a href="/jpg-to-png.html" class="nav-dropdown-item" data-testid="nav-jpg-png">JPG to PNG</a>
-                        <a href="/pdf-to-jpg.html" class="nav-dropdown-item" data-testid="nav-pdf-to-jpg">PDF to JPG</a>
                         <a href="/image-tools/png-to-jpg.html" class="nav-dropdown-item" data-testid="nav-png-jpg">PNG to JPG</a>
                         <a href="/image-tools/webp-to-jpg.html" class="nav-dropdown-item" data-testid="nav-webp-jpg">WEBP to JPG</a>
                         <a href="/image-tools/jpg-to-pdf.html" class="nav-dropdown-item" data-testid="nav-jpg-pdf">JPG to PDF</a>
@@ -57,6 +56,7 @@
                         <a href="/pdf-rotate.html" class="nav-dropdown-item" data-testid="nav-pdf-rotate">PDF Rotate</a>
                         <a href="/pdf-watermark.html" class="nav-dropdown-item" data-testid="nav-pdf-watermark">PDF Watermark</a>
                         <a href="/pdf-to-word.html" class="nav-dropdown-item" data-testid="nav-pdf-to-word">PDF to Word</a>
+                        <a href="/pdf-to-jpg.html" class="nav-dropdown-item" data-testid="nav-pdf-jpg">PDF to JPG</a>
                     </div>
                 </div>
 
@@ -91,20 +91,21 @@
         <div class="hero-section">
             <div class="hero-content">
                 <div class="hero-badge">
-                    <div class="tool-icon bg-red">
+                    <div class="tool-icon bg-orange">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M12 20h9"></path>
-                            <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7,10 12,15 17,10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
                         </svg>
                     </div>
-                    <span>Media Tools</span>
+                    <span>Audio/Video Tools</span>
                 </div>
                 <h1 class="hero-title">Video Compress</h1>
                 <p class="hero-description">Reduce video file size while maintaining quality</p>
                 <div class="hero-features">
-                    <span class="feature-tag">✓ Multiple formats</span>
+                    <span class="feature-tag">✓ Smart compression</span>
                     <span class="feature-tag">✓ Quality control</span>
-                    <span class="feature-tag">✓ Size optimization</span>
+                    <span class="feature-tag">✓ Size preview</span>
                 </div>
             </div>
         </div>
@@ -119,7 +120,7 @@
                 </div>
                 <h3>Drop your video file here</h3>
                 <p>or click anywhere to browse files</p>
-                <p class="supported-formats">Supports MP4, AVI, MOV, WMV, MKV</p>
+                <p class="supported-formats">Supports MP4, MOV, AVI, MKV</p>
                 <input type="file" id="fileInput" accept="video/*" hidden>
             </div>
 
@@ -144,47 +145,48 @@
                         <path d="m6 9 6 6 6-6"/>
                     </svg>
                 </div>
-                <div class="options-content" id="optionsContent">
+                
+                <div class="options-content" id="optionsContent" style="display: none;">
                     <div class="option-group">
                         <label for="compressionLevel">Compression Level</label>
                         <select id="compressionLevel">
+                            <option value="light">Light (Better quality, larger size)</option>
                             <option value="medium" selected>Medium (Balanced)</option>
-                            <option value="light">Light (Higher quality, larger size)</option>
-                            <option value="heavy">Heavy (Lower quality, smaller size)</option>
-                            <option value="custom">Custom Settings</option>
+                            <option value="heavy">Heavy (Smaller size, some quality loss)</option>
+                            <option value="custom">Custom</option>
                         </select>
                     </div>
                     <div class="option-group">
                         <label for="outputFormat">Output Format</label>
                         <select id="outputFormat">
-                            <option value="mp4">MP4 (Recommended)</option>
-                            <option value="webm">WebM</option>
-                            <option value="avi">AVI</option>
+                            <option value="mp4" selected>MP4 (Most Compatible)</option>
+                            <option value="webm">WebM (Web Optimized)</option>
+                            <option value="avi">AVI (Legacy Support)</option>
                         </select>
                     </div>
-                    <div id="custom-settings-group" class="option-group" style="display: none;">
-                        <label for="videoBitrate">Video Bitrate (kbps)</label>
-                        <input type="number" id="videoBitrate" min="100" max="10000" value="1000">
-                    </div>
-                    <div id="resolution-group" class="option-group" style="display: none;">
-                        <label for="resolution">Resolution</label>
-                        <select id="resolution">
-                            <option value="original">Keep Original</option>
-                            <option value="1080p">1080p (1920x1080)</option>
-                            <option value="720p">720p (1280x720)</option>
-                            <option value="480p">480p (854x480)</option>
-                            <option value="360p">360p (640x360)</option>
-                        </select>
-                    </div>
-                    <div id="framerate-group" class="option-group" style="display: none;">
-                        <label for="frameRate">Frame Rate (fps)</label>
-                        <select id="frameRate">
-                            <option value="original">Keep Original</option>
-                            <option value="60">60 fps</option>
-                            <option value="30">30 fps</option>
-                            <option value="24">24 fps</option>
-                            <option value="15">15 fps</option>
-                        </select>
+                    <div id="customSettings" style="display: none;">
+                        <div class="option-group">
+                            <label for="videoBitrate">Video Bitrate (kbps)</label>
+                            <input type="number" id="videoBitrate" min="500" max="8000" value="2000">
+                        </div>
+                        <div class="option-group">
+                            <label for="resolution">Resolution</label>
+                            <select id="resolution">
+                                <option value="original">Keep Original</option>
+                                <option value="1920x1080">1080p (1920x1080)</option>
+                                <option value="1280x720">720p (1280x720)</option>
+                                <option value="854x480">480p (854x480)</option>
+                            </select>
+                        </div>
+                        <div class="option-group">
+                            <label for="frameRate">Frame Rate (fps)</label>
+                            <select id="frameRate">
+                                <option value="original">Keep Original</option>
+                                <option value="60">60 fps</option>
+                                <option value="30">30 fps</option>
+                                <option value="24">24 fps</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -193,9 +195,6 @@
                 <div class="preview-header">
                     <h3 id="fileName"></h3>
                     <span id="fileSize"></span>
-                </div>
-                <div class="video-preview">
-                    <video id="videoPreview" controls style="max-width: 100%; max-height: 300px;"></video>
                 </div>
                 <div class="video-info" id="videoInfo"></div>
             </div>
@@ -210,10 +209,11 @@
                     <div class="progress-fill" id="progressFill"></div>
                 </div>
                 <div class="progress-text" id="progressText">0%</div>
+                <div class="progress-stage" id="progressStage"></div>
             </div>
 
             <div class="results" id="results" style="display: none;">
-                <h3>Compression Complete</h3>
+                <h3>Video Compression Complete</h3>
                 <div class="compression-stats" id="compressionStats"></div>
                 <div class="result-actions">
                     <button class="download-btn" id="downloadBtn">
@@ -237,7 +237,7 @@
                             </svg>
                         </div>
                         <h3>Reduce File Size</h3>
-                        <p>Significantly reduce video file sizes while maintaining visual quality. Perfect for sharing, uploading, and storage optimization.</p>
+                        <p>Significantly decrease video file sizes while maintaining visual quality. Perfect for sharing, uploading, and storage optimization.</p>
                     </div>
                     <div class="info-card">
                         <div class="info-icon">
@@ -254,22 +254,24 @@
                                 <path d="m19.07 4.93-1.41 1.41"/>
                             </svg>
                         </div>
-                        <h3>Smart Settings</h3>
-                        <p>Choose from preset compression levels or customize bitrate, resolution, and frame rate for optimal results based on your needs.</p>
+                        <h3>Smart Compression</h3>
+                        <p>Advanced algorithms analyze your video to find the optimal balance between file size and quality for each compression level.</p>
                     </div>
                     <div class="info-card">
                         <div class="info-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+                                <path d="M12 1L3 5l9 4 9-4-9-4z"/>
+                                <path d="M3 17l6-3 6 3-6 3-6-3z"/>
+                                <path d="M3 12l6-3 6 3-6 3-6-3z"/>
                             </svg>
                         </div>
-                        <h3>Fast Processing</h3>
-                        <p>Advanced compression algorithms work quickly to reduce file sizes up to 90% while preserving visual quality for professional results.</p>
+                        <h3>Multiple Levels</h3>
+                        <p>Choose from light, medium, or heavy compression levels, or customize bitrate, resolution, and frame rate for specific needs.</p>
                     </div>
                 </div>
                 <div class="tool-benefits">
                     <h3>Why Compress Videos?</h3>
-                    <p>Video compression is crucial for efficient storage and sharing. Large video files can be difficult to upload, share via email, or store on devices. Our compression tool reduces file sizes dramatically while maintaining quality, making videos faster to load and easier to manage across all platforms.</p>
+                    <p>Video compression is essential for efficient media management. Large video files can be slow to upload, consume excessive bandwidth, and take up valuable storage space. Our compression tool reduces file sizes by up to 80% while maintaining professional quality, making your videos faster to share and easier to manage across all platforms.</p>
                 </div>
             </div>
 
@@ -306,6 +308,9 @@
                     <ul class="footer-links">
                         <li><a href="/image-tools/heic-to-jpg.html" class="footer-link" data-testid="footer-heic-jpg">HEIC to JPG</a></li>
                         <li><a href="/jpg-to-png.html" class="footer-link" data-testid="footer-jpg-png">JPG to PNG</a></li>
+                        <li><a href="/image-tools/png-to-jpg.html" class="footer-link" data-testid="footer-png-jpg">PNG to JPG</a></li>
+                        <li><a href="/image-tools/webp-to-jpg.html" class="footer-link" data-testid="footer-webp-jpg">WEBP to JPG</a></li>
+                        <li><a href="/image-tools/jpg-to-pdf.html" class="footer-link" data-testid="footer-jpg-pdf">JPG to PDF</a></li>
                     </ul>
                 </div>
                 
@@ -346,8 +351,9 @@
         </div>
     </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.7/dist/umd/ffmpeg.js"></script>
     <script src="js/advanced-options.js"></script>
+    <script src="js/components/uploader.js"></script>
+    <script src="js/components/progress.js"></script>
     <script src="js/converters/video-compress.js"></script>
 </body>
 </html>

@@ -1,114 +1,116 @@
+/**
+ * Video Compressor - Video Compression Tool
+ * Uses shared components and follows the PDF Compress pattern
+ */
 class VideoCompressor {
     constructor() {
         this.init();
         this.setupEventListeners();
-        this.ffmpeg = null;
-        this.isFFmpegLoaded = false;
+        this.setupComponents();
     }
 
     init() {
-        this.uploadArea = document.getElementById('uploadArea');
-        this.fileInput = document.getElementById('fileInput');
-        this.filePreview = document.getElementById('filePreview');
-        this.videoPreview = document.getElementById('videoPreview');
-        this.convertBtn = document.getElementById('convertBtn');
-        this.results = document.getElementById('results');
-        this.progressContainer = document.getElementById('progressContainer');
-        this.progressFill = document.getElementById('progressFill');
-        this.progressText = document.getElementById('progressText');
-        this.compressionLevel = document.getElementById('compressionLevel');
-        this.customSettings = document.getElementById('customSettings');
-        
         this.currentFile = null;
         this.outputBlob = null;
-        this.isFilePickerOpen = false;
+        this.compressionStats = null;
+        
+        // Initialize DOM elements
+        this.filePreview = document.getElementById('filePreview');
+        this.convertBtn = document.getElementById('convertBtn');
+        this.results = document.getElementById('results');
+        this.compressionLevel = document.getElementById('compressionLevel');
+        this.customSettings = document.getElementById('customSettings');
+    }
+
+    setupComponents() {
+        // Initialize shared components
+        this.uploader = new FileUploader({
+            uploadAreaId: 'uploadArea',
+            fileInputId: 'fileInput',
+            acceptedTypes: ['video/*'],
+            multiple: false,
+            onFileSelect: this.handleFile.bind(this)
+        });
+
+        this.progress = new ProgressTracker({
+            progressContainerId: 'progressContainer',
+            progressFillId: 'progressFill',
+            progressTextId: 'progressText',
+            progressStageId: 'progressStage',
+            showStages: true
+        });
+
+        this.buttonLoader = new ButtonLoader('convertBtn');
+        this.errorDisplay = new ErrorDisplay('results');
     }
 
     setupEventListeners() {
-        // File upload handlers
-        this.uploadArea.addEventListener('click', this.handleUploadAreaClick.bind(this));
-        this.uploadArea.addEventListener('dragover', this.handleDragOver.bind(this));
-        this.uploadArea.addEventListener('drop', this.handleDrop.bind(this));
-        this.fileInput.addEventListener('change', this.handleFileSelect.bind(this));
-        
         // Convert button
         this.convertBtn.addEventListener('click', this.compressVideo.bind(this));
         
-        // Compression level change
-        this.compressionLevel.addEventListener('change', this.handleCompressionChange.bind(this));
-        
         // Download button
         document.getElementById('downloadBtn').addEventListener('click', this.downloadVideo.bind(this));
-    }
-
-    handleDragOver(e) {
-        e.preventDefault();
-        this.uploadArea.classList.add('drag-over');
-    }
-
-    handleDrop(e) {
-        e.preventDefault();
-        this.uploadArea.classList.remove('drag-over');
-        const files = e.dataTransfer.files;
-        if (files.length > 0 && files[0].type.startsWith('video/')) {
-            this.handleFile(files[0]);
-        }
-    }
-
-    handleFileSelect(e) {
-        const file = e.target.files[0];
-        if (file && file.type.startsWith('video/')) {
-            this.handleFile(file);
-        }
-    }
-
-    handleUploadAreaClick(e) {
-        if (this.isFilePickerOpen) {
-            return;
-        }
-        this.isFilePickerOpen = true;
-        this.fileInput.click();
         
-        // Reset flag after a short delay to handle cancel scenarios
-        setTimeout(() => {
-            this.isFilePickerOpen = false;
-        }, 100);
+        // Compression level change
+        this.compressionLevel.addEventListener('change', this.handleCompressionChange.bind(this));
     }
 
     async handleFile(file) {
         this.currentFile = file;
         this.showFilePreview(file);
         
-        // Load video for preview and info
-        const url = URL.createObjectURL(file);
-        this.videoPreview.src = url;
-        
-        this.videoPreview.onloadedmetadata = () => {
-            const duration = this.formatDuration(this.videoPreview.duration);
-            const resolution = `${this.videoPreview.videoWidth}x${this.videoPreview.videoHeight}`;
-            
-            document.getElementById('videoInfo').innerHTML = `
-                <div class="video-details">
-                    <span class="detail-item">🎬 ${resolution}</span>
-                    <span class="detail-item">⏱️ ${duration}</span>
-                    <span class="detail-item">📊 ${this.formatFileSize(file.size)}</span>
-                </div>
-            `;
-        };
-        
-        // Initialize FFmpeg if not loaded
-        if (!this.isFFmpegLoaded) {
-            await this.initFFmpeg();
+        // Load video metadata
+        try {
+            const metadata = await this.getVideoMetadata(file);
+            this.displayVideoInfo(metadata);
+            this.convertBtn.disabled = false;
+        } catch (error) {
+            this.errorDisplay.showError('Failed to load video metadata');
         }
-        
-        this.convertBtn.disabled = false;
     }
 
     showFilePreview(file) {
         document.getElementById('fileName').textContent = file.name;
-        document.getElementById('fileSize').textContent = this.formatFileSize(file.size);
+        document.getElementById('fileSize').textContent = FileUtils.formatFileSize(file.size);
         this.filePreview.style.display = 'block';
-        this.uploadArea.style.display = 'none';
+    }
+
+    async getVideoMetadata(file) {
+        return new Promise((resolve, reject) => {
+            const video = document.createElement('video');
+            video.preload = 'metadata';
+            
+            video.onloadedmetadata = () => {
+                const metadata = {
+                    duration: video.duration,
+                    width: video.videoWidth,
+                    height: video.videoHeight
+                };
+                URL.revokeObjectURL(video.src);
+                resolve(metadata);
+            };
+            
+            video.onerror = () => {
+                URL.revokeObjectURL(video.src);
+                reject(new Error('Invalid video file'));
+            };
+            
+            video.src = URL.createObjectURL(file);
+        });
+    }
+
+    displayVideoInfo(metadata) {
+        const duration = FileUtils.formatDuration(metadata.duration);
+        const resolution = `${metadata.width}x${metadata.height}`;
+        const fileSize = FileUtils.formatFileSize(this.currentFile.size);
+        
+        document.getElementById('videoInfo').innerHTML = `
+            <div class="video-details">
+                <span class="detail-item">🎬 ${resolution}</span>
+                <span class="detail-item">⏱️ ${duration}</span>
+                <span class="detail-item">📊 ${fileSize}</span>
+            </div>
+        `;
     }
 
     handleCompressionChange() {
@@ -116,48 +118,25 @@ class VideoCompressor {
         this.customSettings.style.display = isCustom ? 'block' : 'none';
     }
 
-    async initFFmpeg() {
-        if (typeof FFmpeg === 'undefined') {
-            // Fallback to Canvas-based compression for basic functionality
-            this.showInfo('FFmpeg not available. Using basic compression method.');
-            return;
-        }
-
-        try {
-            this.showInfo('Loading video processing engine...');
-            // Note: This is a simplified approach. Real FFmpeg.wasm integration requires more setup
-            this.isFFmpegLoaded = true;
-            this.hideInfo();
-        } catch (error) {
-            console.error('Failed to load FFmpeg:', error);
-            this.showError('Failed to load video processing engine');
-        }
-    }
-
     async compressVideo() {
         if (!this.currentFile) return;
 
-        this.showLoading(true);
-        this.showProgress(0);
+        this.buttonLoader.showLoading();
+        this.progress.show(0, 'Preparing compression...');
         this.results.style.display = 'none';
 
         try {
-            // Get compression settings
             const settings = this.getCompressionSettings();
-            
-            // For demonstration, we'll use a simplified compression method
-            // In a real implementation, this would use FFmpeg.wasm
             await this.performCompression(settings);
-            
             this.showCompressionResults();
-            this.trackConversion();
+            AnalyticsTracker.trackConversion('Media Tools', 'Video Compress');
             
         } catch (error) {
-            this.showError('Failed to compress video: ' + error.message);
+            this.errorDisplay.showError('Failed to compress video: ' + error.message);
         }
 
-        this.hideProgress();
-        this.showLoading(false);
+        this.progress.hide();
+        this.buttonLoader.hideLoading();
     }
 
     getCompressionSettings() {
@@ -195,7 +174,7 @@ class VideoCompressor {
             const formData = new FormData();
             formData.append('file', this.currentFile);
             
-            this.showProgress(10);
+            this.progress.updateProgress(10, 'Uploading video...');
             const uploadResponse = await fetch('/api/upload', {
                 method: 'POST',
                 body: formData
@@ -206,7 +185,7 @@ class VideoCompressor {
             }
             
             const uploadResult = await uploadResponse.json();
-            this.showProgress(30);
+            this.progress.updateProgress(30, 'Analyzing video...');
             
             // Convert with server-side processing
             const convertResponse = await fetch('/api/convert-media', {
@@ -227,15 +206,15 @@ class VideoCompressor {
                 })
             });
             
-            this.showProgress(90);
+            this.progress.updateProgress(80, 'Compressing video...');
             
             if (!convertResponse.ok) {
                 const error = await convertResponse.json();
-                throw new Error(error.error || 'Conversion failed');
+                throw new Error(error.error || 'Compression failed');
             }
             
             const result = await convertResponse.json();
-            this.showProgress(100);
+            this.progress.updateProgress(100, 'Complete!');
             
             // Download the converted file
             this.outputBlob = await fetch(result.download_url).then(r => r.blob());
@@ -248,7 +227,7 @@ class VideoCompressor {
             };
             
         } catch (error) {
-            throw new Error(`Compression failed: ${error.message}`);
+            throw new Error(`Video compression failed: ${error.message}`);
         }
     }
 
@@ -259,15 +238,19 @@ class VideoCompressor {
             <div class="stats-grid">
                 <div class="stat-item">
                     <span class="stat-label">Original Size:</span>
-                    <span class="stat-value">${this.formatFileSize(stats.originalSize)}</span>
+                    <span class="stat-value">${FileUtils.formatFileSize(stats.originalSize)}</span>
                 </div>
                 <div class="stat-item">
                     <span class="stat-label">Compressed Size:</span>
-                    <span class="stat-value">${this.formatFileSize(stats.compressedSize)}</span>
+                    <span class="stat-value">${FileUtils.formatFileSize(stats.compressedSize)}</span>
                 </div>
                 <div class="stat-item">
                     <span class="stat-label">Size Reduction:</span>
                     <span class="stat-value success">${stats.compressionRatio}%</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Status:</span>
+                    <span class="stat-value success">✓ Ready for download</span>
                 </div>
             </div>
         `;
@@ -277,84 +260,20 @@ class VideoCompressor {
 
     downloadVideo() {
         if (this.outputBlob) {
+            const format = document.getElementById('outputFormat').value;
+            const originalName = this.currentFile.name.replace(/\.[^/.]+$/, '');
+            const fileName = `${originalName}_compressed.${format}`;
+            
             const a = document.createElement('a');
             a.href = URL.createObjectURL(this.outputBlob);
-            a.download = this.currentFile.name.replace(/\.[^/.]+$/, '_compressed.mp4');
+            a.download = fileName;
             a.click();
+            
+            // Clean up
+            setTimeout(() => {
+                URL.revokeObjectURL(a.href);
+            }, 100);
         }
-    }
-
-    trackConversion() {
-        // Track the conversion for analytics
-        if (typeof gtag !== 'undefined') {
-            gtag('event', 'conversion', {
-                'event_category': 'Media Tools',
-                'event_label': 'Video Compress',
-                'value': 1
-            });
-        }
-    }
-
-    showProgress(percent) {
-        this.progressContainer.style.display = 'block';
-        this.progressFill.style.width = percent + '%';
-        this.progressText.textContent = percent + '%';
-    }
-
-    hideProgress() {
-        this.progressContainer.style.display = 'none';
-    }
-
-    showInfo(message) {
-        // Show info message (implement as needed)
-        console.log('Info:', message);
-    }
-
-    hideInfo() {
-        // Hide info message
-    }
-
-    formatDuration(seconds) {
-        const hours = Math.floor(seconds / 3600);
-        const minutes = Math.floor((seconds % 3600) / 60);
-        const secs = Math.floor(seconds % 60);
-        
-        if (hours > 0) {
-            return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-        }
-        return `${minutes}:${secs.toString().padStart(2, '0')}`;
-    }
-
-    formatFileSize(bytes) {
-        if (bytes === 0) return '0 Bytes';
-        const k = 1024;
-        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-    }
-
-    showLoading(show) {
-        const btnText = this.convertBtn.querySelector('.btn-text');
-        const btnLoader = this.convertBtn.querySelector('.btn-loader');
-        
-        if (show) {
-            btnText.style.display = 'none';
-            btnLoader.style.display = 'block';
-            this.convertBtn.disabled = true;
-        } else {
-            btnText.style.display = 'block';
-            btnLoader.style.display = 'none';
-            this.convertBtn.disabled = false;
-        }
-    }
-
-    showError(message) {
-        const errorDiv = document.createElement('div');
-        errorDiv.className = 'error-message';
-        errorDiv.textContent = message;
-        this.results.innerHTML = '';
-        this.results.appendChild(errorDiv);
-        this.results.style.display = 'block';
     }
 }
 

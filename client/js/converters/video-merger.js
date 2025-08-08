@@ -1,35 +1,53 @@
+/**
+ * Video Merger - Multiple Video Merging Tool
+ * Uses shared components and follows the PDF Compress pattern
+ */
 class VideoMerger {
     constructor() {
         this.init();
         this.setupEventListeners();
+        this.setupComponents();
     }
 
     init() {
-        this.uploadArea = document.getElementById('uploadArea');
-        this.fileInput = document.getElementById('fileInput');
+        this.videoFiles = [];
+        this.outputBlob = null;
+        this.mergeStats = null;
+        
+        // Initialize DOM elements
         this.videoList = document.getElementById('videoList');
         this.videoItems = document.getElementById('videoItems');
         this.convertBtn = document.getElementById('convertBtn');
         this.results = document.getElementById('results');
-        this.progressContainer = document.getElementById('progressContainer');
-        this.progressFill = document.getElementById('progressFill');
-        this.progressText = document.getElementById('progressText');
-        this.progressStage = document.getElementById('progressStage');
-        
-        this.videoFiles = [];
-        this.outputBlob = null;
-        this.isFilePickerOpen = false;
+    }
+
+    setupComponents() {
+        // Initialize shared components
+        this.uploader = new FileUploader({
+            uploadAreaId: 'uploadArea',
+            fileInputId: 'fileInput',
+            acceptedTypes: ['video/*'],
+            multiple: true,
+            onFileSelect: this.handleFiles.bind(this)
+        });
+
+        this.progress = new ProgressTracker({
+            progressContainerId: 'progressContainer',
+            progressFillId: 'progressFill',
+            progressTextId: 'progressText',
+            progressStageId: 'progressStage',
+            showStages: true
+        });
+
+        this.buttonLoader = new ButtonLoader('convertBtn');
+        this.errorDisplay = new ErrorDisplay('results');
     }
 
     setupEventListeners() {
-        // File upload handlers
-        this.uploadArea.addEventListener('click', this.handleUploadAreaClick.bind(this));
-        this.uploadArea.addEventListener('dragover', this.handleDragOver.bind(this));
-        this.uploadArea.addEventListener('drop', this.handleDrop.bind(this));
-        this.fileInput.addEventListener('change', this.handleFileSelect.bind(this));
-        
         // Add more videos button
-        document.getElementById('addMoreBtn').addEventListener('click', this.handleUploadAreaClick.bind(this));
+        document.getElementById('addMoreBtn').addEventListener('click', () => {
+            this.uploader.triggerFileSelect();
+        });
         
         // Convert button
         this.convertBtn.addEventListener('click', this.mergeVideos.bind(this));
@@ -38,57 +56,55 @@ class VideoMerger {
         document.getElementById('downloadBtn').addEventListener('click', this.downloadVideo.bind(this));
     }
 
-    handleDragOver(e) {
-        e.preventDefault();
-        this.uploadArea.classList.add('drag-over');
-    }
-
-    handleDrop(e) {
-        e.preventDefault();
-        this.uploadArea.classList.remove('drag-over');
-        const files = Array.from(e.dataTransfer.files).filter(file => file.type.startsWith('video/'));
-        if (files.length > 0) {
-            this.handleFiles(files);
+    async handleFiles(files) {
+        // Add new files to existing collection
+        for (const file of files) {
+            try {
+                const metadata = await this.getVideoMetadata(file);
+                this.videoFiles.push({
+                    file: file,
+                    id: Date.now() + Math.random(),
+                    duration: metadata.duration,
+                    width: metadata.width,
+                    height: metadata.height,
+                    url: URL.createObjectURL(file)
+                });
+            } catch (error) {
+                this.errorDisplay.showError(`Failed to load metadata for ${file.name}`);
+            }
         }
-    }
-
-    handleFileSelect(e) {
-        const files = Array.from(e.target.files).filter(file => file.type.startsWith('video/'));
-        if (files.length > 0) {
-            this.handleFiles(files);
-        }
-    }
-
-    handleUploadAreaClick(e) {
-        if (this.isFilePickerOpen) {
-            return;
-        }
-        this.isFilePickerOpen = true;
-        this.fileInput.click();
-        
-        // Reset flag after a short delay to handle cancel scenarios
-        setTimeout(() => {
-            this.isFilePickerOpen = false;
-        }, 100);
-    }
-
-    handleFiles(files) {
-        files.forEach(file => {
-            this.videoFiles.push({
-                file: file,
-                id: Date.now() + Math.random(),
-                duration: 0,
-                url: URL.createObjectURL(file)
-            });
-        });
         
         this.updateVideoList();
-        this.uploadArea.style.display = 'none';
+        this.uploader.hideUploadArea();
         this.videoList.style.display = 'block';
         
         if (this.videoFiles.length >= 2) {
             this.convertBtn.disabled = false;
         }
+    }
+
+    async getVideoMetadata(file) {
+        return new Promise((resolve, reject) => {
+            const video = document.createElement('video');
+            video.preload = 'metadata';
+            
+            video.onloadedmetadata = () => {
+                const metadata = {
+                    duration: video.duration,
+                    width: video.videoWidth,
+                    height: video.videoHeight
+                };
+                URL.revokeObjectURL(video.src);
+                resolve(metadata);
+            };
+            
+            video.onerror = () => {
+                URL.revokeObjectURL(video.src);
+                reject(new Error('Invalid video file'));
+            };
+            
+            video.src = URL.createObjectURL(file);
+        });
     }
 
     updateVideoList() {
@@ -107,7 +123,7 @@ class VideoMerger {
                     <div class="video-info">
                         <div class="video-name">${videoData.file.name}</div>
                         <div class="video-details">
-                            <span class="video-size">${this.formatFileSize(videoData.file.size)}</span>
+                            <span class="video-size">${FileUtils.formatFileSize(videoData.file.size)}</span>
                             <span class="video-duration" id="duration-${videoData.id}">Loading...</span>
                         </div>
                     </div>
@@ -136,8 +152,7 @@ class VideoMerger {
             // Load video metadata
             const video = videoItem.querySelector('video');
             video.onloadedmetadata = () => {
-                videoData.duration = video.duration;
-                document.getElementById(`duration-${videoData.id}`).textContent = this.formatDuration(video.duration);
+                document.getElementById(`duration-${videoData.id}`).textContent = FileUtils.formatDuration(videoData.duration);
             };
         });
     }
@@ -156,7 +171,7 @@ class VideoMerger {
         
         if (this.videoFiles.length === 0) {
             this.videoList.style.display = 'none';
-            this.uploadArea.style.display = 'block';
+            this.uploader.showUploadArea();
             this.convertBtn.disabled = true;
         } else {
             this.updateVideoList();
@@ -169,22 +184,22 @@ class VideoMerger {
     async mergeVideos() {
         if (this.videoFiles.length < 2) return;
 
-        this.showLoading(true);
-        this.showProgressWithStages(0, 'Preparing videos...');
+        this.buttonLoader.showLoading();
+        this.progress.show(0, 'Preparing videos...');
         this.results.style.display = 'none';
 
         try {
             const settings = this.getMergeSettings();
             await this.performMerge(settings);
             this.showMergeResults();
-            this.trackConversion();
+            AnalyticsTracker.trackConversion('Media Tools', 'Video Merger');
             
         } catch (error) {
-            this.showError('Failed to merge videos: ' + error.message);
+            this.errorDisplay.showError('Failed to merge videos: ' + error.message);
         }
 
-        this.hideProgress();
-        this.showLoading(false);
+        this.progress.hide();
+        this.buttonLoader.hideLoading();
     }
 
     getMergeSettings() {
@@ -199,46 +214,68 @@ class VideoMerger {
 
     async performMerge(settings) {
         try {
-            // For video merger, we'll need to upload multiple files and merge them server-side
-            // This is a complex operation that requires careful file handling
-            this.showProgressWithStages(10, 'Preparing files for merge...');
-            
-            // Create a temporary merged file by concatenating them client-side for now
-            // In production, this would use server-side FFmpeg with proper video stream handling
-            const mergedParts = [];
-            
-            this.showProgressWithStages(30, 'Processing video streams...');
+            // Upload all video files to server
+            const uploadedFiles = [];
             
             for (let i = 0; i < this.videoFiles.length; i++) {
-                const video = this.videoFiles[i];
-                const arrayBuffer = await video.file.arrayBuffer();
-                mergedParts.push(arrayBuffer);
+                const formData = new FormData();
+                formData.append('file', this.videoFiles[i].file);
                 
-                const progress = 30 + (i / this.videoFiles.length) * 50; 
-                this.showProgressWithStages(progress, `Processing video ${i + 1}/${this.videoFiles.length}...`);
+                const progress = 10 + (i / this.videoFiles.length) * 30;
+                this.progress.updateProgress(progress, `Uploading video ${i + 1}/${this.videoFiles.length}...`);
+                
+                const uploadResponse = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!uploadResponse.ok) {
+                    throw new Error(`Failed to upload ${this.videoFiles[i].file.name}`);
+                }
+                
+                const uploadResult = await uploadResponse.json();
+                uploadedFiles.push(uploadResult.file_id);
             }
             
-            this.showProgressWithStages(90, 'Finalizing merge...');
+            this.progress.updateProgress(50, 'Merging videos...');
             
-            // Create merged blob (this is a simplified approach)
-            // Real implementation would require FFmpeg server-side processing
-            const totalSize = mergedParts.reduce((sum, part) => sum + part.byteLength, 0);
-            const mergedBuffer = new ArrayBuffer(totalSize);
-            const mergedView = new Uint8Array(mergedBuffer);
-            
-            let offset = 0;
-            mergedParts.forEach(part => {
-                mergedView.set(new Uint8Array(part), offset);
-                offset += part.byteLength;
+            // Merge videos with server-side processing
+            const convertResponse = await fetch('/api/convert-media', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    file_ids: uploadedFiles,
+                    conversion_type: 'video_merge',
+                    options: {
+                        format: settings.outputFormat,
+                        quality: settings.quality,
+                        resolution: settings.resolution,
+                        add_transitions: settings.addTransitions,
+                        normalize_audio: settings.normalizeAudio
+                    }
+                })
             });
             
-            this.outputBlob = new Blob([mergedBuffer], { type: 'video/mp4' });
-            this.showProgressWithStages(100, 'Complete!');
+            this.progress.updateProgress(80, 'Finalizing merge...');
             
-            this.mergeInfo = {
+            if (!convertResponse.ok) {
+                const error = await convertResponse.json();
+                throw new Error(error.error || 'Video merge failed');
+            }
+            
+            const result = await convertResponse.json();
+            this.progress.updateProgress(100, 'Complete!');
+            
+            // Download the merged file
+            this.outputBlob = await fetch(result.download_url).then(r => r.blob());
+            
+            // Store merge stats
+            this.mergeStats = {
                 totalVideos: this.videoFiles.length,
                 totalDuration: this.videoFiles.reduce((sum, video) => sum + video.duration, 0),
-                outputSize: this.outputBlob.size,
+                outputSize: result.file_size,
                 format: settings.outputFormat.toUpperCase()
             };
             
@@ -248,29 +285,29 @@ class VideoMerger {
     }
 
     showMergeResults() {
-        const info = this.mergeInfo;
+        const stats = this.mergeStats;
         
         document.getElementById('mergeInfo').innerHTML = `
-            <div class="merge-details">
-                <div class="detail-row">
-                    <span class="detail-label">Videos Merged:</span>
-                    <span class="detail-value">${info.totalVideos}</span>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="stat-label">Videos Merged:</span>
+                    <span class="stat-value">${stats.totalVideos}</span>
                 </div>
-                <div class="detail-row">
-                    <span class="detail-label">Total Duration:</span>
-                    <span class="detail-value">${this.formatDuration(info.totalDuration)}</span>
+                <div class="stat-item">
+                    <span class="stat-label">Total Duration:</span>
+                    <span class="stat-value">${FileUtils.formatDuration(stats.totalDuration)}</span>
                 </div>
-                <div class="detail-row">
-                    <span class="detail-label">Output Format:</span>
-                    <span class="detail-value">${info.format}</span>
+                <div class="stat-item">
+                    <span class="stat-label">Output Format:</span>
+                    <span class="stat-value">${stats.format}</span>
                 </div>
-                <div class="detail-row">
-                    <span class="detail-label">File Size:</span>
-                    <span class="detail-value">${this.formatFileSize(info.outputSize)}</span>
+                <div class="stat-item">
+                    <span class="stat-label">File Size:</span>
+                    <span class="stat-value">${FileUtils.formatFileSize(stats.outputSize)}</span>
                 </div>
-                <div class="detail-row">
-                    <span class="detail-label">Status:</span>
-                    <span class="detail-value success">✓ Ready for download</span>
+                <div class="stat-item">
+                    <span class="stat-label">Status:</span>
+                    <span class="stat-value success">✓ Ready for download</span>
                 </div>
             </div>
         `;
@@ -288,65 +325,10 @@ class VideoMerger {
         }
     }
 
-    trackConversion() {
-        if (typeof gtag !== 'undefined') {
-            gtag('event', 'conversion', {
-                'event_category': 'Media Tools',
-                'event_label': 'Video Merger',
-                'value': 1
-            });
-        }
-    }
-
-    showProgressWithStages(percent, stage) {
-        this.progressContainer.style.display = 'block';
-        this.progressFill.style.width = percent + '%';
-        this.progressText.textContent = percent + '%';
-        this.progressStage.textContent = stage;
-    }
-
-    hideProgress() {
-        this.progressContainer.style.display = 'none';
-    }
-
-    formatDuration(seconds) {
-        const minutes = Math.floor(seconds / 60);
-        const secs = Math.floor(seconds % 60);
-        return `${minutes}:${secs.toString().padStart(2, '0')}`;
-    }
-
-    formatFileSize(bytes) {
-        if (bytes === 0) return '0 Bytes';
-        const k = 1024;
-        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-    }
-
-    showLoading(show) {
-        const btnText = this.convertBtn.querySelector('.btn-text');
-        const btnLoader = this.convertBtn.querySelector('.btn-loader');
-        
-        if (show) {
-            btnText.style.display = 'none';
-            btnLoader.style.display = 'block';
-            this.convertBtn.disabled = true;
-        } else {
-            btnText.style.display = 'block';
-            btnLoader.style.display = 'none';
-            this.convertBtn.disabled = this.videoFiles.length < 2;
-        }
-    }
-
-    showError(message) {
-        const errorDiv = document.createElement('div');
-        errorDiv.className = 'error-message';
-        errorDiv.textContent = message;
-        this.results.innerHTML = '';
-        this.results.appendChild(errorDiv);
-        this.results.style.display = 'block';
-    }
 }
+
+// Global variable for onclick handlers
+let videoMerger;
 
 // Initialize the video merger when the page loads
 let videoMerger;

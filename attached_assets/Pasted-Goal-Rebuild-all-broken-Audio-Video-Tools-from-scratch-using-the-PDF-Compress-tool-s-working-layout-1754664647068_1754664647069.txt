@@ -1,0 +1,110 @@
+Goal: Rebuild all broken Audio/Video Tools from scratch using the PDF Compress tool’s working layout and logic as the base template. Keep all URLs/placements identical so existing navigation still works.
+
+Audio/Video tools to destroy & rebuild
+MP4 → MP3 Converter
+
+Audio Converter
+
+Video Compress
+
+Video Merger
+
+Video Trim
+
+Guardrails
+Do not modify PDF Tools or Image Tools.
+
+Only work inside the Audio/Video Tools section.
+
+Keep all existing tool URLs unchanged.
+
+Steps
+Backup & remove old implementations
+
+Move all HTML, JS, CSS, and backend handlers for the above tools into a legacy/audio-video/ folder with a timestamp.
+
+Remove old routes and utility functions from the server for these tools.
+
+Create shared A/V tool template
+
+Use PDF Compress page design as a blueprint:
+
+Header, tool title, upload area, progress bar, results display, CTA button, inline error handling.
+
+Extract:
+
+Uploader component (single click + drag/drop, no double popups)
+
+Progress UI with animated loading
+
+Error UI matching the brand style
+into /client/js/components/uploader.js and /client/js/components/progress.js.
+
+Create a shared backend processing helper for:
+
+Save upload to /tmp
+
+Run correct ffmpeg pipeline
+
+Return { ok, url, sizeBytes, contentType, meta }
+
+Cleanup temp files on completion or error
+
+Rebuild each tool
+
+MP4 → MP3 Converter
+ffmpeg: extract audio → mp3
+Progress → result download
+
+Audio Converter
+ffmpeg: convert to chosen format (MP3, WAV, AAC, FLAC, etc.)
+
+Video Compress
+ffmpeg: lower bitrate/quality according to preset
+
+Video Merger
+ffmpeg: concat multiple videos
+
+Video Trim
+ffmpeg: cut between selected start/end timestamps
+
+All tools must have:
+
+Client-side validation for allowed formats
+
+Max size limits
+
+Standardized output filename pattern: <basename>_processed_<timestamp>.<ext>
+
+Navigation & placement
+
+Place rebuilt tools exactly where the old ones were in the Audio/Video Tools dropdown.
+
+Update the nav across all pages so links go to the new rebuilt versions.
+
+Preserve original URL slugs for SEO continuity.
+
+Acceptance checks for each tool
+
+Single file upload works (click + drag/drop)
+
+Progress bar visible while processing
+
+File downloads successfully after completion (correct format)
+
+Inline error display (no browser alert popups)
+
+No infinite loading states
+
+Temp file cleanup confirmed
+
+Navigation dropdown works everywhere
+
+Deliverable:
+When complete, post a summary listing:
+
+Which files/routes were deleted and replaced
+
+Backend processing commands used per tool
+
+Any format or size limitations that still apply
