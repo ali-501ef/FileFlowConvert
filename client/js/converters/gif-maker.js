@@ -22,11 +22,12 @@ class GifMaker {
         this.videoDuration = 0;
         this.startTime = 0;
         this.endTime = 10; // Default 10 seconds
+        this.isFilePickerOpen = false;
     }
 
     setupEventListeners() {
         // File upload handlers
-        this.uploadArea.addEventListener('click', () => this.fileInput.click());
+        this.uploadArea.addEventListener('click', this.handleUploadAreaClick.bind(this));
         this.uploadArea.addEventListener('dragover', this.handleDragOver.bind(this));
         this.uploadArea.addEventListener('drop', this.handleDrop.bind(this));
         this.fileInput.addEventListener('change', this.handleFileSelect.bind(this));
@@ -68,6 +69,19 @@ class GifMaker {
         if (file && file.type.startsWith('video/')) {
             this.handleFile(file);
         }
+    }
+
+    handleUploadAreaClick(e) {
+        if (this.isFilePickerOpen) {
+            return;
+        }
+        this.isFilePickerOpen = true;
+        this.fileInput.click();
+        
+        // Reset flag after a short delay to handle cancel scenarios
+        setTimeout(() => {
+            this.isFilePickerOpen = false;
+        }, 100);
     }
 
     async handleFile(file) {

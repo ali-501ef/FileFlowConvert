@@ -16,11 +16,12 @@ class PDFCompressor {
         
         this.currentFile = null;
         this.outputBlob = null;
+        this.isFilePickerOpen = false;
     }
 
     setupEventListeners() {
-        // File upload handlers
-        this.uploadArea.addEventListener('click', () => this.fileInput.click());
+        // File upload handlers - with click guard to prevent double opening
+        this.uploadArea.addEventListener('click', this.handleUploadAreaClick.bind(this));
         this.uploadArea.addEventListener('dragover', this.handleDragOver.bind(this));
         this.uploadArea.addEventListener('drop', this.handleDrop.bind(this));
         this.fileInput.addEventListener('change', this.handleFileSelect.bind(this));
@@ -30,6 +31,20 @@ class PDFCompressor {
         
         // Download button
         document.getElementById('downloadBtn').addEventListener('click', this.downloadPDF.bind(this));
+    }
+
+    handleUploadAreaClick(e) {
+        // Click guard to prevent double file picker opening
+        if (this.isFilePickerOpen) {
+            return;
+        }
+        this.isFilePickerOpen = true;
+        this.fileInput.click();
+        
+        // Reset flag after a delay to handle cancel cases
+        setTimeout(() => {
+            this.isFilePickerOpen = false;
+        }, 100);
     }
 
     handleDragOver(e) {

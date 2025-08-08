@@ -1,0 +1,79 @@
+Fix double-opening file picker on all upload pages
+Problem
+After rollback, clicking the dropzone/“Choose file” triggers the native file picker twice (and sometimes re-opens after cancel). Drag & drop still works. Do not redesign the UI.
+
+Where to fix
+Apply to these pages/components only: PDF Split, PDF Compress, PDF Rotate, PDF Watermark, PDF to Word, MP4 to MP3, Audio Converter, Video Compress, GIF Maker, Video Trim, Video Merger.
+Do not touch converters that already behave correctly.
+
+What to do (no code snippets—just implement):
+
+Single source of truth for open action
+
+Ensure there is exactly one place that calls input[type=file].click() per component.
+
+If both a <label for="file"> and a JS handler exist, keep one (prefer JS on the dropzone) and remove/disable the other to prevent double fire.
+
+Remove duplicate listeners
+
+Audit click handlers on the dropzone, inner elements, and any “Choose file” button/label.
+
+Remove overlapping handlers and stop event bubbling where needed so a single click does not reach multiple listeners.
+
+Debounce/guard re-entry
+
+Add a lightweight guard so while the picker is open we ignore new clicks.
+
+Clear the guard on change or on cancel (see next).
+
+Handle cancel correctly
+
+Listen for change on the file input. If the user cancels, the files list is empty—do not re-open.
+
+Ensure no focus/blur/visibilitychange handler re-triggers .click() after cancel.
+
+Hide the native mini “Choose file” button
+
+The visible trigger should be the large dropzone or the styled button only.
+
+Keep the <input type="file"> accessible (screen readers) but visually hidden. Do not remove it.
+
+Keep drag & drop working
+
+Preserve existing drop handlers; make sure they don’t also call .click() on drop.
+
+Cross-browser sanity
+
+Verify in Chrome, Firefox, Safari (incl. iOS) that a single tap/click opens the picker once, cancel does nothing further, and selecting files uploads immediately.
+
+Acceptance criteria
+
+Clicking anywhere on the dropzone (or its single visible button) opens the picker exactly once.
+
+Cancel does not re-open the picker.
+
+Selected files appear and upload as before.
+
+Drag & drop still works and does not trigger the picker.
+
+No native mini “Choose file” button is visible inside the dropzone.
+
+Applied only to the listed pages. No regressions on other pages.
+
+QA checklist (please run)
+
+Click, cancel, click again → opens once each time.
+
+Click quickly twice → still one picker (guard works).
+
+Drag in a file → uploads; no picker opens.
+
+Mobile Safari tap → opens once; cancel doesn’t re-open.
+
+Keyboard users can trigger via Enter/Space on the visible control; screen readers announce a single file input.
+
+Deliverables
+
+Short note of what caused the double trigger (e.g., label + JS, bubbling, re-entry) and what you removed/changed.
+
+List of pages updated and which listeners were consolidated.

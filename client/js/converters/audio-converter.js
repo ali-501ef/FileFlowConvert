@@ -26,11 +26,12 @@ class AudioConverter {
         
         this.currentFile = null;
         this.outputBlob = null;
+        this.isFilePickerOpen = false;
     }
 
     setupEventListeners() {
         // File upload handlers
-        this.uploadArea.addEventListener('click', () => this.fileInput.click());
+        this.uploadArea.addEventListener('click', this.handleUploadAreaClick.bind(this));
         this.uploadArea.addEventListener('dragover', this.handleDragOver.bind(this));
         this.uploadArea.addEventListener('drop', this.handleDrop.bind(this));
         this.fileInput.addEventListener('change', this.handleFileSelect.bind(this));
@@ -64,6 +65,19 @@ class AudioConverter {
         if (file && file.type.startsWith('audio/')) {
             this.handleFile(file);
         }
+    }
+
+    handleUploadAreaClick(e) {
+        if (this.isFilePickerOpen) {
+            return;
+        }
+        this.isFilePickerOpen = true;
+        this.fileInput.click();
+        
+        // Reset flag after a short delay to handle cancel scenarios
+        setTimeout(() => {
+            this.isFilePickerOpen = false;
+        }, 100);
     }
 
     async handleFile(file) {
