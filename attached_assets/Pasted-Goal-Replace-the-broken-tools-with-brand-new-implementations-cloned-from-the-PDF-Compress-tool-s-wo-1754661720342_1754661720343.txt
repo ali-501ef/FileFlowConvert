@@ -1,0 +1,101 @@
+Goal: Replace the broken tools with brand-new implementations cloned from the PDF Compress tool’s working design and code pattern. Keep all URLs/placements the same so existing links don’t break.
+
+Tools to destroy & rebuild
+PDF Merge
+
+PDF Rotate
+
+PDF Watermark
+
+Video Trim
+
+MP4 → MP3
+
+Audio Converter
+
+Video Compress
+
+Video Merger
+
+Guardrails
+Do not modify the working PDF Compress and PDF Split behavior except to copy patterns from them.
+
+Work in a new branch; only merge when all acceptance checks pass.
+
+Steps
+Backup & remove old implementations
+
+Move old HTML/JS/CSS/modules for the tools above into legacy/ with a timestamped folder.
+
+Remove their old routes/handlers from the server/router and any orphaned utility functions.
+
+Create a shared template from PDF Compress
+
+Extract the PDF Compress page into a reusable page template: header, hero, upload area, inline progress, result card, and CTA area.
+
+Extract its upload component (single input + drag/drop, debounced, no double-open), progress UI, inline error pattern, and response handling into /client/js/components/uploader.js and /client/js/components/progress.js.
+
+Extract the server pipeline pattern (save temp → process → stream file → cleanup) into a reusable helper.
+
+Rebuild each tool using the template
+
+Recreate each page (same filenames/URLs) using the template + correct labels/CTA text.
+
+Implement server endpoints for each tool by copying the working PDF Compress flow:
+
+Save upload to temp
+
+Run the correct processor (pdfcpu/ghostscript/ImageMagick/ffmpeg)
+
+Return { ok, url, sizeBytes, contentType, meta }
+
+Cleanup temp files reliably
+
+Wire the front end to the new endpoints; show inline progress and errors (no alerts).
+
+Unify behavior
+
+Click and drag/drop both attach files.
+
+Disable action button during processing; re-enable after finish/fail.
+
+Standardize filename pattern: <basename>_to_<target>_<timestamp>.<ext>.
+
+Validate type/max size client-side; block incompatible types with a friendly inline hint.
+
+Navigation & placement
+
+Keep each tool on its original URL and original section position on its category page.
+
+Update the global nav dropdowns to point to the rebuilt pages.
+
+Ensure every other tool’s nav reflects the new links (Image/PDF/Audio-Video menus).
+
+SEO & analytics parity
+
+Copy the meta structure from PDF Compress (title/description/schema as applicable) and customize per tool.
+
+Preserve existing IDs/data-testid attributes for tracking where they exist.
+
+Acceptance checks (must pass for each rebuilt tool)
+Page loads with the same visual layout as PDF Compress (brand/theme intact).
+
+Click and drag/drop both work (single file picker, no double dialog).
+
+Progress shows; no infinite spinners.
+
+Processing completes and a valid file downloads/plays (correct MIME).
+
+Inline errors only (no browser alerts).
+
+Temp files are cleaned on success and failure.
+
+PDF Compress and PDF Split still work exactly as before.
+
+When done, post a short summary:
+
+Which files/routes were removed and which added
+
+Processor/CLI used per tool
+
+Any limitations or format constraints still pending (with TODOs)
