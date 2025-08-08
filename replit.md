@@ -1,5 +1,8 @@
 # FileFlow - File Conversion Tools
 
+## Recent Changes
+- **Fixed Cross-Tool Reliability Issues (Jan 2025)**: Resolved inline onclick handler conflicts in PDF Merge and Video Compress tools that were causing double file picker opening. Applied unified upload pattern from working PDF Compress/Split reference implementations across all 8 broken tools. All tools now use clean JavaScript addEventListener patterns without conflicting inline handlers.
+
 ## Overview
 FileFlow is a comprehensive client-side file conversion web application with a premium Apple/Notion-inspired design. It features a universal converter with live file previews, drag-and-drop functionality, and advanced options. The platform includes specialized tool sections for Image Tools (HEIC to JPG, JPG to PNG), PDF Tools (merge, split, compress, rotate, watermark, PDF to Word), and Media Tools (MP4 to MP3, video compression, audio conversion, video trimming, GIF creation, video merging). All conversions happen client-side for maximum privacy and speed, built with vanilla JavaScript and modern web technologies.
 

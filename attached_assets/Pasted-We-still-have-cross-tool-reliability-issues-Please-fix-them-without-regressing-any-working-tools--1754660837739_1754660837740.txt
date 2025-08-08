@@ -1,0 +1,68 @@
+We still have cross-tool reliability issues. Please fix them without regressing any working tools.
+
+Scope & Guardrails
+Do NOT break currently working tools: PDF Compress and PDF Split are stable. Treat them as reference implementations.
+
+Make all changes in a new branch and only merge after the acceptance checks below pass on Preview.
+
+1) Unify uploads (frontend + backend)
+Reuse the same file input + drag-drop pattern that works in PDF Compress/Split.
+
+Apply to the broken pages: PDF Merge, PDF Rotate, PDF Watermark, Video Trim (files not accepted), MP4→MP3 (hangs), Audio Converter (this.showProgress is not a function), Video Compress (“Failed to upload file”), Video Merger (infinite loading).
+
+Requirements:
+
+Click and drag-drop both work.
+
+Single, debounced picker (no double-open).
+
+Visual file preview/state rendered when selected.
+
+Max size/type validation before submit.
+
+2) Backend processing fixes
+MP4→MP3, Audio Converter, Video Compress, Video Merger:
+
+Ensure uploaded file is saved to temp, processed, and output is streamed back.
+
+Replace/remove any calls to missing methods (e.g., this.showProgress) with a working progress update or inline status text.
+
+Standardize JSON responses: { ok: true, url, sizeBytes, contentType } or { ok: false, error }.
+
+Auto-clean temp files after completion/error.
+
+3) Error handling & UX
+No silent hangs. If a step fails, show an inline error under the action button (no alert popups).
+
+Disable the Convert/Process button while running; re-enable on finish/fail.
+
+Show progress bar/percentage where supported; otherwise show step labels (Uploading → Processing → Finalizing).
+
+4) Regression protection (explicit)
+Do not modify the working upload/processing code paths in PDF Compress and PDF Split except to copy patterns.
+
+After each fix, re-test PDF Compress and PDF Split to confirm:
+
+Upload via click & drag works
+
+Processing completes
+
+Download works
+
+No UI/console errors
+
+5) Acceptance checks (must pass before merge)
+For each of these pages:
+
+PDF Merge, PDF Rotate, PDF Watermark, Video Trim, MP4→MP3, Audio Converter, Video Compress, Video Merger
+
+Click-to-upload and drag-drop both attach the file (preview/state visible).
+
+Process completes within a reasonable time and returns a valid, downloadable file.
+
+No infinite spinners, no double file dialogs, no undefined is not a function errors.
+
+Inline progress/error messages only (no browser alerts).
+
+When done, post a short checklist with each tool and what was changed (frontend + backend), plus any remaining limitations.
+
