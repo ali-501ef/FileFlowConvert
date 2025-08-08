@@ -6097,6 +6097,113 @@ body {
     box-shadow: var(--shadow-md);
 }
 
+/* Processing Overlay Styles */
+.processing-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.95);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-lg);
+    z-index: 10;
+}
+
+.processing-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--element-spacing);
+    text-align: center;
+}
+
+.processing-content p {
+    margin: 0;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+/* Spinner Animation */
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--border);
+    border-top: 3px solid var(--primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Audio Preview Styles */
+.audio-preview-container {
+    background: var(--muted);
+    padding: var(--card-spacing);
+    border-radius: var(--radius-md);
+    margin: var(--element-spacing) 0;
+}
+
+.audio-preview-container h4 {
+    margin: 0 0 var(--element-spacing) 0;
+    font-size: var(--font-size-lg);
+    color: var(--text-primary);
+}
+
+.audio-preview-container audio {
+    border-radius: var(--radius-sm);
+    outline: none;
+}
+
+.audio-preview-container audio:focus {
+    box-shadow: 0 0 0 2px var(--primary-light);
+}
+
+/* Audio/Video Stats Styles */
+.audio-stats, .video-stats, .gif-stats, .merge-stats {
+    background: var(--muted);
+    padding: var(--card-spacing);
+    border-radius: var(--radius-md);
+    margin: var(--element-spacing) 0;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: var(--element-spacing);
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: var(--element-spacing);
+    background: white;
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-soft);
+}
+
+.stat-label {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    margin-bottom: var(--micro-spacing);
+    text-transform: uppercase;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+.stat-value {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: var(--font-size-lg);
+}
+
 /* Error Message Styles */
 .error-message {
     padding: var(--element-spacing);
@@ -6106,6 +6213,182 @@ body {
     border-radius: var(--radius-md);
     margin: var(--element-spacing) 0;
     font-weight: 500;
+    display: none;
+}
+
+.error-content {
+    display: flex;
+    align-items: center;
+    gap: var(--element-spacing);
+}
+
+.error-content svg {
+    flex-shrink: 0;
+    color: var(--error);
+}
+
+/* Video Details Styles */
+.video-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--element-spacing);
+    margin-top: var(--element-spacing);
+}
+
+.detail-item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--micro-spacing);
+    padding: calc(var(--micro-spacing) * 0.5) var(--element-spacing);
+    background: var(--primary-light);
+    color: var(--primary);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+}
+
+/* Upload area processing state */
+.upload-area {
+    position: relative;
+    overflow: hidden;
+}
+
+/* Improved button loading state */
+.btn-loader {
+    width: 16px;
+    height: 16px;
+    border: 2px solid transparent;
+    border-top: 2px solid currentColor;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* Video Merger Styles */
+.video-list {
+    background: var(--muted);
+    padding: var(--card-spacing);
+    border-radius: var(--radius-md);
+    margin: var(--element-spacing) 0;
+}
+
+.video-list h3 {
+    margin: 0 0 var(--element-spacing) 0;
+    font-size: var(--font-size-lg);
+    color: var(--text-primary);
+}
+
+.video-items {
+    display: flex;
+    flex-direction: column;
+    gap: var(--element-spacing);
+    margin-bottom: var(--element-spacing);
+}
+
+.video-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--element-spacing);
+    background: white;
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-soft);
+}
+
+.video-item-info {
+    flex: 1;
+}
+
+.video-item-name {
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: var(--micro-spacing);
+}
+
+.video-item-size {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+}
+
+.video-item-actions {
+    display: flex;
+    gap: var(--micro-spacing);
+}
+
+.video-item-actions button {
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--border);
+    background: white;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--transition-base);
+}
+
+.video-item-actions button:hover:not(:disabled) {
+    border-color: var(--primary);
+    background: var(--primary-light);
+}
+
+.video-item-actions button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.move-up-btn, .move-down-btn {
+    color: var(--text-secondary);
+}
+
+.remove-btn {
+    color: var(--error);
+}
+
+.remove-btn:hover:not(:disabled) {
+    border-color: var(--error);
+    background: var(--error-bg);
+}
+
+.add-more-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--element-spacing);
+    padding: var(--element-spacing) var(--card-spacing);
+    background: var(--muted);
+    border: 2px dashed var(--border);
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all var(--transition-base);
+    width: 100%;
+    justify-content: center;
+}
+
+.add-more-btn:hover:not(:disabled) {
+    border-color: var(--primary);
+    background: var(--primary-light);
+    color: var(--primary);
+}
+
+/* GIF Preview Styles */
+.gif-preview-container {
+    background: var(--muted);
+    padding: var(--card-spacing);
+    border-radius: var(--radius-md);
+    margin: var(--element-spacing) 0;
+    text-align: center;
+}
+
+.gif-preview-container h4 {
+    margin: 0 0 var(--element-spacing) 0;
+    font-size: var(--font-size-lg);
+    color: var(--text-primary);
+}
+
+.gif-preview-container img {
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-soft);
 }
 
 

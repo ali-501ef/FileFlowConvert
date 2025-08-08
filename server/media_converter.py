@@ -42,6 +42,9 @@ def compress_video(input_path, output_path, options):
     """Compress video file"""
     cmd = ['ffmpeg', '-i', input_path]
     
+    # Video codec settings
+    cmd.extend(['-c:v', 'libx264'])
+    
     # Compression level settings
     compression = options.get('compression', 'medium')
     if compression == 'light':
@@ -56,8 +59,10 @@ def compress_video(input_path, output_path, options):
             cmd.extend(['-b:v', f"{options['bitrate']}k"])
         if 'crf' in options:
             cmd.extend(['-crf', str(options['crf'])])
+        if 'preset' in options:
+            cmd.extend(['-preset', options['preset']])
     
-    # Resolution
+    # Resolution scaling
     if 'resolution' in options and options['resolution'] != 'original':
         if options['resolution'] == '1080p':
             cmd.extend(['-vf', 'scale=1920:1080'])
@@ -69,6 +74,9 @@ def compress_video(input_path, output_path, options):
     # Frame rate
     if 'framerate' in options and options['framerate'] != 'original':
         cmd.extend(['-r', str(options['framerate'])])
+    
+    # Audio codec
+    cmd.extend(['-c:a', 'aac', '-b:a', '128k'])
     
     cmd.extend(['-y', output_path])
     
@@ -100,10 +108,18 @@ def extract_audio(input_path, output_path, options):
     elif format_ext == 'wav':
         cmd.extend(['-vn', '-acodec', 'pcm_s16le'])
     elif format_ext == 'aac':
-        cmd.extend(['-vn', '-acodec', 'aac'])
+        cmd.extend(['-vn', '-c:a', 'aac'])
         bitrate = options.get('bitrate', '128') 
         cmd.extend(['-b:a', f'{bitrate}k'])
+    elif format_ext == 'flac':
+        cmd.extend(['-vn', '-c:a', 'flac'])
+    elif format_ext == 'ogg':
+        cmd.extend(['-vn', '-c:a', 'libvorbis'])
+        bitrate = options.get('bitrate', '192')
+        cmd.extend(['-b:a', f'{bitrate}k'])
     
+    # Add metadata preservation
+    cmd.extend(['-map_metadata', '0'])
     cmd.extend(['-y', output_path])
     
     result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
@@ -119,21 +135,29 @@ def convert_audio(input_path, output_path, options):
     
     format_ext = options.get('format', 'mp3')
     if format_ext == 'mp3':
-        cmd.extend(['-acodec', 'libmp3lame'])
+        cmd.extend(['-c:a', 'libmp3lame'])
         bitrate = options.get('bitrate', '192')
         cmd.extend(['-b:a', f'{bitrate}k'])
     elif format_ext == 'wav':
-        cmd.extend(['-acodec', 'pcm_s16le'])
+        cmd.extend(['-c:a', 'pcm_s16le'])
     elif format_ext == 'flac':
-        cmd.extend(['-acodec', 'flac'])
+        cmd.extend(['-c:a', 'flac'])
     elif format_ext == 'aac':
-        cmd.extend(['-acodec', 'aac'])
+        cmd.extend(['-c:a', 'aac'])
         bitrate = options.get('bitrate', '128')
+        cmd.extend(['-b:a', f'{bitrate}k'])
+    elif format_ext == 'ogg':
+        cmd.extend(['-c:a', 'libvorbis'])
+        bitrate = options.get('bitrate', '192')
         cmd.extend(['-b:a', f'{bitrate}k'])
     
     # Sample rate
     if 'sample_rate' in options and options['sample_rate'] != 'keep':
         cmd.extend(['-ar', str(options['sample_rate'])])
+    
+    # Preserve metadata if requested
+    if options.get('preserve_metadata', True):
+        cmd.extend(['-map_metadata', '0'])
     
     cmd.extend(['-y', output_path])
     
@@ -147,15 +171,31 @@ def convert_audio(input_path, output_path, options):
 def trim_video(input_path, output_path, options):
     """Trim video to specified time range"""
     start_time = options.get('start_time', 0)
-    duration = options.get('duration', 10)
+    end_time = options.get('end_time')
+    duration = options.get('duration')
+    fast_copy = options.get('fast_copy', True)
     
-    cmd = [
-        'ffmpeg', '-i', input_path,
-        '-ss', str(start_time),
-        '-t', str(duration),
-        '-c', 'copy',  # Copy streams without re-encoding for speed
-        '-y', output_path
-    ]
+    cmd = ['ffmpeg', '-i', input_path]
+    
+    # Set start time
+    if start_time > 0:
+        cmd.extend(['-ss', str(start_time)])
+    
+    # Set end time or duration
+    if end_time is not None:
+        cmd.extend(['-to', str(end_time)])
+    elif duration is not None:
+        cmd.extend(['-t', str(duration)])
+    else:
+        cmd.extend(['-t', '10'])  # Default 10 seconds
+    
+    # Copy or re-encode
+    if fast_copy:
+        cmd.extend(['-c', 'copy'])  # Fast copy without re-encoding
+    else:
+        cmd.extend(['-c:v', 'libx264', '-c:a', 'aac'])  # Re-encode
+    
+    cmd.extend(['-y', output_path])
     
     result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
     
@@ -210,7 +250,6 @@ def create_gif(input_path, output_path, options):
 def merge_videos(input_path, output_path, options):
     """Merge multiple video files into one"""
     # For video merger, input_path should be a directory or list of files
-    # For now, implement basic concatenation
     video_list = options.get('video_files', [])
     if not video_list:
         return {"error": "No video files provided for merging"}
@@ -220,14 +259,29 @@ def merge_videos(input_path, output_path, options):
     with tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False) as f:
         concat_file = f.name
         for video_file in video_list:
-            f.write(f"file '{video_file}'\n")
+            # Ensure proper path escaping
+            escaped_path = video_file.replace("'", "'\"'\"'")
+            f.write(f"file '{escaped_path}'\n")
     
     try:
-        cmd = [
-            'ffmpeg', '-f', 'concat', '-safe', '0', '-i', concat_file,
-            '-c', 'copy',  # Copy streams without re-encoding for speed
-            '-y', output_path
-        ]
+        normalize = options.get('normalize', True)
+        add_transitions = options.get('add_transitions', False)
+        
+        if normalize:
+            # First normalize all videos to same codec/resolution, then concat
+            cmd = [
+                'ffmpeg', '-f', 'concat', '-safe', '0', '-i', concat_file,
+                '-c:v', 'libx264', '-c:a', 'aac',
+                '-preset', 'medium', '-crf', '23',
+                '-y', output_path
+            ]
+        else:
+            # Try direct concat first (faster)
+            cmd = [
+                'ffmpeg', '-f', 'concat', '-safe', '0', '-i', concat_file,
+                '-c', 'copy',  # Copy streams without re-encoding for speed
+                '-y', output_path
+            ]
         
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
         

@@ -633,16 +633,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const { file_id, conversion_type, options = {} } = req.body;
     
     // Validate required parameters
-    if (!file_id || !conversion_type) {
-      return res.status(400).json({ error: "Missing required parameters: file_id, conversion_type" });
+    if (!conversion_type) {
+      return res.status(400).json({ error: "Missing required parameter: conversion_type" });
     }
     
-    // Check for duplicate conversion requests
-    if (isConversionActive(file_id, conversion_type)) {
-      return res.status(429).json({ 
-        error: "Media conversion already in progress for this file and type",
-        message: "Please wait for the current conversion to complete before starting a new one."
-      });
+    // Special handling for video_merge - doesn't need file_id, uses options.video_files
+    if (conversion_type === 'video_merge') {
+      if (!options.video_files || !Array.isArray(options.video_files) || options.video_files.length < 2) {
+        return res.status(400).json({ error: "Video merge requires at least 2 video files in options.video_files" });
+      }
+      // Verify all video files exist
+      for (const videoFile of options.video_files) {
+        if (!fs.existsSync(videoFile)) {
+          return res.status(404).json({ error: `Video file not found: ${videoFile}` });
+        }
+      }
+    } else {
+      // For other conversions, file_id is required
+      if (!file_id) {
+        return res.status(400).json({ error: "Missing required parameter: file_id" });
+      }
+      
+      // Check for duplicate conversion requests
+      if (isConversionActive(file_id, conversion_type)) {
+        return res.status(429).json({ 
+          error: "Media conversion already in progress for this file and type",
+          message: "Please wait for the current conversion to complete before starting a new one."
+        });
+      }
     }
     
     // Validate conversion type
@@ -651,15 +669,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(400).json({ error: `Unsupported conversion type: ${conversion_type}` });
     }
 
-    const tempPath = path.join(uploadsDir, file_id);
-    
-    if (!fs.existsSync(tempPath)) {
-      return res.status(404).json({ error: 'Input file not found' });
+    let tempPath;
+    if (conversion_type !== 'video_merge') {
+      tempPath = path.join(uploadsDir, file_id);
+      if (!fs.existsSync(tempPath)) {
+        return res.status(404).json({ error: 'Input file not found' });
+      }
+    } else {
+      // For video merge, we'll use the first video file as tempPath for naming
+      tempPath = options.video_files[0];
     }
 
     // Generate unique output filename with appropriate extension
     const outputExtension = getOutputExtension(conversion_type, options.format);
-    const outputFile = generateUniqueOutputFilename(file_id, outputExtension);
+    const fileIdForNaming = conversion_type === 'video_merge' ? 'merged_video_' + Date.now() : file_id;
+    const outputFile = generateUniqueOutputFilename(fileIdForNaming, outputExtension);
     const outputPath = path.join(outputDir, outputFile);
 
     // Prepare Python command
@@ -717,8 +741,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     });
     
-    // Track this conversion to prevent duplicates
-    trackConversion(file_id, conversion_type, conversionPromise);
+    // Track this conversion to prevent duplicates (skip for video_merge since it doesn't have a single file_id)
+    if (conversion_type !== 'video_merge') {
+      trackConversion(file_id, conversion_type, conversionPromise);
+    }
   });
 
   function getOutputExtension(conversionType: string, format?: string): string {

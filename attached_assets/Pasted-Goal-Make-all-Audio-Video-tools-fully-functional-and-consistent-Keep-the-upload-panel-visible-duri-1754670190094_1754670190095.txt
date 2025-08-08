@@ -1,0 +1,127 @@
+Goal: Make all Audio/Video tools fully functional and consistent. Keep the upload panel visible during and after conversion, add an inline preview player for audio, and fix backend job routing so every tool works reliably on the server.
+
+Scope (pages):
+
+mp4-to-mp3.html (Video → Audio)
+
+audio-converter.html (Audio → Audio)
+
+video-compress.html
+
+video-trim.html
+
+video-merger.html
+
+gif-maker.html (Video → GIF)
+
+Frontend fixes (apply to all above pages):
+
+Keep the uploader visible
+
+Do not remove or hide the upload panel on submit. Instead:
+
+Disable its controls while a job is running.
+
+Show a “Processing…” overlay on the panel.
+
+Render the Result card below the uploader.
+
+Ensure drag‑and‑drop and the “Choose file(s)” button both trigger the same handler (no duplicate dialogs).
+
+Audio preview
+
+When an audio file is uploaded (or when MP4→MP3 succeeds), render an <audio controls> player with a Blob URL of the uploaded/converted file.
+
+State & errors
+
+Preserve selected files and advanced options after success/failure.
+
+Inline progress + inline error only (no alerts). Errors must include the failing jobType and param name when applicable.
+
+Advanced options binding
+
+Bind every visible control to state, validate before submit, and include in the request payload. No more null.value or reading 'checked' errors.
+
+If an option is unsupported for the chosen format, disable it.
+
+Backend fixes (server):
+
+Unify job routing & names
+
+Implement/verify endpoints and map these exact jobType strings:
+
+video_to_audio (MP4/MOV/WEBM → MP3/WAV/AAC/FLAC/OGG)
+
+audio_convert (MP3/WAV/AAC/FLAC/OGG ↔ target format)
+
+video_compress (any common video → same container/codec with bitrate/CRF/resolution options)
+
+video_trim (start/end, fast copy toggle)
+
+video_merge (concatenate multiple videos; re‑encode if needed to unify codecs/params)
+
+video_to_gif (GIF Maker)
+
+Remove any stale names that caused “Unsupported conversion type”.
+
+FFmpeg implementations (examples)
+
+video_to_audio
+ffmpeg -i input -vn -acodec libmp3lame -b:a <kbps> output.mp3 (map codec per target)
+
+audio_convert
+Choose codec/container per target; preserve metadata if requested (-map_metadata 0).
+
+video_compress
+H.264: -c:v libx264 -crf <crf> -preset <preset> [-vf scale=...] -c:a aac -b:a 128k
+
+video_trim
+Fast copy: -ss <start> -to <end> -c copy; otherwise re‑encode with selected params.
+
+video_merge
+If inputs differ, first normalize to a common profile, then concat via list file + -f concat -safe 0 -c copy (or re‑encode).
+
+video_to_gif
+Palette method: generate palette then apply for quality.
+
+Progress + streaming
+
+Parse FFmpeg stderr for time/duration to update progress. Stream updates to the client (XHR or fetch).
+
+Uploads & limits
+
+Ensure the file actually reaches the server (fix any multer/busboy config). Set sane limits (e.g., 250 MB per file), return a clear error if exceeded.
+
+Output & headers
+
+Return correct Content-Type, filename, and a signed download URL. Do not inline random JSON errors as files.
+
+Temp files
+
+Store in /tmp/fileflow/<tool>/<jobId>/ with TTL cleanup (e.g., 1–2 hours).
+
+Fix the specific errors seen:
+
+“Unsupported conversion type: video_to_audio / video_to_gif” → caused by missing jobType routes. Add them as above.
+
+“Cannot read properties of null (reading 'value'/'checked')” → unbound option elements. Bind or guard.
+
+Video Merger “backend not yet implemented” → implement FFmpeg concat flow described.
+
+Acceptance criteria:
+
+Upload panel stays visible (disabled during processing), result appears below.
+
+Drag‑and‑drop and “Choose file(s)” both work; single dialog only.
+
+MP4→MP3, Audio Convert, Video Compress, Video Trim, Video Merge, and GIF Maker all succeed on sample files.
+
+Inline progress works; errors are descriptive (no alerts).
+
+Audio files preview inline via <audio> after upload/convert.
+
+Temp files cleaned after TTL.
+
+No null.value/checked or “unsupported conversion type” errors in console.
+
+Please implement now for Audio/Video tools only, with a short summary of files changed and FFmpeg command lines used for each jobType.
