@@ -1,6 +1,7 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
-import { log, setupVite, serveStatic } from "./vite";
+import { log } from "./vite";
+import path from "path";
 
 const app = express();
 app.set('trust proxy', true); // Trust proxy for rate limiting
@@ -48,15 +49,9 @@ app.use((req, res, next) => {
     throw err;
   });
 
-  // Setup Vite for development or serve static files for production
-  if (process.env.NODE_ENV === "development") {
-    log("Setting up Vite for development");
-    await setupVite(app, server);
-    log("Vite setup completed");
-  } else {
-    log("Setting up static file serving for production");
-    serveStatic(app);
-  }
+  // Serve static files from client directory
+  const clientPath = path.resolve(import.meta.dirname, "..", "client");
+  app.use(express.static(clientPath));
 
   // ALWAYS serve the app on the port specified in the environment variable PORT
   // Other ports are firewalled. Default to 5000 if not specified.

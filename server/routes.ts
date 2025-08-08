@@ -475,7 +475,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     maxDelayMs: 10000, // Maximum delay of 10 seconds
   });
   
-  // Static file serving is handled by Vite in development mode
+  // Serve static files from client directory
+  const clientPath = path.resolve(import.meta.dirname, "../client");
+  app.use(express.static(clientPath));
 
   // File conversion API endpoints
   app.post('/api/upload', uploadLimiter, speedLimiter, upload.single('file'), async (req: MulterRequest, res) => {
@@ -1083,6 +1085,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // JPG to PDF conversion routes
   app.use('/api', jpgToPdfRouter);
+
+  // Fallback to index.html for other routes
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(clientPath, 'index.html'));
+  });
 
   const httpServer = createServer(app);
   return httpServer;

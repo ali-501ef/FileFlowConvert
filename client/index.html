@@ -1,13 +1,681 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>FileFlow - Universal File Converter</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FileFlow - Professional File Conversion Tools | Convert HEIC, JPG, PDF, MP4</title>
+    <meta name="description" content="Convert files instantly with FileFlow. HEIC to JPG, JPG to PNG, PDF merge, MP4 to MP3 conversion tools. Fast, secure, and completely free.">
+    <link rel="canonical" href="https://fileflow.com/">
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="FileFlow - Professional File Conversion Tools">
+    <meta property="og:description" content="Convert files instantly with FileFlow. HEIC to JPG, JPG to PNG, PDF merge, MP4 to MP3 conversion tools.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://fileflow.com/">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="/styles.css">
+    
+    <!-- Navigation Script -->
+    <script src="/js/navigation.js" defer></script>
+</head>
+<body>
+    <!-- Top AdSense Banner -->
+    <div class="ad-placeholder ad-banner-top">
+        <span class="ad-text">Advertisement Banner (728x90)</span>
+    </div>
+
+    <!-- Sticky Navigation Bar -->
+    <nav class="sticky-nav">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <a href="/" data-testid="nav-brand">FileFlow</a>
+            </div>
+            
+            <div class="nav-menu">
+                <!-- Image Tools -->
+                <div class="nav-dropdown">
+                    <button class="nav-dropdown-trigger" data-testid="nav-image-trigger">
+                        Image Tools
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    <div class="nav-dropdown-content">
+                        <a href="/image-tools/heic-to-jpg.html" class="nav-dropdown-item" data-testid="nav-heic-jpg">HEIC to JPG</a>
+                        <a href="/jpg-to-png.html" class="nav-dropdown-item" data-testid="nav-jpg-png">JPG to PNG</a>
+                        <a href="/pdf-to-jpg.html" class="nav-dropdown-item" data-testid="nav-pdf-to-jpg">PDF to JPG</a>
+                        <a href="/image-tools/png-to-jpg.html" class="nav-dropdown-item" data-testid="nav-png-jpg">PNG to JPG</a>
+                        <a href="/image-tools/webp-to-jpg.html" class="nav-dropdown-item" data-testid="nav-webp-jpg">WEBP to JPG</a>
+                        <a href="/image-tools/jpg-to-pdf.html" class="nav-dropdown-item" data-testid="nav-jpg-pdf">JPG to PDF</a>
+                        <a href="/image-tools/tiff-to-png.html" class="nav-dropdown-item" data-testid="nav-tiff-png">TIFF to PNG</a>
+                        <a href="/image-tools/bmp-to-jpg.html" class="nav-dropdown-item" data-testid="nav-bmp-jpg">BMP to JPG</a>
+                        <a href="/image-tools/svg-to-png.html" class="nav-dropdown-item" data-testid="nav-svg-png">SVG to PNG</a>
+                        <a href="/image-tools/ico-to-png.html" class="nav-dropdown-item" data-testid="nav-ico-png">ICO to PNG</a>
+                        <a href="/image-tools/gif-to-mp4.html" class="nav-dropdown-item" data-testid="nav-gif-mp4">GIF to MP4</a>
+                    </div>
+                </div>
+
+                <!-- PDF Tools -->
+                <div class="nav-dropdown">
+                    <button class="nav-dropdown-trigger" data-testid="nav-pdf-trigger">
+                        PDF Tools
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    <div class="nav-dropdown-content">
+                        <a href="/pdf-merge.html" class="nav-dropdown-item" data-testid="nav-pdf-merge">PDF Merge</a>
+                        <a href="/pdf-split.html" class="nav-dropdown-item" data-testid="nav-pdf-split">PDF Split</a>
+                        <a href="/pdf-compress.html" class="nav-dropdown-item" data-testid="nav-pdf-compress">PDF Compress</a>
+                        <a href="/pdf-rotate.html" class="nav-dropdown-item" data-testid="nav-pdf-rotate">PDF Rotate</a>
+                        <a href="/pdf-watermark.html" class="nav-dropdown-item" data-testid="nav-pdf-watermark">PDF Watermark</a>
+                        <a href="/pdf-to-word.html" class="nav-dropdown-item" data-testid="nav-pdf-to-word">PDF to Word</a>
+                    </div>
+                </div>
+
+                <!-- Audio/Video Tools -->
+                <div class="nav-dropdown">
+                    <button class="nav-dropdown-trigger" data-testid="nav-media-trigger">
+                        Audio/Video Tools
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    <div class="nav-dropdown-content">
+                        <a href="/mp4-to-mp3.html" class="nav-dropdown-item" data-testid="nav-mp4-mp3">MP4 to MP3</a>
+                        <a href="/audio-converter.html" class="nav-dropdown-item" data-testid="nav-audio-convert">Audio Converter</a>
+                        <a href="/video-compress.html" class="nav-dropdown-item" data-testid="nav-video-compress">Video Compress</a>
+                        <a href="/gif-maker.html" class="nav-dropdown-item" data-testid="nav-gif-maker">GIF Maker</a>
+                        <a href="/video-trim.html" class="nav-dropdown-item" data-testid="nav-video-trim">Video Trim</a>
+                        <a href="/video-merger.html" class="nav-dropdown-item" data-testid="nav-video-merge">Video Merger</a>
+                    </div>
+                </div>
+            </div>
+            
+            <button class="mobile-nav-toggle" data-testid="mobile-nav-toggle">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content-centered">
+            <div class="container">
+                <!-- Universal Converter Hero Section -->
+                <div class="universal-hero-section">
+                    <div class="hero-content">
+                        <h1 class="universal-hero-title">
+                            Convert Files <span class="text-primary">Instantly</span>
+                        </h1>
+                        <p class="universal-hero-description">
+                            Professional file conversion tools with secure server processing.<br>Fast, private, and completely free.
+                        </p>
+                        
+                        <!-- Universal Converter Interface -->
+                        <div class="universal-converter-interface">
+                            <div class="drop-zone" id="universal-drop-zone" data-testid="dropzone-universal" style="cursor: pointer;">
+                                <div class="drop-zone-content">
+                                    <div class="upload-icon">
+                                        <svg width="48" height="48" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                        </svg>
+                                    </div>
+                                    <p class="drop-zone-text">Drag and drop your file here</p>
+                                    <p class="drop-zone-subtext">or click to browse</p>
+                                </div>
+                            </div>
+                            
+                            <div class="converter-controls">
+                                <button class="choose-file-btn" id="choose-file-btn" data-testid="button-choose-file">
+                                    Choose a File
+                                </button>
+                                
+                                <div class="convert-options">
+                                    <div class="select-wrapper">
+                                        <label for="output-format" class="select-label">Convert to...</label>
+                                        <select id="output-format" class="format-select" data-testid="select-output-format">
+                                            <option value="jpeg">JPEG</option>
+                                            <option value="png">PNG</option>
+                                            <option value="webp">WebP</option>
+                                            <option value="gif">GIF</option>
+                                            <option value="bmp">BMP</option>
+                                            <option value="tiff">TIFF</option>
+                                            <option value="mp3">MP3</option>
+                                            <option value="wav">WAV</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <button class="convert-now-btn" id="convert-now-btn" data-testid="button-convert-now" disabled>
+                                        Convert Now
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <input type="file" id="universal-file-input" style="display: none;" data-testid="input-file-universal" accept="image/*,.heic,.heif,.mp4,.mp3,.wav,.pdf,.doc,.docx">
+                        </div>
+                        
+
+                    </div>
+                </div>
+
+                <!-- Top Content Ad -->
+                <div class="ad-placeholder ad-content-horizontal">
+                    <span class="ad-label">Sponsored</span>
+                </div>
+
+                <!-- Image Tools Section -->
+                <section id="tools" class="tools-section">
+                    <div class="section-header">
+                        <div class="section-icon">
+                            <svg width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                        </div>
+                        <div class="section-content">
+                            <h2 class="section-title">Image Tools</h2>
+                            <p class="section-description">Professional image conversion and optimization tools</p>
+                        </div>
+                    </div>
+                    <div class="tools-grid">
+                        <div class="tool-card" data-testid="card-heic-to-jpg" onclick="window.location.href='/image-tools/heic-to-jpg.html'">
+                            <div class="tool-header">
+                                <div class="tool-icon bg-blue">
+                                    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                    </svg>
+                                </div>
+                                <div class="tool-info">
+                                    <h3 class="tool-title">HEIC to JPG</h3>
+                                    <p class="tool-description">Convert iPhone photos to universal JPG format</p>
+                                </div>
+                            </div>
+                            <div class="tool-features">
+                                ✓ Batch conversion ✓ Maintains quality ✓ Instant download
+                            </div>
+                        </div>
+
+
+                        <div class="tool-card" data-testid="card-jpg-to-png" onclick="window.location.href='/jpg-to-png.html'">
+                            <div class="tool-header">
+                                <div class="tool-icon bg-green">
+                                    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2m-8 0h8m-8 0V2m8 2v2M7 4h10a2 2 0 012 2v12a2 2 0 01-2 2H7a2 2 0 01-2-2V6a2 2 0 012-2z"></path>
+                                    </svg>
+                                </div>
+                                <div class="tool-info">
+                                    <h3 class="tool-title">JPG to PNG</h3>
+                                    <p class="tool-description">Convert JPG images to PNG with transparency</p>
+                                </div>
+                            </div>
+                            <div class="tool-features">
+                                ✓ Transparency support ✓ Lossless quality ✓ Web optimized
+                            </div>
+                        </div>
+
+                        <div class="tool-card" data-testid="card-pdf-to-jpg" onclick="window.location.href='/pdf-to-jpg.html'">
+                            <div class="tool-header">
+                                <div class="tool-icon bg-red">
+                                    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                        <polyline points="14,2 14,8 20,8"></polyline>
+                                        <rect x="8" y="12" width="8" height="6" rx="1" stroke="currentColor" stroke-width="1" fill="currentColor" opacity="0.3"/>
+                                        <circle cx="10" cy="14" r="1" fill="white"/>
+                                        <path d="M18 16l-2-2-2 2-2-2" stroke="white" stroke-width="1" fill="none"/>
+                                    </svg>
+                                </div>
+                                <div class="tool-info">
+                                    <h3 class="tool-title">PDF to JPG</h3>
+                                    <p class="tool-description">Convert PDF pages to high-quality JPG images</p>
+                                </div>
+                            </div>
+                            <div class="tool-features">
+                                ✓ High resolution ✓ Multiple pages ✓ Quality control
+                            </div>
+                        </div>
+
+                    </div>
+                    
+                    <!-- More Image Tools - Full Width Section -->
+                    <div class="full-width-tool-container">
+                        <div class="tool-card wide-card" data-testid="card-more-image-tools" onclick="window.location.href='/image-tools/more.html'">
+                            <div class="tool-header">
+                                <div class="tool-icon bg-purple">
+                                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                                    </svg>
+                                </div>
+                                <div class="tool-info">
+                                    <h3 class="tool-title">More Image Tools</h3>
+                                    <p class="tool-description">Extended collection of specialized converters</p>
+                                </div>
+                            </div>
+                            <div class="tool-features">
+                                ✓ WEBP, TIFF, SVG, ICO ✓ Advanced formats ✓ Specialized tools
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Image Tools Ad -->
+                <div class="section-ad-container">
+                    <div class="ad-placeholder ad-section-banner">
+                        <span class="ad-label">Advertisement</span>
+                        <span class="ad-text">728x90 Banner Ad Space</span>
+                    </div>
+                </div>
+
+                <!-- PDF Tools Section -->
+                <section class="tools-section">
+                    <div class="section-header">
+                        <div class="section-icon">
+                            <svg width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                        </div>
+                        <div class="section-content">
+                            <h2 class="section-title">PDF Tools</h2>
+                            <p class="section-description">Complete PDF manipulation and optimization suite</p>
+                        </div>
+                    </div>
+                    <div class="tools-grid">
+                        <div class="tool-card" data-testid="card-pdf-merge" onclick="window.location.href='/pdf-merge.html'">
+                            <div class="tool-header">
+                                <div class="tool-icon bg-red">
+                                    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                    </svg>
+                                </div>
+                                <div class="tool-info">
+                                    <h3 class="tool-title">PDF Merge</h3>
+                                    <p class="tool-description">Combine multiple PDF files into one document</p>
+                                </div>
+                            </div>
+                            <div class="tool-features">
+                                ✓ Unlimited files ✓ Preserve formatting ✓ Drag & drop ordering
+                            </div>
+                        </div>
+                        
+                        <div class="tool-card" data-testid="card-pdf-split" onclick="window.location.href='/pdf-split.html'">
+                            <div class="tool-header">
+                                <div class="tool-icon bg-orange">
+                                    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 3h5v5"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21 3-5 5"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 3H3v5"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m3 3 5 5"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 21h5v-5"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21 21-5-5"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 21H3v-5"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m3 21 5-5"></path>
+                                    </svg>
+                                </div>
+                                <div class="tool-info">
+                                    <h3 class="tool-title">PDF Split</h3>
+                                    <p class="tool-description">Extract specific pages or split by range</p>
+                                </div>
+                            </div>
+                            <div class="tool-features">
+                                ✓ Page ranges ✓ Individual pages ✓ Bulk extraction
+                            </div>
+                        </div>
+                        
+                        <div class="tool-card" data-testid="card-pdf-compress" onclick="window.location.href='/pdf-compress.html'">
+                            <div class="tool-header">
+                                <div class="tool-icon bg-green">
+                                    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                        <polyline points="7,10 12,15 17,10"></polyline>
+                                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                                    </svg>
+                                </div>
+                                <div class="tool-info">
+                                    <h3 class="tool-title">PDF Compress</h3>
+                                    <p class="tool-description">Reduce PDF file size without quality loss</p>
+                                </div>
+                            </div>
+                            <div class="tool-features">
+                                ✓ Smart compression ✓ Quality control ✓ Batch processing
+                            </div>
+                        </div>
+                        
+                        <div class="tool-card" data-testid="card-pdf-to-word" onclick="window.location.href='/pdf-to-word.html'">
+                            <div class="tool-header">
+                                <div class="tool-icon bg-blue">
+                                    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                    </svg>
+                                </div>
+                                <div class="tool-info">
+                                    <h3 class="tool-title">PDF to Word</h3>
+                                    <p class="tool-description">Convert PDF documents to editable Word files</p>
+                                </div>
+                            </div>
+                            <div class="tool-features">
+                                ✓ Editable format ✓ Layout preservation ✓ Text recognition
+                            </div>
+                        </div>
+                        
+                        <div class="tool-card" data-testid="card-pdf-rotate" onclick="window.location.href='/pdf-rotate.html'">
+                            <div class="tool-header">
+                                <div class="tool-icon bg-purple">
+                                    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/>
+                                        <path d="M21 3v5h-5"/>
+                                    </svg>
+                                </div>
+                                <div class="tool-info">
+                                    <h3 class="tool-title">PDF Rotate</h3>
+                                    <p class="tool-description">Rotate PDF pages to correct orientation</p>
+                                </div>
+                            </div>
+                            <div class="tool-features">
+                                ✓ Individual pages ✓ Batch rotation ✓ 90° increments
+                            </div>
+                        </div>
+                        
+                        <div class="tool-card" data-testid="card-pdf-watermark" onclick="window.location.href='/pdf-watermark.html'">
+                            <div class="tool-header">
+                                <div class="tool-icon bg-teal">
+                                    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"/>
+                                    </svg>
+                                </div>
+                                <div class="tool-info">
+                                    <h3 class="tool-title">PDF Watermark</h3>
+                                    <p class="tool-description">Add text or image watermarks to PDFs</p>
+                                </div>
+                            </div>
+                            <div class="tool-features">
+                                ✓ Text & images ✓ Custom opacity ✓ Position control
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- PDF Tools Ad -->
+                <div class="section-ad-container">
+                    <div class="ad-placeholder ad-section-banner">
+                        <span class="ad-label">Advertisement</span>
+                        <span class="ad-text">728x90 Banner Ad Space</span>
+                    </div>
+                </div>
+
+                <!-- Media Tools Section -->
+                <section class="tools-section">
+                    <div class="section-header">
+                        <div class="section-icon">
+                            <svg width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
+                            </svg>
+                        </div>
+                        <div class="section-content">
+                            <h2 class="section-title">Media Tools</h2>
+                            <p class="section-description">Video and audio conversion and editing tools</p>
+                        </div>
+                    </div>
+                    <div class="tools-grid">
+                        <div class="tool-card" data-testid="card-mp4-to-mp3" onclick="window.location.href='/mp4-to-mp3.html'">
+                            <div class="tool-header">
+                                <div class="tool-icon bg-purple">
+                                    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
+                                    </svg>
+                                </div>
+                                <div class="tool-info">
+                                    <h3 class="tool-title">MP4 to MP3</h3>
+                                    <p class="tool-description">Extract audio from video files (up to 50MB)</p>
+                                </div>
+                            </div>
+                            <div class="tool-features">
+                                ✓ High quality audio ✓ Fast conversion ✓ Multiple bitrates
+                            </div>
+                        </div>
+                        
+                        <div class="tool-card" data-testid="card-video-compress" onclick="window.location.href='/video-compress.html'">
+                            <div class="tool-header">
+                                <div class="tool-icon bg-red">
+                                    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 20h9"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                                    </svg>
+                                </div>
+                                <div class="tool-info">
+                                    <h3 class="tool-title">Video Compress</h3>
+                                    <p class="tool-description">Reduce video file size while maintaining quality</p>
+                                </div>
+                            </div>
+                            <div class="tool-features">
+                                ✓ Multiple formats ✓ Quality control ✓ Size optimization
+                            </div>
+                        </div>
+                        
+                        <div class="tool-card" data-testid="card-audio-converter" onclick="window.location.href='/audio-converter.html'">
+                            <div class="tool-header">
+                                <div class="tool-icon bg-green">
+                                    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                    </svg>
+                                </div>
+                                <div class="tool-info">
+                                    <h3 class="tool-title">Audio Converter</h3>
+                                    <p class="tool-description">Convert between audio formats (MP3, WAV, FLAC)</p>
+                                </div>
+                            </div>
+                            <div class="tool-features">
+                                ✓ Multiple formats ✓ Bitrate control ✓ Metadata preservation
+                            </div>
+                        </div>
+                        
+                        <div class="tool-card" data-testid="card-video-trim" onclick="window.location.href='/video-trim.html'">
+                            <div class="tool-header">
+                                <div class="tool-icon bg-orange">
+                                    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m15 18-6-6 6-6"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 12h12"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 17l4-4 4 4m-4-5v9"></path>
+                                    </svg>
+                                </div>
+                                <div class="tool-info">
+                                    <h3 class="tool-title">Video Trim</h3>
+                                    <p class="tool-description">Cut and trim video clips to desired length</p>
+                                </div>
+                            </div>
+                            <div class="tool-features">
+                                ✓ Frame-perfect accuracy ✓ Timeline preview ✓ Multiple segments
+                            </div>
+                        </div>
+                        
+                        <div class="tool-card" data-testid="card-gif-maker" onclick="window.location.href='/gif-maker.html'">
+                            <div class="tool-header">
+                                <div class="tool-icon bg-blue">
+                                    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <rect width="18" height="18" x="3" y="3" rx="2"/>
+                                        <path d="m9 9 5 12 1.774-5.226L21 14 9 9z"/>
+                                    </svg>
+                                </div>
+                                <div class="tool-info">
+                                    <h3 class="tool-title">GIF Maker</h3>
+                                    <p class="tool-description">Create animated GIFs from videos</p>
+                                </div>
+                            </div>
+                            <div class="tool-features">
+                                ✓ Custom frame rate ✓ Quality control ✓ Loop options
+                            </div>
+                        </div>
+                        
+                        <div class="tool-card" data-testid="card-video-merger" onclick="window.location.href='/video-merger.html'">
+                            <div class="tool-header">
+                                <div class="tool-icon bg-teal">
+                                    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path d="M12 3v6l4-4-4-4"/>
+                                        <path d="M12 21v-6l4 4-4 4"/>
+                                        <path d="M3 12h6l-4-4 4-4"/>
+                                        <path d="M21 12h-6l4 4-4 4"/>
+                                    </svg>
+                                </div>
+                                <div class="tool-info">
+                                    <h3 class="tool-title">Video Merger</h3>
+                                    <p class="tool-description">Combine multiple video files into one</p>
+                                </div>
+                            </div>
+                            <div class="tool-features">
+                                ✓ Multiple formats ✓ Seamless joining ✓ Quality preservation
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Media Tools Ad -->
+                <div class="section-ad-container">
+                    <div class="ad-placeholder ad-section-banner">
+                        <span class="ad-label">Advertisement</span>
+                        <span class="ad-text">728x90 Banner Ad Space</span>
+                    </div>
+                </div>
+
+                <!-- Why Choose FileFlow Section -->
+                <section class="benefits-section">
+                    <div class="benefits-header">
+                        <h2 class="section-title centered">Why Choose FileFlow?</h2>
+                        <p class="section-description centered">Professional file conversion with uncompromising quality and privacy</p>
+                    </div>
+                    
+                    <div class="benefits-grid">
+                        <div class="benefit-card">
+                            <div class="benefit-icon">
+                                <svg width="32" height="32" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                                </svg>
+                            </div>
+                            <h3 class="benefit-title">Secure Processing</h3>
+                            <p class="benefit-description">Files are encrypted during upload and processed securely on our servers. Files are automatically deleted after conversion with no personal data stored.</p>
+                        </div>
+                        
+                        <div class="benefit-card">
+                            <div class="benefit-icon">
+                                <svg width="32" height="32" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                </svg>
+                            </div>
+                            <h3 class="benefit-title">Temporary Processing</h3>
+                            <p class="benefit-description">Files are processed temporarily on secure servers and automatically deleted after conversion. No data is stored beyond your session.</p>
+                        </div>
+                        
+                        <div class="benefit-card">
+                            <div class="benefit-icon">
+                                <svg width="32" height="32" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                            <h3 class="benefit-title">Trusted by Millions</h3>
+                            <p class="benefit-description">Professional-grade conversion tools used by content creators, developers, and businesses worldwide.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Footer Ad Banner -->
+                <div class="footer-ad-container">
+                    <div class="ad-placeholder ad-footer-banner">
+                        <span class="ad-label">Advertisement</span>
+                        <span class="ad-text">728x90 Footer Banner</span>
+                    </div>
+                </div>
+
+            </div>
+    </main>
+
+    <!-- Desktop Sidebar Ad Right (Fixed Position) -->
+    <div class="sidebar-ad-fixed desktop-only">
+        <div class="ad-placeholder ad-sidebar-slim">
+            <span class="ad-text">Ad<br>160x600</span>
+        </div>
+    </div>
+
+
+
+    <!-- Bottom Content Ad -->
+    <div class="ad-placeholder ad-content-horizontal">
+        <span class="ad-label">Sponsored</span>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <!-- Branding Section -->
+                <div class="footer-section">
+                    <h3 class="footer-title">FileFlow</h3>
+                    <p class="footer-description">Professional file conversion tools for everyone.</p>
+                </div>
+                
+                <!-- PDF Tools -->
+                <div class="footer-section">
+                    <h4 class="footer-subtitle">PDF Tools</h4>
+                    <ul class="footer-links">
+                        <li><a href="/pdf-merge.html" class="footer-link" data-testid="footer-pdf-merge">PDF Merge</a></li>
+                        <li><a href="/pdf-split.html" class="footer-link" data-testid="footer-pdf-split">PDF Split</a></li>
+                        <li><a href="/pdf-compress.html" class="footer-link" data-testid="footer-pdf-compress">PDF Compress</a></li>
+                        <li><a href="/pdf-to-word.html" class="footer-link" data-testid="footer-pdf-to-word">PDF to Word</a></li>
+                        <li><a href="/pdf-rotate.html" class="footer-link" data-testid="footer-pdf-rotate">PDF Rotate</a></li>
+                        <li><a href="/pdf-watermark.html" class="footer-link" data-testid="footer-pdf-watermark">PDF Watermark</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Image Tools -->
+                <div class="footer-section">
+                    <h4 class="footer-subtitle">Image Tools</h4>
+                    <ul class="footer-links">
+                        <li><a href="/pdf-to-jpg.html" class="footer-link" data-testid="footer-pdf-to-jpg">PDF to JPG</a></li>
+                        <li><a href="/image-tools/heic-to-jpg.html" class="footer-link" data-testid="footer-heic-jpg">HEIC to JPG</a></li>
+                        <li><a href="/jpg-to-png.html" class="footer-link" data-testid="footer-jpg-png">JPG to PNG</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Audio/Video Tools -->
+                <div class="footer-section">
+                    <h4 class="footer-subtitle">Audio/Video Tools</h4>
+                    <ul class="footer-links">
+                        <li><a href="/mp4-to-mp3.html" class="footer-link" data-testid="footer-mp4-mp3">MP4 to MP3</a></li>
+                        <li><a href="/video-compress.html" class="footer-link" data-testid="footer-video-compress">Video Compress</a></li>
+                        <li><a href="/audio-converter.html" class="footer-link" data-testid="footer-audio-converter">Audio Converter</a></li>
+                        <li><a href="/video-trim.html" class="footer-link" data-testid="footer-video-trim">Video Trim</a></li>
+                        <li><a href="/gif-maker.html" class="footer-link" data-testid="footer-gif-maker">GIF Maker</a></li>
+                        <li><a href="/video-merger.html" class="footer-link" data-testid="footer-video-merger">Video Merger</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Support Links -->
+                <div class="footer-section">
+                    <h4 class="footer-subtitle">Support</h4>
+                    <ul class="footer-links">
+                        <li><a href="mailto:support@fileflow.com" class="footer-link" data-testid="footer-contact">Contact</a></li>
+                        <li><a href="#" class="footer-link" data-testid="footer-help">Help Center</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Legal Links -->
+                <div class="footer-section">
+                    <h4 class="footer-subtitle">Legal</h4>
+                    <ul class="footer-links">
+                        <li><a href="/privacy-policy.html" class="footer-link" data-testid="footer-privacy">Privacy Policy</a></li>
+                        <li><a href="/terms-of-use.html" class="footer-link" data-testid="footer-terms">Terms of Use</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 FileFlow. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/js/main.js"></script>
+    <script src="/js/server-converter.js"></script>
+</body>
 </html>
