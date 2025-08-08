@@ -217,8 +217,16 @@ const ALLOWED_MIME_TYPES = {
   'image/avif': ['.heic', '.heif'],
   'application/pdf': ['.pdf'],
   'video/mp4': ['.mp4'],
+  'video/quicktime': ['.mov'],
+  'video/x-msvideo': ['.avi'],
+  'video/webm': ['.webm'],
+  'video/x-ms-wmv': ['.wmv'],
+  'video/x-matroska': ['.mkv'],
   'audio/mpeg': ['.mp3'],
-  'audio/wav': ['.wav']
+  'audio/wav': ['.wav'],
+  'audio/ogg': ['.ogg'],
+  'audio/aac': ['.aac'],
+  'audio/x-m4a': ['.m4a']
 };
 
 const ALLOWED_OUTPUT_FORMATS = ['jpeg', 'jpg', 'png', 'webp', 'gif', 'bmp', 'tiff', 'mp3', 'wav', 'docx'];

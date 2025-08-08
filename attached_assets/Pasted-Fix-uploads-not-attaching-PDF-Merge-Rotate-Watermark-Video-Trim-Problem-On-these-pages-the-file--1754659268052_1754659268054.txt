@@ -1,0 +1,73 @@
+Fix uploads not attaching (PDF Merge/Rotate/Watermark, Video Trim)
+Problem: On these pages the file dialog opens (once), but chosen files don’t attach and drag-and-drop doesn’t register.
+
+Pages in scope:
+
+pdf-merge.html, pdf-rotate.html, pdf-watermark.html, video-trim.html
+
+Do this exactly:
+
+Verify DOM targets & inputs
+
+Ensure each page has a single <input type="file" id="fileInput" data-tool="..."> (or whatever id is used consistently) and it is enabled, visible (no pointer-events:none; or overlay on top), and not replaced by multiple inputs.
+
+The large drop zone must have data-role="dropzone" and be labeled for the file input (either for on a <label> or JS click binding).
+
+Repair event wiring
+
+For each page JS module, confirm only one set of listeners is bound:
+
+fileInput.addEventListener('change', onFilesSelected)
+
+Dropzone: dragenter/dragover → preventDefault() + add hover class; drop → preventDefault() + call onFilesSelected(Array.from(e.dataTransfer.files))
+
+Remove any stale inline onclick, duplicate listeners, or return false; that stop propagation.
+
+Ensure onFilesSelected:
+
+Validates file types against the tool (application/pdf for PDF tools; video mime for Video Trim).
+
+Updates UI list and enables the primary action button.
+
+Stores files in a single source of truth (e.g., uploaderState.files).
+
+Payload & form
+
+Confirm upload uses FormData with the key the backend expects (e.g., files[] for multi, file for single). Do not send empty arrays.
+
+Ensure the form/POST sets enctype="multipart/form-data" and the fetch includes credentials:'same-origin' if required by the server.
+
+Remove any premature form.reset() that clears the input immediately after selection.
+
+CSS/overlay guard
+
+Make sure no absolutely-positioned element sits over the dropzone or input (use DevTools to check). Fix with:
+
+Dropzone container: position:relative; z-index: 1;
+
+Remove pointer-events:none from any ancestor.
+
+Size/MIME gating
+
+If there is client-side size or MIME filtering, log rejected reasons inline. Do not silently drop files. For PDFs, accept application/pdf. For Video Trim, accept common video MIMEs (mp4, mov, mkv).
+
+Regression tests
+
+Add a quick page-level test in console/dev harness that programmatically dispatches a change event with a mock File and asserts the UI list shows the file and the action button is enabled.
+
+Manually test: click Choose → select; then drag-and-drop. Both must attach the same internal array and render a chip/list item.
+
+Acceptance criteria
+
+File dialog opens once.
+
+After choosing or dropping, the file appears in the list/queue and the main action button enables.
+
+Upload proceeds and server receives the file (verify network tab shows non-empty FormData).
+
+No console errors.
+
+Same behaviour on all four pages.
+
+Log & report: Add temporary console logs console.info('[upload]', tool, step, details) while testing; remove them before final commit. Post a short summary of what was wrong and which files were changed.
+
