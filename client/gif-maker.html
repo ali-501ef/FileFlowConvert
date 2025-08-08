@@ -30,7 +30,6 @@
                     <div class="nav-dropdown-content">
                         <a href="/image-tools/heic-to-jpg.html" class="nav-dropdown-item" data-testid="nav-heic-jpg">HEIC to JPG</a>
                         <a href="/jpg-to-png.html" class="nav-dropdown-item" data-testid="nav-jpg-png">JPG to PNG</a>
-                        <a href="/pdf-to-jpg.html" class="nav-dropdown-item" data-testid="nav-pdf-to-jpg">PDF to JPG</a>
                         <a href="/image-tools/png-to-jpg.html" class="nav-dropdown-item" data-testid="nav-png-jpg">PNG to JPG</a>
                         <a href="/image-tools/webp-to-jpg.html" class="nav-dropdown-item" data-testid="nav-webp-jpg">WEBP to JPG</a>
                         <a href="/image-tools/jpg-to-pdf.html" class="nav-dropdown-item" data-testid="nav-jpg-pdf">JPG to PDF</a>
@@ -57,6 +56,7 @@
                         <a href="/pdf-rotate.html" class="nav-dropdown-item" data-testid="nav-pdf-rotate">PDF Rotate</a>
                         <a href="/pdf-watermark.html" class="nav-dropdown-item" data-testid="nav-pdf-watermark">PDF Watermark</a>
                         <a href="/pdf-to-word.html" class="nav-dropdown-item" data-testid="nav-pdf-to-word">PDF to Word</a>
+                        <a href="/pdf-to-jpg.html" class="nav-dropdown-item" data-testid="nav-pdf-jpg">PDF to JPG</a>
                     </div>
                 </div>
 
@@ -91,13 +91,13 @@
         <div class="hero-section">
             <div class="hero-content">
                 <div class="hero-badge">
-                    <div class="tool-icon bg-blue">
+                    <div class="tool-icon bg-green">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <rect width="18" height="18" x="3" y="3" rx="2"/>
                             <path d="m9 9 5 12 1.774-5.226L21 14 9 9z"/>
                         </svg>
                     </div>
-                    <span>Media Tools</span>
+                    <span>Audio/Video Tools</span>
                 </div>
                 <h1 class="hero-title">GIF Maker</h1>
                 <p class="hero-description">Create animated GIFs from videos</p>
@@ -119,7 +119,7 @@
                 </div>
                 <h3>Drop your video file here</h3>
                 <p>or click anywhere to browse files</p>
-                <p class="supported-formats">Supports MP4, AVI, MOV, WMV, MKV</p>
+                <p class="supported-formats">MP4, MOV, AVI, MKV, WMV files supported</p>
                 <input type="file" id="fileInput" accept="video/*" hidden>
             </div>
 
@@ -142,7 +142,7 @@
                             <path d="m6.34 17.66-1.41 1.41"/>
                             <path d="m19.07 4.93-1.41 1.41"/>
                         </svg>
-                        <span>Advanced Options</span>
+                        <span>GIF Settings</span>
                     </div>
                     <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="m6 9 6 6 6-6"/>
@@ -196,6 +196,14 @@
                 </div>
             </div>
 
+            <div class="file-preview" id="filePreview" style="display: none;">
+                <div class="preview-header">
+                    <h3 id="fileName"></h3>
+                    <span id="fileSize"></span>
+                </div>
+                <div class="video-info" id="videoInfo"></div>
+            </div>
+
             <button class="convert-btn" id="convertBtn" disabled>
                 <span class="btn-text">Create GIF</span>
                 <div class="btn-loader" style="display: none;"></div>
@@ -206,13 +214,12 @@
                     <div class="progress-fill" id="progressFill"></div>
                 </div>
                 <div class="progress-text" id="progressText">0%</div>
-                <div class="progress-stage" id="progressStage"></div>
             </div>
 
             <div class="results" id="results" style="display: none;">
                 <h3>GIF Creation Complete</h3>
                 <div class="gif-preview" id="gifPreview"></div>
-                <div class="gif-stats" id="gifInfo"></div>
+                <div class="gif-stats" id="gifStats"></div>
                 <div class="result-actions">
                     <button class="download-btn" id="downloadBtn">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -308,6 +315,9 @@
                     <ul class="footer-links">
                         <li><a href="/image-tools/heic-to-jpg.html" class="footer-link" data-testid="footer-heic-jpg">HEIC to JPG</a></li>
                         <li><a href="/jpg-to-png.html" class="footer-link" data-testid="footer-jpg-png">JPG to PNG</a></li>
+                        <li><a href="/image-tools/png-to-jpg.html" class="footer-link" data-testid="footer-png-jpg">PNG to JPG</a></li>
+                        <li><a href="/image-tools/webp-to-jpg.html" class="footer-link" data-testid="footer-webp-jpg">WEBP to JPG</a></li>
+                        <li><a href="/image-tools/jpg-to-pdf.html" class="footer-link" data-testid="footer-jpg-pdf">JPG to PDF</a></li>
                     </ul>
                 </div>
                 

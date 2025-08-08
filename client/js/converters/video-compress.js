@@ -1,283 +1,261 @@
-/**
- * Video Compressor - Video Compression Tool
- * Uses shared components and follows the PDF Compress pattern
- */
 class VideoCompressor {
     constructor() {
+        this.currentFile = null;
+        this.outputBlob = null;
+        this.uploadResult = null;
         this.init();
         this.setupEventListeners();
-        this.setupComponents();
     }
 
     init() {
-        this.currentFile = null;
-        this.outputBlob = null;
-        this.compressionStats = null;
-        
-        // Initialize DOM elements
-        this.filePreview = document.getElementById('filePreview');
-        this.convertBtn = document.getElementById('convertBtn');
-        this.results = document.getElementById('results');
-        this.compressionLevel = document.getElementById('compressionLevel');
-        this.customSettings = document.getElementById('customSettings');
-    }
-
-    setupComponents() {
         // Initialize shared components
         this.uploader = new FileUploader({
             uploadAreaId: 'uploadArea',
             fileInputId: 'fileInput',
             acceptedTypes: ['video/*'],
-            multiple: false,
             onFileSelect: this.handleFile.bind(this)
         });
 
         this.progress = new ProgressTracker({
             progressContainerId: 'progressContainer',
             progressFillId: 'progressFill',
-            progressTextId: 'progressText',
-            progressStageId: 'progressStage',
-            showStages: true
+            progressTextId: 'progressText'
         });
 
         this.buttonLoader = new ButtonLoader('convertBtn');
         this.errorDisplay = new ErrorDisplay('results');
+
+        // Get DOM elements
+        this.convertBtn = document.getElementById('convertBtn');
+        this.downloadBtn = document.getElementById('downloadBtn');
+        this.filePreview = document.getElementById('filePreview');
+        this.results = document.getElementById('results');
     }
 
     setupEventListeners() {
-        // Convert button
         this.convertBtn.addEventListener('click', this.compressVideo.bind(this));
-        
-        // Download button
-        document.getElementById('downloadBtn').addEventListener('click', this.downloadVideo.bind(this));
-        
-        // Compression level change
-        this.compressionLevel.addEventListener('change', this.handleCompressionChange.bind(this));
+        this.downloadBtn.addEventListener('click', this.downloadFile.bind(this));
     }
 
     async handleFile(file) {
         this.currentFile = file;
-        this.showFilePreview(file);
-        
-        // Load video metadata
+        console.log('File selected:', file.name, file.type, file.size);
+
+        // Validate file type
+        if (!file.type.startsWith('video/')) {
+            this.errorDisplay.showError('Please select a valid video file');
+            return;
+        }
+
         try {
-            const metadata = await this.getVideoMetadata(file);
-            this.displayVideoInfo(metadata);
+            // Show file preview
+            this.showFilePreview(file);
+            
+            // Upload file to server
+            await this.uploadFile(file);
+            
             this.convertBtn.disabled = false;
+            
         } catch (error) {
-            this.errorDisplay.showError('Failed to load video metadata');
+            console.error('Error handling file:', error);
+            this.errorDisplay.showError('Error processing file: ' + error.message);
         }
     }
 
     showFilePreview(file) {
         document.getElementById('fileName').textContent = file.name;
         document.getElementById('fileSize').textContent = FileUtils.formatFileSize(file.size);
+        
+        // Create video element to get metadata
+        const video = document.createElement('video');
+        video.src = URL.createObjectURL(file);
+        
+        video.addEventListener('loadedmetadata', () => {
+            const duration = FileUtils.formatDuration(video.duration);
+            const resolution = `${video.videoWidth}x${video.videoHeight}`;
+            
+            document.getElementById('videoInfo').innerHTML = `
+                <div class="video-details">
+                    <span class="detail-item">🎬 ${duration}</span>
+                    <span class="detail-item">📐 ${resolution}</span>
+                    <span class="detail-item">📊 ${FileUtils.formatFileSize(file.size)}</span>
+                </div>
+            `;
+            
+            // Clean up object URL
+            URL.revokeObjectURL(video.src);
+        });
+
         this.filePreview.style.display = 'block';
     }
 
-    async getVideoMetadata(file) {
-        return new Promise((resolve, reject) => {
-            const video = document.createElement('video');
-            video.preload = 'metadata';
-            
-            video.onloadedmetadata = () => {
-                const metadata = {
-                    duration: video.duration,
-                    width: video.videoWidth,
-                    height: video.videoHeight
-                };
-                URL.revokeObjectURL(video.src);
-                resolve(metadata);
-            };
-            
-            video.onerror = () => {
-                URL.revokeObjectURL(video.src);
-                reject(new Error('Invalid video file'));
-            };
-            
-            video.src = URL.createObjectURL(file);
+    async uploadFile(file) {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const response = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData
         });
-    }
 
-    displayVideoInfo(metadata) {
-        const duration = FileUtils.formatDuration(metadata.duration);
-        const resolution = `${metadata.width}x${metadata.height}`;
-        const fileSize = FileUtils.formatFileSize(this.currentFile.size);
-        
-        document.getElementById('videoInfo').innerHTML = `
-            <div class="video-details">
-                <span class="detail-item">🎬 ${resolution}</span>
-                <span class="detail-item">⏱️ ${duration}</span>
-                <span class="detail-item">📊 ${fileSize}</span>
-            </div>
-        `;
-    }
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Upload failed');
+        }
 
-    handleCompressionChange() {
-        const isCustom = this.compressionLevel.value === 'custom';
-        this.customSettings.style.display = isCustom ? 'block' : 'none';
+        this.uploadResult = await response.json();
+        console.log('Upload successful:', this.uploadResult);
     }
 
     async compressVideo() {
-        if (!this.currentFile) return;
-
-        this.buttonLoader.showLoading();
-        this.progress.show(0, 'Preparing compression...');
-        this.results.style.display = 'none';
-
-        try {
-            const settings = this.getCompressionSettings();
-            await this.performCompression(settings);
-            this.showCompressionResults();
-            AnalyticsTracker.trackConversion('Media Tools', 'Video Compress');
-            
-        } catch (error) {
-            this.errorDisplay.showError('Failed to compress video: ' + error.message);
+        if (!this.uploadResult) {
+            this.errorDisplay.showError('Please upload a file first');
+            return;
         }
 
-        this.progress.hide();
-        this.buttonLoader.hideLoading();
+        try {
+            this.buttonLoader.showLoading();
+            this.progress.show(0);
+            this.results.style.display = 'none';
+
+            // Get compression settings
+            const settings = this.getCompressionSettings();
+            console.log('Compression settings:', settings);
+
+            // Start compression
+            await this.performCompression(settings);
+            
+            // Show results
+            this.showResults();
+            
+            // Track conversion for analytics
+            AnalyticsTracker.trackConversion('Audio/Video Tools', 'Video Compress');
+            
+        } catch (error) {
+            console.error('Compression error:', error);
+            this.errorDisplay.showError('Compression failed: ' + error.message);
+        } finally {
+            this.buttonLoader.hideLoading();
+            this.progress.hide();
+        }
     }
 
     getCompressionSettings() {
-        const level = this.compressionLevel.value;
-        const format = document.getElementById('outputFormat').value;
-        
-        let settings = { format };
-        
-        switch (level) {
-            case 'light':
-                settings.compressionRatio = 0.8;
-                settings.quality = 0.9;
-                break;
-            case 'medium':
-                settings.compressionRatio = 0.6;
-                settings.quality = 0.7;
-                break;
-            case 'heavy':
-                settings.compressionRatio = 0.4;
-                settings.quality = 0.5;
-                break;
-            case 'custom':
-                settings.bitrate = document.getElementById('videoBitrate').value;
-                settings.resolution = document.getElementById('resolution').value;
-                settings.frameRate = document.getElementById('frameRate').value;
-                break;
-        }
-        
-        return settings;
+        return {
+            compression: document.getElementById('compressionLevel').value,
+            format: document.getElementById('outputFormat').value,
+            resolution: document.getElementById('resolution').value,
+            frameRate: document.getElementById('frameRate').value
+        };
     }
 
     async performCompression(settings) {
-        try {
-            // Upload file first
-            const formData = new FormData();
-            formData.append('file', this.currentFile);
-            
-            this.progress.updateProgress(10, 'Uploading video...');
-            const uploadResponse = await fetch('/api/upload', {
-                method: 'POST',
-                body: formData
-            });
-            
-            if (!uploadResponse.ok) {
-                throw new Error('Failed to upload file');
-            }
-            
-            const uploadResult = await uploadResponse.json();
-            this.progress.updateProgress(30, 'Analyzing video...');
-            
-            // Convert with server-side processing
-            const convertResponse = await fetch('/api/convert-media', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    file_id: uploadResult.file_id,
-                    conversion_type: 'video_compress',
-                    options: {
-                        compression: settings.compressionRatio < 0.5 ? 'heavy' : settings.compressionRatio < 0.7 ? 'medium' : 'light',
-                        format: settings.format,
-                        bitrate: settings.bitrate,
-                        resolution: settings.resolution,
-                        framerate: settings.frameRate
-                    }
-                })
-            });
-            
-            this.progress.updateProgress(80, 'Compressing video...');
-            
-            if (!convertResponse.ok) {
-                const error = await convertResponse.json();
-                throw new Error(error.error || 'Compression failed');
-            }
-            
-            const result = await convertResponse.json();
-            this.progress.updateProgress(100, 'Complete!');
-            
-            // Download the converted file
-            this.outputBlob = await fetch(result.download_url).then(r => r.blob());
-            
-            // Store compression stats for display
-            this.compressionStats = {
-                originalSize: this.currentFile.size,
-                compressedSize: result.file_size,
-                compressionRatio: result.compression_ratio || ((this.currentFile.size - result.file_size) / this.currentFile.size * 100).toFixed(1)
-            };
-            
-        } catch (error) {
-            throw new Error(`Video compression failed: ${error.message}`);
+        this.progress.updateProgress(10);
+        
+        // Call backend conversion API
+        const response = await fetch('/api/convert-media', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                file_id: this.uploadResult.file_id,
+                conversion_type: 'video_compress',
+                options: {
+                    compression: settings.compression,
+                    resolution: settings.resolution === 'original' ? null : settings.resolution,
+                    framerate: settings.frameRate === 'original' ? null : settings.frameRate
+                }
+            })
+        });
+
+        this.progress.updateProgress(50);
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Compression failed');
         }
+
+        const result = await response.json();
+        console.log('Compression result:', result);
+
+        this.progress.updateProgress(100);
+
+        // Store download URL for later use
+        this.downloadUrl = result.download_url;
+        this.outputFilename = result.output_file;
+        this.fileSize = result.file_size;
+        this.compressionStats = result.compression_stats || {};
     }
 
-    showCompressionResults() {
-        const stats = this.compressionStats;
-        
+    showResults() {
+        const originalSize = this.currentFile.size;
+        const outputSize = this.fileSize;
+        const compressionRatio = this.compressionStats.compression_ratio || 
+                               ((1 - outputSize/originalSize) * 100).toFixed(1);
+        const format = document.getElementById('outputFormat').value.toUpperCase();
+
         document.getElementById('compressionStats').innerHTML = `
             <div class="stats-grid">
                 <div class="stat-item">
+                    <span class="stat-label">Format:</span>
+                    <span class="stat-value">${format}</span>
+                </div>
+                <div class="stat-item">
                     <span class="stat-label">Original Size:</span>
-                    <span class="stat-value">${FileUtils.formatFileSize(stats.originalSize)}</span>
+                    <span class="stat-value">${FileUtils.formatFileSize(originalSize)}</span>
                 </div>
                 <div class="stat-item">
                     <span class="stat-label">Compressed Size:</span>
-                    <span class="stat-value">${FileUtils.formatFileSize(stats.compressedSize)}</span>
+                    <span class="stat-value">${FileUtils.formatFileSize(outputSize)}</span>
                 </div>
                 <div class="stat-item">
                     <span class="stat-label">Size Reduction:</span>
-                    <span class="stat-value success">${stats.compressionRatio}%</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Status:</span>
-                    <span class="stat-value success">✓ Ready for download</span>
+                    <span class="stat-value success">${compressionRatio}%</span>
                 </div>
             </div>
         `;
-        
+
         this.results.style.display = 'block';
     }
 
-    downloadVideo() {
-        if (this.outputBlob) {
-            const format = document.getElementById('outputFormat').value;
-            const originalName = this.currentFile.name.replace(/\.[^/.]+$/, '');
-            const fileName = `${originalName}_compressed.${format}`;
+    async downloadFile() {
+        if (!this.downloadUrl) {
+            this.errorDisplay.showError('No file ready for download');
+            return;
+        }
+
+        try {
+            const response = await fetch(this.downloadUrl);
+            if (!response.ok) {
+                throw new Error('Download failed');
+            }
+
+            const blob = await response.blob();
+            const url = URL.createObjectURL(blob);
             
             const a = document.createElement('a');
-            a.href = URL.createObjectURL(this.outputBlob);
-            a.download = fileName;
-            a.click();
+            a.href = url;
             
-            // Clean up
-            setTimeout(() => {
-                URL.revokeObjectURL(a.href);
-            }, 100);
+            // Create proper filename based on original file and settings
+            const format = document.getElementById('outputFormat').value;
+            const baseName = this.currentFile.name.replace(/\.[^/.]+$/, "");
+            const timestamp = new Date().toISOString().slice(0, 16).replace(/[-:]/g, '').replace('T', '-');
+            a.download = `${baseName}_compressed_${timestamp}.${format}`;
+            
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+        } catch (error) {
+            console.error('Download error:', error);
+            this.errorDisplay.showError('Download failed: ' + error.message);
         }
     }
 }
 
-// Initialize the video compressor when the page loads
+// Initialize the compressor when the page loads
 document.addEventListener('DOMContentLoaded', () => {
     new VideoCompressor();
 });

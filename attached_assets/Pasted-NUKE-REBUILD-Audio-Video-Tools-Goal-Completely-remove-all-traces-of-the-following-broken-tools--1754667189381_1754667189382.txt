@@ -1,0 +1,127 @@
+NUKE & REBUILD — Audio/Video Tools
+Goal: Completely remove all traces of the following broken tools, wipe their code/config/assets/routes, and rebuild them from scratch so they work reliably. Use the PDF Compress page as the UI/UX baseline.
+
+Tools to NUKE & REBUILD
+MP4 → MP3 Converter
+
+Audio Converter
+
+Video Compress
+
+Video Trim
+
+Video Merger
+
+GIF Maker
+
+Step 0 — Nuke Everything Related to the Old Versions
+Delete all HTML/JS/CSS for the above tools.
+
+Remove backend routes and handlers from routers/controllers.
+
+Clear any shared util code that only those tools used (upload helpers, old ffmpeg wrappers).
+
+Purge static assets and icons for the old tools.
+
+Remove test files for the old implementations.
+
+Search repo for old route names and delete or comment out all references.
+
+Verify no stale imports remain.
+
+Step 1 — Fresh Build (PDF Compress Template)
+Clone the PDF Compress layout exactly:
+
+Single click-to-upload area (no double-popup).
+
+Drag/drop support.
+
+Inline progress bar & status text.
+
+Inline result download area above tool description/info.
+
+Use the same CSS classes & spacing for consistent styling.
+
+Step 2 — Backend Reimplementation (ffmpeg-first)
+Build new shared ffmpeg helper for all video/audio tools:
+
+Save upload to /tmp with safe filename.
+
+Run ffmpeg with correct args.
+
+Validate output (non-empty, correct MIME).
+
+Stream back to user with proper headers.
+
+Clean up all temp files.
+
+Tool-specific requirements:
+
+MP4 → MP3: Extract audio stream (preserve quality).
+
+Audio Converter: Convert to mp3|wav|aac|flac|ogg.
+
+Video Compress: Apply Low/Med/High bitrate presets.
+
+Video Trim: Start/End timestamps; codec copy when possible.
+
+Video Merger: Same-codec concat or re-encode to common profile.
+
+GIF Maker: FPS, width, loop support from advanced options.
+
+Step 3 — Functionality Standards
+All rebuilt tools must:
+
+Accept file via click or drag/drop.
+
+Block unsupported file types with clear inline error.
+
+Show real-time progress (Uploading → Processing → Done).
+
+Return correct filename: <basename>_<toolname>_<YYYYMMDD-HHmm>.<ext> (no weird double extensions).
+
+Set accurate Content-Type header.
+
+Enforce 120s timeout with user-friendly fail message.
+
+Step 4 — Testing Before Merge
+Run manual + automated tests for each tool:
+
+Confirm click upload & drag/drop both work.
+
+Verify output format, quality, and filename.
+
+Ensure no infinite spinners or failed downloads.
+
+Confirm advanced options actually apply to output (where present).
+
+For example:
+
+Trim video to 5s → output is ~5s.
+
+Compress video → file size drops appropriately.
+
+Convert WAV to MP3 → plays fine in VLC.
+
+Merge 2 MP4s → plays as one continuous file.
+
+GIF Maker → produces playable looping GIF.
+
+Step 5 — Restore Navigation
+Add rebuilt tools back in the same positions under Audio/Video Tools in the nav.
+
+Update navigation across all other tool pages.
+
+Keep route slugs the same as before so existing links still work.
+
+Step 6 — Final Deliverables
+Provide:
+
+List of files deleted/added.
+
+ffmpeg commands per tool.
+
+Test results (file sizes, durations, MIME checks).
+
+Any unsupported advanced options (mark as TODO).
+

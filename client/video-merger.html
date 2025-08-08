@@ -30,7 +30,6 @@
                     <div class="nav-dropdown-content">
                         <a href="/image-tools/heic-to-jpg.html" class="nav-dropdown-item" data-testid="nav-heic-jpg">HEIC to JPG</a>
                         <a href="/jpg-to-png.html" class="nav-dropdown-item" data-testid="nav-jpg-png">JPG to PNG</a>
-                        <a href="/pdf-to-jpg.html" class="nav-dropdown-item" data-testid="nav-pdf-to-jpg">PDF to JPG</a>
                         <a href="/image-tools/png-to-jpg.html" class="nav-dropdown-item" data-testid="nav-png-jpg">PNG to JPG</a>
                         <a href="/image-tools/webp-to-jpg.html" class="nav-dropdown-item" data-testid="nav-webp-jpg">WEBP to JPG</a>
                         <a href="/image-tools/jpg-to-pdf.html" class="nav-dropdown-item" data-testid="nav-jpg-pdf">JPG to PDF</a>
@@ -57,6 +56,7 @@
                         <a href="/pdf-rotate.html" class="nav-dropdown-item" data-testid="nav-pdf-rotate">PDF Rotate</a>
                         <a href="/pdf-watermark.html" class="nav-dropdown-item" data-testid="nav-pdf-watermark">PDF Watermark</a>
                         <a href="/pdf-to-word.html" class="nav-dropdown-item" data-testid="nav-pdf-to-word">PDF to Word</a>
+                        <a href="/pdf-to-jpg.html" class="nav-dropdown-item" data-testid="nav-pdf-jpg">PDF to JPG</a>
                     </div>
                 </div>
 
@@ -99,7 +99,7 @@
                             <path d="M21 12h-6l4 4-4 4"/>
                         </svg>
                     </div>
-                    <span>Media Tools</span>
+                    <span>Audio/Video Tools</span>
                 </div>
                 <h1 class="hero-title">Video Merger</h1>
                 <p class="hero-description">Combine multiple video files into one</p>
@@ -121,7 +121,7 @@
                 </div>
                 <h3>Drop your video files here</h3>
                 <p>or click anywhere to browse files</p>
-                <p class="supported-formats">Supports MP4, AVI, MOV, WMV, MKV</p>
+                <p class="supported-formats">MP4, MOV, AVI, MKV, WMV files supported</p>
                 <input type="file" id="fileInput" accept="video/*" multiple hidden>
             </div>
 
@@ -152,7 +152,7 @@
                             <path d="m6.34 17.66-1.41 1.41"/>
                             <path d="m19.07 4.93-1.41 1.41"/>
                         </svg>
-                        <span>Advanced Options</span>
+                        <span>Merge Options</span>
                     </div>
                     <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="m6 9 6 6 6-6"/>
@@ -209,12 +209,11 @@
                     <div class="progress-fill" id="progressFill"></div>
                 </div>
                 <div class="progress-text" id="progressText">0%</div>
-                <div class="progress-stage" id="progressStage"></div>
             </div>
 
             <div class="results" id="results" style="display: none;">
                 <h3>Video Merge Complete</h3>
-                <div class="merge-stats" id="mergeInfo"></div>
+                <div class="merge-stats" id="mergeStats"></div>
                 <div class="result-actions">
                     <button class="download-btn" id="downloadBtn">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -306,6 +305,9 @@
                     <ul class="footer-links">
                         <li><a href="/image-tools/heic-to-jpg.html" class="footer-link" data-testid="footer-heic-jpg">HEIC to JPG</a></li>
                         <li><a href="/jpg-to-png.html" class="footer-link" data-testid="footer-jpg-png">JPG to PNG</a></li>
+                        <li><a href="/image-tools/png-to-jpg.html" class="footer-link" data-testid="footer-png-jpg">PNG to JPG</a></li>
+                        <li><a href="/image-tools/webp-to-jpg.html" class="footer-link" data-testid="footer-webp-jpg">WEBP to JPG</a></li>
+                        <li><a href="/image-tools/jpg-to-pdf.html" class="footer-link" data-testid="footer-jpg-pdf">JPG to PDF</a></li>
                     </ul>
                 </div>
                 

@@ -1,289 +1,257 @@
-/**
- * Audio Converter - Multi-format Audio Conversion Tool
- * Uses shared components and follows the PDF Compress pattern
- */
 class AudioConverter {
     constructor() {
+        this.currentFile = null;
+        this.outputBlob = null;
+        this.uploadResult = null;
         this.init();
         this.setupEventListeners();
-        this.setupComponents();
     }
 
     init() {
-        this.currentFile = null;
-        this.outputBlob = null;
-        this.conversionStats = null;
-        
-        // Initialize DOM elements
-        this.filePreview = document.getElementById('filePreview');
-        this.convertBtn = document.getElementById('convertBtn');
-        this.results = document.getElementById('results');
-        this.audioQuality = document.getElementById('audioQuality');
-        this.customBitrateGroup = document.getElementById('customBitrateGroup');
-    }
-
-    setupComponents() {
         // Initialize shared components
         this.uploader = new FileUploader({
             uploadAreaId: 'uploadArea',
             fileInputId: 'fileInput',
             acceptedTypes: ['audio/*'],
-            multiple: false,
             onFileSelect: this.handleFile.bind(this)
         });
 
         this.progress = new ProgressTracker({
             progressContainerId: 'progressContainer',
             progressFillId: 'progressFill',
-            progressTextId: 'progressText',
-            progressStageId: 'progressStage',
-            showStages: true
+            progressTextId: 'progressText'
         });
 
         this.buttonLoader = new ButtonLoader('convertBtn');
         this.errorDisplay = new ErrorDisplay('results');
+
+        // Get DOM elements
+        this.convertBtn = document.getElementById('convertBtn');
+        this.downloadBtn = document.getElementById('downloadBtn');
+        this.filePreview = document.getElementById('filePreview');
+        this.results = document.getElementById('results');
     }
 
     setupEventListeners() {
-        // Convert button
         this.convertBtn.addEventListener('click', this.convertAudio.bind(this));
-        
-        // Download button
-        document.getElementById('downloadBtn').addEventListener('click', this.downloadAudio.bind(this));
-        
-        // Quality setting change
-        this.audioQuality.addEventListener('change', this.handleQualityChange.bind(this));
+        this.downloadBtn.addEventListener('click', this.downloadFile.bind(this));
     }
 
     async handleFile(file) {
         this.currentFile = file;
-        this.showFilePreview(file);
-        
-        // Load audio metadata
+        console.log('File selected:', file.name, file.type, file.size);
+
+        // Validate file type
+        if (!file.type.startsWith('audio/')) {
+            this.errorDisplay.showError('Please select a valid audio file');
+            return;
+        }
+
         try {
-            const metadata = await this.getAudioMetadata(file);
-            this.displayAudioInfo(metadata);
+            // Show file preview
+            this.showFilePreview(file);
+            
+            // Upload file to server
+            await this.uploadFile(file);
+            
             this.convertBtn.disabled = false;
+            
         } catch (error) {
-            this.errorDisplay.showError('Failed to load audio metadata');
+            console.error('Error handling file:', error);
+            this.errorDisplay.showError('Error processing file: ' + error.message);
         }
     }
 
     showFilePreview(file) {
         document.getElementById('fileName').textContent = file.name;
         document.getElementById('fileSize').textContent = FileUtils.formatFileSize(file.size);
-        this.filePreview.style.display = 'block';
         
-        // Set up audio preview
-        const audioPreview = document.getElementById('audioPreview');
-        audioPreview.src = URL.createObjectURL(file);
-    }
-
-    async getAudioMetadata(file) {
-        return new Promise((resolve, reject) => {
-            const audio = document.createElement('audio');
-            audio.preload = 'metadata';
+        // Create audio element to get metadata
+        const audio = document.createElement('audio');
+        audio.src = URL.createObjectURL(file);
+        
+        audio.addEventListener('loadedmetadata', () => {
+            const duration = FileUtils.formatDuration(audio.duration);
+            const channels = 'Stereo'; // Default assumption
             
-            audio.onloadedmetadata = () => {
-                const metadata = {
-                    duration: audio.duration,
-                    sampleRate: audio.sampleRate || 'Unknown'
-                };
-                URL.revokeObjectURL(audio.src);
-                resolve(metadata);
-            };
+            document.getElementById('audioInfo').innerHTML = `
+                <div class="audio-details">
+                    <span class="detail-item">🎵 ${duration}</span>
+                    <span class="detail-item">🔊 ${channels}</span>
+                    <span class="detail-item">📊 ${FileUtils.formatFileSize(file.size)}</span>
+                </div>
+            `;
             
-            audio.onerror = () => {
-                URL.revokeObjectURL(audio.src);
-                reject(new Error('Invalid audio file'));
-            };
-            
-            audio.src = URL.createObjectURL(file);
+            // Clean up object URL
+            URL.revokeObjectURL(audio.src);
         });
+
+        this.filePreview.style.display = 'block';
     }
 
-    displayAudioInfo(metadata) {
-        const duration = FileUtils.formatDuration(metadata.duration);
-        const fileExtension = this.currentFile.name.split('.').pop().toLowerCase();
-        const fileSize = FileUtils.formatFileSize(this.currentFile.size);
-        
-        document.getElementById('audioInfo').innerHTML = `
-            <div class="audio-details">
-                <span class="detail-item">🎵 ${fileExtension.toUpperCase()}</span>
-                <span class="detail-item">⏱️ ${duration}</span>
-                <span class="detail-item">📊 ${fileSize}</span>
-            </div>
-        `;
-    }
+    async uploadFile(file) {
+        const formData = new FormData();
+        formData.append('file', file);
 
-    handleQualityChange() {
-        const isCustom = this.audioQuality.value === 'custom';
-        this.customBitrateGroup.style.display = isCustom ? 'block' : 'none';
+        const response = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Upload failed');
+        }
+
+        this.uploadResult = await response.json();
+        console.log('Upload successful:', this.uploadResult);
     }
 
     async convertAudio() {
-        if (!this.currentFile) return;
-
-        this.buttonLoader.showLoading();
-        this.progress.show(0, 'Preparing conversion...');
-        this.results.style.display = 'none';
-
-        try {
-            const settings = this.getConversionSettings();
-            await this.performConversion(settings);
-            this.showConversionResults();
-            AnalyticsTracker.trackConversion('Media Tools', 'Audio Converter');
-            
-        } catch (error) {
-            this.errorDisplay.showError('Failed to convert audio: ' + error.message);
+        if (!this.uploadResult) {
+            this.errorDisplay.showError('Please upload a file first');
+            return;
         }
 
-        this.progress.hide();
-        this.buttonLoader.hideLoading();
+        try {
+            this.buttonLoader.showLoading();
+            this.progress.show(0);
+            this.results.style.display = 'none';
+
+            // Get conversion settings
+            const settings = this.getConversionSettings();
+            console.log('Conversion settings:', settings);
+
+            // Start conversion
+            await this.performConversion(settings);
+            
+            // Show results
+            this.showResults();
+            
+            // Track conversion for analytics
+            AnalyticsTracker.trackConversion('Audio/Video Tools', 'Audio Converter');
+            
+        } catch (error) {
+            console.error('Conversion error:', error);
+            this.errorDisplay.showError('Conversion failed: ' + error.message);
+        } finally {
+            this.buttonLoader.hideLoading();
+            this.progress.hide();
+        }
     }
 
     getConversionSettings() {
-        const quality = this.audioQuality.value;
-        let bitrate;
-        
-        switch (quality) {
-            case 'standard':
-                bitrate = 128;
-                break;
-            case 'medium':
-                bitrate = 192;
-                break;
-            case 'high':
-                bitrate = 320;
-                break;
-            case 'custom':
-                bitrate = parseInt(document.getElementById('customBitrate').value);
-                break;
-            default:
-                bitrate = 192;
-        }
-        
         return {
-            outputFormat: document.getElementById('outputFormat').value,
-            bitrate: bitrate,
+            format: document.getElementById('outputFormat').value,
+            quality: document.getElementById('audioQuality').value,
             sampleRate: document.getElementById('sampleRate').value,
             preserveMetadata: document.getElementById('preserveMetadata').checked,
-            normalizeAudio: document.getElementById('normalizeAudio')?.checked || false
+            normalizeAudio: document.getElementById('normalizeAudio').checked
         };
     }
 
     async performConversion(settings) {
-        try {
-            // Upload file first
-            const formData = new FormData();
-            formData.append('file', this.currentFile);
-            
-            this.progress.updateProgress(10, 'Uploading audio...');
-            const uploadResponse = await fetch('/api/upload', {
-                method: 'POST',
-                body: formData
-            });
-            
-            if (!uploadResponse.ok) {
-                throw new Error('Failed to upload file');
-            }
-            
-            const uploadResult = await uploadResponse.json();
-            this.progress.updateProgress(30, 'Processing audio...');
-            
-            // Convert with server-side processing
-            const convertResponse = await fetch('/api/convert-media', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    file_id: uploadResult.file_id,
-                    conversion_type: 'audio_convert',
-                    options: {
-                        format: settings.outputFormat,
-                        bitrate: settings.bitrate,
-                        sample_rate: settings.sampleRate === 'keep' ? null : parseInt(settings.sampleRate),
-                        preserve_metadata: settings.preserveMetadata,
-                        normalize: settings.normalizeAudio
-                    }
-                })
-            });
-            
-            this.progress.updateProgress(80, 'Converting audio...');
-            
-            if (!convertResponse.ok) {
-                const error = await convertResponse.json();
-                throw new Error(error.error || 'Conversion failed');
-            }
-            
-            const result = await convertResponse.json();
-            this.progress.updateProgress(100, 'Complete!');
-            
-            // Download the converted file
-            this.outputBlob = await fetch(result.download_url).then(r => r.blob());
-            
-            // Store conversion stats
-            this.conversionStats = {
-                originalSize: this.currentFile.size,
-                outputSize: result.file_size,
-                originalFormat: this.currentFile.name.split('.').pop().toUpperCase(),
-                outputFormat: settings.outputFormat.toUpperCase(),
-                quality: settings.bitrate + ' kbps',
-                duration: result.duration || 'N/A'
-            };
-            
-        } catch (error) {
-            throw new Error(`Audio conversion failed: ${error.message}`);
+        this.progress.updateProgress(10);
+        
+        // Call backend conversion API
+        const response = await fetch('/api/convert-media', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                file_id: this.uploadResult.file_id,
+                conversion_type: 'audio_convert',
+                options: {
+                    format: settings.format,
+                    bitrate: settings.quality,
+                    sample_rate: settings.sampleRate === 'keep' ? null : settings.sampleRate,
+                    preserve_metadata: settings.preserveMetadata,
+                    normalize_audio: settings.normalizeAudio
+                }
+            })
+        });
+
+        this.progress.updateProgress(50);
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Conversion failed');
         }
+
+        const result = await response.json();
+        console.log('Conversion result:', result);
+
+        this.progress.updateProgress(100);
+
+        // Store download URL for later use
+        this.downloadUrl = result.download_url;
+        this.outputFilename = result.output_file;
+        this.fileSize = result.file_size;
     }
 
-    showConversionResults() {
-        const stats = this.conversionStats;
-        
+    showResults() {
+        const originalSize = this.currentFile.size;
+        const outputSize = this.fileSize;
+        const format = document.getElementById('outputFormat').value.toUpperCase();
+        const quality = document.getElementById('audioQuality').value;
+
         document.getElementById('conversionStats').innerHTML = `
             <div class="stats-grid">
                 <div class="stat-item">
-                    <span class="stat-label">Original:</span>
-                    <span class="stat-value">${stats.originalFormat} • ${FileUtils.formatFileSize(stats.originalSize)}</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Converted:</span>
-                    <span class="stat-value">${stats.outputFormat} • ${FileUtils.formatFileSize(stats.outputSize)}</span>
+                    <span class="stat-label">Format:</span>
+                    <span class="stat-value">${format}</span>
                 </div>
                 <div class="stat-item">
                     <span class="stat-label">Quality:</span>
-                    <span class="stat-value">${stats.quality}</span>
+                    <span class="stat-value">${quality} kbps</span>
                 </div>
                 <div class="stat-item">
-                    <span class="stat-label">Duration:</span>
-                    <span class="stat-value">${stats.duration}</span>
+                    <span class="stat-label">Original Size:</span>
+                    <span class="stat-value">${FileUtils.formatFileSize(originalSize)}</span>
                 </div>
                 <div class="stat-item">
-                    <span class="stat-label">Status:</span>
-                    <span class="stat-value success">✓ Ready for download</span>
+                    <span class="stat-label">Output Size:</span>
+                    <span class="stat-value">${FileUtils.formatFileSize(outputSize)}</span>
                 </div>
             </div>
         `;
-        
+
         this.results.style.display = 'block';
     }
 
-    downloadAudio() {
-        if (this.outputBlob) {
-            const format = document.getElementById('outputFormat').value;
-            const originalName = this.currentFile.name.replace(/\.[^/.]+$/, '');
-            const fileName = `${originalName}.${format}`;
+    async downloadFile() {
+        if (!this.downloadUrl) {
+            this.errorDisplay.showError('No file ready for download');
+            return;
+        }
+
+        try {
+            const response = await fetch(this.downloadUrl);
+            if (!response.ok) {
+                throw new Error('Download failed');
+            }
+
+            const blob = await response.blob();
+            const url = URL.createObjectURL(blob);
             
             const a = document.createElement('a');
-            a.href = URL.createObjectURL(this.outputBlob);
-            a.download = fileName;
-            a.click();
+            a.href = url;
             
-            // Clean up
-            setTimeout(() => {
-                URL.revokeObjectURL(a.href);
-            }, 100);
+            // Create proper filename based on original file and settings
+            const format = document.getElementById('outputFormat').value;
+            const baseName = this.currentFile.name.replace(/\.[^/.]+$/, "");
+            const timestamp = new Date().toISOString().slice(0, 16).replace(/[-:]/g, '').replace('T', '-');
+            a.download = `${baseName}_audioconvert_${timestamp}.${format}`;
+            
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+        } catch (error) {
+            console.error('Download error:', error);
+            this.errorDisplay.showError('Download failed: ' + error.message);
         }
     }
 }

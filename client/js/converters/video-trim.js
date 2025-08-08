@@ -1,157 +1,103 @@
-/**
- * Video Trimmer - Video Trimming Tool
- * Uses shared components and follows the PDF Compress pattern
- */
 class VideoTrimmer {
     constructor() {
+        this.currentFile = null;
+        this.outputBlob = null;
+        this.uploadResult = null;
+        this.videoDuration = 0;
         this.init();
         this.setupEventListeners();
-        this.setupComponents();
     }
 
     init() {
-        this.currentFile = null;
-        this.outputBlob = null;
-        this.videoDuration = 0;
-        this.startTime = 0;
-        this.endTime = 0;
-        this.trimStats = null;
-        
-        // Initialize DOM elements
-        this.videoPreview = document.getElementById('videoPreview');
-        this.videoPlayer = document.getElementById('videoPlayer');
-        this.trimControls = document.getElementById('trimControls');
-        this.convertBtn = document.getElementById('convertBtn');
-        this.results = document.getElementById('results');
-    }
-
-    setupComponents() {
         // Initialize shared components
         this.uploader = new FileUploader({
             uploadAreaId: 'uploadArea',
             fileInputId: 'fileInput',
             acceptedTypes: ['video/*'],
-            multiple: false,
             onFileSelect: this.handleFile.bind(this)
         });
 
         this.progress = new ProgressTracker({
             progressContainerId: 'progressContainer',
             progressFillId: 'progressFill',
-            progressTextId: 'progressText',
-            progressStageId: 'progressStage',
-            showStages: true
+            progressTextId: 'progressText'
         });
 
         this.buttonLoader = new ButtonLoader('convertBtn');
         this.errorDisplay = new ErrorDisplay('results');
+
+        // Get DOM elements
+        this.convertBtn = document.getElementById('convertBtn');
+        this.downloadBtn = document.getElementById('downloadBtn');
+        this.filePreview = document.getElementById('filePreview');
+        this.videoPreview = document.getElementById('videoPreview');
+        this.videoPlayer = document.getElementById('videoPlayer');
+        this.results = document.getElementById('results');
     }
 
     setupEventListeners() {
-        // Trim controls
-        document.getElementById('startTime').addEventListener('input', this.updateStartTime.bind(this));
-        document.getElementById('endTime').addEventListener('input', this.updateEndTime.bind(this));
-        document.getElementById('duration').addEventListener('input', this.updateDuration.bind(this));
-        
-        // Convert button
         this.convertBtn.addEventListener('click', this.trimVideo.bind(this));
+        this.downloadBtn.addEventListener('click', this.downloadFile.bind(this));
         
-        // Download button
-        document.getElementById('downloadBtn').addEventListener('click', this.downloadVideo.bind(this));
+        // Time input validation
+        document.getElementById('startTime').addEventListener('input', this.validateTimeInputs.bind(this));
+        document.getElementById('endTime').addEventListener('input', this.validateTimeInputs.bind(this));
+        
+        // Video player events
+        this.videoPlayer.addEventListener('loadedmetadata', this.onVideoLoaded.bind(this));
     }
 
     async handleFile(file) {
         this.currentFile = file;
-        
-        // Load video metadata
+        console.log('File selected:', file.name, file.type, file.size);
+
+        // Validate file type
+        if (!file.type.startsWith('video/')) {
+            this.errorDisplay.showError('Please select a valid video file');
+            return;
+        }
+
         try {
-            const metadata = await this.getVideoMetadata(file);
-            this.videoDuration = metadata.duration;
-            this.endTime = this.videoDuration;
+            // Show file preview
+            this.showFilePreview(file);
             
-            this.showVideoPreview(file);
-            this.setupTrimControls();
+            // Upload file to server
+            await this.uploadFile(file);
+            
             this.convertBtn.disabled = false;
+            
         } catch (error) {
-            this.errorDisplay.showError('Failed to load video metadata');
+            console.error('Error handling file:', error);
+            this.errorDisplay.showError('Error processing file: ' + error.message);
         }
     }
 
-    async getVideoMetadata(file) {
-        return new Promise((resolve, reject) => {
-            const video = document.createElement('video');
-            video.preload = 'metadata';
-            
-            video.onloadedmetadata = () => {
-                const metadata = {
-                    duration: video.duration,
-                    width: video.videoWidth,
-                    height: video.videoHeight
-                };
-                URL.revokeObjectURL(video.src);
-                resolve(metadata);
-            };
-            
-            video.onerror = () => {
-                URL.revokeObjectURL(video.src);
-                reject(new Error('Invalid video file'));
-            };
-            
-            video.src = URL.createObjectURL(file);
-        });
-    }
-
-    showVideoPreview(file) {
-        const videoUrl = URL.createObjectURL(file);
-        this.videoPlayer.src = videoUrl;
+    showFilePreview(file) {
+        document.getElementById('fileName').textContent = file.name;
+        document.getElementById('fileSize').textContent = FileUtils.formatFileSize(file.size);
         
-        this.uploader.hideUploadArea();
+        // Show video preview
+        this.videoPlayer.src = URL.createObjectURL(file);
         this.videoPreview.style.display = 'block';
+        this.filePreview.style.display = 'block';
     }
 
-    setupTrimControls() {
-        const startInput = document.getElementById('startTime');
-        const endInput = document.getElementById('endTime');
-        const durationInput = document.getElementById('duration');
+    onVideoLoaded() {
+        this.videoDuration = this.videoPlayer.duration;
+        const duration = FileUtils.formatDuration(this.videoDuration);
+        const resolution = `${this.videoPlayer.videoWidth}x${this.videoPlayer.videoHeight}`;
         
-        // Set up time inputs with proper format
-        startInput.value = this.formatTimeInput(0);
-        endInput.value = this.formatTimeInput(this.videoDuration);
-        durationInput.value = this.formatTimeInput(this.videoDuration);
-    }
+        document.getElementById('videoInfo').innerHTML = `
+            <div class="video-details">
+                <span class="detail-item">🎬 ${duration}</span>
+                <span class="detail-item">📐 ${resolution}</span>
+                <span class="detail-item">📊 ${FileUtils.formatFileSize(this.currentFile.size)}</span>
+            </div>
+        `;
 
-    updateStartTime() {
-        const timeStr = document.getElementById('startTime').value;
-        this.startTime = this.parseTimeInput(timeStr);
-        if (this.startTime >= this.endTime) {
-            this.startTime = Math.max(0, this.endTime - 1);
-            document.getElementById('startTime').value = this.formatTimeInput(this.startTime);
-        }
-        this.videoPlayer.currentTime = this.startTime;
-        this.updateDurationDisplay();
-    }
-
-    updateEndTime() {
-        const timeStr = document.getElementById('endTime').value;
-        this.endTime = this.parseTimeInput(timeStr);
-        if (this.endTime <= this.startTime) {
-            this.endTime = Math.min(this.videoDuration, this.startTime + 1);
-            document.getElementById('endTime').value = this.formatTimeInput(this.endTime);
-        }
-        this.updateDurationDisplay();
-    }
-
-    updateDuration() {
-        const durationStr = document.getElementById('duration').value;
-        const duration = this.parseTimeInput(durationStr);
-        this.endTime = Math.min(this.startTime + duration, this.videoDuration);
-        document.getElementById('endTime').value = this.formatTimeInput(this.endTime);
-        this.updateDurationDisplay();
-    }
-
-    updateDurationDisplay() {
-        const trimmedDuration = this.endTime - this.startTime;
-        document.getElementById('duration').value = this.formatTimeInput(trimmedDuration);
+        // Set default end time to video duration or 10 seconds, whichever is smaller
+        const defaultDuration = Math.min(this.videoDuration, 10);
+        document.getElementById('endTime').value = this.formatTimeInput(defaultDuration);
     }
 
     formatTimeInput(seconds) {
@@ -161,172 +107,202 @@ class VideoTrimmer {
         return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
     }
 
-    parseTimeInput(timeStr) {
-        const parts = timeStr.split(':').map(p => parseInt(p) || 0);
+    parseTimeInput(timeString) {
+        const parts = timeString.split(':').map(part => parseInt(part) || 0);
         if (parts.length === 3) {
-            return parts[0] * 3600 + parts[1] * 60 + parts[2];
+            return parts[0] * 3600 + parts[1] * 60 + parts[2]; // HH:MM:SS
         } else if (parts.length === 2) {
-            return parts[0] * 60 + parts[1];
+            return parts[0] * 60 + parts[1]; // MM:SS
         }
-        return parts[0] || 0;
+        return parts[0] || 0; // SS
+    }
+
+    validateTimeInputs() {
+        const startTime = this.parseTimeInput(document.getElementById('startTime').value);
+        const endTime = this.parseTimeInput(document.getElementById('endTime').value);
+        
+        if (startTime >= endTime) {
+            document.getElementById('endTime').value = this.formatTimeInput(startTime + 1);
+        }
+        
+        if (this.videoDuration && endTime > this.videoDuration) {
+            document.getElementById('endTime').value = this.formatTimeInput(this.videoDuration);
+        }
+    }
+
+    async uploadFile(file) {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const response = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Upload failed');
+        }
+
+        this.uploadResult = await response.json();
+        console.log('Upload successful:', this.uploadResult);
     }
 
     async trimVideo() {
-        if (!this.currentFile) return;
-
-        this.buttonLoader.showLoading();
-        this.progress.show(0, 'Preparing trim...');
-        this.results.style.display = 'none';
-
-        try {
-            const settings = this.getTrimSettings();
-            await this.performTrim(settings);
-            this.showTrimResults();
-            AnalyticsTracker.trackConversion('Media Tools', 'Video Trim');
-            
-        } catch (error) {
-            this.errorDisplay.showError('Failed to trim video: ' + error.message);
+        if (!this.uploadResult) {
+            this.errorDisplay.showError('Please upload a file first');
+            return;
         }
 
-        this.progress.hide();
-        this.buttonLoader.hideLoading();
+        try {
+            this.buttonLoader.showLoading();
+            this.progress.show(0);
+            this.results.style.display = 'none';
+
+            // Get trim settings
+            const settings = this.getTrimSettings();
+            console.log('Trim settings:', settings);
+
+            // Validate settings
+            if (settings.startTime >= settings.endTime) {
+                throw new Error('Start time must be before end time');
+            }
+
+            // Start trimming
+            await this.performTrim(settings);
+            
+            // Show results
+            this.showResults(settings);
+            
+            // Track conversion for analytics
+            AnalyticsTracker.trackConversion('Audio/Video Tools', 'Video Trim');
+            
+        } catch (error) {
+            console.error('Trim error:', error);
+            this.errorDisplay.showError('Trim failed: ' + error.message);
+        } finally {
+            this.buttonLoader.hideLoading();
+            this.progress.hide();
+        }
     }
 
     getTrimSettings() {
+        const startTime = this.parseTimeInput(document.getElementById('startTime').value);
+        const endTime = this.parseTimeInput(document.getElementById('endTime').value);
+        
         return {
-            startTime: this.startTime,
-            endTime: this.endTime,
-            outputFormat: document.getElementById('outputFormat').value,
-            quality: document.getElementById('quality').value,
-            fadeIn: document.getElementById('fadeIn').checked,
-            fadeOut: document.getElementById('fadeOut').checked
+            startTime: startTime,
+            duration: endTime - startTime,
+            format: document.getElementById('outputFormat').value,
+            fastCopy: document.getElementById('fastCopy').checked
         };
     }
 
     async performTrim(settings) {
-        try {
-            // Upload file first
-            const formData = new FormData();
-            formData.append('file', this.currentFile);
-            
-            this.progress.updateProgress(10, 'Uploading video...');
-            const uploadResponse = await fetch('/api/upload', {
-                method: 'POST',
-                body: formData
-            });
-            
-            if (!uploadResponse.ok) {
-                throw new Error('Failed to upload file');
-            }
-            
-            const uploadResult = await uploadResponse.json();
-            this.progress.updateProgress(30, 'Processing video...');
-            
-            // Convert with server-side processing
-            const convertResponse = await fetch('/api/convert-media', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    file_id: uploadResult.file_id,
-                    conversion_type: 'video_trim',
-                    options: {
-                        start_time: settings.startTime,
-                        duration: settings.endTime - settings.startTime,
-                        format: settings.outputFormat,
-                        quality: settings.quality,
-                        fade_in: settings.fadeIn,
-                        fade_out: settings.fadeOut
-                    }
-                })
-            });
-            
-            this.progress.updateProgress(80, 'Trimming video...');
-            
-            if (!convertResponse.ok) {
-                const error = await convertResponse.json();
-                throw new Error(error.error || 'Video trim failed');
-            }
-            
-            const result = await convertResponse.json();
-            this.progress.updateProgress(100, 'Complete!');
-            
-            // Download the converted file
-            this.outputBlob = await fetch(result.download_url).then(r => r.blob());
-            
-            const trimmedDuration = settings.endTime - settings.startTime;
-            this.trimStats = {
-                originalDuration: this.videoDuration,
-                trimmedDuration: trimmedDuration,
-                startTime: settings.startTime,
-                endTime: settings.endTime,
-                outputSize: result.file_size,
-                format: settings.outputFormat.toUpperCase()
-            };
-            
-        } catch (error) {
-            throw new Error(`Video trim failed: ${error.message}`);
+        this.progress.updateProgress(10);
+        
+        // Call backend conversion API
+        const response = await fetch('/api/convert-media', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                file_id: this.uploadResult.file_id,
+                conversion_type: 'video_trim',
+                options: {
+                    start_time: settings.startTime,
+                    duration: settings.duration,
+                    fast_copy: settings.fastCopy
+                }
+            })
+        });
+
+        this.progress.updateProgress(50);
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Trim failed');
         }
+
+        const result = await response.json();
+        console.log('Trim result:', result);
+
+        this.progress.updateProgress(100);
+
+        // Store download URL for later use
+        this.downloadUrl = result.download_url;
+        this.outputFilename = result.output_file;
+        this.fileSize = result.file_size;
     }
 
-    showTrimResults() {
-        const trimResultsDiv = document.createElement('div');
-        trimResultsDiv.innerHTML = `
-            <h3>Video Trimming Complete</h3>
+    showResults(settings) {
+        const originalSize = this.currentFile.size;
+        const outputSize = this.fileSize;
+        const format = document.getElementById('outputFormat').value.toUpperCase();
+        const trimmedDuration = FileUtils.formatDuration(settings.duration);
+
+        document.getElementById('trimStats').innerHTML = `
             <div class="stats-grid">
                 <div class="stat-item">
-                    <span class="stat-label">Original Duration:</span>
-                    <span class="stat-value">${FileUtils.formatDuration(this.trimStats.originalDuration)}</span>
+                    <span class="stat-label">Format:</span>
+                    <span class="stat-value">${format}</span>
                 </div>
                 <div class="stat-item">
                     <span class="stat-label">Trimmed Duration:</span>
-                    <span class="stat-value">${FileUtils.formatDuration(this.trimStats.trimmedDuration)}</span>
+                    <span class="stat-value">${trimmedDuration}</span>
                 </div>
                 <div class="stat-item">
-                    <span class="stat-label">Trim Range:</span>
-                    <span class="stat-value">${FileUtils.formatDuration(this.trimStats.startTime)} - ${FileUtils.formatDuration(this.trimStats.endTime)}</span>
+                    <span class="stat-label">Original Size:</span>
+                    <span class="stat-value">${FileUtils.formatFileSize(originalSize)}</span>
                 </div>
                 <div class="stat-item">
-                    <span class="stat-label">Output Format:</span>
-                    <span class="stat-value">${this.trimStats.format}</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">File Size:</span>
-                    <span class="stat-value">${FileUtils.formatFileSize(this.trimStats.outputSize)}</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Status:</span>
-                    <span class="stat-value success">✓ Ready for download</span>
+                    <span class="stat-label">Output Size:</span>
+                    <span class="stat-value">${FileUtils.formatFileSize(outputSize)}</span>
                 </div>
             </div>
         `;
-        
-        this.results.innerHTML = '';
-        this.results.appendChild(trimResultsDiv);
+
         this.results.style.display = 'block';
     }
 
-    downloadVideo() {
-        if (this.outputBlob) {
-            const format = document.getElementById('outputFormat').value;
-            const originalName = this.currentFile.name.replace(/\.[^/.]+$/, '');
-            const fileName = `${originalName}_trimmed.${format}`;
+    async downloadFile() {
+        if (!this.downloadUrl) {
+            this.errorDisplay.showError('No file ready for download');
+            return;
+        }
+
+        try {
+            const response = await fetch(this.downloadUrl);
+            if (!response.ok) {
+                throw new Error('Download failed');
+            }
+
+            const blob = await response.blob();
+            const url = URL.createObjectURL(blob);
             
             const a = document.createElement('a');
-            a.href = URL.createObjectURL(this.outputBlob);
-            a.download = fileName;
-            a.click();
+            a.href = url;
             
-            // Clean up
-            setTimeout(() => {
-                URL.revokeObjectURL(a.href);
-            }, 100);
+            // Create proper filename based on original file and settings
+            const format = document.getElementById('outputFormat').value;
+            const baseName = this.currentFile.name.replace(/\.[^/.]+$/, "");
+            const timestamp = new Date().toISOString().slice(0, 16).replace(/[-:]/g, '').replace('T', '-');
+            a.download = `${baseName}_trimmed_${timestamp}.${format}`;
+            
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+        } catch (error) {
+            console.error('Download error:', error);
+            this.errorDisplay.showError('Download failed: ' + error.message);
         }
     }
 }
 
-// Initialize the video trimmer when the page loads
+// Initialize the trimmer when the page loads
 document.addEventListener('DOMContentLoaded', () => {
     new VideoTrimmer();
 });

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Video Trim - FileFlow</title>
-    <meta name="description" content="Trim and cut video clips with precision using FileFlow's Video Trim tool. Extract specific segments from your videos with frame-perfect accuracy.">
+    <meta name="description" content="Cut and trim video clips with precision. Extract specific segments from videos with start and end time controls.">
     <link rel="stylesheet" href="styles.css">
     
     <!-- Navigation Script -->
@@ -30,7 +30,6 @@
                     <div class="nav-dropdown-content">
                         <a href="/image-tools/heic-to-jpg.html" class="nav-dropdown-item" data-testid="nav-heic-jpg">HEIC to JPG</a>
                         <a href="/jpg-to-png.html" class="nav-dropdown-item" data-testid="nav-jpg-png">JPG to PNG</a>
-                        <a href="/pdf-to-jpg.html" class="nav-dropdown-item" data-testid="nav-pdf-to-jpg">PDF to JPG</a>
                         <a href="/image-tools/png-to-jpg.html" class="nav-dropdown-item" data-testid="nav-png-jpg">PNG to JPG</a>
                         <a href="/image-tools/webp-to-jpg.html" class="nav-dropdown-item" data-testid="nav-webp-jpg">WEBP to JPG</a>
                         <a href="/image-tools/jpg-to-pdf.html" class="nav-dropdown-item" data-testid="nav-jpg-pdf">JPG to PDF</a>
@@ -57,6 +56,7 @@
                         <a href="/pdf-rotate.html" class="nav-dropdown-item" data-testid="nav-pdf-rotate">PDF Rotate</a>
                         <a href="/pdf-watermark.html" class="nav-dropdown-item" data-testid="nav-pdf-watermark">PDF Watermark</a>
                         <a href="/pdf-to-word.html" class="nav-dropdown-item" data-testid="nav-pdf-to-word">PDF to Word</a>
+                        <a href="/pdf-to-jpg.html" class="nav-dropdown-item" data-testid="nav-pdf-jpg">PDF to JPG</a>
                     </div>
                 </div>
 
@@ -91,20 +91,24 @@
         <div class="hero-section">
             <div class="hero-content">
                 <div class="hero-badge">
-                    <div class="tool-icon bg-orange">
+                    <div class="tool-icon bg-red">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="m15 18-6-6 6-6"/>
-                            <path d="m9 12h12"/>
+                            <path d="m3 3 18 18"/>
+                            <path d="M8.5 8.5c-.2.4-.5.8-.9 1.2l-2.6 2.6"/>
+                            <path d="m10 10-2-2"/>
+                            <path d="M12 8.5v6"/>
+                            <path d="m14 14-2 2"/>
+                            <path d="M15.5 15.5c.2-.4.5-.8.9-1.2l2.6-2.6"/>
                         </svg>
                     </div>
-                    <span>Media Tools</span>
+                    <span>Audio/Video Tools</span>
                 </div>
                 <h1 class="hero-title">Video Trim</h1>
-                <p class="hero-description">Trim and cut video clips with precision</p>
+                <p class="hero-description">Cut precise video clips with start and end controls</p>
                 <div class="hero-features">
-                    <span class="feature-tag">✓ Frame-perfect accuracy</span>
+                    <span class="feature-tag">✓ Precise timing</span>
                     <span class="feature-tag">✓ Timeline preview</span>
-                    <span class="feature-tag">✓ Multiple segments</span>
+                    <span class="feature-tag">✓ Quality preservation</span>
                 </div>
             </div>
         </div>
@@ -119,36 +123,12 @@
                 </div>
                 <h3>Drop your video file here</h3>
                 <p>or click anywhere to browse files</p>
-                <p class="supported-formats">Supports MP4, AVI, MOV, WMV, MKV</p>
+                <p class="supported-formats">MP4, MOV, AVI, MKV, WMV files supported</p>
                 <input type="file" id="fileInput" accept="video/*" hidden>
             </div>
 
             <div class="video-preview" id="videoPreview" style="display: none;">
                 <video id="videoPlayer" controls style="width: 100%; max-height: 400px; border-radius: 12px;"></video>
-                <div class="trim-controls" id="trimControls">
-                    <div class="timeline-container">
-                        <div class="timeline" id="timeline">
-                            <div class="timeline-track"></div>
-                            <div class="start-handle" id="startHandle"></div>
-                            <div class="end-handle" id="endHandle"></div>
-                            <div class="trim-region" id="trimRegion"></div>
-                        </div>
-                    </div>
-                    <div class="time-inputs">
-                        <div class="input-group">
-                            <label for="startTime">Start Time</label>
-                            <input type="text" id="startTime" placeholder="00:00:00" pattern="[0-9]{2}:[0-9]{2}:[0-9]{2}">
-                        </div>
-                        <div class="input-group">
-                            <label for="endTime">End Time</label>
-                            <input type="text" id="endTime" placeholder="00:00:10" pattern="[0-9]{2}:[0-9]{2}:[0-9]{2}">
-                        </div>
-                        <div class="input-group">
-                            <label for="duration">Duration</label>
-                            <input type="text" id="duration" readonly>
-                        </div>
-                    </div>
-                </div>
             </div>
 
             <div class="advanced-options" id="advancedOptions">
@@ -166,41 +146,45 @@
                             <path d="m6.34 17.66-1.41 1.41"/>
                             <path d="m19.07 4.93-1.41 1.41"/>
                         </svg>
-                        <span>Advanced Options</span>
+                        <span>Trim Settings</span>
                     </div>
                     <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="m6 9 6 6 6-6"/>
                     </svg>
                 </div>
+                
                 <div class="options-content" id="optionsContent" style="display: none;">
+                    <div class="option-group">
+                        <label for="startTime">Start Time (HH:MM:SS)</label>
+                        <input type="text" id="startTime" value="00:00:00" placeholder="00:00:00">
+                    </div>
+                    <div class="option-group">
+                        <label for="endTime">End Time (HH:MM:SS)</label>
+                        <input type="text" id="endTime" value="00:00:10" placeholder="00:00:10">
+                    </div>
                     <div class="option-group">
                         <label for="outputFormat">Output Format</label>
                         <select id="outputFormat">
-                            <option value="mp4">MP4 (Recommended)</option>
-                            <option value="webm">WebM</option>
-                            <option value="avi">AVI</option>
-                        </select>
-                    </div>
-                    <div class="option-group">
-                        <label for="quality">Video Quality</label>
-                        <select id="quality">
-                            <option value="medium" selected>Medium Quality</option>
-                            <option value="original">Keep Original</option>
-                            <option value="high">High Quality</option>
-                            <option value="low">Low Quality</option>
+                            <option value="mp4" selected>MP4 (Most Compatible)</option>
+                            <option value="webm">WebM (Web Optimized)</option>
+                            <option value="avi">AVI (Legacy Support)</option>
                         </select>
                     </div>
                     <div class="checkbox-group">
                         <div class="premium-checkbox-item">
-                            <input type="checkbox" id="fadeIn" class="premium-checkbox">
-                            <label for="fadeIn" class="checkbox-label">Fade in at start</label>
-                        </div>
-                        <div class="premium-checkbox-item">
-                            <input type="checkbox" id="fadeOut" class="premium-checkbox">
-                            <label for="fadeOut" class="checkbox-label">Fade out at end</label>
+                            <input type="checkbox" id="fastCopy" class="premium-checkbox" checked>
+                            <label for="fastCopy" class="checkbox-label">Fast copy (preserves original quality)</label>
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <div class="file-preview" id="filePreview" style="display: none;">
+                <div class="preview-header">
+                    <h3 id="fileName"></h3>
+                    <span id="fileSize"></span>
+                </div>
+                <div class="video-info" id="videoInfo"></div>
             </div>
 
             <button class="convert-btn" id="convertBtn" disabled>
@@ -213,11 +197,10 @@
                     <div class="progress-fill" id="progressFill"></div>
                 </div>
                 <div class="progress-text" id="progressText">0%</div>
-                <div class="progress-stage" id="progressStage"></div>
             </div>
 
             <div class="results" id="results" style="display: none;">
-                <h3>Video Trimming Complete</h3>
+                <h3>Video Trim Complete</h3>
                 <div class="trim-stats" id="trimStats"></div>
                 <div class="result-actions">
                     <button class="download-btn" id="downloadBtn">
@@ -237,38 +220,37 @@
                     <div class="info-card">
                         <div class="info-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M4 7V4a2 2 0 0 1 2-2h8.5L20 7.5V20a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-3"/>
-                                <polyline points="14,2 14,8 20,8"/>
-                                <path d="M10.42 12.61a2.1 2.1 0 1 1 2.97 2.97L7.95 21 4 22l1.05-3.95 5.37-5.44z"/>
+                                <rect x="6" y="4" width="4" height="16"/>
+                                <rect x="14" y="4" width="4" height="16"/>
                             </svg>
                         </div>
-                        <h3>Precise Trimming</h3>
-                        <p>Cut videos to exact start and end times with frame-accurate precision. Perfect for creating clips, removing unwanted sections, and content editing.</p>
+                        <h3>Precision Cutting</h3>
+                        <p>Cut video segments with frame-perfect accuracy. Extract specific scenes, remove unwanted parts, or create highlights from longer videos.</p>
                     </div>
                     <div class="info-card">
                         <div class="info-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
-                                <path d="M10 17l5-5-5-5"/>
-                                <path d="M13.8 12H3"/>
+                                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                                <line x1="8" y1="21" x2="16" y2="21"/>
+                                <line x1="12" y1="17" x2="12" y2="21"/>
                             </svg>
                         </div>
-                        <h3>Easy Controls</h3>
-                        <p>Visual timeline with drag controls and time input fields. Set start and end points easily with real-time video preview.</p>
+                        <h3>Timeline Preview</h3>
+                        <p>Preview your video and set exact start and end times using time inputs or the built-in video player controls.</p>
                     </div>
                     <div class="info-card">
                         <div class="info-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
                             </svg>
                         </div>
-                        <h3>Quality Preserved</h3>
-                        <p>Maintain original video quality during trimming. Add fade effects and choose output formats for professional results.</p>
+                        <h3>Quality Preservation</h3>
+                        <p>Fast copy mode preserves original quality without re-encoding, ensuring no quality loss and faster processing times.</p>
                     </div>
                 </div>
                 <div class="tool-benefits">
                     <h3>Why Trim Videos?</h3>
-                    <p>Video trimming is essential for content creation and editing. Whether you need to create social media clips, remove unwanted sections, or extract specific moments, trimming allows you to focus on the most important parts while reducing file size and improving viewer engagement.</p>
+                    <p>Video trimming is essential for content creation and editing. Extract the best moments from long recordings, create social media clips, remove unwanted sections, or prepare highlight reels. Trimming helps reduce file size, focus viewer attention, and create polished content optimized for your specific needs.</p>
                 </div>
             </div>
 
@@ -305,6 +287,9 @@
                     <ul class="footer-links">
                         <li><a href="/image-tools/heic-to-jpg.html" class="footer-link" data-testid="footer-heic-jpg">HEIC to JPG</a></li>
                         <li><a href="/jpg-to-png.html" class="footer-link" data-testid="footer-jpg-png">JPG to PNG</a></li>
+                        <li><a href="/image-tools/png-to-jpg.html" class="footer-link" data-testid="footer-png-jpg">PNG to JPG</a></li>
+                        <li><a href="/image-tools/webp-to-jpg.html" class="footer-link" data-testid="footer-webp-jpg">WEBP to JPG</a></li>
+                        <li><a href="/image-tools/jpg-to-pdf.html" class="footer-link" data-testid="footer-jpg-pdf">JPG to PDF</a></li>
                     </ul>
                 </div>
                 

@@ -120,7 +120,7 @@
                 </div>
                 <h3>Drop your video file here</h3>
                 <p>or click anywhere to browse files</p>
-                <p class="supported-formats">Supports MP4, MOV, AVI, MKV</p>
+                <p class="supported-formats">MP4, MOV, AVI, MKV, WMV files supported</p>
                 <input type="file" id="fileInput" accept="video/*" hidden>
             </div>
 
@@ -153,7 +153,6 @@
                             <option value="light">Light (Better quality, larger size)</option>
                             <option value="medium" selected>Medium (Balanced)</option>
                             <option value="heavy">Heavy (Smaller size, some quality loss)</option>
-                            <option value="custom">Custom</option>
                         </select>
                     </div>
                     <div class="option-group">
@@ -164,29 +163,23 @@
                             <option value="avi">AVI (Legacy Support)</option>
                         </select>
                     </div>
-                    <div id="customSettings" style="display: none;">
-                        <div class="option-group">
-                            <label for="videoBitrate">Video Bitrate (kbps)</label>
-                            <input type="number" id="videoBitrate" min="500" max="8000" value="2000">
-                        </div>
-                        <div class="option-group">
-                            <label for="resolution">Resolution</label>
-                            <select id="resolution">
-                                <option value="original">Keep Original</option>
-                                <option value="1920x1080">1080p (1920x1080)</option>
-                                <option value="1280x720">720p (1280x720)</option>
-                                <option value="854x480">480p (854x480)</option>
-                            </select>
-                        </div>
-                        <div class="option-group">
-                            <label for="frameRate">Frame Rate (fps)</label>
-                            <select id="frameRate">
-                                <option value="original">Keep Original</option>
-                                <option value="60">60 fps</option>
-                                <option value="30">30 fps</option>
-                                <option value="24">24 fps</option>
-                            </select>
-                        </div>
+                    <div class="option-group">
+                        <label for="resolution">Resolution</label>
+                        <select id="resolution">
+                            <option value="original" selected>Keep Original</option>
+                            <option value="1920x1080">1080p (1920×1080)</option>
+                            <option value="1280x720">720p (1280×720)</option>
+                            <option value="854x480">480p (854×480)</option>
+                        </select>
+                    </div>
+                    <div class="option-group">
+                        <label for="frameRate">Frame Rate</label>
+                        <select id="frameRate">
+                            <option value="original" selected>Keep Original</option>
+                            <option value="60">60 fps</option>
+                            <option value="30">30 fps</option>
+                            <option value="24">24 fps</option>
+                        </select>
                     </div>
                 </div>
             </div>
@@ -209,7 +202,6 @@
                     <div class="progress-fill" id="progressFill"></div>
                 </div>
                 <div class="progress-text" id="progressText">0%</div>
-                <div class="progress-stage" id="progressStage"></div>
             </div>
 
             <div class="results" id="results" style="display: none;">
@@ -266,7 +258,7 @@
                             </svg>
                         </div>
                         <h3>Multiple Levels</h3>
-                        <p>Choose from light, medium, or heavy compression levels, or customize bitrate, resolution, and frame rate for specific needs.</p>
+                        <p>Choose from light, medium, or heavy compression levels. Customize resolution, frame rate, and format for specific needs.</p>
                     </div>
                 </div>
                 <div class="tool-benefits">

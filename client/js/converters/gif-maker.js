@@ -1,303 +1,303 @@
-/**
- * GIF Maker - Video to GIF Conversion Tool
- * Uses shared components and follows the PDF Compress pattern
- */
 class GifMaker {
     constructor() {
+        this.currentFile = null;
+        this.outputBlob = null;
+        this.uploadResult = null;
+        this.videoDuration = 0;
         this.init();
         this.setupEventListeners();
-        this.setupComponents();
     }
 
     init() {
-        this.currentFile = null;
-        this.outputBlob = null;
-        this.videoDuration = 0;
-        this.startTime = 0;
-        this.endTime = 3; // Default 3 seconds
-        this.gifStats = null;
-        
-        // Initialize DOM elements
-        this.videoPreview = document.getElementById('videoPreview');
-        this.videoPlayer = document.getElementById('videoPlayer');
-        this.convertBtn = document.getElementById('convertBtn');
-        this.results = document.getElementById('results');
-    }
-
-    setupComponents() {
         // Initialize shared components
         this.uploader = new FileUploader({
             uploadAreaId: 'uploadArea',
             fileInputId: 'fileInput',
             acceptedTypes: ['video/*'],
-            multiple: false,
             onFileSelect: this.handleFile.bind(this)
         });
 
         this.progress = new ProgressTracker({
             progressContainerId: 'progressContainer',
             progressFillId: 'progressFill',
-            progressTextId: 'progressText',
-            progressStageId: 'progressStage',
-            showStages: true
+            progressTextId: 'progressText'
         });
 
         this.buttonLoader = new ButtonLoader('convertBtn');
         this.errorDisplay = new ErrorDisplay('results');
+
+        // Get DOM elements
+        this.convertBtn = document.getElementById('convertBtn');
+        this.downloadBtn = document.getElementById('downloadBtn');
+        this.filePreview = document.getElementById('filePreview');
+        this.videoPreview = document.getElementById('videoPreview');
+        this.videoPlayer = document.getElementById('videoPlayer');
+        this.results = document.getElementById('results');
     }
 
     setupEventListeners() {
-        // GIF settings
-        document.getElementById('startTime').addEventListener('input', this.updateStartTime.bind(this));
-        document.getElementById('duration').addEventListener('input', this.updateDuration.bind(this));
+        this.convertBtn.addEventListener('click', this.createGIF.bind(this));
+        this.downloadBtn.addEventListener('click', this.downloadFile.bind(this));
         
-        // Convert button
-        this.convertBtn.addEventListener('click', this.createGif.bind(this));
+        // Duration validation
+        document.getElementById('duration').addEventListener('input', this.validateDuration.bind(this));
+        document.getElementById('startTime').addEventListener('input', this.validateTimes.bind(this));
         
-        // Download button
-        document.getElementById('downloadBtn').addEventListener('click', this.downloadGif.bind(this));
+        // Video player events
+        this.videoPlayer.addEventListener('loadedmetadata', this.onVideoLoaded.bind(this));
     }
 
     async handleFile(file) {
         this.currentFile = file;
-        
-        // Load video metadata
+        console.log('File selected:', file.name, file.type, file.size);
+
+        // Validate file type
+        if (!file.type.startsWith('video/')) {
+            this.errorDisplay.showError('Please select a valid video file');
+            return;
+        }
+
         try {
-            const metadata = await this.getVideoMetadata(file);
-            this.videoDuration = metadata.duration;
-            this.endTime = Math.min(3, this.videoDuration); // Default to 3 seconds or video duration
+            // Show file preview
+            this.showFilePreview(file);
             
-            this.showVideoPreview(file);
-            this.setupGifControls();
+            // Upload file to server
+            await this.uploadFile(file);
+            
             this.convertBtn.disabled = false;
+            
         } catch (error) {
-            this.errorDisplay.showError('Failed to load video metadata');
+            console.error('Error handling file:', error);
+            this.errorDisplay.showError('Error processing file: ' + error.message);
         }
     }
 
-    async getVideoMetadata(file) {
-        return new Promise((resolve, reject) => {
-            const video = document.createElement('video');
-            video.preload = 'metadata';
-            
-            video.onloadedmetadata = () => {
-                const metadata = {
-                    duration: video.duration,
-                    width: video.videoWidth,
-                    height: video.videoHeight
-                };
-                URL.revokeObjectURL(video.src);
-                resolve(metadata);
-            };
-            
-            video.onerror = () => {
-                URL.revokeObjectURL(video.src);
-                reject(new Error('Invalid video file'));
-            };
-            
-            video.src = URL.createObjectURL(file);
-        });
-    }
-
-    showVideoPreview(file) {
-        const videoUrl = URL.createObjectURL(file);
-        this.videoPlayer.src = videoUrl;
+    showFilePreview(file) {
+        document.getElementById('fileName').textContent = file.name;
+        document.getElementById('fileSize').textContent = FileUtils.formatFileSize(file.size);
         
-        this.uploader.hideUploadArea();
+        // Show video preview
+        this.videoPlayer.src = URL.createObjectURL(file);
         this.videoPreview.style.display = 'block';
+        this.filePreview.style.display = 'block';
     }
 
-    setupGifControls() {
-        const startInput = document.getElementById('startTime');
-        const durationInput = document.getElementById('duration');
+    onVideoLoaded() {
+        this.videoDuration = this.videoPlayer.duration;
+        const duration = FileUtils.formatDuration(this.videoDuration);
+        const resolution = `${this.videoPlayer.videoWidth}x${this.videoPlayer.videoHeight}`;
         
-        startInput.max = this.videoDuration;
-        startInput.value = this.startTime;
-        
-        durationInput.max = Math.min(10, this.videoDuration); // Max 10 seconds for GIF
-        durationInput.value = this.endTime - this.startTime;
+        document.getElementById('videoInfo').innerHTML = `
+            <div class="video-details">
+                <span class="detail-item">🎬 ${duration}</span>
+                <span class="detail-item">📐 ${resolution}</span>
+                <span class="detail-item">📊 ${FileUtils.formatFileSize(this.currentFile.size)}</span>
+            </div>
+        `;
+
+        // Set default duration based on video length
+        const defaultDuration = Math.min(this.videoDuration, 3);
+        document.getElementById('duration').value = defaultDuration;
+        document.getElementById('duration').max = Math.min(this.videoDuration, 10);
     }
 
-    updateStartTime() {
-        this.startTime = parseFloat(document.getElementById('startTime').value);
-        const duration = parseFloat(document.getElementById('duration').value);
-        this.endTime = Math.min(this.startTime + duration, this.videoDuration);
+    validateDuration() {
+        const duration = parseFloat(document.getElementById('duration').value) || 0;
+        const startTime = parseFloat(document.getElementById('startTime').value) || 0;
         
-        if (this.endTime > this.videoDuration) {
-            this.endTime = this.videoDuration;
-            document.getElementById('duration').value = this.endTime - this.startTime;
-        }
-        
-        this.videoPlayer.currentTime = this.startTime;
-    }
-
-    updateDuration() {
-        const duration = parseFloat(document.getElementById('duration').value);
-        this.endTime = Math.min(this.startTime + duration, this.videoDuration);
-        
-        if (this.endTime > this.videoDuration) {
-            this.endTime = this.videoDuration;
-            document.getElementById('duration').value = this.endTime - this.startTime;
+        if (this.videoDuration && startTime + duration > this.videoDuration) {
+            document.getElementById('duration').value = Math.max(0.5, this.videoDuration - startTime);
         }
     }
 
+    validateTimes() {
+        const startTime = parseFloat(document.getElementById('startTime').value) || 0;
+        const duration = parseFloat(document.getElementById('duration').value) || 3;
+        
+        if (this.videoDuration) {
+            document.getElementById('startTime').max = Math.max(0, this.videoDuration - 0.5);
+            
+            if (startTime + duration > this.videoDuration) {
+                document.getElementById('duration').value = Math.max(0.5, this.videoDuration - startTime);
+            }
+        }
+    }
 
-    async createGif() {
-        if (!this.currentFile) return;
+    async uploadFile(file) {
+        const formData = new FormData();
+        formData.append('file', file);
 
-        this.buttonLoader.showLoading();
-        this.progress.show(0, 'Preparing GIF creation...');
-        this.results.style.display = 'none';
+        const response = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Upload failed');
+        }
+
+        this.uploadResult = await response.json();
+        console.log('Upload successful:', this.uploadResult);
+    }
+
+    async createGIF() {
+        if (!this.uploadResult) {
+            this.errorDisplay.showError('Please upload a file first');
+            return;
+        }
 
         try {
+            this.buttonLoader.showLoading();
+            this.progress.show(0);
+            this.results.style.display = 'none';
+
+            // Get GIF settings
             const settings = this.getGifSettings();
+            console.log('GIF settings:', settings);
+
+            // Validate settings
+            if (settings.startTime + settings.duration > this.videoDuration) {
+                throw new Error('Start time + duration exceeds video length');
+            }
+
+            // Start GIF creation
             await this.performGifCreation(settings);
-            this.showGifResults();
-            AnalyticsTracker.trackConversion('Media Tools', 'GIF Maker');
+            
+            // Show results
+            this.showResults(settings);
+            
+            // Track conversion for analytics
+            AnalyticsTracker.trackConversion('Audio/Video Tools', 'GIF Maker');
             
         } catch (error) {
-            this.errorDisplay.showError('Failed to create GIF: ' + error.message);
+            console.error('GIF creation error:', error);
+            this.errorDisplay.showError('GIF creation failed: ' + error.message);
+        } finally {
+            this.buttonLoader.hideLoading();
+            this.progress.hide();
         }
-
-        this.progress.hide();
-        this.buttonLoader.hideLoading();
     }
 
     getGifSettings() {
         return {
-            startTime: this.startTime,
-            duration: this.endTime - this.startTime,
-            frameRate: parseInt(document.getElementById('frameRate').value),
-            width: document.getElementById('width').value,
+            startTime: parseFloat(document.getElementById('startTime').value) || 0,
+            duration: parseFloat(document.getElementById('duration').value) || 3,
+            frameRate: parseInt(document.getElementById('frameRate').value) || 10,
             quality: document.getElementById('quality').value,
+            width: document.getElementById('width').value === 'original' ? null : parseInt(document.getElementById('width').value),
             loop: document.getElementById('loop').checked,
             boomerang: document.getElementById('boomerang').checked
         };
     }
 
     async performGifCreation(settings) {
-        try {
-            // Upload file first
-            const formData = new FormData();
-            formData.append('file', this.currentFile);
-            
-            this.progress.updateProgress(10, 'Uploading video...');
-            const uploadResponse = await fetch('/api/upload', {
-                method: 'POST',
-                body: formData
-            });
-            
-            if (!uploadResponse.ok) {
-                throw new Error('Failed to upload file');
-            }
-            
-            const uploadResult = await uploadResponse.json();
-            this.progress.updateProgress(30, 'Analyzing video...');
-            
-            // Convert with server-side processing
-            const convertResponse = await fetch('/api/convert-media', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    file_id: uploadResult.file_id,
-                    conversion_type: 'video_to_gif',
-                    options: {
-                        start_time: settings.startTime,
-                        duration: settings.duration,
-                        fps: settings.frameRate,
-                        width: settings.width === 'original' ? null : parseInt(settings.width),
-                        quality: settings.quality,
-                        loop: settings.loop,
-                        boomerang: settings.boomerang
-                    }
-                })
-            });
-            
-            this.progress.updateProgress(80, 'Generating GIF...');
-            
-            if (!convertResponse.ok) {
-                const error = await convertResponse.json();
-                throw new Error(error.error || 'GIF creation failed');
-            }
-            
-            const result = await convertResponse.json();
-            this.progress.updateProgress(100, 'Complete!');
-            
-            // Download the converted file
-            this.outputBlob = await fetch(result.download_url).then(r => r.blob());
-            
-            this.gifStats = {
-                duration: settings.duration,
-                frames: Math.floor(settings.duration * settings.frameRate),
-                frameRate: settings.frameRate,
-                width: settings.width,
-                outputSize: result.file_size,
-                quality: settings.quality
-            };
-            
-        } catch (error) {
-            throw new Error(`GIF creation failed: ${error.message}`);
+        this.progress.updateProgress(10);
+        
+        // Call backend conversion API
+        const response = await fetch('/api/convert-media', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                file_id: this.uploadResult.file_id,
+                conversion_type: 'video_to_gif',
+                options: {
+                    start_time: settings.startTime,
+                    duration: settings.duration,
+                    fps: settings.frameRate,
+                    width: settings.width,
+                    quality: settings.quality,
+                    loop: settings.loop,
+                    boomerang: settings.boomerang
+                }
+            })
+        });
+
+        this.progress.updateProgress(50);
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'GIF creation failed');
         }
+
+        const result = await response.json();
+        console.log('GIF creation result:', result);
+
+        this.progress.updateProgress(100);
+
+        // Store download URL for later use
+        this.downloadUrl = result.download_url;
+        this.outputFilename = result.output_file;
+        this.fileSize = result.file_size;
     }
 
-    showGifResults() {
-        const stats = this.gifStats;
-        
-        document.getElementById('gifInfo').innerHTML = `
+    showResults(settings) {
+        const originalSize = this.currentFile.size;
+        const outputSize = this.fileSize;
+
+        // Show GIF preview
+        document.getElementById('gifPreview').innerHTML = `
+            <img src="${this.downloadUrl}" alt="Generated GIF" style="max-width: 100%; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" />
+        `;
+
+        // Show stats
+        document.getElementById('gifStats').innerHTML = `
             <div class="stats-grid">
                 <div class="stat-item">
                     <span class="stat-label">Duration:</span>
-                    <span class="stat-value">${FileUtils.formatDuration(stats.duration)}</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Total Frames:</span>
-                    <span class="stat-value">${stats.frames}</span>
+                    <span class="stat-value">${settings.duration}s</span>
                 </div>
                 <div class="stat-item">
                     <span class="stat-label">Frame Rate:</span>
-                    <span class="stat-value">${stats.frameRate} fps</span>
+                    <span class="stat-value">${settings.frameRate} FPS</span>
                 </div>
                 <div class="stat-item">
-                    <span class="stat-label">Dimensions:</span>
-                    <span class="stat-value">${stats.width}px width</span>
+                    <span class="stat-label">Size:</span>
+                    <span class="stat-value">${settings.width ? settings.width + 'px' : 'Original'}</span>
                 </div>
                 <div class="stat-item">
                     <span class="stat-label">File Size:</span>
-                    <span class="stat-value">${FileUtils.formatFileSize(stats.outputSize)}</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Status:</span>
-                    <span class="stat-value success">✓ Ready for download</span>
+                    <span class="stat-value">${FileUtils.formatFileSize(outputSize)}</span>
                 </div>
             </div>
         `;
-        
-        // Show GIF preview if available
-        const gifPreview = document.getElementById('gifPreview');
-        if (gifPreview && this.outputBlob) {
-            const gifUrl = URL.createObjectURL(this.outputBlob);
-            gifPreview.innerHTML = `<img src="${gifUrl}" alt="Generated GIF" style="max-width: 100%; max-height: 300px; border-radius: 8px;">`;
-        }
-        
+
         this.results.style.display = 'block';
     }
 
-    downloadGif() {
-        if (this.outputBlob) {
-            const originalName = this.currentFile.name.replace(/\.[^/.]+$/, '');
-            const fileName = `${originalName}.gif`;
+    async downloadFile() {
+        if (!this.downloadUrl) {
+            this.errorDisplay.showError('No file ready for download');
+            return;
+        }
+
+        try {
+            const response = await fetch(this.downloadUrl);
+            if (!response.ok) {
+                throw new Error('Download failed');
+            }
+
+            const blob = await response.blob();
+            const url = URL.createObjectURL(blob);
             
             const a = document.createElement('a');
-            a.href = URL.createObjectURL(this.outputBlob);
-            a.download = fileName;
-            a.click();
+            a.href = url;
             
-            // Clean up
-            setTimeout(() => {
-                URL.revokeObjectURL(a.href);
-            }, 100);
+            // Create proper filename based on original file and settings
+            const baseName = this.currentFile.name.replace(/\.[^/.]+$/, "");
+            const timestamp = new Date().toISOString().slice(0, 16).replace(/[-:]/g, '').replace('T', '-');
+            a.download = `${baseName}_gif_${timestamp}.gif`;
+            
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+        } catch (error) {
+            console.error('Download error:', error);
+            this.errorDisplay.showError('Download failed: ' + error.message);
         }
     }
 }

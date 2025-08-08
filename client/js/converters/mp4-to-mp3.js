@@ -1,253 +1,255 @@
-/**
- * MP4 to MP3 Converter - Audio Extraction Tool
- * Uses shared components and follows the PDF Compress pattern
- */
 class MP4ToMP3Converter {
     constructor() {
+        this.currentFile = null;
+        this.outputBlob = null;
+        this.uploadResult = null;
         this.init();
         this.setupEventListeners();
-        this.setupComponents();
     }
 
     init() {
-        this.currentFile = null;
-        this.outputBlob = null;
-        this.conversionStats = null;
-        
-        // Initialize DOM elements
-        this.filePreview = document.getElementById('filePreview');
-        this.convertBtn = document.getElementById('convertBtn');
-        this.results = document.getElementById('results');
-    }
-
-    setupComponents() {
         // Initialize shared components
         this.uploader = new FileUploader({
             uploadAreaId: 'uploadArea',
             fileInputId: 'fileInput',
             acceptedTypes: ['video/*'],
-            multiple: false,
             onFileSelect: this.handleFile.bind(this)
         });
 
         this.progress = new ProgressTracker({
             progressContainerId: 'progressContainer',
             progressFillId: 'progressFill',
-            progressTextId: 'progressText',
-            progressStageId: 'progressStage',
-            showStages: true
+            progressTextId: 'progressText'
         });
 
         this.buttonLoader = new ButtonLoader('convertBtn');
         this.errorDisplay = new ErrorDisplay('results');
+
+        // Get DOM elements
+        this.convertBtn = document.getElementById('convertBtn');
+        this.downloadBtn = document.getElementById('downloadBtn');
+        this.filePreview = document.getElementById('filePreview');
+        this.results = document.getElementById('results');
     }
 
     setupEventListeners() {
-        // Convert button
-        this.convertBtn.addEventListener('click', this.convertToAudio.bind(this));
-        
-        // Download button
-        document.getElementById('downloadBtn').addEventListener('click', this.downloadAudio.bind(this));
+        this.convertBtn.addEventListener('click', this.convertToMP3.bind(this));
+        this.downloadBtn.addEventListener('click', this.downloadFile.bind(this));
     }
 
     async handleFile(file) {
         this.currentFile = file;
-        this.showFilePreview(file);
-        
-        // Load video metadata
+        console.log('File selected:', file.name, file.type, file.size);
+
+        // Validate file type
+        if (!file.type.startsWith('video/')) {
+            this.errorDisplay.showError('Please select a valid video file');
+            return;
+        }
+
         try {
-            const metadata = await this.getVideoMetadata(file);
-            this.displayVideoInfo(metadata);
+            // Show file preview
+            this.showFilePreview(file);
+            
+            // Upload file to server
+            await this.uploadFile(file);
+            
             this.convertBtn.disabled = false;
+            
         } catch (error) {
-            this.errorDisplay.showError('Failed to load video metadata');
+            console.error('Error handling file:', error);
+            this.errorDisplay.showError('Error processing file: ' + error.message);
         }
     }
 
     showFilePreview(file) {
         document.getElementById('fileName').textContent = file.name;
         document.getElementById('fileSize').textContent = FileUtils.formatFileSize(file.size);
+        
+        // Create video element to get metadata
+        const video = document.createElement('video');
+        video.src = URL.createObjectURL(file);
+        
+        video.addEventListener('loadedmetadata', () => {
+            const duration = FileUtils.formatDuration(video.duration);
+            const resolution = `${video.videoWidth}x${video.videoHeight}`;
+            
+            document.getElementById('videoInfo').innerHTML = `
+                <div class="video-details">
+                    <span class="detail-item">🎬 ${duration}</span>
+                    <span class="detail-item">📐 ${resolution}</span>
+                    <span class="detail-item">📊 ${FileUtils.formatFileSize(file.size)}</span>
+                </div>
+            `;
+            
+            // Clean up object URL
+            URL.revokeObjectURL(video.src);
+        });
+
         this.filePreview.style.display = 'block';
     }
 
-    async getVideoMetadata(file) {
-        return new Promise((resolve, reject) => {
-            const video = document.createElement('video');
-            video.preload = 'metadata';
-            
-            video.onloadedmetadata = () => {
-                const metadata = {
-                    duration: video.duration,
-                    width: video.videoWidth,
-                    height: video.videoHeight
-                };
-                URL.revokeObjectURL(video.src);
-                resolve(metadata);
-            };
-            
-            video.onerror = () => {
-                URL.revokeObjectURL(video.src);
-                reject(new Error('Invalid video file'));
-            };
-            
-            video.src = URL.createObjectURL(file);
+    async uploadFile(file) {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const response = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData
         });
-    }
 
-    displayVideoInfo(metadata) {
-        const duration = FileUtils.formatDuration(metadata.duration);
-        const resolution = `${metadata.width}x${metadata.height}`;
-        const fileSize = FileUtils.formatFileSize(this.currentFile.size);
-        
-        document.getElementById('videoInfo').innerHTML = `
-            <div class="video-details">
-                <span class="detail-item">🎬 ${resolution}</span>
-                <span class="detail-item">⏱️ ${duration}</span>
-                <span class="detail-item">📊 ${fileSize}</span>
-            </div>
-        `;
-    }
-
-    async convertToAudio() {
-        if (!this.currentFile) return;
-
-        this.buttonLoader.showLoading();
-        this.progress.show(0, 'Preparing conversion...');
-        this.results.style.display = 'none';
-
-        try {
-            const settings = this.getConversionSettings();
-            await this.performConversion(settings);
-            this.showConversionResults();
-            AnalyticsTracker.trackConversion('Media Tools', 'MP4 to MP3');
-            
-        } catch (error) {
-            this.errorDisplay.showError('Failed to convert video: ' + error.message);
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Upload failed');
         }
 
-        this.progress.hide();
-        this.buttonLoader.hideLoading();
+        this.uploadResult = await response.json();
+        console.log('Upload successful:', this.uploadResult);
+    }
+
+    async convertToMP3() {
+        if (!this.uploadResult) {
+            this.errorDisplay.showError('Please upload a file first');
+            return;
+        }
+
+        try {
+            this.buttonLoader.showLoading();
+            this.progress.show(0);
+            this.results.style.display = 'none';
+
+            // Get conversion settings
+            const settings = this.getConversionSettings();
+            console.log('Conversion settings:', settings);
+
+            // Start conversion
+            await this.performConversion(settings);
+            
+            // Show results
+            this.showResults();
+            
+            // Track conversion for analytics
+            AnalyticsTracker.trackConversion('Audio/Video Tools', 'MP4 to MP3');
+            
+        } catch (error) {
+            console.error('Conversion error:', error);
+            this.errorDisplay.showError('Conversion failed: ' + error.message);
+        } finally {
+            this.buttonLoader.hideLoading();
+            this.progress.hide();
+        }
     }
 
     getConversionSettings() {
         return {
-            outputFormat: document.getElementById('outputFormat').value,
-            audioQuality: parseInt(document.getElementById('audioQuality').value),
+            bitrate: document.getElementById('audioBitrate').value,
+            format: document.getElementById('audioFormat').value,
             preserveMetadata: document.getElementById('preserveMetadata').checked,
             normalizeAudio: document.getElementById('normalizeAudio').checked
         };
     }
 
     async performConversion(settings) {
-        try {
-            // Upload file first
-            const formData = new FormData();
-            formData.append('file', this.currentFile);
-            
-            this.progress.updateProgress(10, 'Uploading video...');
-            const uploadResponse = await fetch('/api/upload', {
-                method: 'POST',
-                body: formData
-            });
-            
-            if (!uploadResponse.ok) {
-                throw new Error('Failed to upload file');
-            }
-            
-            const uploadResult = await uploadResponse.json();
-            this.progress.updateProgress(30, 'Processing video...');
-            
-            // Convert with server-side processing
-            const convertResponse = await fetch('/api/convert-media', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    file_id: uploadResult.file_id,
-                    conversion_type: 'video_to_audio',
-                    options: {
-                        format: settings.outputFormat,
-                        bitrate: settings.audioQuality,
-                        normalize: settings.normalizeAudio,
-                        preserve_metadata: settings.preserveMetadata
-                    }
-                })
-            });
-            
-            this.progress.updateProgress(80, 'Extracting audio...');
-            
-            if (!convertResponse.ok) {
-                const error = await convertResponse.json();
-                throw new Error(error.error || 'Conversion failed');
-            }
-            
-            const result = await convertResponse.json();
-            this.progress.updateProgress(100, 'Complete!');
-            
-            // Download the converted file
-            this.outputBlob = await fetch(result.download_url).then(r => r.blob());
-            
-            // Store conversion stats
-            this.conversionStats = {
-                originalSize: this.currentFile.size,
-                outputSize: result.file_size,
-                format: settings.outputFormat.toUpperCase(),
-                quality: settings.audioQuality + ' kbps',
-                duration: result.duration || 'N/A'
-            };
-            
-        } catch (error) {
-            throw new Error(`Audio conversion failed: ${error.message}`);
+        this.progress.updateProgress(10);
+        
+        // Call backend conversion API
+        const response = await fetch('/api/convert-media', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                file_id: this.uploadResult.file_id,
+                conversion_type: 'video_to_audio',
+                options: {
+                    format: settings.format,
+                    bitrate: settings.bitrate,
+                    preserve_metadata: settings.preserveMetadata,
+                    normalize_audio: settings.normalizeAudio
+                }
+            })
+        });
+
+        this.progress.updateProgress(50);
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Conversion failed');
         }
+
+        const result = await response.json();
+        console.log('Conversion result:', result);
+
+        this.progress.updateProgress(100);
+
+        // Store download URL for later use
+        this.downloadUrl = result.download_url;
+        this.outputFilename = result.output_file;
+        this.fileSize = result.file_size;
     }
 
-    showConversionResults() {
-        const stats = this.conversionStats;
-        
+    showResults() {
+        const originalSize = this.currentFile.size;
+        const outputSize = this.fileSize;
+        const format = document.getElementById('audioFormat').value.toUpperCase();
+        const bitrate = document.getElementById('audioBitrate').value;
+
         document.getElementById('conversionStats').innerHTML = `
             <div class="stats-grid">
                 <div class="stat-item">
-                    <span class="stat-label">Original Size:</span>
-                    <span class="stat-value">${FileUtils.formatFileSize(stats.originalSize)}</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Audio Size:</span>
-                    <span class="stat-value">${FileUtils.formatFileSize(stats.outputSize)}</span>
-                </div>
-                <div class="stat-item">
                     <span class="stat-label">Format:</span>
-                    <span class="stat-value">${stats.format}</span>
+                    <span class="stat-value">${format}</span>
                 </div>
                 <div class="stat-item">
-                    <span class="stat-label">Quality:</span>
-                    <span class="stat-value">${stats.quality}</span>
+                    <span class="stat-label">Bitrate:</span>
+                    <span class="stat-value">${bitrate} kbps</span>
                 </div>
                 <div class="stat-item">
-                    <span class="stat-label">Status:</span>
-                    <span class="stat-value success">✓ Ready for download</span>
+                    <span class="stat-label">Original Size:</span>
+                    <span class="stat-value">${FileUtils.formatFileSize(originalSize)}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Output Size:</span>
+                    <span class="stat-value">${FileUtils.formatFileSize(outputSize)}</span>
                 </div>
             </div>
         `;
-        
+
         this.results.style.display = 'block';
     }
 
-    downloadAudio() {
-        if (this.outputBlob) {
-            const format = document.getElementById('outputFormat').value;
-            const originalName = this.currentFile.name.replace(/\.[^/.]+$/, '');
-            const fileName = `${originalName}.${format}`;
+    async downloadFile() {
+        if (!this.downloadUrl) {
+            this.errorDisplay.showError('No file ready for download');
+            return;
+        }
+
+        try {
+            const response = await fetch(this.downloadUrl);
+            if (!response.ok) {
+                throw new Error('Download failed');
+            }
+
+            const blob = await response.blob();
+            const url = URL.createObjectURL(blob);
             
             const a = document.createElement('a');
-            a.href = URL.createObjectURL(this.outputBlob);
-            a.download = fileName;
-            a.click();
+            a.href = url;
             
-            // Clean up
-            setTimeout(() => {
-                URL.revokeObjectURL(a.href);
-            }, 100);
+            // Create proper filename based on original file and settings
+            const format = document.getElementById('audioFormat').value;
+            const baseName = this.currentFile.name.replace(/\.[^/.]+$/, "");
+            const timestamp = new Date().toISOString().slice(0, 16).replace(/[-:]/g, '').replace('T', '-');
+            a.download = `${baseName}_mp4tomp3_${timestamp}.${format}`;
+            
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+        } catch (error) {
+            console.error('Download error:', error);
+            this.errorDisplay.showError('Download failed: ' + error.message);
         }
     }
 }

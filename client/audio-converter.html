@@ -91,7 +91,7 @@
         <div class="hero-section">
             <div class="hero-content">
                 <div class="hero-badge">
-                    <div class="tool-icon bg-blue">
+                    <div class="tool-icon bg-purple">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M9 18V5l12-2v13"/>
                             <circle cx="6" cy="18" r="3"/>
@@ -121,7 +121,7 @@
                 </div>
                 <h3>Drop your audio file here</h3>
                 <p>or click anywhere to browse files</p>
-                <p class="supported-formats">Supports MP3, WAV, FLAC, AAC, OGG</p>
+                <p class="supported-formats">MP3, WAV, FLAC, AAC, OGG, M4A files supported</p>
                 <input type="file" id="fileInput" accept="audio/*" hidden>
             </div>
 
@@ -165,12 +165,7 @@
                             <option value="192" selected>192 kbps (Good)</option>
                             <option value="256">256 kbps (Very Good)</option>
                             <option value="320">320 kbps (Best)</option>
-                            <option value="custom">Custom</option>
                         </select>
-                    </div>
-                    <div class="option-group" id="customBitrateGroup" style="display: none;">
-                        <label for="customBitrate">Custom Bitrate (kbps)</label>
-                        <input type="number" id="customBitrate" min="64" max="512" value="192">
                     </div>
                     <div class="option-group">
                         <label for="sampleRate">Sample Rate</label>
@@ -213,7 +208,6 @@
                     <div class="progress-fill" id="progressFill"></div>
                 </div>
                 <div class="progress-text" id="progressText">0%</div>
-                <div class="progress-stage" id="progressStage"></div>
             </div>
 
             <div class="results" id="results" style="display: none;">
