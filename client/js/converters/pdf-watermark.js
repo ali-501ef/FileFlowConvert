@@ -285,8 +285,8 @@ class PDFWatermarker {
                 return { x: pageWidth - 50 - itemWidth, y: 50 };
             case 'slanted':
                 return { 
-                    x: pageWidth * 0.2, 
-                    y: pageHeight * 0.3 
+                    x: pageWidth * 0.5, 
+                    y: pageHeight * 0.5 
                 };
             case 'center':
             default:
