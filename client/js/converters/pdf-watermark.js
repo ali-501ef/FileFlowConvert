@@ -236,7 +236,8 @@ class PDFWatermarker {
             size: settings.fontSize,
             font: font,
             color: PDFLib.rgb(rgb.r / 255, rgb.g / 255, rgb.b / 255),
-            opacity: settings.opacity
+            opacity: settings.opacity,
+            rotate: settings.position === 'slanted' ? PDFLib.degrees(-45) : PDFLib.degrees(0)
         });
     }
 
@@ -267,7 +268,8 @@ class PDFWatermarker {
             y: y,
             width: imageWidth,
             height: imageHeight,
-            opacity: settings.opacity
+            opacity: settings.opacity,
+            rotate: settings.position === 'slanted' ? PDFLib.degrees(-45) : PDFLib.degrees(0)
         });
     }
 
@@ -281,6 +283,11 @@ class PDFWatermarker {
                 return { x: 50, y: 50 };
             case 'bottom-right':
                 return { x: pageWidth - 50 - itemWidth, y: 50 };
+            case 'slanted':
+                return { 
+                    x: pageWidth * 0.2, 
+                    y: pageHeight * 0.3 
+                };
             case 'center':
             default:
                 return { 

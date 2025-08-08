@@ -5889,8 +5889,9 @@ body {
 
 .angle-btn {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
+    justify-content: center;
     gap: var(--micro-spacing);
     padding: var(--element-spacing);
     background: var(--surface);
@@ -5898,7 +5899,8 @@ body {
     border-radius: var(--radius-lg);
     cursor: pointer;
     transition: all var(--transition-base);
-    min-width: 80px;
+    width: 120px;
+    flex: 1;
 }
 
 .angle-btn:hover {
