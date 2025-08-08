@@ -572,13 +572,24 @@ class AdvancedOptionsManager {
             }
         }
         
-        // Display errors
-        errorContainer.innerHTML = `
-            <div class="error-header">Please fix the following issues:</div>
-            <ul class="error-list">
-                ${errors.map(error => `<li>${error}</li>`).join('')}
-            </ul>
-        `;
+        // Display errors - using safe DOM methods to prevent XSS
+        errorContainer.innerHTML = ''; // Clear existing content
+        
+        const errorHeader = document.createElement('div');
+        errorHeader.className = 'error-header';
+        errorHeader.textContent = 'Please fix the following issues:';
+        
+        const errorList = document.createElement('ul');
+        errorList.className = 'error-list';
+        
+        errors.forEach(error => {
+            const listItem = document.createElement('li');
+            listItem.textContent = error; // Safe text assignment
+            errorList.appendChild(listItem);
+        });
+        
+        errorContainer.appendChild(errorHeader);
+        errorContainer.appendChild(errorList);
         errorContainer.style.display = 'block';
         
         // Scroll to errors
