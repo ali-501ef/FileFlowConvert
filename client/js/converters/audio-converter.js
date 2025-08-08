@@ -138,19 +138,51 @@ class AudioConverter {
 
         // Show audio preview
         if (audioInfo) {
-            audioInfo.innerHTML = `
-                <div class="audio-preview-container">
-                    <h4>Current Audio</h4>
-                    <audio controls style="width: 100%; margin-top: 10px;">
-                        <source src="${URL.createObjectURL(file)}" type="${file.type}">
-                        Your browser does not support the audio element.
-                    </audio>
-                    <div class="audio-details">
-                        <span class="detail-item">🎵 ${file.type.split('/')[1]?.toUpperCase()}</span>
-                        <span class="detail-item">📊 ${this.formatFileSize(file.size)}</span>
-                    </div>
-                </div>
-            `;
+            // Clear existing content
+            audioInfo.innerHTML = '';
+            
+            // Create container
+            const container = document.createElement('div');
+            container.className = 'audio-preview-container';
+            
+            // Create title
+            const title = document.createElement('h4');
+            title.textContent = 'Current Audio';
+            container.appendChild(title);
+            
+            // Create audio element
+            const audio = document.createElement('audio');
+            audio.controls = true;
+            audio.style.width = '100%';
+            audio.style.marginTop = '10px';
+            
+            const source = document.createElement('source');
+            source.src = URL.createObjectURL(file);
+            source.type = file.type;
+            audio.appendChild(source);
+            
+            // Fallback text
+            audio.appendChild(document.createTextNode('Your browser does not support the audio element.'));
+            container.appendChild(audio);
+            
+            // Create details section
+            const details = document.createElement('div');
+            details.className = 'audio-details';
+            
+            // Format type span
+            const typeSpan = document.createElement('span');
+            typeSpan.className = 'detail-item';
+            typeSpan.textContent = `🎵 ${file.type.split('/')[1]?.toUpperCase()}`;
+            details.appendChild(typeSpan);
+            
+            // Size span
+            const sizeSpan = document.createElement('span');
+            sizeSpan.className = 'detail-item';
+            sizeSpan.textContent = `📊 ${this.formatFileSize(file.size)}`;
+            details.appendChild(sizeSpan);
+            
+            container.appendChild(details);
+            audioInfo.appendChild(container);
         }
 
         this.filePreview.style.display = 'block';
