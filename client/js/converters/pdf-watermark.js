@@ -216,13 +216,13 @@ class PDFWatermarker {
             fontSize: parseInt(document.getElementById('fontSize').value),
             fontColor: document.getElementById('fontColor').value,
             opacity: parseInt(document.getElementById('watermarkOpacity').value) / 100,
-            position: document.getElementById('watermarkPosition').value
+            position: document.getElementById('watermarkPosition').value,
+            repeat: document.getElementById('repeatWatermark').checked
         };
     }
 
     async addTextWatermark(page, settings, pdfDoc) {
         const { width, height } = page.getSize();
-        const { x, y } = this.getWatermarkPosition(settings.position, width, height);
         
         // Embed font
         const font = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
@@ -230,15 +230,37 @@ class PDFWatermarker {
         // Convert hex color to RGB
         const rgb = this.hexToRgb(settings.fontColor);
         
-        page.drawText(settings.text, {
-            x: x,
-            y: y,
-            size: settings.fontSize,
-            font: font,
-            color: PDFLib.rgb(rgb.r / 255, rgb.g / 255, rgb.b / 255),
-            opacity: settings.opacity,
-            rotate: settings.position === 'slanted' ? PDFLib.degrees(-45) : PDFLib.degrees(0)
-        });
+        if (settings.repeat) {
+            // Repeat watermark across the page
+            const stepX = 200; // Horizontal spacing
+            const stepY = 150; // Vertical spacing
+            
+            for (let x = 50; x < width - 100; x += stepX) {
+                for (let y = 50; y < height - 50; y += stepY) {
+                    page.drawText(settings.text, {
+                        x: x,
+                        y: y,
+                        size: settings.fontSize,
+                        font: font,
+                        color: PDFLib.rgb(rgb.r / 255, rgb.g / 255, rgb.b / 255),
+                        opacity: settings.opacity,
+                        rotate: PDFLib.degrees(-45)
+                    });
+                }
+            }
+        } else {
+            const { x, y } = this.getWatermarkPosition(settings.position, width, height);
+            
+            page.drawText(settings.text, {
+                x: x,
+                y: y,
+                size: settings.fontSize,
+                font: font,
+                color: PDFLib.rgb(rgb.r / 255, rgb.g / 255, rgb.b / 255),
+                opacity: settings.opacity,
+                rotate: settings.position === 'slanted' ? PDFLib.degrees(-45) : PDFLib.degrees(0)
+            });
+        }
     }
 
     async addImageWatermark(page, settings, pdfDoc) {
@@ -258,19 +280,38 @@ class PDFWatermarker {
             }
         }
         
-        const imageWidth = embeddedImage.width * 0.5; // Scale down
-        const imageHeight = embeddedImage.height * 0.5;
+        const imageWidth = embeddedImage.width * 0.3; // Scale down for repeating
+        const imageHeight = embeddedImage.height * 0.3;
         
-        const { x, y } = this.getWatermarkPosition(settings.position, width, height, imageWidth, imageHeight);
-        
-        page.drawImage(embeddedImage, {
-            x: x,
-            y: y,
-            width: imageWidth,
-            height: imageHeight,
-            opacity: settings.opacity,
-            rotate: settings.position === 'slanted' ? PDFLib.degrees(-45) : PDFLib.degrees(0)
-        });
+        if (settings.repeat) {
+            // Repeat watermark across the page
+            const stepX = 200; // Horizontal spacing
+            const stepY = 150; // Vertical spacing
+            
+            for (let x = 50; x < width - imageWidth; x += stepX) {
+                for (let y = 50; y < height - imageHeight; y += stepY) {
+                    page.drawImage(embeddedImage, {
+                        x: x,
+                        y: y,
+                        width: imageWidth,
+                        height: imageHeight,
+                        opacity: settings.opacity,
+                        rotate: PDFLib.degrees(-45)
+                    });
+                }
+            }
+        } else {
+            const { x, y } = this.getWatermarkPosition(settings.position, width, height, imageWidth, imageHeight);
+            
+            page.drawImage(embeddedImage, {
+                x: x,
+                y: y,
+                width: imageWidth,
+                height: imageHeight,
+                opacity: settings.opacity,
+                rotate: settings.position === 'slanted' ? PDFLib.degrees(-45) : PDFLib.degrees(0)
+            });
+        }
     }
 
     getWatermarkPosition(position, pageWidth, pageHeight, itemWidth = 100, itemHeight = 20) {
