@@ -28,6 +28,7 @@ class VideoCompressor {
         // Advanced options
         this.compressionLevel = document.getElementById('compressionLevel');
         this.videoQuality = document.getElementById('videoQuality');
+        this.outputFormat = document.getElementById('outputFormat');
         this.outputResolution = document.getElementById('outputResolution');
         this.frameRate = document.getElementById('frameRate');
         this.targetSize = document.getElementById('targetSize');
@@ -35,6 +36,7 @@ class VideoCompressor {
         // Initialize with default values
         if (this.compressionLevel) this.compressionLevel.value = 'medium';
         if (this.videoQuality) this.videoQuality.value = 'balanced';
+        if (this.outputFormat) this.outputFormat.value = 'mp4';
         if (this.outputResolution) this.outputResolution.value = 'original';
         if (this.frameRate) this.frameRate.value = 'original';
         if (this.targetSize) this.targetSize.value = '';
@@ -208,6 +210,7 @@ class VideoCompressor {
         return {
             compression: this.compressionLevel?.value || 'medium',
             quality: this.videoQuality?.value || 'balanced',
+            format: this.outputFormat?.value || 'mp4',
             resolution: this.outputResolution?.value || 'original',
             framerate: this.frameRate?.value === 'original' ? undefined : this.frameRate?.value,
             target_size: this.targetSize?.value || undefined
@@ -229,7 +232,7 @@ class VideoCompressor {
                     compression: settings.compression,
                     resolution: settings.resolution,
                     framerate: settings.framerate,
-                    format: 'mp4'
+                    format: settings.format
                 }
             })
         });
