@@ -111,7 +111,8 @@
         </div>
 
         <div class="converter-container">
-            <div class="upload-area ff-upload-area" id="uploadArea" data-testid="upload-area-audio" data-page-id="audio-converter">
+            <section class="ff-upload" data-page-id="audio-converter">
+                <div class="upload-area ff-dropzone" id="uploadArea" role="button" tabindex="0" aria-label="Upload audio files" data-testid="upload-area-audio">
                 <div class="upload-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
@@ -120,7 +121,9 @@
                 <h3>Drop your audio file here</h3>
                 <p>or <button class="ff-choose-btn" type="button">Choose a File</button></p>
                 <p class="supported-formats">Supports MP3, WAV, FLAC, AAC, OGG, M4A</p>
-                <input class="ff-file-input" type="file" accept="audio/*" hidden />
+                    <input class="ff-file-input" type="file" accept="audio/*" hidden />
+                </div>
+            </section>
             </div>
 
             <div class="advanced-options" id="advancedOptions">
@@ -342,6 +345,8 @@
     <script src="js/utils/fileInput.js"></script>
     <script src="js/advanced-options-manager.js"></script>
     <script src="js/advanced-options.js"></script>
+    <script src="js/uploader.js"></script>
+    <script src="js/upload-dispatch.js"></script>
     <script src="js/converters/audio-converter.js"></script>
 </body>
 </html>

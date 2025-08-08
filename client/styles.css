@@ -3330,23 +3330,36 @@ body {
     font-size: 0.875rem;
 }
 
-/* FileFlow file input system */
-.ff-upload-area { 
+/* FileFlow unified upload component system */
+.ff-upload { 
     position: relative; 
+}
+
+.ff-dropzone { 
+    position: relative; 
+    z-index: 5; 
+    cursor: pointer; 
 }
 
 .ff-choose-btn { 
     position: relative; 
-    z-index: 5; 
+    z-index: 6; 
 }
 
-.ff-file-input {
-    position: absolute;
-    inset: 0;
-    opacity: 0;
-    z-index: 6;
-    cursor: pointer;
-    pointer-events: auto;
+.ff-file-input { 
+    display: none; 
+}
+
+/* Ensure decorative layers never eat clicks */
+.ff-dropzone .overlay, 
+.decorative-gradient { 
+    pointer-events: none !important; 
+}
+
+/* Drag state styling */
+.ff-dropzone.is-drag {
+    background-color: hsl(213, 100%, 97%);
+    border-color: hsl(213, 100%, 85%);
 }
 
 /* Remove blockers */

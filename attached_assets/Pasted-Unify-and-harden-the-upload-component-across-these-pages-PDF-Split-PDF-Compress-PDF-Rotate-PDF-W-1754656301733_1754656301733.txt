@@ -1,0 +1,131 @@
+Unify and harden the upload component across these pages:
+PDF Split, PDF Compress, PDF Rotate, PDF Watermark, PDF to Word,
+MP4 to MP3, Audio Converter, Video Compress, GIF Maker, Video Trim, Video Merger.
+
+Goals:
+- Clicking ANYWHERE on the large dropzone opens the file picker (exactly once).
+- The “Choose File” button also opens it (once).
+- Selected files are handed to the correct uploader and start processing.
+- Drag & drop still works.
+- Works after SPA navigation; no overlays break clicks.
+- Add simple integration tests to keep it from regressing.
+
+Do this:
+
+1) Componentize upload UI (no redesign, just structure):
+   Replace each page’s upload area with:
+   <section class="ff-upload" data-page-id="<tool-id>">
+     <div class="ff-dropzone" role="button" tabindex="0" aria-label="Upload files">
+       <!-- existing icon/title/help text remain inside -->
+       <button class="ff-choose-btn" type="button">Choose a File</button>
+       <input class="ff-file-input" type="file" hidden />
+     </div>
+   </section>
+   - Keep each page’s current accept/multiple attributes; set them on .ff-file-input for that page.
+
+2) CSS guardrails (shared):
+   .ff-upload { position: relative; }
+   .ff-dropzone { position: relative; z-index: 5; cursor: pointer; }
+   .ff-choose-btn { position: relative; z-index: 6; }
+   /* DO NOT visually place the input over the zone; trigger via JS to avoid overlay conflicts */
+   .ff-file-input { display: none; }
+   /* Ensure decorative layers never eat clicks */
+   .ff-dropzone .overlay, .decorative-gradient { pointer-events: none !important; }
+
+3) Single, canonical binder (runs on DOMContentLoaded AND after SPA route changes):
+   Create client/js/uploader.js and import it globally.
+   window.ffBindUploaders = function bind(root=document){
+     root.querySelectorAll('.ff-upload').forEach((wrap) => {
+       const dz = wrap.querySelector('.ff-dropzone');
+       const btn = wrap.querySelector('.ff-choose-btn');
+       const input = wrap.querySelector('.ff-file-input');
+
+       // Reset previous listeners to avoid double-open
+       dz.replaceWith(dz.cloneNode(true));  // strip old listeners on dz
+       btn.replaceWith(btn.cloneNode(true));
+       input.replaceWith(input.cloneNode(true));
+
+       const dz2 = wrap.querySelector('.ff-dropzone');
+       const btn2 = wrap.querySelector('.ff-choose-btn');
+       const input2 = wrap.querySelector('.ff-file-input');
+
+       const openPicker = (e) => {
+         e.preventDefault(); e.stopPropagation();
+         // Must be synchronous user gesture
+         input2.click();
+       };
+
+       // Click anywhere on the big box
+       dz2.addEventListener('click', openPicker);
+       dz2.addEventListener('keydown', (e) => {
+         if (e.key === 'Enter' || e.key === ' ') openPicker(e);
+       });
+
+       // Small button
+       btn2.addEventListener('click', openPicker);
+
+       // Drag & drop (keep existing visuals)
+       dz2.addEventListener('dragover', (e) => { e.preventDefault(); dz2.classList.add('is-drag'); });
+       dz2.addEventListener('dragleave', () => dz2.classList.remove('is-drag'));
+       dz2.addEventListener('drop', (e) => {
+         e.preventDefault(); dz2.classList.remove('is-drag');
+         const files = Array.from(e.dataTransfer.files || []);
+         if (files.length) window.ffUpload?.(wrap.dataset.pageId, files);
+       });
+
+       // File selection
+       input2.addEventListener('change', () => {
+         const files = Array.from(input2.files || []);
+         if (files.length) window.ffUpload?.(wrap.dataset.pageId, files);
+       });
+     });
+   };
+   document.addEventListener('DOMContentLoaded', () => window.ffBindUploaders(document));
+   // Call window.ffBindUploaders(newContainer) after SPA page swaps.
+
+4) Wire the uploader entry point (single place):
+   In client/js/upload-dispatch.js expose:
+   window.ffUpload = async function dispatch(pageId, files){
+     // Map pageId -> existing upload handler for that tool
+     const map = {
+       'pdf-split': window.uploadPdfSplit,
+       'pdf-compress': window.uploadPdfCompress,
+       'pdf-rotate': window.uploadPdfRotate,
+       'pdf-watermark': window.uploadPdfWatermark,
+       'pdf-to-word': window.uploadPdfToWord,
+       'mp4-to-mp3': window.uploadMp4ToMp3,
+       'audio-converter': window.uploadAudioConvert,
+       'video-compress': window.uploadVideoCompress,
+       'gif-maker': window.uploadGifMaker,
+       'video-trim': window.uploadVideoTrim,
+       'video-merger': window.uploadVideoMerger,
+     };
+     const fn = map[pageId];
+     if (!fn) { console.error('[ffUpload] No handler for', pageId); return; }
+     try { await fn(files); } catch (e) { console.error('[ffUpload] failed', e); }
+   };
+   - Ensure each page root has data-page-id set to the key above.
+
+5) Purge legacy handlers that caused double-open or blocked clicks:
+   - Remove any delegated document.click that calls input.click() for these pages.
+   - Remove any input overlay technique (absolute transparent input on top).
+   - Search project for input[type=file] overlays and delete them for these pages.
+
+6) Acceptance criteria (must pass on all listed pages):
+   - Clicking the big dropzone or the small button opens the native file picker exactly once.
+   - Selecting files triggers the correct upload handler and starts processing.
+   - Canceling the picker does nothing further (no second open).
+   - Drag & drop still uploads.
+   - Works after navigating between tools (SPA rebind verified).
+   - No console errors.
+
+7) Minimal integration test (Playwright or Cypress in /tests/upload/):
+   - For each page:
+     - Mount page, click .ff-dropzone → expect native dialog hook (stub), then call ffUpload.
+     - Simulate drop event with a fake File → ffUpload called with files.
+     - Navigate away and back → click still triggers (rebinding works).
+
+Provide a short report listing:
+- Which legacy listeners/overlays were removed.
+- Confirmation that each page’s data-page-id maps to the proper upload function.
+- Any pages where accept/multiple attributes differed and how they were set.
