@@ -5807,5 +5807,304 @@ body {
     color: var(--success);
 }
 
+/* New UI Components for Rebuilt Tools */
+
+/* PDF Merge - Files List Styles */
+.files-list {
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-lg);
+    padding: var(--element-spacing);
+    margin: var(--element-spacing) 0;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.file-item {
+    display: flex;
+    align-items: center;
+    gap: var(--element-spacing);
+    padding: var(--element-spacing);
+    background: var(--muted);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--micro-spacing);
+    cursor: grab;
+    transition: all var(--transition-base);
+}
+
+.file-item:hover {
+    background: var(--primary-light);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-soft);
+}
+
+.file-item.dragging {
+    opacity: 0.5;
+    transform: rotate(2deg);
+}
+
+.file-item .drag-handle {
+    color: var(--foreground-light);
+    cursor: grab;
+}
+
+.file-item .file-info {
+    flex: 1;
+}
+
+.file-item .file-name {
+    font-weight: 500;
+    color: var(--foreground);
+    margin-bottom: 2px;
+}
+
+.file-item .file-size {
+    font-size: var(--font-size-sm);
+    color: var(--foreground-light);
+}
+
+.file-item .remove-btn {
+    padding: 0.5rem;
+    background: var(--error-bg);
+    color: var(--error);
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.file-item .remove-btn:hover {
+    background: var(--error);
+    color: white;
+}
+
+/* PDF Rotate - Angle Selection Styles */
+.angle-selection {
+    display: flex;
+    gap: var(--element-spacing);
+    justify-content: center;
+    flex-wrap: wrap;
+    margin: var(--element-spacing) 0;
+}
+
+.angle-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--micro-spacing);
+    padding: var(--element-spacing);
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: all var(--transition-base);
+    min-width: 80px;
+}
+
+.angle-btn:hover {
+    border-color: var(--primary);
+    background: var(--primary-light);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.angle-btn.selected {
+    border-color: var(--primary);
+    background: var(--primary);
+    color: white;
+}
+
+.angle-btn .angle-icon {
+    width: 32px;
+    height: 32px;
+    margin-bottom: var(--micro-spacing);
+}
+
+.angle-btn .angle-text {
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+}
+
+/* PDF Watermark - Additional Form Styles */
+.watermark-options {
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-lg);
+    padding: var(--card-spacing);
+    margin: var(--element-spacing) 0;
+    box-shadow: var(--shadow-soft);
+}
+
+.watermark-controls {
+    display: grid;
+    gap: var(--element-spacing);
+}
+
+.watermark-type {
+    margin-bottom: var(--element-spacing);
+}
+
+.text-watermark-settings,
+.image-watermark-settings {
+    display: grid;
+    gap: var(--element-spacing);
+    padding: var(--element-spacing) 0;
+    border-top: 1px solid var(--border-soft);
+}
+
+.common-settings {
+    display: grid;
+    gap: var(--element-spacing);
+    padding: var(--element-spacing) 0;
+    border-top: 1px solid var(--border-soft);
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--micro-spacing);
+}
+
+.form-group label {
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    color: var(--foreground);
+}
+
+.form-group input,
+.form-group select {
+    padding: var(--element-spacing);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    color: var(--foreground);
+    font-size: var(--font-size-base);
+    transition: all var(--transition-base);
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.form-group input[type="range"] {
+    padding: 0;
+}
+
+.form-group input[type="color"] {
+    padding: 0.25rem;
+    height: 2.5rem;
+    cursor: pointer;
+}
+
+/* Enhanced Button Styles */
+.convert-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--micro-spacing);
+    width: 100%;
+    padding: var(--element-spacing) var(--card-spacing);
+    background: var(--gradient-primary);
+    color: white;
+    border: none;
+    border-radius: var(--radius-lg);
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-base);
+    margin: var(--card-spacing) 0;
+    box-shadow: var(--shadow-md);
+}
+
+.convert-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.convert-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.convert-btn .btn-loader {
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Results and Stats Styles */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--element-spacing);
+    margin: var(--element-spacing) 0;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--element-spacing);
+    background: var(--muted);
+    border-radius: var(--radius-md);
+}
+
+.stat-label {
+    font-size: var(--font-size-sm);
+    color: var(--foreground-light);
+}
+
+.stat-value {
+    font-weight: 600;
+    color: var(--foreground);
+}
+
+.download-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--micro-spacing);
+    padding: var(--element-spacing) var(--card-spacing);
+    background: var(--success);
+    color: white;
+    border: none;
+    border-radius: var(--radius-lg);
+    font-size: var(--font-size-base);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-base);
+    box-shadow: var(--shadow-soft);
+}
+
+.download-btn:hover {
+    background: var(--success);
+    opacity: 0.9;
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+/* Error Message Styles */
+.error-message {
+    padding: var(--element-spacing);
+    background: var(--error-bg);
+    color: var(--error);
+    border: 1px solid var(--error-border);
+    border-radius: var(--radius-md);
+    margin: var(--element-spacing) 0;
+    font-weight: 500;
+}
+
 
 
