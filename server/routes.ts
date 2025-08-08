@@ -646,7 +646,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     
     // Validate conversion type
-    const allowedConversions = ['mp4-to-mp3', 'video-compress', 'audio-convert', 'video-trim', 'gif-make', 'video-merge'];
+    const allowedConversions = ['video_to_audio', 'video_compress', 'audio_convert', 'video_trim', 'video_to_gif', 'video_merge'];
     if (!allowedConversions.includes(conversion_type)) {
       return res.status(400).json({ error: `Unsupported conversion type: ${conversion_type}` });
     }
@@ -733,6 +733,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return 'mp4';
       case 'video_to_gif':
         return 'gif';
+      case 'video_merge':
+        return format || 'mp4';
       default:
         return 'mp4';
     }

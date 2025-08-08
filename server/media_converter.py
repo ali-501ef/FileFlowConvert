@@ -30,6 +30,8 @@ def convert_media(input_path, output_path, conversion_type, options=None):
             return trim_video(input_path, output_path, options)
         elif conversion_type == "video_to_gif":
             return create_gif(input_path, output_path, options)
+        elif conversion_type == "video_merge":
+            return merge_videos(input_path, output_path, options)
         else:
             return {"error": f"Unknown conversion type: {conversion_type}"}
     
@@ -204,6 +206,41 @@ def create_gif(input_path, output_path, options):
         return {"success": True}
     else:
         return {"error": f"GIF creation failed: {result.stderr}"}
+
+def merge_videos(input_path, output_path, options):
+    """Merge multiple video files into one"""
+    # For video merger, input_path should be a directory or list of files
+    # For now, implement basic concatenation
+    video_list = options.get('video_files', [])
+    if not video_list:
+        return {"error": "No video files provided for merging"}
+    
+    # Create a temporary file list for FFmpeg concat
+    import tempfile
+    with tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False) as f:
+        concat_file = f.name
+        for video_file in video_list:
+            f.write(f"file '{video_file}'\n")
+    
+    try:
+        cmd = [
+            'ffmpeg', '-f', 'concat', '-safe', '0', '-i', concat_file,
+            '-c', 'copy',  # Copy streams without re-encoding for speed
+            '-y', output_path
+        ]
+        
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
+        
+        if result.returncode == 0:
+            return {"success": True}
+        else:
+            return {"error": f"Video merge failed: {result.stderr}"}
+    finally:
+        # Clean up temporary concat file
+        try:
+            os.remove(concat_file)
+        except:
+            pass
 
 if __name__ == "__main__":
     if len(sys.argv) < 4:
