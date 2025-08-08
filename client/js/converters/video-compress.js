@@ -1,98 +1,105 @@
 class VideoCompressor {
     constructor() {
-        this.currentFile = null;
-        this.outputBlob = null;
-        this.uploadResult = null;
         this.init();
         this.setupEventListeners();
     }
 
     init() {
-        console.log('VideoCompressor: Starting initialization');
+        this.uploadArea = document.getElementById('uploadArea');
+        this.fileInput = document.getElementById('fileInput');
+        this.filePreview = document.getElementById('filePreview');
+        this.convertBtn = document.getElementById('convertBtn');
+        this.results = document.getElementById('results');
+        this.progressContainer = document.getElementById('progressContainer');
+        this.progressFill = document.getElementById('progressFill');
+        this.progressText = document.getElementById('progressText');
         
-        try {
-            // Initialize shared components
-            this.uploader = new FileUploader({
-                uploadAreaId: 'uploadArea',
-                fileInputId: 'fileInput',
-                acceptedTypes: ['video/*'],
-                onFileSelect: this.handleFile.bind(this)
-            });
-            console.log('VideoCompressor: FileUploader initialized');
-    
-            this.progress = new ProgressTracker({
-                progressContainerId: 'progressContainer',
-                progressFillId: 'progressFill',
-                progressTextId: 'progressText'
-            });
-            console.log('VideoCompressor: ProgressTracker initialized');
-    
-            this.buttonLoader = new ButtonLoader('convertBtn');
-            console.log('VideoCompressor: ButtonLoader initialized');
-            
-            this.errorDisplay = new ErrorDisplay('results');
-            console.log('VideoCompressor: ErrorDisplay initialized');
-    
-            // Get DOM elements
-            this.convertBtn = document.getElementById('convertBtn');
-            this.downloadBtn = document.getElementById('downloadBtn');
-            this.filePreview = document.getElementById('filePreview');
-            this.results = document.getElementById('results');
-            
-            console.log('VideoCompressor: All components initialized successfully');
-        } catch (error) {
-            console.error('VideoCompressor: Initialization failed:', error);
-            throw error;
-        }
+        this.currentFile = null;
+        this.uploadResult = null;
+        this.outputBlob = null;
+        this.isFilePickerOpen = false;
     }
 
     setupEventListeners() {
+        // File upload handlers - with click guard to prevent double opening
+        this.uploadArea.addEventListener('click', this.handleUploadAreaClick.bind(this));
+        this.uploadArea.addEventListener('dragover', this.handleDragOver.bind(this));
+        this.uploadArea.addEventListener('drop', this.handleDrop.bind(this));
+        this.fileInput.addEventListener('change', this.handleFileSelect.bind(this));
+        
+        // Convert button
         this.convertBtn.addEventListener('click', this.compressVideo.bind(this));
-        this.downloadBtn.addEventListener('click', this.downloadFile.bind(this));
+        
+        // Download button
+        document.getElementById('downloadBtn').addEventListener('click', this.downloadFile.bind(this));
+    }
+
+    handleUploadAreaClick(e) {
+        // Click guard to prevent double file picker opening
+        if (this.isFilePickerOpen) {
+            return;
+        }
+        this.isFilePickerOpen = true;
+        this.fileInput.click();
+        
+        // Reset flag after a delay to handle cancel cases
+        setTimeout(() => {
+            this.isFilePickerOpen = false;
+        }, 100);
+    }
+
+    handleDragOver(e) {
+        e.preventDefault();
+        this.uploadArea.classList.add('drag-over');
+    }
+
+    handleDrop(e) {
+        e.preventDefault();
+        this.uploadArea.classList.remove('drag-over');
+        const files = e.dataTransfer.files;
+        if (files.length > 0 && files[0].type.startsWith('video/')) {
+            this.handleFile(files[0]);
+        }
+    }
+
+    handleFileSelect(e) {
+        const file = e.target.files[0];
+        if (file && file.type.startsWith('video/')) {
+            this.handleFile(file);
+        }
     }
 
     async handleFile(file) {
         this.currentFile = file;
-        console.log('File selected:', file.name, file.type, file.size);
-
-        // Validate file type
-        if (!file.type.startsWith('video/')) {
-            this.errorDisplay.showError('Please select a valid video file');
-            return;
-        }
-
+        this.showFilePreview(file);
+        
         try {
-            // Show file preview
-            this.showFilePreview(file);
-            
             // Upload file to server
             await this.uploadFile(file);
-            
             this.convertBtn.disabled = false;
             
         } catch (error) {
-            console.error('Error handling file:', error);
-            this.errorDisplay.showError('Error processing file: ' + error.message);
+            this.showError('Failed to upload file: ' + error.message);
         }
     }
 
     showFilePreview(file) {
         document.getElementById('fileName').textContent = file.name;
-        document.getElementById('fileSize').textContent = FileUtils.formatFileSize(file.size);
+        document.getElementById('fileSize').textContent = this.formatFileSize(file.size);
         
         // Create video element to get metadata
         const video = document.createElement('video');
         video.src = URL.createObjectURL(file);
         
         video.addEventListener('loadedmetadata', () => {
-            const duration = FileUtils.formatDuration(video.duration);
+            const duration = this.formatDuration(video.duration);
             const resolution = `${video.videoWidth}x${video.videoHeight}`;
             
             document.getElementById('videoInfo').innerHTML = `
                 <div class="video-details">
                     <span class="detail-item">🎬 ${duration}</span>
                     <span class="detail-item">📐 ${resolution}</span>
-                    <span class="detail-item">📊 ${FileUtils.formatFileSize(file.size)}</span>
+                    <span class="detail-item">📊 ${this.formatFileSize(file.size)}</span>
                 </div>
             `;
             
@@ -101,6 +108,7 @@ class VideoCompressor {
         });
 
         this.filePreview.style.display = 'block';
+        this.uploadArea.style.display = 'none';
     }
 
     async uploadFile(file) {
@@ -118,53 +126,44 @@ class VideoCompressor {
         }
 
         this.uploadResult = await response.json();
-        console.log('Upload successful:', this.uploadResult);
-    }
-
-    async compressVideo() {
-        if (!this.uploadResult) {
-            this.errorDisplay.showError('Please upload a file first');
-            return;
-        }
-
-        try {
-            this.buttonLoader.showLoading();
-            this.progress.show(0);
-            this.results.style.display = 'none';
-
-            // Get compression settings
-            const settings = this.getCompressionSettings();
-            console.log('Compression settings:', settings);
-
-            // Start compression
-            await this.performCompression(settings);
-            
-            // Show results
-            this.showResults();
-            
-            // Track conversion for analytics
-            AnalyticsTracker.trackConversion('Audio/Video Tools', 'Video Compress');
-            
-        } catch (error) {
-            console.error('Compression error:', error);
-            this.errorDisplay.showError('Compression failed: ' + error.message);
-        } finally {
-            this.buttonLoader.hideLoading();
-            this.progress.hide();
-        }
     }
 
     getCompressionSettings() {
         return {
             compression: document.getElementById('compressionLevel').value,
-            format: document.getElementById('outputFormat').value,
-            resolution: document.getElementById('resolution').value,
-            frameRate: document.getElementById('frameRate').value
+            bitrate: document.getElementById('videoBitrate').value,
+            resolution: document.getElementById('outputResolution').value,
+            framerate: document.getElementById('frameRate').value
         };
     }
 
+    async compressVideo() {
+        if (!this.currentFile) return;
+
+        this.showLoading(true);
+        this.showProgress(0);
+        this.results.style.display = 'none';
+
+        try {
+            // Get compression settings
+            const settings = this.getCompressionSettings();
+            
+            // Perform compression
+            await this.performCompression(settings);
+            
+            this.showCompressionResults();
+            this.trackConversion();
+            
+        } catch (error) {
+            this.showError('Failed to compress video: ' + error.message);
+        }
+
+        this.hideProgress();
+        this.showLoading(false);
+    }
+
     async performCompression(settings) {
-        this.progress.updateProgress(10);
+        this.showProgress(10);
         
         // Call backend conversion API
         const response = await fetch('/api/convert-media', {
@@ -177,51 +176,43 @@ class VideoCompressor {
                 conversion_type: 'video_compress',
                 options: {
                     compression: settings.compression,
-                    resolution: settings.resolution === 'original' ? null : settings.resolution,
-                    framerate: settings.frameRate === 'original' ? null : settings.frameRate
+                    bitrate: settings.bitrate,
+                    resolution: settings.resolution,
+                    framerate: settings.framerate
                 }
             })
         });
 
-        this.progress.updateProgress(50);
+        this.showProgress(50);
 
         if (!response.ok) {
             const error = await response.json();
-            throw new Error(error.error || 'Compression failed');
+            throw new Error(error.error || 'Conversion failed');
         }
 
         const result = await response.json();
-        console.log('Compression result:', result);
-
-        this.progress.updateProgress(100);
+        this.showProgress(100);
 
         // Store download URL for later use
         this.downloadUrl = result.download_url;
         this.outputFilename = result.output_file;
         this.fileSize = result.file_size;
-        this.compressionStats = result.compression_stats || {};
     }
 
-    showResults() {
+    showCompressionResults() {
         const originalSize = this.currentFile.size;
-        const outputSize = this.fileSize;
-        const compressionRatio = this.compressionStats.compression_ratio || 
-                               ((1 - outputSize/originalSize) * 100).toFixed(1);
-        const format = document.getElementById('outputFormat').value.toUpperCase();
+        const compressedSize = this.fileSize;
+        const compressionRatio = ((originalSize - compressedSize) / originalSize * 100).toFixed(1);
 
         document.getElementById('compressionStats').innerHTML = `
             <div class="stats-grid">
                 <div class="stat-item">
-                    <span class="stat-label">Format:</span>
-                    <span class="stat-value">${format}</span>
-                </div>
-                <div class="stat-item">
                     <span class="stat-label">Original Size:</span>
-                    <span class="stat-value">${FileUtils.formatFileSize(originalSize)}</span>
+                    <span class="stat-value">${this.formatFileSize(originalSize)}</span>
                 </div>
                 <div class="stat-item">
                     <span class="stat-label">Compressed Size:</span>
-                    <span class="stat-value">${FileUtils.formatFileSize(outputSize)}</span>
+                    <span class="stat-value">${this.formatFileSize(compressedSize)}</span>
                 </div>
                 <div class="stat-item">
                     <span class="stat-label">Size Reduction:</span>
@@ -233,39 +224,72 @@ class VideoCompressor {
         this.results.style.display = 'block';
     }
 
-    async downloadFile() {
-        if (!this.downloadUrl) {
-            this.errorDisplay.showError('No file ready for download');
-            return;
-        }
-
-        try {
-            const response = await fetch(this.downloadUrl);
-            if (!response.ok) {
-                throw new Error('Download failed');
-            }
-
-            const blob = await response.blob();
-            const url = URL.createObjectURL(blob);
-            
+    downloadFile() {
+        if (this.downloadUrl) {
             const a = document.createElement('a');
-            a.href = url;
-            
-            // Create proper filename based on original file and settings
-            const format = document.getElementById('outputFormat').value;
-            const baseName = this.currentFile.name.replace(/\.[^/.]+$/, "");
-            const timestamp = new Date().toISOString().slice(0, 16).replace(/[-:]/g, '').replace('T', '-');
-            a.download = `${baseName}_compressed_${timestamp}.${format}`;
-            
-            document.body.appendChild(a);
+            a.href = this.downloadUrl;
+            a.download = this.currentFile.name.replace(/\.[^/.]+$/, '') + '_compressed.mp4';
             a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            
-        } catch (error) {
-            console.error('Download error:', error);
-            this.errorDisplay.showError('Download failed: ' + error.message);
         }
+    }
+
+    trackConversion() {
+        // Track the conversion for analytics
+        if (typeof gtag !== 'undefined') {
+            gtag('event', 'conversion', {
+                'event_category': 'Audio/Video Tools',
+                'event_label': 'Video Compress',
+                'value': 1
+            });
+        }
+    }
+
+    showProgress(percent) {
+        this.progressContainer.style.display = 'block';
+        this.progressFill.style.width = percent + '%';
+        this.progressText.textContent = percent + '%';
+    }
+
+    hideProgress() {
+        this.progressContainer.style.display = 'none';
+    }
+
+    formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    formatDuration(seconds) {
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${mins}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    showLoading(show) {
+        const btnText = this.convertBtn.querySelector('.btn-text');
+        const btnLoader = this.convertBtn.querySelector('.btn-loader');
+        
+        if (show) {
+            btnText.style.display = 'none';
+            btnLoader.style.display = 'block';
+            this.convertBtn.disabled = true;
+        } else {
+            btnText.style.display = 'block';
+            btnLoader.style.display = 'none';
+            this.convertBtn.disabled = false;
+        }
+    }
+
+    showError(message) {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error-message';
+        errorDiv.textContent = message;
+        this.results.innerHTML = '';
+        this.results.appendChild(errorDiv);
+        this.results.style.display = 'block';
     }
 }
 

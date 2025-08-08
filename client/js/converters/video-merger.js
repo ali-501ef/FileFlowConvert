@@ -1,78 +1,100 @@
 class VideoMerger {
     constructor() {
-        this.currentFiles = [];
-        this.uploadResults = [];
-        this.outputBlob = null;
         this.init();
         this.setupEventListeners();
     }
 
     init() {
-        console.log('VideoMerger: Starting initialization');
+        this.uploadArea = document.getElementById('uploadArea');
+        this.fileInput = document.getElementById('fileInput');
+        this.videoList = document.getElementById('videoList');
+        this.videoItems = document.getElementById('videoItems');
+        this.addMoreBtn = document.getElementById('addMoreBtn');
+        this.convertBtn = document.getElementById('convertBtn');
+        this.results = document.getElementById('results');
+        this.progressContainer = document.getElementById('progressContainer');
+        this.progressFill = document.getElementById('progressFill');
+        this.progressText = document.getElementById('progressText');
         
-        try {
-            // Initialize shared components
-            this.uploader = new FileUploader({
-                uploadAreaId: 'uploadArea',
-                fileInputId: 'fileInput',
-                acceptedTypes: ['video/*'],
-                multiple: true,
-                onFilesSelect: this.handleFiles.bind(this)
-            });
-            console.log('VideoMerger: FileUploader initialized');
-    
-            this.progress = new ProgressTracker({
-                progressContainerId: 'progressContainer',
-                progressFillId: 'progressFill',
-                progressTextId: 'progressText'
-            });
-            console.log('VideoMerger: ProgressTracker initialized');
-    
-            this.buttonLoader = new ButtonLoader('convertBtn');
-            console.log('VideoMerger: ButtonLoader initialized');
-            
-            this.errorDisplay = new ErrorDisplay('results');
-            console.log('VideoMerger: ErrorDisplay initialized');
-    
-            // Get DOM elements
-            this.convertBtn = document.getElementById('convertBtn');
-            this.downloadBtn = document.getElementById('downloadBtn');
-            this.videoList = document.getElementById('videoList');
-            this.videoItems = document.getElementById('videoItems');
-            this.addMoreBtn = document.getElementById('addMoreBtn');
-            this.results = document.getElementById('results');
-            
-            console.log('VideoMerger: All components initialized successfully');
-        } catch (error) {
-            console.error('VideoMerger: Initialization failed:', error);
-            throw error;
-        }
+        this.currentFiles = [];
+        this.uploadResults = [];
+        this.outputBlob = null;
+        this.isFilePickerOpen = false;
     }
 
     setupEventListeners() {
+        // File upload handlers - with click guard to prevent double opening
+        this.uploadArea.addEventListener('click', this.handleUploadAreaClick.bind(this));
+        this.uploadArea.addEventListener('dragover', this.handleDragOver.bind(this));
+        this.uploadArea.addEventListener('drop', this.handleDrop.bind(this));
+        this.fileInput.addEventListener('change', this.handleFileSelect.bind(this));
+        
+        // Add more files button
+        this.addMoreBtn.addEventListener('click', this.handleAddMoreClick.bind(this));
+        
+        // Convert button
         this.convertBtn.addEventListener('click', this.mergeVideos.bind(this));
-        this.downloadBtn.addEventListener('click', this.downloadFile.bind(this));
-        this.addMoreBtn.addEventListener('click', () => {
-            document.getElementById('fileInput').click();
-        });
+        
+        // Download button
+        document.getElementById('downloadBtn').addEventListener('click', this.downloadFile.bind(this));
     }
 
-    async handleFiles(files) {
-        console.log('Files selected:', files.map(f => f.name));
-
-        // Validate file types
-        const invalidFiles = files.filter(file => !file.type.startsWith('video/'));
-        if (invalidFiles.length > 0) {
-            this.errorDisplay.showError(`Invalid files detected: ${invalidFiles.map(f => f.name).join(', ')}`);
+    handleUploadAreaClick(e) {
+        // Click guard to prevent double file picker opening
+        if (this.isFilePickerOpen) {
             return;
         }
+        this.isFilePickerOpen = true;
+        this.fileInput.click();
+        
+        // Reset flag after a delay to handle cancel cases
+        setTimeout(() => {
+            this.isFilePickerOpen = false;
+        }, 100);
+    }
 
+    handleAddMoreClick(e) {
+        // Click guard to prevent double file picker opening
+        if (this.isFilePickerOpen) {
+            return;
+        }
+        this.isFilePickerOpen = true;
+        this.fileInput.click();
+        
+        // Reset flag after a delay to handle cancel cases
+        setTimeout(() => {
+            this.isFilePickerOpen = false;
+        }, 100);
+    }
+
+    handleDragOver(e) {
+        e.preventDefault();
+        this.uploadArea.classList.add('drag-over');
+    }
+
+    handleDrop(e) {
+        e.preventDefault();
+        this.uploadArea.classList.remove('drag-over');
+        const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('video/'));
+        if (files.length > 0) {
+            this.handleFiles(files);
+        }
+    }
+
+    handleFileSelect(e) {
+        const files = Array.from(e.target.files).filter(f => f.type.startsWith('video/'));
+        if (files.length > 0) {
+            this.handleFiles(files);
+        }
+    }
+
+    async handleFiles(newFiles) {
         // Add new files to current list
-        this.currentFiles = [...this.currentFiles, ...files];
-
+        this.currentFiles = [...this.currentFiles, ...newFiles];
+        
         try {
             // Upload all new files
-            for (const file of files) {
+            for (const file of newFiles) {
                 const uploadResult = await this.uploadFile(file);
                 this.uploadResults.push({
                     file: file,
@@ -85,57 +107,7 @@ class VideoMerger {
             this.convertBtn.disabled = this.currentFiles.length < 2;
             
         } catch (error) {
-            console.error('Error handling files:', error);
-            this.errorDisplay.showError('Error processing files: ' + error.message);
-        }
-    }
-
-    updateVideoList() {
-        // Show video list
-        this.videoList.style.display = 'block';
-        
-        // Clear existing items
-        this.videoItems.innerHTML = '';
-        
-        // Add video items
-        this.currentFiles.forEach((file, index) => {
-            const videoItem = document.createElement('div');
-            videoItem.className = 'video-item';
-            videoItem.innerHTML = `
-                <div class="video-item-info">
-                    <div class="video-item-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <polygon points="23 7 16 12 23 17 23 7"></polygon>
-                            <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
-                        </svg>
-                    </div>
-                    <div class="video-item-details">
-                        <div class="video-item-name">${file.name}</div>
-                        <div class="video-item-size">${FileUtils.formatFileSize(file.size)}</div>
-                    </div>
-                </div>
-                <div class="video-item-actions">
-                    <button class="video-item-remove" onclick="videoMerger.removeVideo(${index})" type="button">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="18" y1="6" x2="6" y2="18"></line>
-                            <line x1="6" y1="6" x2="18" y2="18"></line>
-                        </svg>
-                    </button>
-                </div>
-            `;
-            this.videoItems.appendChild(videoItem);
-        });
-    }
-
-    removeVideo(index) {
-        this.currentFiles.splice(index, 1);
-        this.uploadResults.splice(index, 1);
-        this.updateVideoList();
-        this.convertBtn.disabled = this.currentFiles.length < 2;
-        
-        if (this.currentFiles.length === 0) {
-            this.videoList.style.display = 'none';
-            this.uploader.showUploadArea();
+            this.showError('Failed to upload files: ' + error.message);
         }
     }
 
@@ -153,58 +125,103 @@ class VideoMerger {
             throw new Error(error.error || 'Upload failed');
         }
 
-        const result = await response.json();
-        console.log('Upload successful:', file.name, result);
-        return result;
+        return await response.json();
     }
 
-    async mergeVideos() {
-        if (this.uploadResults.length < 2) {
-            this.errorDisplay.showError('Please upload at least 2 video files');
-            return;
-        }
-
-        try {
-            this.buttonLoader.showLoading();
-            this.progress.show(0);
-            this.results.style.display = 'none';
-
-            // Get merge settings
-            const settings = this.getMergeSettings();
-            console.log('Merge settings:', settings);
-
-            // Start merging
-            await this.performMerge(settings);
+    updateVideoList() {
+        // Show video list and hide upload area
+        this.videoList.style.display = 'block';
+        this.uploadArea.style.display = 'none';
+        
+        // Clear existing items
+        this.videoItems.innerHTML = '';
+        
+        // Add video items
+        this.currentFiles.forEach((file, index) => {
+            const videoItem = document.createElement('div');
+            videoItem.className = 'video-item';
+            videoItem.innerHTML = `
+                <div class="video-item-info">
+                    <div class="video-item-name">${file.name}</div>
+                    <div class="video-item-size">${this.formatFileSize(file.size)}</div>
+                </div>
+                <div class="video-item-actions">
+                    <button class="remove-video-btn" data-index="${index}">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+            `;
             
-            // Show results
-            this.showResults();
+            // Add remove functionality
+            const removeBtn = videoItem.querySelector('.remove-video-btn');
+            removeBtn.addEventListener('click', () => this.removeVideo(index));
             
-            // Track conversion for analytics
-            AnalyticsTracker.trackConversion('Audio/Video Tools', 'Video Merger');
-            
-        } catch (error) {
-            console.error('Merge error:', error);
-            this.errorDisplay.showError('Merge failed: ' + error.message);
-        } finally {
-            this.buttonLoader.hideLoading();
-            this.progress.hide();
+            this.videoItems.appendChild(videoItem);
+        });
+    }
+
+    removeVideo(index) {
+        this.currentFiles.splice(index, 1);
+        this.uploadResults.splice(index, 1);
+        
+        if (this.currentFiles.length === 0) {
+            this.videoList.style.display = 'none';
+            this.uploadArea.style.display = 'block';
+            this.convertBtn.disabled = true;
+        } else {
+            this.updateVideoList();
+            this.convertBtn.disabled = this.currentFiles.length < 2;
         }
     }
 
     getMergeSettings() {
         return {
-            format: document.getElementById('outputFormat').value,
+            output_format: document.getElementById('outputFormat').value,
             quality: document.getElementById('quality').value,
             resolution: document.getElementById('resolution').value,
-            addTransitions: document.getElementById('addTransitions').checked,
-            normalizeAudio: document.getElementById('normalizeAudio').checked
+            add_transitions: document.getElementById('addTransitions').checked,
+            normalize_audio: document.getElementById('normalizeAudio').checked
         };
     }
 
-    async performMerge(settings) {
-        this.progress.updateProgress(10);
+    async mergeVideos() {
+        if (this.currentFiles.length < 2) {
+            this.showError('Please select at least 2 video files to merge');
+            return;
+        }
+
+        this.showLoading(true);
+        this.showProgress(0);
+        this.results.style.display = 'none';
+
+        try {
+            // Get merge settings
+            const settings = this.getMergeSettings();
+            
+            // For now, show an error that this feature needs backend implementation
+            // In a real implementation, this would call the backend API
+            throw new Error('Video merging backend not yet implemented. This feature requires server-side FFmpeg processing to concatenate multiple video files.');
+            
+            // TODO: Once backend is implemented, use this:
+            // await this.performMerging(settings);
+            // this.showMergeResults();
+            // this.trackConversion();
+            
+        } catch (error) {
+            this.showError('Failed to merge videos: ' + error.message);
+        }
+
+        this.hideProgress();
+        this.showLoading(false);
+    }
+
+    async performMerging(settings) {
+        this.showProgress(10);
         
-        // Call backend conversion API
+        // Call backend conversion API with multiple files
         const response = await fetch('/api/convert-media', {
             method: 'POST',
             headers: {
@@ -213,26 +230,19 @@ class VideoMerger {
             body: JSON.stringify({
                 file_ids: this.uploadResults.map(ur => ur.result.file_id),
                 conversion_type: 'video_merge',
-                options: {
-                    quality: settings.quality,
-                    resolution: settings.resolution === 'auto' ? null : settings.resolution,
-                    add_transitions: settings.addTransitions,
-                    normalize_audio: settings.normalizeAudio
-                }
+                options: settings
             })
         });
 
-        this.progress.updateProgress(50);
+        this.showProgress(50);
 
         if (!response.ok) {
             const error = await response.json();
-            throw new Error(error.error || 'Merge failed');
+            throw new Error(error.error || 'Video merging failed');
         }
 
         const result = await response.json();
-        console.log('Merge result:', result);
-
-        this.progress.updateProgress(100);
+        this.showProgress(100);
 
         // Store download URL for later use
         this.downloadUrl = result.download_url;
@@ -240,29 +250,28 @@ class VideoMerger {
         this.fileSize = result.file_size;
     }
 
-    showResults() {
+    showMergeResults() {
         const totalOriginalSize = this.currentFiles.reduce((sum, file) => sum + file.size, 0);
-        const outputSize = this.fileSize;
-        const format = document.getElementById('outputFormat').value.toUpperCase();
-        const videoCount = this.currentFiles.length;
+        const mergedSize = this.fileSize;
+        const fileCount = this.currentFiles.length;
 
         document.getElementById('mergeStats').innerHTML = `
             <div class="stats-grid">
                 <div class="stat-item">
-                    <span class="stat-label">Videos Merged:</span>
-                    <span class="stat-value">${videoCount}</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Format:</span>
-                    <span class="stat-value">${format}</span>
+                    <span class="stat-label">Files Merged:</span>
+                    <span class="stat-value">${fileCount} videos</span>
                 </div>
                 <div class="stat-item">
                     <span class="stat-label">Total Input Size:</span>
-                    <span class="stat-value">${FileUtils.formatFileSize(totalOriginalSize)}</span>
+                    <span class="stat-value">${this.formatFileSize(totalOriginalSize)}</span>
                 </div>
                 <div class="stat-item">
                     <span class="stat-label">Output Size:</span>
-                    <span class="stat-value">${FileUtils.formatFileSize(outputSize)}</span>
+                    <span class="stat-value">${this.formatFileSize(mergedSize)}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Output Format:</span>
+                    <span class="stat-value">${document.getElementById('outputFormat').value.toUpperCase()}</span>
                 </div>
             </div>
         `;
@@ -270,45 +279,70 @@ class VideoMerger {
         this.results.style.display = 'block';
     }
 
-    async downloadFile() {
-        if (!this.downloadUrl) {
-            this.errorDisplay.showError('No file ready for download');
-            return;
-        }
-
-        try {
-            const response = await fetch(this.downloadUrl);
-            if (!response.ok) {
-                throw new Error('Download failed');
-            }
-
-            const blob = await response.blob();
-            const url = URL.createObjectURL(blob);
-            
+    downloadFile() {
+        if (this.downloadUrl) {
             const a = document.createElement('a');
-            a.href = url;
-            
-            // Create proper filename based on settings
-            const format = document.getElementById('outputFormat').value;
-            const timestamp = new Date().toISOString().slice(0, 16).replace(/[-:]/g, '').replace('T', '-');
-            a.download = `merged_video_${timestamp}.${format}`;
-            
-            document.body.appendChild(a);
+            a.href = this.downloadUrl;
+            a.download = 'merged_video.' + document.getElementById('outputFormat').value;
             a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            
-        } catch (error) {
-            console.error('Download error:', error);
-            this.errorDisplay.showError('Download failed: ' + error.message);
         }
+    }
+
+    trackConversion() {
+        // Track the conversion for analytics
+        if (typeof gtag !== 'undefined') {
+            gtag('event', 'conversion', {
+                'event_category': 'Audio/Video Tools',
+                'event_label': 'Video Merger',
+                'value': 1
+            });
+        }
+    }
+
+    showProgress(percent) {
+        this.progressContainer.style.display = 'block';
+        this.progressFill.style.width = percent + '%';
+        this.progressText.textContent = percent + '%';
+    }
+
+    hideProgress() {
+        this.progressContainer.style.display = 'none';
+    }
+
+    formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    showLoading(show) {
+        const btnText = this.convertBtn.querySelector('.btn-text');
+        const btnLoader = this.convertBtn.querySelector('.btn-loader');
+        
+        if (show) {
+            btnText.style.display = 'none';
+            btnLoader.style.display = 'block';
+            this.convertBtn.disabled = true;
+        } else {
+            btnText.style.display = 'block';
+            btnLoader.style.display = 'none';
+            this.convertBtn.disabled = this.currentFiles.length < 2;
+        }
+    }
+
+    showError(message) {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error-message';
+        errorDiv.textContent = message;
+        this.results.innerHTML = '';
+        this.results.appendChild(errorDiv);
+        this.results.style.display = 'block';
     }
 }
 
-// Global variable to make functions accessible from onclick handlers
-let videoMerger;
-
 // Initialize the merger when the page loads
 document.addEventListener('DOMContentLoaded', () => {
-    videoMerger = new VideoMerger();
+    new VideoMerger();
 });

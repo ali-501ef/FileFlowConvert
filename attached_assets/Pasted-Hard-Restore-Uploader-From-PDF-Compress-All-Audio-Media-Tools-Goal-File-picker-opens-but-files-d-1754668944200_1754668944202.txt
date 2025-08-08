@@ -1,0 +1,100 @@
+Hard-Restore Uploader From PDF Compress → All Audio/Media Tools
+
+Goal: File picker opens but files don’t upload across all A/V tools. Do NOT rebuild again. Instead, copy the exact working uploader + request flow from PDF Compress (frontend + backend wiring) and use it for these pages:
+
+MP4 → MP3
+
+Audio Converter
+
+Video Compress
+
+Video Trim
+
+Video Merger
+
+GIF Maker
+
+1) Frontend: transplant the working uploader
+Identify the exact uploader code used by PDF Compress (DOM structure, click & drag/drop bindings, change handler, progress UI, inline error UI, and the function that builds FormData and calls the API).
+
+Copy that uploader component and initialization pattern into each A/V tool page without modification, then only change:
+
+The accept and multiple attributes appropriate for each tool.
+
+The API endpoint path (route) to the correct A/V endpoint.
+
+Ensure the uploader binds on page load and after SPA navigation (same as Compress).
+
+Kill any legacy listeners on these pages that also call input.click() or send their own FormData. There must be one source of truth: the PDF Compress uploader.
+
+2) Backend: match the working upload route contract
+Mirror the PDF Compress upload route contract for each A/V tool:
+
+Same multipart middleware (multer/busboy) and same field name used by PDF Compress (e.g., file or files[]). If the A/V routes currently expect different field names, change them to match PDF Compress to avoid frontend divergence.
+
+On receipt, log: route, field name, file count, mimetypes, size.
+
+Keep the A/V processing logic (ffmpeg etc.) but do not change how the request is parsed. Only adapt the processing step.
+
+Response schema must match: { ok:true, url, contentType, sizeBytes, meta } or { ok:false, error }.
+
+3) Page-specific acceptance (set correct accept + multiple)
+MP4 → MP3: accept="video/mp4,video/quicktime,video/*", single file.
+
+Audio Converter: accept="audio/*", single file.
+
+Video Compress: accept="video/*", single file.
+
+Video Trim: accept="video/*", single file.
+
+Video Merger: accept="video/*", multiple files (preserve order chosen in UI).
+
+GIF Maker: accept="video/*", single file.
+
+4) Progress + results behavior (identical to PDF Compress)
+Inline progress stages: Uploading → Processing → Finalizing (no toasts).
+
+Disable action button during processing; re-enable on finish/fail.
+
+Results panel appears directly under the uploader, above info text.
+
+Filenames use the unified pattern already adopted site-wide.
+
+5) Remove blockers / legacy code
+Delete or disable any old A/V upload handlers, delegated document.click hacks, extra hidden inputs, or overlay elements that may intercept clicks.
+
+Ensure no second FormData builder exists on those pages.
+
+6) Verify network + server logs (must show real uploads)
+In DevTools (Network), selecting a file must immediately show a POST with non-zero payload and the same field name used by PDF Compress.
+
+Server logs for each tool must show the route hit and files received (count, types, sizes).
+
+7) Mini smoke tests (before marking done)
+For each A/V tool:
+
+Click choose file → picker opens once; select a valid file → upload starts (progress visible).
+
+Drag & drop the same file → upload starts (progress visible).
+
+Processing completes; download works; Content-Type matches.
+
+No infinite spinners, no console errors.
+
+PDF Compress remains fully functional (unchanged).
+
+8) Deliverables
+Short note listing:
+
+The uploader files/functions copied from PDF Compress and where they were inserted for each A/V tool.
+
+The FormData field name used (should match PDF Compress).
+
+Endpoint paths per tool.
+
+A screenshot of DevTools Network → Request Payload for one tool showing the file present.
+
+One success screenshot per tool (progress → result).
+
+Important: Do not alter the PDF/Image tools. This task is strictly the uploader hard-restore + wiring for A/V tools.
+

@@ -1,98 +1,105 @@
 class MP4ToMP3Converter {
     constructor() {
-        this.currentFile = null;
-        this.outputBlob = null;
-        this.uploadResult = null;
         this.init();
         this.setupEventListeners();
     }
 
     init() {
-        console.log('MP4ToMP3Converter: Starting initialization');
+        this.uploadArea = document.getElementById('uploadArea');
+        this.fileInput = document.getElementById('fileInput');
+        this.filePreview = document.getElementById('filePreview');
+        this.convertBtn = document.getElementById('convertBtn');
+        this.results = document.getElementById('results');
+        this.progressContainer = document.getElementById('progressContainer');
+        this.progressFill = document.getElementById('progressFill');
+        this.progressText = document.getElementById('progressText');
         
-        try {
-            // Initialize shared components
-            this.uploader = new FileUploader({
-                uploadAreaId: 'uploadArea',
-                fileInputId: 'fileInput',
-                acceptedTypes: ['video/*'],
-                onFileSelect: this.handleFile.bind(this)
-            });
-            console.log('MP4ToMP3Converter: FileUploader initialized');
-    
-            this.progress = new ProgressTracker({
-                progressContainerId: 'progressContainer',
-                progressFillId: 'progressFill',
-                progressTextId: 'progressText'
-            });
-            console.log('MP4ToMP3Converter: ProgressTracker initialized');
-    
-            this.buttonLoader = new ButtonLoader('convertBtn');
-            console.log('MP4ToMP3Converter: ButtonLoader initialized');
-            
-            this.errorDisplay = new ErrorDisplay('results');
-            console.log('MP4ToMP3Converter: ErrorDisplay initialized');
-    
-            // Get DOM elements
-            this.convertBtn = document.getElementById('convertBtn');
-            this.downloadBtn = document.getElementById('downloadBtn');
-            this.filePreview = document.getElementById('filePreview');
-            this.results = document.getElementById('results');
-            
-            console.log('MP4ToMP3Converter: All components initialized successfully');
-        } catch (error) {
-            console.error('MP4ToMP3Converter: Initialization failed:', error);
-            throw error;
-        }
+        this.currentFile = null;
+        this.uploadResult = null;
+        this.outputBlob = null;
+        this.isFilePickerOpen = false;
     }
 
     setupEventListeners() {
+        // File upload handlers - with click guard to prevent double opening
+        this.uploadArea.addEventListener('click', this.handleUploadAreaClick.bind(this));
+        this.uploadArea.addEventListener('dragover', this.handleDragOver.bind(this));
+        this.uploadArea.addEventListener('drop', this.handleDrop.bind(this));
+        this.fileInput.addEventListener('change', this.handleFileSelect.bind(this));
+        
+        // Convert button
         this.convertBtn.addEventListener('click', this.convertToMP3.bind(this));
-        this.downloadBtn.addEventListener('click', this.downloadFile.bind(this));
+        
+        // Download button
+        document.getElementById('downloadBtn').addEventListener('click', this.downloadFile.bind(this));
+    }
+
+    handleUploadAreaClick(e) {
+        // Click guard to prevent double file picker opening
+        if (this.isFilePickerOpen) {
+            return;
+        }
+        this.isFilePickerOpen = true;
+        this.fileInput.click();
+        
+        // Reset flag after a delay to handle cancel cases
+        setTimeout(() => {
+            this.isFilePickerOpen = false;
+        }, 100);
+    }
+
+    handleDragOver(e) {
+        e.preventDefault();
+        this.uploadArea.classList.add('drag-over');
+    }
+
+    handleDrop(e) {
+        e.preventDefault();
+        this.uploadArea.classList.remove('drag-over');
+        const files = e.dataTransfer.files;
+        if (files.length > 0 && files[0].type.startsWith('video/')) {
+            this.handleFile(files[0]);
+        }
+    }
+
+    handleFileSelect(e) {
+        const file = e.target.files[0];
+        if (file && file.type.startsWith('video/')) {
+            this.handleFile(file);
+        }
     }
 
     async handleFile(file) {
         this.currentFile = file;
-        console.log('File selected:', file.name, file.type, file.size);
-
-        // Validate file type
-        if (!file.type.startsWith('video/')) {
-            this.errorDisplay.showError('Please select a valid video file');
-            return;
-        }
-
+        this.showFilePreview(file);
+        
         try {
-            // Show file preview
-            this.showFilePreview(file);
-            
             // Upload file to server
             await this.uploadFile(file);
-            
             this.convertBtn.disabled = false;
             
         } catch (error) {
-            console.error('Error handling file:', error);
-            this.errorDisplay.showError('Error processing file: ' + error.message);
+            this.showError('Failed to upload file: ' + error.message);
         }
     }
 
     showFilePreview(file) {
         document.getElementById('fileName').textContent = file.name;
-        document.getElementById('fileSize').textContent = FileUtils.formatFileSize(file.size);
+        document.getElementById('fileSize').textContent = this.formatFileSize(file.size);
         
         // Create video element to get metadata
         const video = document.createElement('video');
         video.src = URL.createObjectURL(file);
         
         video.addEventListener('loadedmetadata', () => {
-            const duration = FileUtils.formatDuration(video.duration);
+            const duration = this.formatDuration(video.duration);
             const resolution = `${video.videoWidth}x${video.videoHeight}`;
             
             document.getElementById('videoInfo').innerHTML = `
                 <div class="video-details">
                     <span class="detail-item">🎬 ${duration}</span>
                     <span class="detail-item">📐 ${resolution}</span>
-                    <span class="detail-item">📊 ${FileUtils.formatFileSize(file.size)}</span>
+                    <span class="detail-item">📊 ${this.formatFileSize(file.size)}</span>
                 </div>
             `;
             
@@ -101,6 +108,7 @@ class MP4ToMP3Converter {
         });
 
         this.filePreview.style.display = 'block';
+        this.uploadArea.style.display = 'none';
     }
 
     async uploadFile(file) {
@@ -118,40 +126,31 @@ class MP4ToMP3Converter {
         }
 
         this.uploadResult = await response.json();
-        console.log('Upload successful:', this.uploadResult);
     }
 
     async convertToMP3() {
-        if (!this.uploadResult) {
-            this.errorDisplay.showError('Please upload a file first');
-            return;
-        }
+        if (!this.currentFile) return;
+
+        this.showLoading(true);
+        this.showProgress(0);
+        this.results.style.display = 'none';
 
         try {
-            this.buttonLoader.showLoading();
-            this.progress.show(0);
-            this.results.style.display = 'none';
-
             // Get conversion settings
             const settings = this.getConversionSettings();
-            console.log('Conversion settings:', settings);
-
-            // Start conversion
+            
+            // Perform conversion
             await this.performConversion(settings);
             
-            // Show results
-            this.showResults();
-            
-            // Track conversion for analytics
-            AnalyticsTracker.trackConversion('Audio/Video Tools', 'MP4 to MP3');
+            this.showConversionResults();
+            this.trackConversion();
             
         } catch (error) {
-            console.error('Conversion error:', error);
-            this.errorDisplay.showError('Conversion failed: ' + error.message);
-        } finally {
-            this.buttonLoader.hideLoading();
-            this.progress.hide();
+            this.showError('Failed to convert video: ' + error.message);
         }
+
+        this.hideProgress();
+        this.showLoading(false);
     }
 
     getConversionSettings() {
@@ -164,7 +163,7 @@ class MP4ToMP3Converter {
     }
 
     async performConversion(settings) {
-        this.progress.updateProgress(10);
+        this.showProgress(10);
         
         // Call backend conversion API
         const response = await fetch('/api/convert-media', {
@@ -177,14 +176,12 @@ class MP4ToMP3Converter {
                 conversion_type: 'video_to_audio',
                 options: {
                     format: settings.format,
-                    bitrate: settings.bitrate,
-                    preserve_metadata: settings.preserveMetadata,
-                    normalize_audio: settings.normalizeAudio
+                    bitrate: settings.bitrate
                 }
             })
         });
 
-        this.progress.updateProgress(50);
+        this.showProgress(50);
 
         if (!response.ok) {
             const error = await response.json();
@@ -192,9 +189,7 @@ class MP4ToMP3Converter {
         }
 
         const result = await response.json();
-        console.log('Conversion result:', result);
-
-        this.progress.updateProgress(100);
+        this.showProgress(100);
 
         // Store download URL for later use
         this.downloadUrl = result.download_url;
@@ -202,7 +197,7 @@ class MP4ToMP3Converter {
         this.fileSize = result.file_size;
     }
 
-    showResults() {
+    showConversionResults() {
         const originalSize = this.currentFile.size;
         const outputSize = this.fileSize;
         const format = document.getElementById('audioFormat').value.toUpperCase();
@@ -220,11 +215,11 @@ class MP4ToMP3Converter {
                 </div>
                 <div class="stat-item">
                     <span class="stat-label">Original Size:</span>
-                    <span class="stat-value">${FileUtils.formatFileSize(originalSize)}</span>
+                    <span class="stat-value">${this.formatFileSize(originalSize)}</span>
                 </div>
                 <div class="stat-item">
                     <span class="stat-label">Output Size:</span>
-                    <span class="stat-value">${FileUtils.formatFileSize(outputSize)}</span>
+                    <span class="stat-value">${this.formatFileSize(outputSize)}</span>
                 </div>
             </div>
         `;
@@ -232,39 +227,72 @@ class MP4ToMP3Converter {
         this.results.style.display = 'block';
     }
 
-    async downloadFile() {
-        if (!this.downloadUrl) {
-            this.errorDisplay.showError('No file ready for download');
-            return;
-        }
-
-        try {
-            const response = await fetch(this.downloadUrl);
-            if (!response.ok) {
-                throw new Error('Download failed');
-            }
-
-            const blob = await response.blob();
-            const url = URL.createObjectURL(blob);
-            
+    downloadFile() {
+        if (this.downloadUrl) {
             const a = document.createElement('a');
-            a.href = url;
-            
-            // Create proper filename based on original file and settings
-            const format = document.getElementById('audioFormat').value;
-            const baseName = this.currentFile.name.replace(/\.[^/.]+$/, "");
-            const timestamp = new Date().toISOString().slice(0, 16).replace(/[-:]/g, '').replace('T', '-');
-            a.download = `${baseName}_mp4tomp3_${timestamp}.${format}`;
-            
-            document.body.appendChild(a);
+            a.href = this.downloadUrl;
+            a.download = this.currentFile.name.replace(/\.[^/.]+$/, '') + '_audio.' + document.getElementById('audioFormat').value;
             a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            
-        } catch (error) {
-            console.error('Download error:', error);
-            this.errorDisplay.showError('Download failed: ' + error.message);
         }
+    }
+
+    trackConversion() {
+        // Track the conversion for analytics
+        if (typeof gtag !== 'undefined') {
+            gtag('event', 'conversion', {
+                'event_category': 'Audio/Video Tools',
+                'event_label': 'MP4 to MP3',
+                'value': 1
+            });
+        }
+    }
+
+    showProgress(percent) {
+        this.progressContainer.style.display = 'block';
+        this.progressFill.style.width = percent + '%';
+        this.progressText.textContent = percent + '%';
+    }
+
+    hideProgress() {
+        this.progressContainer.style.display = 'none';
+    }
+
+    formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    formatDuration(seconds) {
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${mins}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    showLoading(show) {
+        const btnText = this.convertBtn.querySelector('.btn-text');
+        const btnLoader = this.convertBtn.querySelector('.btn-loader');
+        
+        if (show) {
+            btnText.style.display = 'none';
+            btnLoader.style.display = 'block';
+            this.convertBtn.disabled = true;
+        } else {
+            btnText.style.display = 'block';
+            btnLoader.style.display = 'none';
+            this.convertBtn.disabled = false;
+        }
+    }
+
+    showError(message) {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error-message';
+        errorDiv.textContent = message;
+        this.results.innerHTML = '';
+        this.results.appendChild(errorDiv);
+        this.results.style.display = 'block';
     }
 }
 
