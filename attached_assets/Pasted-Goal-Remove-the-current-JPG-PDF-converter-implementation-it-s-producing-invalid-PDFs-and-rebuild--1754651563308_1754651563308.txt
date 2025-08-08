@@ -1,0 +1,148 @@
+Goal: Remove the current JPG→PDF converter implementation (it’s producing invalid PDFs) and rebuild a fresh, minimal, correct version that matches our design system and works reliably.
+
+Scope: Only the JPG→PDF tool (page, client JS, API route, and server logic). Keep URL paths and UI layout the same for users.
+
+1) Backup & remove the old implementation
+Create a git branch fix/jpg-to-pdf-rebuild.
+
+Move the existing JPG→PDF files to a backup folder backup/jpg-to-pdf-OLD/:
+
+page: image-tools/jpg-to-pdf.html (or equivalent)
+
+client: client/js/jpgToPdf.js (or equivalent)
+
+server route/controller: server/routes/jpgToPdf.js, server/controllers/jpgToPdf.js (or equivalent)
+
+any utility used only by this converter
+
+Grep the codebase and remove dead imports/refs to the OLD module.
+
+2) Recreate page & client script (keep UI consistent)
+Recreate image-tools/jpg-to-pdf.html using the same section layout used by other tools (hero, dropzone, “Advanced Options”, CTA, reasons block, footer).
+
+Recreate client/js/jpgToPdf.js that:
+
+Accepts multiple image files (JPG/JPEG/PNG/WEBP/TIFF/BMP, but we’ll convert all to PDF pages).
+
+Posts to POST /api/convert/jpg-to-pdf via multipart/form-data.
+
+Sends these option fields (names exactly):
+
+pageSize: auto|A4|Letter|Legal
+
+orientation: portrait|landscape
+
+margins: number (points) default 36
+
+fit: contain|cover
+
+dpi: number (default 300)
+
+bgColor: hex like #FFFFFF
+
+order: filename|uploaded
+
+Shows progress bar and handles errors with our standard inline error banner.
+
+Uses the unified filename pattern returned by server.
+
+3) Rebuild server route cleanly
+New route file: server/routes/jpgToPdf.js and controller server/controllers/jpgToPdf.js.
+
+API contract: POST /api/convert/jpg-to-pdf
+
+body: images[] (1..100), plus options above
+
+returns: application/pdf with a valid PDF stream (single file; multiple images become multi-page PDF)
+
+filename pattern: <base>_to_pdf_<timestamp>.pdf
+
+Libraries: use a robust PDF lib (prefer pdf-lib) and a sharp-like image pipeline (sharp) for decoding, sizing, DPI, and background fill.
+
+Logic outline:
+
+Validate inputs & content-types (reject non images).
+
+Sort files per order.
+
+For each image:
+
+Load via sharp, get dimensions, convert to RGB if needed.
+
+Map pageSize → points; if auto, compute from image pixel size / DPI.
+
+Apply fit: compute scale to contain or cover within page minus margins, place centered; fill background with bgColor.
+
+If transparency in source, composite on bgColor.
+
+Embed image bytes in pdf-lib page (JPEG/PNG as appropriate).
+
+Save PDF with useObjectStreams: false for maximum viewer compatibility.
+
+Set headers: Content-Type: application/pdf, Content-Disposition: attachment; filename="<pattern>"
+
+Output validation (must-have):
+
+Ensure the buffer starts with %PDF- and ends with %%EOF.
+
+Try reopening with pdf-lib to confirm parse succeeds before sending.
+
+Error handling:
+
+If any page fails, return 400 with a friendly message. No partial PDFs.
+
+Cleanup: Use our existing temp storage TTL; delete uploaded temps after response.
+
+4) Wire up Advanced Options
+Map UI controls to options exactly:
+
+Page Size (select): auto, A4, Letter, Legal
+
+Orientation (select): portrait, landscape
+
+Margins (number, pts; default 36)
+
+Fit (select): contain (no crop) or cover (fills page, may crop)
+
+DPI (number; default 300; used only when pageSize=auto)
+
+Background Color (color input; default #FFFFFF)
+
+Order (select): filename or uploaded
+
+Persist choices per-session (localStorage) like other tools.
+
+5) Filename & analytics consistency
+Ensure returned filename uses our unified pattern <base>_to_pdf_<timestamp>.pdf where <base> is the first file’s basename without extension (sanitize).
+
+Keep our standardized logging: tool=jpg-to-pdf, pages, pageSize, fit, orientation, totalBytes.
+
+6) QA checklist (run now)
+Single JPG → single-page PDF opens in Chrome/Preview/Acrobat.
+
+Multiple images → multi-page PDF with correct order.
+
+Transparent PNG gets correct background fill (bgColor).
+
+Very large image doesn’t blow up memory; still valid PDF.
+
+A4/Letter changes page size as expected; margins respected.
+
+Content-Type and file extension correct; no more “not a real PDF”.
+
+Advanced Options actually influence output (spot-check each).
+
+Filename pattern correct and human-readable.
+
+7) Rollout
+Replace nav link to point to the rebuilt page (same path).
+
+Remove the temporary “Coming soon / experimental” flags if any.
+
+Push branch, run, and show a demo with 3 images producing a valid multi-page PDF; attach sample output.
+
+If anything blocks (missing deps), install them and wire into our build:
+
+pdf-lib, sharp, multer (or current uploader), and any color parser.
+
+This should fully replace the flaky converter with a clean, stable implementation.
