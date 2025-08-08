@@ -21,14 +21,21 @@ class VideoMerger {
     }
 
     setupEventListeners() {
-        // File upload handlers
-        this.uploadArea.addEventListener('click', () => this.fileInput.click());
-        this.uploadArea.addEventListener('dragover', this.handleDragOver.bind(this));
-        this.uploadArea.addEventListener('drop', this.handleDrop.bind(this));
-        this.fileInput.addEventListener('change', this.handleFileSelect.bind(this));
+        // Standardized file input handling (prevents duplicate dialogs)
+        this.fileInputCleanup = window.FileInputUtils.bindFileInputHandler(
+            this.fileInput,
+            this.handleFiles.bind(this),
+            { accept: 'video/*', multiple: true }
+        );
         
-        // Add more videos button
-        document.getElementById('addMoreBtn').addEventListener('click', () => this.fileInput.click());
+        // Add more videos button - use the standardized handler
+        document.getElementById('addMoreBtn').addEventListener('click', () => {
+            if (this.fileInput.dataset.dialogOpen !== 'true') {
+                this.fileInput.dataset.dialogOpen = 'true';
+                setTimeout(() => this.fileInput.dataset.dialogOpen = 'false', 100);
+                this.fileInput.click();
+            }
+        });
         
         // Convert button
         this.convertBtn.addEventListener('click', this.mergeVideos.bind(this));
@@ -37,26 +44,7 @@ class VideoMerger {
         document.getElementById('downloadBtn').addEventListener('click', this.downloadVideo.bind(this));
     }
 
-    handleDragOver(e) {
-        e.preventDefault();
-        this.uploadArea.classList.add('drag-over');
-    }
-
-    handleDrop(e) {
-        e.preventDefault();
-        this.uploadArea.classList.remove('drag-over');
-        const files = Array.from(e.dataTransfer.files).filter(file => file.type.startsWith('video/'));
-        if (files.length > 0) {
-            this.handleFiles(files);
-        }
-    }
-
-    handleFileSelect(e) {
-        const files = Array.from(e.target.files).filter(file => file.type.startsWith('video/'));
-        if (files.length > 0) {
-            this.handleFiles(files);
-        }
-    }
+    // File handling methods removed - now handled by standardized FileInputUtils
 
     handleFiles(files) {
         files.forEach(file => {

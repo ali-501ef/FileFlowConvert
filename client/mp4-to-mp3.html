@@ -424,25 +424,27 @@
 
     <script src="/js/main.js"></script>
     <script src="/js/advanced-options.js"></script>
-    <!-- MP4 to MP3 Tool - Basic file handler for now -->
+    <!-- MP4 to MP3 Tool - Using standardized file input handler -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const dropZone = document.querySelector('.file-drop-zone');
             const fileInput = document.getElementById('file-input');
             const convertBtn = document.getElementById('convert-btn');
             
-            dropZone.addEventListener('click', () => fileInput.click());
-            
-            fileInput.addEventListener('change', function(e) {
-                const files = Array.from(e.target.files);
-                if (files.length > 0) {
+            // Use standardized file input handler to prevent duplicate dialogs
+            const fileInputCleanup = window.FileInputUtils.bindFileInputHandler(
+                fileInput,
+                function(files) {
+                    // Handle either single file or file array
+                    const fileArray = Array.isArray(files) ? files : [files];
+                if (fileArray.length > 0) {
                     document.getElementById('file-list').classList.remove('hidden');
                     document.getElementById('quality-settings').classList.remove('hidden');
                     document.getElementById('advanced-options-section').classList.remove('hidden');
                     document.getElementById('action-buttons').classList.remove('hidden');
                     
                     const fileCards = document.getElementById('file-cards');
-                    fileCards.innerHTML = files.map(file => `
+                    fileCards.innerHTML = fileArray.map(file => `
                         <div class="file-card">
                             <div class="file-info">
                                 <div class="file-name">${file.name}</div>
@@ -454,12 +456,15 @@
                     
                     convertBtn.disabled = false;
                 }
-            });
+                },
+                { accept: 'video/*' }
+            );
             
             convertBtn.addEventListener('click', function() {
                 alert('Video conversion requires additional setup. Coming soon!');
             });
         });
     </script>
+    <script src="js/utils/fileInput.js"></script>
 </body>
 </html>
