@@ -8,28 +8,42 @@ class AudioConverter {
     }
 
     init() {
-        // Initialize shared components
-        this.uploader = new FileUploader({
-            uploadAreaId: 'uploadArea',
-            fileInputId: 'fileInput',
-            acceptedTypes: ['audio/*'],
-            onFileSelect: this.handleFile.bind(this)
-        });
-
-        this.progress = new ProgressTracker({
-            progressContainerId: 'progressContainer',
-            progressFillId: 'progressFill',
-            progressTextId: 'progressText'
-        });
-
-        this.buttonLoader = new ButtonLoader('convertBtn');
-        this.errorDisplay = new ErrorDisplay('results');
-
-        // Get DOM elements
-        this.convertBtn = document.getElementById('convertBtn');
-        this.downloadBtn = document.getElementById('downloadBtn');
-        this.filePreview = document.getElementById('filePreview');
-        this.results = document.getElementById('results');
+        console.log('AudioConverter: Starting initialization');
+        
+        try {
+            // Initialize shared components
+            this.uploader = new FileUploader({
+                uploadAreaId: 'uploadArea',
+                fileInputId: 'fileInput',
+                acceptedTypes: ['audio/*'],
+                onFileSelect: this.handleFile.bind(this)
+            });
+            console.log('AudioConverter: FileUploader initialized');
+    
+            this.progress = new ProgressTracker({
+                progressContainerId: 'progressContainer',
+                progressFillId: 'progressFill',
+                progressTextId: 'progressText'
+            });
+            console.log('AudioConverter: ProgressTracker initialized');
+    
+            this.buttonLoader = new ButtonLoader('convertBtn');
+            console.log('AudioConverter: ButtonLoader initialized');
+            
+            this.errorDisplay = new ErrorDisplay('results');
+            console.log('AudioConverter: ErrorDisplay initialized');
+    
+            // Get DOM elements
+            this.convertBtn = document.getElementById('convertBtn');
+            this.downloadBtn = document.getElementById('downloadBtn');
+            this.filePreview = document.getElementById('filePreview');
+            this.results = document.getElementById('results');
+            
+            console.log('AudioConverter: All components initialized successfully');
+        } catch (error) {
+            console.error('AudioConverter: Initialization failed:', error);
+            throw error;
+        }
     }
 
     setupEventListeners() {

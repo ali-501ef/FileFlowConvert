@@ -9,30 +9,44 @@ class VideoTrimmer {
     }
 
     init() {
-        // Initialize shared components
-        this.uploader = new FileUploader({
-            uploadAreaId: 'uploadArea',
-            fileInputId: 'fileInput',
-            acceptedTypes: ['video/*'],
-            onFileSelect: this.handleFile.bind(this)
-        });
-
-        this.progress = new ProgressTracker({
-            progressContainerId: 'progressContainer',
-            progressFillId: 'progressFill',
-            progressTextId: 'progressText'
-        });
-
-        this.buttonLoader = new ButtonLoader('convertBtn');
-        this.errorDisplay = new ErrorDisplay('results');
-
-        // Get DOM elements
-        this.convertBtn = document.getElementById('convertBtn');
-        this.downloadBtn = document.getElementById('downloadBtn');
-        this.filePreview = document.getElementById('filePreview');
-        this.videoPreview = document.getElementById('videoPreview');
-        this.videoPlayer = document.getElementById('videoPlayer');
-        this.results = document.getElementById('results');
+        console.log('VideoTrimmer: Starting initialization');
+        
+        try {
+            // Initialize shared components
+            this.uploader = new FileUploader({
+                uploadAreaId: 'uploadArea',
+                fileInputId: 'fileInput',
+                acceptedTypes: ['video/*'],
+                onFileSelect: this.handleFile.bind(this)
+            });
+            console.log('VideoTrimmer: FileUploader initialized');
+    
+            this.progress = new ProgressTracker({
+                progressContainerId: 'progressContainer',
+                progressFillId: 'progressFill',
+                progressTextId: 'progressText'
+            });
+            console.log('VideoTrimmer: ProgressTracker initialized');
+    
+            this.buttonLoader = new ButtonLoader('convertBtn');
+            console.log('VideoTrimmer: ButtonLoader initialized');
+            
+            this.errorDisplay = new ErrorDisplay('results');
+            console.log('VideoTrimmer: ErrorDisplay initialized');
+    
+            // Get DOM elements
+            this.convertBtn = document.getElementById('convertBtn');
+            this.downloadBtn = document.getElementById('downloadBtn');
+            this.filePreview = document.getElementById('filePreview');
+            this.videoPreview = document.getElementById('videoPreview');
+            this.videoPlayer = document.getElementById('videoPlayer');
+            this.results = document.getElementById('results');
+            
+            console.log('VideoTrimmer: All components initialized successfully');
+        } catch (error) {
+            console.error('VideoTrimmer: Initialization failed:', error);
+            throw error;
+        }
     }
 
     setupEventListeners() {

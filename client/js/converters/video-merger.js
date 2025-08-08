@@ -8,31 +8,45 @@ class VideoMerger {
     }
 
     init() {
-        // Initialize shared components
-        this.uploader = new FileUploader({
-            uploadAreaId: 'uploadArea',
-            fileInputId: 'fileInput',
-            acceptedTypes: ['video/*'],
-            multiple: true,
-            onFilesSelect: this.handleFiles.bind(this)
-        });
-
-        this.progress = new ProgressTracker({
-            progressContainerId: 'progressContainer',
-            progressFillId: 'progressFill',
-            progressTextId: 'progressText'
-        });
-
-        this.buttonLoader = new ButtonLoader('convertBtn');
-        this.errorDisplay = new ErrorDisplay('results');
-
-        // Get DOM elements
-        this.convertBtn = document.getElementById('convertBtn');
-        this.downloadBtn = document.getElementById('downloadBtn');
-        this.videoList = document.getElementById('videoList');
-        this.videoItems = document.getElementById('videoItems');
-        this.addMoreBtn = document.getElementById('addMoreBtn');
-        this.results = document.getElementById('results');
+        console.log('VideoMerger: Starting initialization');
+        
+        try {
+            // Initialize shared components
+            this.uploader = new FileUploader({
+                uploadAreaId: 'uploadArea',
+                fileInputId: 'fileInput',
+                acceptedTypes: ['video/*'],
+                multiple: true,
+                onFilesSelect: this.handleFiles.bind(this)
+            });
+            console.log('VideoMerger: FileUploader initialized');
+    
+            this.progress = new ProgressTracker({
+                progressContainerId: 'progressContainer',
+                progressFillId: 'progressFill',
+                progressTextId: 'progressText'
+            });
+            console.log('VideoMerger: ProgressTracker initialized');
+    
+            this.buttonLoader = new ButtonLoader('convertBtn');
+            console.log('VideoMerger: ButtonLoader initialized');
+            
+            this.errorDisplay = new ErrorDisplay('results');
+            console.log('VideoMerger: ErrorDisplay initialized');
+    
+            // Get DOM elements
+            this.convertBtn = document.getElementById('convertBtn');
+            this.downloadBtn = document.getElementById('downloadBtn');
+            this.videoList = document.getElementById('videoList');
+            this.videoItems = document.getElementById('videoItems');
+            this.addMoreBtn = document.getElementById('addMoreBtn');
+            this.results = document.getElementById('results');
+            
+            console.log('VideoMerger: All components initialized successfully');
+        } catch (error) {
+            console.error('VideoMerger: Initialization failed:', error);
+            throw error;
+        }
     }
 
     setupEventListeners() {

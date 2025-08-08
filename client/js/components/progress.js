@@ -23,8 +23,14 @@ class ProgressTracker {
         this.progressStage = this.config.showStages ? document.getElementById(this.config.progressStageId) : null;
         
         if (!this.progressContainer || !this.progressFill || !this.progressText) {
+            console.error('ProgressTracker: Required elements not found', {
+                progressContainer: this.progressContainer,
+                progressFill: this.progressFill,
+                progressText: this.progressText
+            });
             throw new Error('Progress elements not found');
         }
+        console.log('ProgressTracker: Initialized successfully');
     }
     
     show(percent = 0, stage = null) {
@@ -77,8 +83,15 @@ class ButtonLoader {
         this.btnLoader = this.button?.querySelector('.btn-loader');
         
         if (!this.button || !this.btnText || !this.btnLoader) {
+            console.error('ButtonLoader: Required elements not found', {
+                buttonId: buttonId,
+                button: this.button,
+                btnText: this.btnText,
+                btnLoader: this.btnLoader
+            });
             throw new Error('Button or loading elements not found');
         }
+        console.log('ButtonLoader: Initialized successfully for button:', buttonId);
     }
     
     showLoading() {
@@ -107,8 +120,10 @@ class ErrorDisplay {
         this.container = document.getElementById(containerId);
         
         if (!this.container) {
+            console.error('ErrorDisplay: Container not found:', containerId);
             throw new Error('Error container not found');
         }
+        console.log('ErrorDisplay: Initialized successfully for container:', containerId);
     }
     
     showError(message) {

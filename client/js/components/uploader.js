@@ -4,6 +4,7 @@
  */
 class FileUploader {
     constructor(config) {
+        console.log('FileUploader: Initializing with config:', config);
         this.config = {
             uploadAreaId: 'uploadArea',
             fileInputId: 'fileInput',
@@ -16,17 +17,41 @@ class FileUploader {
         this.currentFile = null;
         this.currentFiles = [];
         
+        // Only call init, setupEventListeners will be called from init
         this.init();
-        this.setupEventListeners();
     }
     
     init() {
-        this.uploadArea = document.getElementById(this.config.uploadAreaId);
-        this.fileInput = document.getElementById(this.config.fileInputId);
+        // Retry initialization if DOM elements not found
+        const maxRetries = 10;
+        let retries = 0;
         
-        if (!this.uploadArea || !this.fileInput) {
-            throw new Error('Upload area or file input not found');
-        }
+        const tryInit = () => {
+            this.uploadArea = document.getElementById(this.config.uploadAreaId);
+            this.fileInput = document.getElementById(this.config.fileInputId);
+            
+            if (!this.uploadArea || !this.fileInput) {
+                console.log(`FileUploader: Retry ${retries + 1}/${maxRetries} - Elements not found yet`);
+                retries++;
+                if (retries < maxRetries) {
+                    setTimeout(tryInit, 100);
+                    return;
+                } else {
+                    console.error('FileUploader: Upload elements not found after retries', {
+                        uploadAreaId: this.config.uploadAreaId,
+                        fileInputId: this.config.fileInputId,
+                        uploadArea: this.uploadArea,
+                        fileInput: this.fileInput
+                    });
+                    throw new Error(`Upload area (${this.config.uploadAreaId}) or file input (${this.config.fileInputId}) not found`);
+                }
+            } else {
+                console.log('FileUploader: Elements found successfully');
+                this.setupEventListeners();
+            }
+        };
+        
+        tryInit();
     }
     
     setupEventListeners() {

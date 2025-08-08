@@ -8,28 +8,42 @@ class VideoCompressor {
     }
 
     init() {
-        // Initialize shared components
-        this.uploader = new FileUploader({
-            uploadAreaId: 'uploadArea',
-            fileInputId: 'fileInput',
-            acceptedTypes: ['video/*'],
-            onFileSelect: this.handleFile.bind(this)
-        });
-
-        this.progress = new ProgressTracker({
-            progressContainerId: 'progressContainer',
-            progressFillId: 'progressFill',
-            progressTextId: 'progressText'
-        });
-
-        this.buttonLoader = new ButtonLoader('convertBtn');
-        this.errorDisplay = new ErrorDisplay('results');
-
-        // Get DOM elements
-        this.convertBtn = document.getElementById('convertBtn');
-        this.downloadBtn = document.getElementById('downloadBtn');
-        this.filePreview = document.getElementById('filePreview');
-        this.results = document.getElementById('results');
+        console.log('VideoCompressor: Starting initialization');
+        
+        try {
+            // Initialize shared components
+            this.uploader = new FileUploader({
+                uploadAreaId: 'uploadArea',
+                fileInputId: 'fileInput',
+                acceptedTypes: ['video/*'],
+                onFileSelect: this.handleFile.bind(this)
+            });
+            console.log('VideoCompressor: FileUploader initialized');
+    
+            this.progress = new ProgressTracker({
+                progressContainerId: 'progressContainer',
+                progressFillId: 'progressFill',
+                progressTextId: 'progressText'
+            });
+            console.log('VideoCompressor: ProgressTracker initialized');
+    
+            this.buttonLoader = new ButtonLoader('convertBtn');
+            console.log('VideoCompressor: ButtonLoader initialized');
+            
+            this.errorDisplay = new ErrorDisplay('results');
+            console.log('VideoCompressor: ErrorDisplay initialized');
+    
+            // Get DOM elements
+            this.convertBtn = document.getElementById('convertBtn');
+            this.downloadBtn = document.getElementById('downloadBtn');
+            this.filePreview = document.getElementById('filePreview');
+            this.results = document.getElementById('results');
+            
+            console.log('VideoCompressor: All components initialized successfully');
+        } catch (error) {
+            console.error('VideoCompressor: Initialization failed:', error);
+            throw error;
+        }
     }
 
     setupEventListeners() {
