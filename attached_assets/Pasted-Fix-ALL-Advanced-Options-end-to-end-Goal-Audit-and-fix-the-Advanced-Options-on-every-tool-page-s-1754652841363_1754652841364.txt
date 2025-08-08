@@ -1,0 +1,98 @@
+Fix ALL Advanced Options (end-to-end)
+
+Goal: Audit and fix the Advanced Options on every tool page so each control is correctly bound, validated, sent to the backend, processed, and reflected in the output. Keep the current UI style; do not redesign.
+
+Scope (pages & options to verify):
+
+PDF to Word: Output format, Conversion mode, Include images, OCR, Preserve fonts/formatting.
+
+PDF Rotate: Default rotation, Auto-detect page orientation, Preserve aspect ratio.
+
+PDF Watermark: Apply to pages (range), Behind text, Repeat pattern.
+
+PDF Merge/Split/Compress: Any exposed toggles (ordering, compression level, etc.).
+
+Audio Converter: Target format, Bitrate, Sample rate, Channels.
+
+Video Trim: Start/End (or Duration), Resolution (if present), FPS (if present).
+
+GIF Maker: Start time, Duration, FPS, Quality, Width, Loop, Boomerang.
+
+Video Merger: Output format, Quality, Resolution, Add fade transitions, Normalize audio.
+
+Image tools (HEIC→JPG, JPG→PNG, etc.): Any option shown (e.g., transparency handling), if present.
+
+Do this in one pass:
+
+Wire-up audit: For each control, confirm:
+
+It’s bound to state and updates on change.
+
+The value is included in the request payload.
+
+The server receives the correct param name + type.
+
+The backend maps that param to the correct processor/CLI (ffmpeg, ImageMagick, pdfcpu/ghostscript, etc.).
+
+Normalize a single param map: Create config/advancedOptionMap.json mapping UI keys → backend args for each tool (with allowed values, defaults, and incompatible combos). Use it everywhere for consistent naming.
+
+Validation & capability gating:
+
+Disable options that are incompatible with the uploaded file/target format (don’t send them).
+
+Prevent submit until: a file is present + all required options are valid.
+
+Reset options to sane defaults after each completed job.
+
+State persistence (single page): If a job fails, keep the chosen options so the user can retry without re-selecting.
+
+Progress & errors (inline only):
+
+Keep progress/status inside the conversion area (no toast popups).
+
+Show clear inline error if a backend call rejects an option, including which param failed.
+
+Multi-file & edge-case testing:
+
+Test multiple uploads where supported (e.g., PDF Merge, JPG→PDF).
+
+Test unusual file names, large files, and uncommon formats.
+
+Output verification logging:
+
+Log the exact option state and backend args for each run (for debugging).
+
+When visually verifiable (rotation, watermark, trim), open and confirm output matches expectations.
+
+Automated test harness:
+
+Add /tests/advanced-options/ with small fixtures and run an integration test per tool.
+
+Log failures with the tool name + option key + backend arg.
+
+Accessibility & tiny CSS fixes:
+
+Ensure every control has a <label for> connection.
+
+Vertically align labels and controls with flex align-items:center (no layout changes).
+
+Guardrails:
+
+If an option is not implemented on the backend, hide or disable it and mark it with // TODO: implement backend.
+
+Do not leave clickable but non-functional controls.
+
+Acceptance criteria (must pass):
+
+Every option listed above is selectable, submitted, acted on by the backend, and verifiable in output.
+
+Unsupported options are disabled/hidden based on file/format.
+
+Conversion buttons remain disabled until a valid file + options are ready.
+
+Inline progress + inline errors only (no popups).
+
+All tests in /tests/advanced-options/ pass locally in the Replit console.
+
+Provide a short report summarizing any options you had to disable because the backend doesn’t support them yet.
+

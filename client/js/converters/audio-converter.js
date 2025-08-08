@@ -2,6 +2,14 @@ class AudioConverter {
     constructor() {
         this.init();
         this.setupEventListeners();
+        
+        // Initialize Advanced Options Manager
+        this.optionsManager = window.createAdvancedOptionsManager('audio-converter');
+        
+        // Link with the legacy advanced options handler
+        if (window.advancedOptionsHandler) {
+            window.advancedOptionsHandler.setOptionsManager(this.optionsManager);
+        }
     }
 
     init() {
@@ -99,9 +107,14 @@ class AudioConverter {
 
         this.showLoading(true);
         this.results.style.display = 'none';
+        
+        // Clear any previous validation errors
+        if (this.optionsManager) {
+            this.optionsManager.hideValidationErrors();
+        }
 
         try {
-            // Get conversion settings
+            // Get conversion settings with validation
             const settings = this.getConversionSettings();
             
             // Perform the conversion using Web Audio API
@@ -118,6 +131,43 @@ class AudioConverter {
     }
 
     getConversionSettings() {
+        // Use the options manager to collect and validate settings
+        if (this.optionsManager) {
+            const validation = this.optionsManager.validateOptions();
+            if (!validation.isValid) {
+                this.optionsManager.showValidationErrors(validation.errors);
+                throw new Error(`Invalid options: ${validation.errors.join(', ')}`);
+            }
+            const options = this.optionsManager.collectOptions();
+            
+            // Process quality to bitrate mapping
+            let bitrate;
+            switch (options.audioQuality) {
+                case 'high':
+                    bitrate = 320;
+                    break;
+                case 'medium':
+                    bitrate = 192;
+                    break;
+                case 'standard':
+                    bitrate = 128;
+                    break;
+                case 'custom':
+                    bitrate = parseInt(options.customBitrate);
+                    break;
+                default:
+                    bitrate = 192;
+            }
+            
+            return {
+                format: options.outputFormat,
+                bitrate,
+                sampleRate: options.sampleRate === 'keep' ? null : parseInt(options.sampleRate),
+                preserveMetadata: options.preserveMetadata
+            };
+        }
+        
+        // Fallback to manual collection if manager not available
         const format = this.outputFormat.value;
         const quality = this.audioQuality.value;
         const sampleRate = document.getElementById('sampleRate').value;

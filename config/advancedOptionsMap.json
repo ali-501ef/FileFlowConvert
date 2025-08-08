@@ -1,0 +1,335 @@
+{
+  "pdf-to-word": {
+    "endpoint": "/api/pdf-to-word/convert",
+    "defaultOptions": {
+      "outputFormat": "docx",
+      "conversionMode": "flowing",
+      "includeImages": true,
+      "recognizeText": true,
+      "preserveFormatting": true
+    },
+    "validation": {
+      "outputFormat": {"type": "select", "options": ["docx", "doc", "rtf"]},
+      "conversionMode": {"type": "select", "options": ["layout", "flowing", "mixed"]},
+      "includeImages": {"type": "boolean"},
+      "recognizeText": {"type": "boolean"},
+      "preserveFormatting": {"type": "boolean"}
+    },
+    "parameterMapping": {
+      "outputFormat": "output_format",
+      "conversionMode": "conversion_mode",
+      "includeImages": "include_images",
+      "recognizeText": "recognize_text",
+      "preserveFormatting": "preserve_formatting"
+    }
+  },
+  "pdf-rotate": {
+    "endpoint": "/api/pdf-rotate/convert",
+    "defaultOptions": {
+      "rotationAngle": "90",
+      "autoDetect": false,
+      "preserveAspectRatio": true
+    },
+    "validation": {
+      "rotationAngle": {"type": "select", "options": ["90", "180", "270"]},
+      "autoDetect": {"type": "boolean"},
+      "preserveAspectRatio": {"type": "boolean"}
+    },
+    "parameterMapping": {
+      "rotationAngle": "rotation_angle",
+      "autoDetect": "auto_detect",
+      "preserveAspectRatio": "preserve_aspect_ratio"
+    }
+  },
+  "pdf-watermark": {
+    "endpoint": "/api/pdf-watermark/convert",
+    "defaultOptions": {
+      "watermarkText": "",
+      "watermarkOpacity": "50",
+      "watermarkPosition": "center",
+      "watermarkSize": "medium",
+      "watermarkColor": "#000000",
+      "watermarkRotation": "0"
+    },
+    "validation": {
+      "watermarkText": {"type": "text", "required": true},
+      "watermarkOpacity": {"type": "range", "min": 0, "max": 100},
+      "watermarkPosition": {"type": "select", "options": ["top-left", "top-center", "top-right", "center-left", "center", "center-right", "bottom-left", "bottom-center", "bottom-right"]},
+      "watermarkSize": {"type": "select", "options": ["small", "medium", "large"]},
+      "watermarkColor": {"type": "color"},
+      "watermarkRotation": {"type": "range", "min": -180, "max": 180}
+    },
+    "parameterMapping": {
+      "watermarkText": "watermark_text",
+      "watermarkOpacity": "watermark_opacity",
+      "watermarkPosition": "watermark_position",
+      "watermarkSize": "watermark_size",
+      "watermarkColor": "watermark_color",
+      "watermarkRotation": "watermark_rotation"
+    }
+  },
+  "pdf-compress": {
+    "endpoint": "/api/pdf-compress/convert",
+    "defaultOptions": {
+      "compressionLevel": "medium",
+      "imageQuality": "high",
+      "colorSpaceOptimization": true,
+      "removeMetadata": false,
+      "optimizeFonts": true
+    },
+    "validation": {
+      "compressionLevel": {"type": "select", "options": ["low", "medium", "high", "maximum"]},
+      "imageQuality": {"type": "select", "options": ["low", "medium", "high"]},
+      "colorSpaceOptimization": {"type": "boolean"},
+      "removeMetadata": {"type": "boolean"},
+      "optimizeFonts": {"type": "boolean"}
+    },
+    "parameterMapping": {
+      "compressionLevel": "compression_level",
+      "imageQuality": "image_quality",
+      "colorSpaceOptimization": "color_space_optimization",
+      "removeMetadata": "remove_metadata",
+      "optimizeFonts": "optimize_fonts"
+    }
+  },
+  "pdf-merge": {
+    "endpoint": "/api/pdf-merge/convert",
+    "defaultOptions": {
+      "bookmarkHandling": "preserve",
+      "pageNumbering": false,
+      "removeBlankPages": false,
+      "optimizeOutput": true
+    },
+    "validation": {
+      "bookmarkHandling": {"type": "select", "options": ["preserve", "merge", "remove"]},
+      "pageNumbering": {"type": "boolean"},
+      "removeBlankPages": {"type": "boolean"},
+      "optimizeOutput": {"type": "boolean"}
+    },
+    "parameterMapping": {
+      "bookmarkHandling": "bookmark_handling",
+      "pageNumbering": "page_numbering",
+      "removeBlankPages": "remove_blank_pages",
+      "optimizeOutput": "optimize_output"
+    }
+  },
+  "pdf-split": {
+    "endpoint": "/api/pdf-split/convert",
+    "defaultOptions": {
+      "splitMode": "pages",
+      "pagesPerSplit": "1",
+      "preserveBookmarks": true,
+      "includePageNumbers": false
+    },
+    "validation": {
+      "splitMode": {"type": "select", "options": ["pages", "range", "bookmark"]},
+      "pagesPerSplit": {"type": "number", "min": 1, "max": 100},
+      "preserveBookmarks": {"type": "boolean"},
+      "includePageNumbers": {"type": "boolean"}
+    },
+    "parameterMapping": {
+      "splitMode": "split_mode",
+      "pagesPerSplit": "pages_per_split",
+      "preserveBookmarks": "preserve_bookmarks",
+      "includePageNumbers": "include_page_numbers"
+    }
+  },
+  "audio-converter": {
+    "endpoint": "/api/audio-converter/convert",
+    "defaultOptions": {
+      "outputFormat": "mp3",
+      "audioQuality": "medium",
+      "customBitrate": "192",
+      "sampleRate": "keep",
+      "preserveMetadata": true
+    },
+    "validation": {
+      "outputFormat": {"type": "select", "options": ["mp3", "wav", "flac", "aac", "ogg"]},
+      "audioQuality": {"type": "select", "options": ["standard", "medium", "high", "custom"]},
+      "customBitrate": {"type": "number", "min": 64, "max": 320},
+      "sampleRate": {"type": "select", "options": ["keep", "44100", "48000", "96000"]},
+      "preserveMetadata": {"type": "boolean"}
+    },
+    "parameterMapping": {
+      "outputFormat": "output_format",
+      "audioQuality": "audio_quality",
+      "customBitrate": "custom_bitrate",
+      "sampleRate": "sample_rate",
+      "preserveMetadata": "preserve_metadata"
+    }
+  },
+  "video-trim": {
+    "endpoint": "/api/video-trim/convert",
+    "defaultOptions": {
+      "startTime": "00:00:00",
+      "endTime": "00:01:00",
+      "outputFormat": "mp4",
+      "videoQuality": "high",
+      "preserveAudio": true,
+      "fadeInOut": false
+    },
+    "validation": {
+      "startTime": {"type": "time"},
+      "endTime": {"type": "time"},
+      "outputFormat": {"type": "select", "options": ["mp4", "avi", "mov", "webm"]},
+      "videoQuality": {"type": "select", "options": ["low", "medium", "high"]},
+      "preserveAudio": {"type": "boolean"},
+      "fadeInOut": {"type": "boolean"}
+    },
+    "parameterMapping": {
+      "startTime": "start_time",
+      "endTime": "end_time",
+      "outputFormat": "output_format",
+      "videoQuality": "video_quality",
+      "preserveAudio": "preserve_audio",
+      "fadeInOut": "fade_in_out"
+    }
+  },
+  "gif-maker": {
+    "endpoint": "/api/gif-maker/convert",
+    "defaultOptions": {
+      "frameRate": "10",
+      "startTime": "00:00:00",
+      "duration": "3",
+      "resolution": "medium",
+      "loop": true,
+      "optimize": true
+    },
+    "validation": {
+      "frameRate": {"type": "number", "min": 1, "max": 30},
+      "startTime": {"type": "time"},
+      "duration": {"type": "number", "min": 1, "max": 30},
+      "resolution": {"type": "select", "options": ["low", "medium", "high"]},
+      "loop": {"type": "boolean"},
+      "optimize": {"type": "boolean"}
+    },
+    "parameterMapping": {
+      "frameRate": "frame_rate",
+      "startTime": "start_time",
+      "duration": "duration",
+      "resolution": "resolution",
+      "loop": "loop",
+      "optimize": "optimize"
+    }
+  },
+  "video-merger": {
+    "endpoint": "/api/video-merger/convert",
+    "defaultOptions": {
+      "outputFormat": "mp4",
+      "videoQuality": "high",
+      "audioHandling": "merge",
+      "transitionEffect": "none",
+      "includeAudio": true
+    },
+    "validation": {
+      "outputFormat": {"type": "select", "options": ["mp4", "avi", "mov", "webm"]},
+      "videoQuality": {"type": "select", "options": ["low", "medium", "high"]},
+      "audioHandling": {"type": "select", "options": ["merge", "first", "last", "remove"]},
+      "transitionEffect": {"type": "select", "options": ["none", "fade", "crossfade"]},
+      "includeAudio": {"type": "boolean"}
+    },
+    "parameterMapping": {
+      "outputFormat": "output_format",
+      "videoQuality": "video_quality",
+      "audioHandling": "audio_handling",
+      "transitionEffect": "transition_effect",
+      "includeAudio": "include_audio"
+    }
+  },
+  "video-compress": {
+    "endpoint": "/api/video-compress/convert",
+    "defaultOptions": {
+      "compressionLevel": "medium",
+      "videoQuality": "medium",
+      "resolution": "keep",
+      "frameRate": "keep",
+      "audioBitrate": "128"
+    },
+    "validation": {
+      "compressionLevel": {"type": "select", "options": ["low", "medium", "high", "maximum"]},
+      "videoQuality": {"type": "select", "options": ["low", "medium", "high"]},
+      "resolution": {"type": "select", "options": ["keep", "480p", "720p", "1080p"]},
+      "frameRate": {"type": "select", "options": ["keep", "24", "30", "60"]},
+      "audioBitrate": {"type": "select", "options": ["64", "128", "192", "256"]}
+    },
+    "parameterMapping": {
+      "compressionLevel": "compression_level",
+      "videoQuality": "video_quality",
+      "resolution": "resolution",
+      "frameRate": "frame_rate",
+      "audioBitrate": "audio_bitrate"
+    }
+  },
+  "jpg-to-pdf": {
+    "endpoint": "/api/convert/jpg-to-pdf",
+    "defaultOptions": {
+      "pageSize": "A4",
+      "orientation": "portrait",
+      "margins": "36",
+      "fit": "contain",
+      "dpi": "300",
+      "bgColor": "#ffffff",
+      "order": "uploaded"
+    },
+    "validation": {
+      "pageSize": {"type": "select", "options": ["A4", "Letter", "Legal", "auto"]},
+      "orientation": {"type": "select", "options": ["portrait", "landscape"]},
+      "margins": {"type": "number", "min": 0, "max": 200},
+      "fit": {"type": "select", "options": ["contain", "cover"]},
+      "dpi": {"type": "number", "min": 72, "max": 600},
+      "bgColor": {"type": "color"},
+      "order": {"type": "select", "options": ["uploaded", "filename"]}
+    },
+    "parameterMapping": {
+      "pageSize": "pageSize",
+      "orientation": "orientation", 
+      "margins": "margins",
+      "fit": "fit",
+      "dpi": "dpi",
+      "bgColor": "bgColor",
+      "order": "order"
+    }
+  },
+  "heic-to-jpg": {
+    "endpoint": "/api/heic-to-jpg/convert",
+    "defaultOptions": {
+      "quality": "high",
+      "preserveMetadata": true,
+      "resizeMode": "keep",
+      "outputResolution": "original"
+    },
+    "validation": {
+      "quality": {"type": "select", "options": ["low", "medium", "high", "maximum"]},
+      "preserveMetadata": {"type": "boolean"},
+      "resizeMode": {"type": "select", "options": ["keep", "resize", "fit"]},
+      "outputResolution": {"type": "select", "options": ["original", "1080p", "720p", "480p"]}
+    },
+    "parameterMapping": {
+      "quality": "quality",
+      "preserveMetadata": "preserve_metadata",
+      "resizeMode": "resize_mode",
+      "outputResolution": "output_resolution"
+    }
+  },
+  "png-to-jpg": {
+    "endpoint": "/api/png-to-jpg/convert",
+    "defaultOptions": {
+      "quality": "high",
+      "backgroundColor": "#ffffff",
+      "preserveTransparency": false,
+      "compressionLevel": "medium"
+    },
+    "validation": {
+      "quality": {"type": "select", "options": ["low", "medium", "high", "maximum"]},
+      "backgroundColor": {"type": "color"},
+      "preserveTransparency": {"type": "boolean"},
+      "compressionLevel": {"type": "select", "options": ["low", "medium", "high"]}
+    },
+    "parameterMapping": {
+      "quality": "quality",
+      "backgroundColor": "background_color",
+      "preserveTransparency": "preserve_transparency",
+      "compressionLevel": "compression_level"
+    }
+  }
+}

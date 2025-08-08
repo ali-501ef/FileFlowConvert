@@ -1,6 +1,7 @@
 /**
  * PDF Rotate Tool
  * Enhanced with functional advanced options and preview
+ * Now integrated with Universal Advanced Options Manager
  */
 
 class PDFRotate {
@@ -8,6 +9,14 @@ class PDFRotate {
         this.init();
         this.setupEventListeners();
         this.pageRotations = new Map(); // Track individual page rotations
+        
+        // Initialize Advanced Options Manager
+        this.optionsManager = window.createAdvancedOptionsManager('pdf-rotate');
+        
+        // Link with the legacy advanced options handler
+        if (window.advancedOptionsHandler) {
+            window.advancedOptionsHandler.setOptionsManager(this.optionsManager);
+        }
     }
 
     init() {
@@ -220,6 +229,11 @@ class PDFRotate {
         this.showLoading(true);
         this.showProgress(0);
         this.results.style.display = 'none';
+        
+        // Clear any previous validation errors
+        if (this.optionsManager) {
+            this.optionsManager.hideValidationErrors();
+        }
 
         try {
             const settings = this.getRotationSettings();
@@ -258,6 +272,22 @@ class PDFRotate {
     }
 
     getRotationSettings() {
+        // Use the options manager to collect and validate settings
+        if (this.optionsManager) {
+            const validation = this.optionsManager.validateOptions();
+            if (!validation.isValid) {
+                this.optionsManager.showValidationErrors(validation.errors);
+                throw new Error(`Invalid options: ${validation.errors.join(', ')}`);
+            }
+            const options = this.optionsManager.collectOptions();
+            // Add page-specific rotations to the settings
+            return {
+                ...options,
+                pageRotations: new Map(this.pageRotations)
+            };
+        }
+        
+        // Fallback to manual collection if manager not available
         return {
             preserveAspectRatio: document.getElementById('preserveAspectRatio')?.checked || true,
             autoDetect: document.getElementById('autoDetect')?.checked || false,

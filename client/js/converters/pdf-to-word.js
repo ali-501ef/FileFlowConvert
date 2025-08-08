@@ -1,12 +1,20 @@
 /**
  * PDF to Word Converter
  * Advanced PDF text extraction with proper Word document generation
+ * Now integrated with Universal Advanced Options Manager
  */
 
 class PDFToWordConverter {
     constructor() {
         this.init();
         this.setupEventListeners();
+        // Initialize Advanced Options Manager
+        this.optionsManager = window.createAdvancedOptionsManager('pdf-to-word');
+        
+        // Link with the legacy advanced options handler
+        if (window.advancedOptionsHandler) {
+            window.advancedOptionsHandler.setOptionsManager(this.optionsManager);
+        }
     }
 
     init() {
@@ -188,9 +196,14 @@ class PDFToWordConverter {
         this.showLoading(true);
         this.showProgress(0);
         this.results.style.display = 'none';
+        
+        // Clear any previous validation errors
+        if (this.optionsManager) {
+            this.optionsManager.hideValidationErrors();
+        }
 
         try {
-            // Get conversion settings
+            // Get conversion settings with validation
             const settings = this.getConversionSettings();
             
             // Enhanced conversion process with proper stages
@@ -225,6 +238,17 @@ class PDFToWordConverter {
     }
 
     getConversionSettings() {
+        // Use the options manager to collect and validate settings
+        if (this.optionsManager) {
+            const validation = this.optionsManager.validateOptions();
+            if (!validation.isValid) {
+                this.optionsManager.showValidationErrors(validation.errors);
+                throw new Error(`Invalid options: ${validation.errors.join(', ')}`);
+            }
+            return this.optionsManager.collectOptions();
+        }
+        
+        // Fallback to manual collection if manager not available
         return {
             outputFormat: document.getElementById('outputFormat')?.value || 'docx',
             conversionMode: document.getElementById('conversionMode')?.value || 'flowing',
