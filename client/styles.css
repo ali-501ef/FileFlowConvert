@@ -4978,16 +4978,17 @@ body {
 }
 
 .benefit-icon {
-    width: 64px;
-    height: 64px;
+    width: 72px;
+    height: 72px;
     background: linear-gradient(135deg, var(--primary), #3b82f6);
     border-radius: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
-    margin: 0 auto 1.5rem auto;
-    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.2);
+    margin: 0 auto 1.8rem auto;
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.25);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .benefit-title {
@@ -5428,20 +5429,29 @@ body {
 
 .premium-benefits-grid {
     display: grid;
-    gap: 2rem;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    margin-top: 2rem;
+    gap: 2.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    margin-top: 3rem;
+    max-width: 1100px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .premium-benefit-card {
     background: rgba(255, 255, 255, 0.5);
     backdrop-filter: blur(12px);
-    border-radius: 16px;
-    padding: 2rem;
+    border-radius: 20px;
+    padding: 2.5rem 2rem 2rem 2rem;
     border: 1px solid rgba(255, 255, 255, 0.25);
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.02), 
                 inset 0 1px 0 rgba(255, 255, 255, 0.3);
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    text-align: center;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
 }
 
 .premium-benefit-card:hover {
@@ -5625,9 +5635,18 @@ body {
 .premium-benefit-title {
     color: var(--foreground);
     font-weight: 700;
-    font-size: 1.25rem;
-    margin: 1rem 0 0.5rem 0;
-    line-height: 1.3;
+    font-size: 1.35rem;
+    margin: 0 0 1rem 0;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+}
+
+.premium-benefit-description {
+    color: rgba(75, 85, 99, 0.8);
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin: 0;
+    font-weight: 500;
 }
 
 .premium-benefit-description {
@@ -5667,8 +5686,9 @@ body {
 }
 
 .premium-benefit-card:hover .benefit-icon {
-    transform: scale(1.1) rotateZ(5deg);
+    transform: scale(1.05) translateY(-2px);
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 8px 25px rgba(99, 102, 241, 0.35);
 }
 
 /* Responsive typography improvements */
@@ -5726,6 +5746,23 @@ body {
         padding: 2.5rem 1.5rem;
         border-radius: 20px;
         margin: 3rem 0;
+    }
+    
+    .premium-benefits-grid {
+        gap: 1.8rem;
+        margin-top: 2rem;
+        grid-template-columns: 1fr;
+    }
+    
+    .premium-benefit-card {
+        min-height: 180px;
+        padding: 2rem 1.5rem 1.5rem 1.5rem;
+    }
+    
+    .benefit-icon {
+        width: 60px;
+        height: 60px;
+        margin-bottom: 1.5rem;
     }
     
     .premium-title {
