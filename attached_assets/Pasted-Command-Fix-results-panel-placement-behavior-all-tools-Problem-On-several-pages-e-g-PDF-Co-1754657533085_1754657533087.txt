@@ -1,0 +1,56 @@
+Command: Fix results panel placement & behavior (all tools)
+
+Problem: On several pages (e.g., PDF Compress, PDF Split, PDF Rotate, PDF to Word, PDF Watermark, MP4 to MP3, Audio Converter, Video Compress, GIF Maker, Video Trim, Video Merger) the results/download panel renders below informational sections (“Why …”), pushing it out of view.
+
+Goal: For every tool page, the results panel must appear immediately under the upload area / primary action button and above any explanatory/SEO sections. Keep current styling; only fix structure/placement/visibility.
+
+Do:
+
+DOM placement
+
+Ensure each page has a single results container (e.g., #resultPanel or page-specific equivalent).
+
+Programmatically insert (or render) this container right after the main upload widget wrapper (dropzone) and before the informational section.
+
+Do not duplicate nodes; reuse the same container per page.
+
+Visibility & lifecycle
+
+Results container is hidden by default.
+
+After a successful job, populate, show, and scroll into view (smooth).
+
+On new file selection/start of a new job, clear previous results and hide until the new job completes.
+
+Consistency
+
+Use the same markup blocks and classes for: summary stats (size before/after, reduction), per-file links (where applicable), and main Download button.
+
+Respect ad slots and page gutters; do not move or overlap existing ad placeholders.
+
+Responsive
+
+Ensure the results container width follows the main content container.
+
+Cards/rows wrap cleanly on small viewports; no horizontal scroll.
+
+Regression guard
+
+Do not change copy, colors, or SEO sections—only move the results container.
+
+Keep IDs/classes stable so existing CSS applies.
+
+Acceptance criteria (for each page above):
+
+After conversion, the results/download panel shows right under the uploader/action button without needing to scroll past “Why …” text.
+
+Starting a new job hides the old results until the new job finishes.
+
+No duplicate results blocks; no layout shift of ad spaces.
+
+Mobile/desktop both render cleanly.
+
+Please implement and confirm with short before/after screenshots for at least:
+
+PDF Compress, PDF Split, Video Compress, and GIF Maker.
+

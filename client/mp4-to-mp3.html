@@ -209,6 +209,27 @@
                     <div class="btn-loader" style="display: none;"></div>
                 </button>
 
+                <div class="progress-container" id="progressContainer" style="display: none;">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="progress-text" id="progressText">0%</div>
+                </div>
+
+                <div class="results" id="results" style="display: none;">
+                    <h3>Extraction Complete</h3>
+                    <div class="result-actions">
+                        <button class="download-btn" id="downloadBtn">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7,10 12,15 17,10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                            Download Audio File
+                        </button>
+                    </div>
+                </div>
+
                 <!-- Tool Information Section -->
                 <div class="tool-info-section">
                     <div class="info-grid">
@@ -250,26 +271,6 @@
                     </div>
                 </div>
 
-                <div class="progress-container" id="progressContainer" style="display: none;">
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="progressFill"></div>
-                    </div>
-                    <div class="progress-text" id="progressText">0%</div>
-                </div>
-
-                <div class="results" id="results" style="display: none;">
-                    <h3>Extraction Complete</h3>
-                    <div class="result-actions">
-                        <button class="download-btn" id="downloadBtn">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                <polyline points="7,10 12,15 17,10"></polyline>
-                                <line x1="12" y1="15" x2="12" y2="3"></line>
-                            </svg>
-                            Download Audio File
-                        </button>
-                    </div>
-                </div>
             </div>
         </main>
 
@@ -279,187 +280,5 @@
         <script src="js/converters/mp4-to-mp3.js"></script>
     </body>
     </html>
-
-                    <!-- Progress Section -->
-                    <div id="progress-section" class="progress-section hidden">
-                        <div class="progress-header">
-                            <span class="progress-label">Converting video to audio...</span>
-                            <span id="progress-text" class="progress-text" data-testid="text-progress">0%</span>
-                        </div>
-                        <div class="progress-bar-container">
-                            <div id="progress-bar" class="progress-bar" data-testid="progress-bar" style="width: 0%"></div>
-                        </div>
-                        <div id="ffmpeg-status" class="ffmpeg-status" data-testid="text-ffmpeg-status">
-                            Initializing conversion engine...
-                        </div>
-                    </div>
-
-                    <!-- Action Buttons -->
-                    <div id="action-buttons" class="action-buttons hidden">
-                        <button id="convert-btn" class="btn btn-primary" data-testid="button-convert">
-                            Convert to MP3
-                        </button>
-                        <button id="clear-btn" class="btn btn-secondary" data-testid="button-clear">
-                            Clear All
-                        </button>
-                    </div>
-
-                    <!-- Download Section -->
-                    <div id="download-section" class="download-section hidden">
-                        <div class="success-message">
-                            <div class="success-header">
-                                <svg class="success-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                                <h3 class="success-title">Conversion Complete!</h3>
-                            </div>
-                            <p class="success-text">Your video files have been successfully converted to MP3.</p>
-                            <div id="download-links" class="download-links" data-testid="download-links">
-                                <!-- Download links will be inserted here -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Tool Information -->
-                <div class="tool-info-section">
-                    <h3 class="info-title">How it works</h3>
-                    <div class="info-content">
-                        <ul class="info-list">
-                            <li>Extract audio from MP4, MOV, and AVI video files</li>
-                            <li>Multiple quality options (128kbps, 192kbps, 320kbps)</li>
-                            <li>File size limit: 50MB per video for optimal performance</li>
-                            <li>Fast conversion using WebAssembly technology</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </main>
-
-        <!-- Desktop Sidebar Ad Right -->
-        <div class="sidebar-ad desktop-only">
-            <div class="ad-placeholder ad-sidebar">
-                <span class="ad-text">Sidebar<br>Advertisement<br>(160x600)</span>
-            </div>
-        </div>
-    </div>
-
-    <!-- Bottom AdSense Banner -->
-    <div class="ad-placeholder ad-banner-bottom">
-        <span class="ad-text">Advertisement Banner (728x90)</span>
-    </div>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <!-- Branding Section -->
-                <div class="footer-section">
-                    <h3 class="footer-title">FileFlow</h3>
-                    <p class="footer-description">Professional file conversion tools for everyone.</p>
-                </div>
-                
-                <!-- PDF Tools -->
-                <div class="footer-section">
-                    <h4 class="footer-subtitle">PDF Tools</h4>
-                    <ul class="footer-links">
-                        <li><a href="/pdf-merge.html" class="footer-link" data-testid="footer-pdf-merge">PDF Merge</a></li>
-                        <li><a href="/pdf-split.html" class="footer-link" data-testid="footer-pdf-split">PDF Split</a></li>
-                        <li><a href="/pdf-compress.html" class="footer-link" data-testid="footer-pdf-compress">PDF Compress</a></li>
-                        <li><a href="/pdf-to-word.html" class="footer-link" data-testid="footer-pdf-to-word">PDF to Word</a></li>
-                        <li><a href="/pdf-rotate.html" class="footer-link" data-testid="footer-pdf-rotate">PDF Rotate</a></li>
-                        <li><a href="/pdf-watermark.html" class="footer-link" data-testid="footer-pdf-watermark">PDF Watermark</a></li>
-                        <li><a href="/pdf-to-jpg.html" class="footer-link" data-testid="footer-pdf-jpg">PDF to JPG</a></li>
-                    </ul>
-                </div>
-                
-                <!-- Image Tools -->
-                <div class="footer-section">
-                    <h4 class="footer-subtitle">Image Tools</h4>
-                    <ul class="footer-links">
-                        <li><a href="/image-tools/heic-to-jpg.html" class="footer-link" data-testid="footer-heic-jpg">HEIC to JPG</a></li>
-                        <li><a href="/jpg-to-png.html" class="footer-link" data-testid="footer-jpg-png">JPG to PNG</a></li>
-                        <li><a href="/image-tools/png-to-jpg.html" class="footer-link" data-testid="footer-png-jpg">PNG to JPG</a></li>
-                        <li><a href="/image-tools/webp-to-jpg.html" class="footer-link" data-testid="footer-webp-jpg">WEBP to JPG</a></li>
-                        <li><a href="/image-tools/jpg-to-pdf.html" class="footer-link" data-testid="footer-jpg-pdf">JPG to PDF</a></li>
-                    </ul>
-                </div>
-                
-                <!-- Audio/Video Tools -->
-                <div class="footer-section">
-                    <h4 class="footer-subtitle">Audio/Video Tools</h4>
-                    <ul class="footer-links">
-                        <li><a href="/mp4-to-mp3.html" class="footer-link" data-testid="footer-mp4-mp3">MP4 to MP3</a></li>
-                        <li><a href="/video-compress.html" class="footer-link" data-testid="footer-video-compress">Video Compress</a></li>
-                        <li><a href="/audio-converter.html" class="footer-link" data-testid="footer-audio-converter">Audio Converter</a></li>
-                        <li><a href="/video-trim.html" class="footer-link" data-testid="footer-video-trim">Video Trim</a></li>
-                        <li><a href="/gif-maker.html" class="footer-link" data-testid="footer-gif-maker">GIF Maker</a></li>
-                        <li><a href="/video-merger.html" class="footer-link" data-testid="footer-video-merger">Video Merger</a></li>
-                    </ul>
-                </div>
-                
-                <!-- Support Links -->
-                <div class="footer-section">
-                    <h4 class="footer-subtitle">Support</h4>
-                    <ul class="footer-links">
-                        <li><a href="mailto:support@fileflow.com" class="footer-link" data-testid="footer-contact">Contact</a></li>
-                        <li><a href="#" class="footer-link" data-testid="footer-help">Help Center</a></li>
-                    </ul>
-                </div>
-                
-                <!-- Legal Links -->
-                <div class="footer-section">
-                    <h4 class="footer-subtitle">Legal</h4>
-                    <ul class="footer-links">
-                        <li><a href="/privacy-policy.html" class="footer-link" data-testid="footer-privacy">Privacy Policy</a></li>
-                        <li><a href="/terms-of-use.html" class="footer-link" data-testid="footer-terms">Terms of Use</a></li>
-                    </ul>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2024 FileFlow. All rights reserved.</p>
-            </div>
-        </div>
-    </footer>
-
-    <script src="/js/main.js"></script>
-    <script src="/js/advanced-options.js"></script>
-    <!-- MP4 to MP3 Tool - Basic file handler for now -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const dropZone = document.querySelector('.file-drop-zone');
-            const fileInput = document.getElementById('file-input');
-            const convertBtn = document.getElementById('convert-btn');
-            
-            dropZone.addEventListener('click', () => fileInput.click());
-            
-            fileInput.addEventListener('change', function(e) {
-                const files = Array.from(e.target.files);
-                if (files.length > 0) {
-                    document.getElementById('file-list').classList.remove('hidden');
-                    document.getElementById('quality-settings').classList.remove('hidden');
-                    document.getElementById('advanced-options-section').classList.remove('hidden');
-                    document.getElementById('action-buttons').classList.remove('hidden');
-                    
-                    const fileCards = document.getElementById('file-cards');
-                    fileCards.innerHTML = files.map(file => `
-                        <div class="file-card">
-                            <div class="file-info">
-                                <div class="file-name">${file.name}</div>
-                                <div class="file-size">${Math.round(file.size/1024)}KB</div>
-                                <div class="file-status">Ready for conversion</div>
-                            </div>
-                        </div>
-                    `).join('');
-                    
-                    convertBtn.disabled = false;
-                }
-            });
-            
-            convertBtn.addEventListener('click', function() {
-                alert('Video conversion requires additional setup. Coming soon!');
-            });
-        });
-    </script>
 </body>
 </html>
