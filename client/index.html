@@ -120,7 +120,7 @@
                         <!-- Universal Converter Interface -->
                         <div class="universal-converter-interface">
                             <div class="drop-zone" id="universal-drop-zone" data-testid="dropzone-universal" style="cursor: pointer;">
-                                <div class="drop-zone-content">
+                                <div class="drop-zone-content" id="drop-zone-content">
                                     <div class="upload-icon">
                                         <svg width="48" height="48" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
@@ -128,6 +128,15 @@
                                     </div>
                                     <p class="drop-zone-text">Drag and drop your file here</p>
                                     <p class="drop-zone-subtext">or click to browse</p>
+                                </div>
+                                <div class="file-preview" id="file-preview" style="display: none;">
+                                    <div class="preview-content" id="preview-content">
+                                        <!-- File preview will be inserted here -->
+                                    </div>
+                                    <div class="file-info" id="file-info">
+                                        <div class="file-name" id="file-name"></div>
+                                        <div class="file-size" id="file-size"></div>
+                                    </div>
                                 </div>
                             </div>
                             
@@ -677,5 +686,12 @@
 
     <script src="/js/main.js"></script>
     <script src="/js/server-converter.js"></script>
+    <script src="/js/universal-homepage.js"></script>
+    <script>
+        // Initialize the universal converter when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            new UniversalHomepageConverter();
+        });
+    </script>
 </body>
 </html>
