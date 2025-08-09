@@ -339,25 +339,25 @@ class PDFToWordConverter {
         const conversionInfo = document.getElementById('conversionInfo');
         if (conversionInfo) {
             conversionInfo.innerHTML = `
-                <div class="conversion-stats">
-                    <div class="stat-row">
-                        <span class="stat-label">Original PDF:</span>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-label">ORIGINAL PDF:</span>
                         <span class="stat-value">${this.formatFileSize(originalSize)}</span>
                     </div>
-                    <div class="stat-row">
-                        <span class="stat-label">Word Document:</span>
+                    <div class="stat-item">
+                        <span class="stat-label">WORD DOCUMENT:</span>
                         <span class="stat-value">${this.formatFileSize(convertedSize)}</span>
                     </div>
-                    <div class="stat-row">
-                        <span class="stat-label">Output Format:</span>
+                    <div class="stat-item">
+                        <span class="stat-label">OUTPUT FORMAT:</span>
                         <span class="stat-value">DOCX</span>
                     </div>
-                    <div class="stat-row">
-                        <span class="stat-label">Pages Processed:</span>
+                    <div class="stat-item">
+                        <span class="stat-label">PAGES PROCESSED:</span>
                         <span class="stat-value">${pageCount}</span>
                     </div>
-                    <div class="stat-row">
-                        <span class="stat-label">Method:</span>
+                    <div class="stat-item">
+                        <span class="stat-label">METHOD:</span>
                         <span class="stat-value">Server-side conversion</span>
                     </div>
                 </div>
