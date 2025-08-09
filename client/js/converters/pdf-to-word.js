@@ -356,10 +356,6 @@ class PDFToWordConverter {
                         <span class="stat-label">PAGES PROCESSED:</span>
                         <span class="stat-value">${pageCount}</span>
                     </div>
-                    <div class="stat-item">
-                        <span class="stat-label">METHOD:</span>
-                        <span class="stat-value">Server-side conversion</span>
-                    </div>
                 </div>
             `;
         }
