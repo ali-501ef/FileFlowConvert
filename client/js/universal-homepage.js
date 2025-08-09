@@ -69,22 +69,21 @@ class UniversalHomepageConverter {
     updateDropZoneText() {
         if (this.selectedFile) {
             const dropZoneContent = this.dropZone.querySelector('.drop-zone-content');
-            const filePreview = this.dropZone.querySelector('.file-preview');
-            const previewContent = this.dropZone.querySelector('#preview-content');
-            const fileName = this.dropZone.querySelector('#file-name');
-            const fileSize = this.dropZone.querySelector('#file-size');
             
-            // Hide initial drop zone content and show preview
-            dropZoneContent.style.display = 'none';
-            filePreview.style.display = 'block';
+            // Clear existing content
+            dropZoneContent.innerHTML = '';
             
-            // Clear and populate preview content
-            previewContent.innerHTML = '';
-            this.addFilePreview(previewContent, this.selectedFile);
+            // Add preview based on file type
+            this.addFilePreview(dropZoneContent, this.selectedFile);
             
-            // Update file info
-            fileName.textContent = this.selectedFile.name;
-            fileSize.textContent = this.formatFileSize(this.selectedFile.size);
+            // Add file info
+            const fileInfo = document.createElement('div');
+            fileInfo.className = 'file-preview-info';
+            fileInfo.innerHTML = `
+                <p class="file-preview-name">${this.selectedFile.name}</p>
+                <p class="file-preview-size">${this.formatFileSize(this.selectedFile.size)} • Click to change file</p>
+            `;
+            dropZoneContent.appendChild(fileInfo);
         }
     }
     
