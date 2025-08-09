@@ -94,13 +94,18 @@ class PDFCompressor {
         document.getElementById('fileName').textContent = file.name;
         document.getElementById('fileSize').textContent = this.formatFileSize(file.size);
         this.filePreview.style.display = 'block';
-        this.uploadArea.style.display = 'none';
+        // Keep upload area visible but disable interactions during processing
+        this.fileInput.disabled = false;
+        this.uploadArea.classList.remove('busy');
     }
 
     async compressPDF() {
         if (!this.currentFile) return;
 
         this.showLoading(true);
+        // Disable upload area during processing
+        this.fileInput.disabled = true;
+        this.uploadArea.classList.add('busy');
         this.showProgress(0);
         this.results.style.display = 'none';
 
@@ -120,6 +125,9 @@ class PDFCompressor {
 
         this.hideProgress();
         this.showLoading(false);
+        // Re-enable upload area after processing
+        this.fileInput.disabled = false;
+        this.uploadArea.classList.remove('busy');
     }
 
     getCompressionSettings() {

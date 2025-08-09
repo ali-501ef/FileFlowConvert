@@ -1,0 +1,100 @@
+Command to Replit (paste as one message)
+Goal:
+On the following pages, keep the file “Drop your … here” upload box visible even after the Convert button is pressed—exactly like on mp4-to-mp3.html.
+Pages to change (and only these):
+
+pdf-split.html + its JS
+
+pdf-compress.html + its JS
+
+pdf-rotate.html + its JS
+
+pdf-watermark.html + its JS
+
+pdf-to-word.html + its JS
+
+Strict scope guardrails:
+
+Do not modify any backend, conversion logic, request payloads, or Advanced Options behavior.
+
+Only adjust the UI visibility logic for the upload area on the 5 pages above.
+
+Use MP4→MP3 implementation as the source of truth for this specific aspect.
+
+What to implement (match MP4→MP3):
+
+On each target page’s JS file, locate any code that hides the upload area during/after conversion, e.g.:
+
+uploadArea.style.display = 'none'
+
+uploadArea.classList.add('hidden')
+
+uploadContainer?.classList.add('is-hidden')
+
+Any function like hideUploadArea() called on convertBtn click.
+Replace this with logic that keeps the upload area visible, but disables the input while a job runs (to prevent duplicate uploads):
+
+js
+Copy
+Edit
+// Keep visible
+uploadArea.style.display = '';
+uploadArea.classList.remove('hidden', 'is-hidden');
+
+// Disable clicks while converting
+fileInput.disabled = true;
+uploadArea.classList.add('busy'); // add a CSS state like MP4→MP3
+On job complete (success or failure), re-enable:
+
+js
+Copy
+Edit
+fileInput.disabled = false;
+uploadArea.classList.remove('busy');
+If any page conditionally toggles between “upload view” and “results view,” do not hide the upload area. Instead, just show results below (as MP4→MP3 does).
+
+Create/ensure a shared tiny CSS rule (re-use from MP4→MP3 if it exists):
+
+css
+Copy
+Edit
+.upload-area.busy { pointer-events: none; opacity: 0.6; }
+Only add this rule if it doesn’t already exist; otherwise reuse the existing one.
+
+Do not alter DOM structure. Only adjust visibility/disabled states.
+
+Parity check with MP4→MP3:
+
+Compare js/converters/mp4-to-mp3.js event flow for: file select → enable convert → show progress/results without hiding upload area.
+
+Mirror that visibility/disable pattern in the 5 target JS files:
+
+js/converters/pdf-split.js
+
+js/converters/pdf-compress.js
+
+js/converters/pdf-rotate.js
+
+js/converters/pdf-watermark.js
+
+js/converters/pdf-to-word.js
+(If filenames differ, use the page-specific converter JS that each HTML includes.)
+
+Do not touch any other pages.
+
+Safety net (quick tests):
+
+For each of the 5 tools:
+
+Upload a valid file, click Convert.
+
+Confirm: the upload box remains visible (not display:none), input is disabled during conversion, results render, then input re-enables at the end.
+
+Drag & drop still works before a job, and after completion.
+
+Deliverables:
+
+A concise commit with the JS changes above (one commit).
+
+A short note listing which lines were changed per file (search keys used: display = 'none', .classList.add('hidden'), hideUploadArea).
+
