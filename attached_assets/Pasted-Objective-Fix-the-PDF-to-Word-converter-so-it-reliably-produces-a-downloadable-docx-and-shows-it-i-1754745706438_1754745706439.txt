@@ -1,0 +1,118 @@
+Objective:
+Fix the PDF to Word converter so it reliably produces a downloadable .docx and shows it in the results box. Leave every other page and feature exactly as-is.
+
+Scope lock (do not modify anything else):
+Only change files used by pdf-to-word.html and its converter module. Do not touch other converters, shared upload code, advanced options, or navigation.
+
+1) Reproduce + wire check
+Open pdf-to-word.html and its JS (likely js/converters/pdf-to-word.js).
+
+Confirm the frontend POSTs to our backend endpoint (e.g. /api/convert/pdf-to-word OR whatever the file currently hits).
+
+Confirm the backend controller exists (TypeScript/Node) and is registered in the router, e.g. api/src/server/js/controllers/pdfToWord.ts (or similar). If it’s missing or not routed, create/register it.
+
+2) Backend implementation (robust + pure userspace)
+Implement conversion with a text-first, OCR-fallback approach that works in the Replit environment:
+
+Preferred path (text PDFs):
+
+Use Python pdf2docx to convert vector/text PDFs to .docx (no LibreOffice dependency).
+
+If we already have a Python bridge (we do for other converters), add a function pdf_to_word(input_pdf, output_docx, page_start=None, page_end=None, ocr=False) to our Python utils (e.g. api/src/server/js/pdf_converter.py or api/src/server/python/pdf_tools.py—match repo layout). Implementation sketch:
+
+python
+Copy
+Edit
+from pdf2docx import Converter
+def pdf_to_word(input_pdf, output_docx, page_start=None, page_end=None):
+    cv = Converter(input_pdf)
+    try:
+        cv.convert(output_docx, start=page_start, end=page_end)
+    finally:
+        cv.close()
+    return output_docx
+Add dependency: pdf2docx to the Python requirements used by the server (do not install LibreOffice).
+
+OCR fallback (scanned PDFs):
+
+If pdf2docx returns zero paragraphs or throws “no text” errors, fall back to OCR:
+
+Convert pages to images (pdf2image or pdftoppm if present), then pytesseract to extract text, then write into a .docx via python-docx.
+
+Add light dependencies only if missing: pdf2image, pytesseract, python-docx. If Tesseract binary isn’t available, gracefully return a clear error telling the user that scanned PDFs aren’t supported yet (don’t crash).
+
+Encryption/invalid PDFs:
+
+If PDF is encrypted or corrupt, return structured error { code: "PDF_ENCRYPTED" | "PDF_INVALID", message: "...friendly text..." }.
+
+Output + headers:
+
+Save output to our temp/output dir (same TTL/cleanup as other tools).
+
+Filename: <base>_to_docx_<timestamp>.docx
+
+Respond JSON (exact shape expected by our frontend results renderer):
+
+json
+Copy
+Edit
+{
+  "success": true,
+  "fileUrl": "/output/<filename>.docx",
+  "filename": "<filename>.docx",
+  "stats": { "pages": <int>, "sizeBytes": <int>, "method": "pdf2docx" | "ocr" }
+}
+3) Frontend (results box stays visible)
+In js/converters/pdf-to-word.js:
+
+Ensure the request sends the file under the same field name our backend expects (usually file) plus any advanced options (page range).
+
+Show inline progress (like PDF → JPG) and do not hide the upload box (match MP4→MP3 behavior).
+
+On success: populate the results panel with:
+
+stats (pages, size),
+
+a Download DOCX button using fileUrl,
+
+optional badge showing method (Text or OCR).
+
+On error: show the inline error box with the backend’s message.
+
+4) Logging (temporary, concise)
+Add server-side logs only for this endpoint: start/end, pages counted, chosen method (text/ocr), size of output.
+
+Do not spam console globally.
+
+5) Tests (quick manual verifications)
+Use a normal text PDF (your “GCSE…pdf”). Expect a valid DOCX with text.
+
+Try a small scanned PDF (if available): either OCR output or a friendly message if OCR isn’t available.
+
+Confirm:
+
+results box shows Download DOCX,
+
+content-type application/vnd.openxmlformats-officedocument.wordprocessingml.document,
+
+file downloads and opens in Word/Pages/Google Docs,
+
+upload area remains visible, and buttons re-enable after job completes.
+
+6) Cleanup & consistency
+Ensure the file is tracked by the same cleanup TTL as other outputs.
+
+Do not alter any unrelated CSS/HTML.
+
+Deliverable:
+
+One commit touching only:
+
+the pdf-to-word controller/router,
+
+the Python helper (if needed),
+
+the converter JS for this page.
+
+A short summary of what was changed and where, plus a note if OCR fallback was enabled or gracefully disabled.
+

@@ -225,23 +225,21 @@ class PDFToWordConverter {
             // Get conversion settings with validation
             const settings = this.getConversionSettings();
             
-            // Enhanced conversion process with proper stages
+            // Server-side conversion process stages
             const stages = [
+                'Uploading PDF file...',
                 'Analyzing PDF structure...',
-                'Extracting text content...',
-                'Processing formatting...',
-                'Handling images and graphics...',
                 'Converting to Word format...',
-                'Optimizing document layout...',
-                'Finalizing document...'
+                'Finalizing DOCX document...'
             ];
             
-            for (let i = 0; i < stages.length; i++) {
-                this.showProgressWithStage((i / stages.length) * 85, stages[i]);
-                await new Promise(resolve => setTimeout(resolve, 800));
+            for (let i = 0; i < stages.length - 1; i++) {
+                this.showProgressWithStage((i / stages.length) * 25, stages[i]);
+                await new Promise(resolve => setTimeout(resolve, 500));
             }
             
-            // Perform the actual conversion
+            // Perform the actual server-side conversion
+            this.showProgressWithStage(75, stages[stages.length - 1]);
             await this.performAdvancedConversion(settings);
             
             this.showProgressWithStage(100, 'Conversion complete!');
@@ -281,236 +279,107 @@ class PDFToWordConverter {
     }
 
     async performAdvancedConversion(settings) {
-        // Extract all text content from PDF
-        this.extractedContent = await this.extractAllContent(settings);
+        // Upload file and get conversion data
+        await this.uploadFileForConversion();
         
-        // Generate proper Word document based on format
-        const wordDocument = await this.createWordDocument(settings);
-        
-        // Create output blob with correct MIME type
-        const mimeType = this.getMimeType(settings.outputFormat);
-        this.outputBlob = new Blob([wordDocument], { type: mimeType });
+        // Perform server-side conversion
+        await this.performServerConversion(settings);
     }
 
-    async extractAllContent(settings) {
-        const content = {
-            title: this.currentFile.name.replace(/\.pdf$/i, ''),
-            pages: [],
-            metadata: {
-                pageCount: this.pdfDoc.getPageCount(),
-                conversionDate: new Date().toISOString(),
-                settings: settings
-            }
+    async uploadFileForConversion() {
+        const formData = new FormData();
+        formData.append('file', this.currentFile);
+
+        const response = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Upload failed');
+        }
+
+        this.uploadResult = await response.json();
+        console.log('PDF-to-Word upload successful:', this.uploadResult);
+    }
+
+    async performServerConversion(settings) {
+        const conversionData = {
+            file_id: this.uploadResult.file_id,
+            output_format: 'docx',
+            temp_path: this.uploadResult.temp_path
         };
-        
-        // Extract content from each page
-        for (let i = 0; i < this.pdfDoc.getPageCount(); i++) {
-            const page = this.pdfDoc.getPage(i);
-            const pageContent = await this.extractPageText(page, i);
-            
-            content.pages.push({
-                pageNumber: i + 1,
-                text: pageContent,
-                hasImages: settings.includeImages && Math.random() > 0.7 // Simulate image detection
-            });
-        }
-        
-        return content;
-    }
 
-    async createWordDocument(settings) {
-        switch (settings.outputFormat) {
-            case 'rtf':
-                return this.createRTFDocument(settings);
-            case 'doc':
-                return this.createDOCDocument(settings);
-            case 'docx':
-            default:
-                return this.createDOCXDocument(settings);
-        }
-    }
-
-    createRTFDocument(settings) {
-        // Create RTF (Rich Text Format) document - widely compatible
-        let rtfContent = '{\\rtf1\\ansi\\deff0';
-        
-        // Font table
-        rtfContent += '{\\fonttbl{\\f0 Times New Roman;}{\\f1 Arial;}}';
-        
-        // Color table
-        rtfContent += '{\\colortbl;\\red0\\green0\\blue0;\\red0\\green0\\blue255;}';
-        
-        // Document title
-        rtfContent += `\\f1\\fs28\\b ${this.extractedContent.title}\\par\\par`;
-        
-        // Conversion info
-        rtfContent += `\\f0\\fs20\\b0 Converted from PDF on ${new Date().toLocaleDateString()}\\par`;
-        rtfContent += `Source: ${this.currentFile.name}\\par`;
-        rtfContent += `Pages: ${this.extractedContent.metadata.pageCount}\\par\\par`;
-        
-        // Add page content
-        this.extractedContent.pages.forEach(page => {
-            if (settings.conversionMode === 'layout') {
-                rtfContent += `\\page\\f1\\fs24\\b Page ${page.pageNumber}\\par\\par`;
-            }
-            
-            // Convert text with basic formatting
-            const formattedText = this.formatTextForRTF(page.text, settings);
-            rtfContent += `\\f0\\fs22 ${formattedText}\\par\\par`;
-            
-            if (page.hasImages && settings.includeImages) {
-                rtfContent += `\\f0\\fs18\\i [Image content from page ${page.pageNumber}]\\par\\par`;
-            }
+        const response = await fetch('/api/convert', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(conversionData)
         });
-        
-        rtfContent += '}';
-        
-        return new TextEncoder().encode(rtfContent);
-    }
 
-    createDOCXDocument(settings) {
-        // Simplified DOCX creation (in reality, this would require a proper DOCX library)
-        // For now, create a structured XML-like format that Word can read
-        
-        let docContent = '<?xml version="1.0" encoding="UTF-8"?>\n';
-        docContent += '<document>\n';
-        docContent += `<title>${this.extractedContent.title}</title>\n`;
-        docContent += `<metadata>\n`;
-        docContent += `  <source>${this.currentFile.name}</source>\n`;
-        docContent += `  <pages>${this.extractedContent.metadata.pageCount}</pages>\n`;
-        docContent += `  <converted>${new Date().toISOString()}</converted>\n`;
-        docContent += `</metadata>\n`;
-        
-        docContent += '<content>\n';
-        
-        this.extractedContent.pages.forEach(page => {
-            docContent += `<page number="${page.pageNumber}">\n`;
-            
-            // Process text with paragraph detection
-            const paragraphs = page.text.split('\n\n').filter(p => p.trim());
-            paragraphs.forEach(paragraph => {
-                const cleanPara = this.cleanTextForXML(paragraph);
-                if (cleanPara.trim()) {
-                    docContent += `  <paragraph>${cleanPara}</paragraph>\n`;
-                }
-            });
-            
-            if (page.hasImages && settings.includeImages) {
-                docContent += `  <image-placeholder>Image from page ${page.pageNumber}</image-placeholder>\n`;
-            }
-            
-            docContent += '</page>\n';
-        });
-        
-        docContent += '</content>\n';
-        docContent += '</document>';
-        
-        return new TextEncoder().encode(docContent);
-    }
-
-    createDOCDocument(settings) {
-        // Create legacy DOC format (simplified)
-        let docContent = `${this.extractedContent.title}\n`;
-        docContent += `${'='.repeat(this.extractedContent.title.length)}\n\n`;
-        
-        docContent += `Document Information:\n`;
-        docContent += `- Source: ${this.currentFile.name}\n`;
-        docContent += `- Pages: ${this.extractedContent.metadata.pageCount}\n`;
-        docContent += `- Converted: ${new Date().toLocaleString()}\n`;
-        docContent += `- Format: ${settings.outputFormat.toUpperCase()}\n\n`;
-        
-        if (settings.conversionMode === 'layout') {
-            docContent += `Note: Layout preservation mode enabled\n\n`;
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Conversion failed');
         }
-        
-        this.extractedContent.pages.forEach(page => {
-            if (settings.conversionMode === 'layout') {
-                docContent += `\n--- Page ${page.pageNumber} ---\n\n`;
-            }
-            
-            docContent += page.text;
-            
-            if (page.hasImages && settings.includeImages) {
-                docContent += `\n[Image placeholder - Page ${page.pageNumber}]\n`;
-            }
-            
-            docContent += '\n\n';
-        });
-        
-        return new TextEncoder().encode(docContent);
+
+        this.conversionResult = await response.json();
+        console.log('PDF-to-Word conversion successful:', this.conversionResult);
     }
 
-    formatTextForRTF(text, settings) {
-        // Basic RTF formatting
-        let formatted = text
-            .replace(/\\/g, '\\\\')  // Escape backslashes
-            .replace(/\{/g, '\\{')   // Escape braces
-            .replace(/\}/g, '\\}')
-            .replace(/\n/g, '\\par '); // Convert newlines to RTF paragraphs
-        
-        if (settings.preserveFormatting) {
-            // Add basic formatting detection
-            formatted = formatted
-                .replace(/\*\*(.*?)\*\*/g, '\\b $1\\b0 ') // Bold
-                .replace(/\*(.*?)\*/g, '\\i $1\\i0 ');     // Italic
-        }
-        
-        return formatted;
-    }
-
-    cleanTextForXML(text) {
-        return text
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#39;')
-            .trim();
-    }
-
-    getMimeType(format) {
-        const mimeTypes = {
-            'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-            'doc': 'application/msword',
-            'rtf': 'application/rtf'
-        };
-        return mimeTypes[format] || mimeTypes['docx'];
-    }
+    // Server-side conversion is now used for PDF-to-Word conversion
 
     showConversionResults() {
         const originalSize = this.currentFile.size;
-        const convertedSize = this.outputBlob.size;
-        const settings = this.getConversionSettings();
+        const convertedSize = this.conversionResult.file_size;
+        const pageCount = this.pdfDoc ? this.pdfDoc.getPageCount() : 'N/A';
         
-        document.getElementById('conversionInfo') ? 
-        document.getElementById('conversionInfo').innerHTML = `
-            <div class="conversion-stats">
-                <div class="stat-row">
-                    <span class="stat-label">Original PDF:</span>
-                    <span class="stat-value">${this.formatFileSize(originalSize)}</span>
+        // Show conversion stats
+        const conversionInfo = document.getElementById('conversionInfo');
+        if (conversionInfo) {
+            conversionInfo.innerHTML = `
+                <div class="conversion-stats">
+                    <div class="stat-row">
+                        <span class="stat-label">Original PDF:</span>
+                        <span class="stat-value">${this.formatFileSize(originalSize)}</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Word Document:</span>
+                        <span class="stat-value">${this.formatFileSize(convertedSize)}</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Output Format:</span>
+                        <span class="stat-value">DOCX</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Pages Processed:</span>
+                        <span class="stat-value">${pageCount}</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Method:</span>
+                        <span class="stat-value">Server-side conversion</span>
+                    </div>
                 </div>
-                <div class="stat-row">
-                    <span class="stat-label">Word Document:</span>
-                    <span class="stat-value">${this.formatFileSize(convertedSize)}</span>
+            `;
+        }
+
+        // Show download section
+        const downloadSection = document.getElementById('downloadSection');
+        if (downloadSection) {
+            downloadSection.innerHTML = `
+                <div class="download-container">
+                    <button class="download-btn" onclick="window.pdfToWordConverter.downloadFile()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7,10 12,15 17,10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        Download DOCX
+                    </button>
                 </div>
-                <div class="stat-row">
-                    <span class="stat-label">Output Format:</span>
-                    <span class="stat-value">${settings.outputFormat.toUpperCase()}</span>
-                </div>
-                <div class="stat-row">
-                    <span class="stat-label">Pages Processed:</span>
-                    <span class="stat-value">${this.extractedContent.metadata.pageCount}</span>
-                </div>
-                <div class="stat-row">
-                    <span class="stat-label">Conversion Mode:</span>
-                    <span class="stat-value">${this.formatConversionMode(settings.conversionMode)}</span>
-                </div>
-                <div class="stat-row">
-                    <span class="stat-label">Features:</span>
-                    <span class="stat-value">${this.getFeaturesList(settings)}</span>
-                </div>
-            </div>
-        ` : null;
+            `;
+        }
         
         this.results.style.display = 'block';
     }
@@ -532,16 +401,17 @@ class PDFToWordConverter {
         return features.join(', ') || 'Basic';
     }
 
-    downloadWord() {
-        if (this.outputBlob) {
-            const settings = this.getConversionSettings();
-            const extension = settings.outputFormat;
+    downloadFile() {
+        if (this.conversionResult && this.conversionResult.download_url) {
             const a = document.createElement('a');
-            a.href = URL.createObjectURL(this.outputBlob);
-            a.download = this.currentFile.name.replace(/\.pdf$/i, `.${extension}`);
+            a.href = this.conversionResult.download_url;
+            a.download = this.currentFile.name.replace(/\.pdf$/i, '.docx');
             a.click();
-            URL.revokeObjectURL(a.href);
         }
+    }
+
+    downloadWord() {
+        this.downloadFile();
     }
 
     showProgressWithStage(percent, stage) {
