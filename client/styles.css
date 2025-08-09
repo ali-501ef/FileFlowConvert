@@ -6164,6 +6164,12 @@ body {
     box-shadow: var(--shadow-md);
 }
 
+.result-actions {
+    display: flex;
+    justify-content: center;
+    margin-top: var(--element-spacing);
+}
+
 /* Processing Overlay Styles */
 .processing-overlay {
     position: absolute;
