@@ -123,49 +123,49 @@ def pdf_to_text(input_path: str, output_path: str):
         raise Exception(f"PDF to text conversion failed: {e}")
 
 def pdf_to_docx(input_path: str, output_path: str):
-    """Convert PDF to DOCX"""
+    """Convert PDF to DOCX using python-docx and pdfplumber"""
     try:
-        from pdf2docx import Converter
+        import pdfplumber
+        from docx import Document
         
-        # Convert PDF to DOCX
-        cv = Converter(input_path)
-        cv.convert(output_path, start=0)
-        cv.close()
-        return True
+        # Extract text using pdfplumber
+        doc = Document()
         
-    except ImportError:
-        # Fallback: Extract text and create simple DOCX
-        try:
-            import fitz  # PyMuPDF
-            from docx import Document
+        # Add document title
+        doc.add_heading('PDF to Word Conversion', 0)
+        doc.add_paragraph(f'Converted from: {input_path.split("/")[-1]}')
+        doc.add_paragraph('')  # Empty line
+        
+        with pdfplumber.open(input_path) as pdf:
+            doc.add_paragraph(f'Total pages: {len(pdf.pages)}')
+            doc.add_paragraph('')  # Empty line
             
-            # Extract text using PyMuPDF
-            pdf_doc = fitz.open(input_path)
-            doc = Document()
-            
-            for page_num in range(len(pdf_doc)):
-                page = pdf_doc[page_num]
-                text = page.get_text()
+            for page_num, page in enumerate(pdf.pages):
+                text = page.extract_text()
                 
                 # Add page heading
                 doc.add_heading(f'Page {page_num + 1}', level=2)
                 
                 # Add text content
-                if text.strip():
-                    doc.add_paragraph(text)
+                if text and text.strip():
+                    # Split text into paragraphs and add them
+                    paragraphs = text.split('\n\n')
+                    for para in paragraphs:
+                        para = para.strip()
+                        if para:
+                            doc.add_paragraph(para)
                 else:
                     doc.add_paragraph('[No text content found on this page]')
                 
                 # Add page break except for last page
-                if page_num < len(pdf_doc) - 1:
+                if page_num < len(pdf.pages) - 1:
                     doc.add_page_break()
-            
-            doc.save(output_path)
-            pdf_doc.close()
-            return True
-            
-        except ImportError:
-            raise Exception("PDF to DOCX conversion requires pdf2docx or python-docx with PyMuPDF")
+        
+        doc.save(output_path)
+        return True
+        
+    except ImportError as e:
+        raise Exception(f"PDF to DOCX conversion requires python-docx and pdfplumber: {e}")
     
     except Exception as e:
         raise Exception(f"PDF to DOCX conversion failed: {e}")
