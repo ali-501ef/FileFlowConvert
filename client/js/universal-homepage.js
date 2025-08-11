@@ -16,19 +16,36 @@ class UniversalHomepageConverter {
             return; // Elements not found, homepage converter not available
         }
         
-        // --- BEGIN PATCH: homepage uploader (native label click, single change binding) ---
+        // --- BEGIN PATCH: homepage uploader double-open fix ---
         // Prevent multiple bindings after re-render/navigation
-        if (this.fileInput.dataset.bound === '1') return;
-        this.fileInput.dataset.bound = '1';
+        if (this.dropZone.dataset.bound === '1') return;
+        this.dropZone.dataset.bound = '1';
 
-        // Native change handler for file selection
-        this.fileInput.addEventListener('change', async (e) => {
-            try {
-                await this.handleHomeUpload(e.target.files);
-            } catch (err) {
-                console.error('Homepage upload failed:', err);
-            }
-        });
+        // Re-entrancy guard to stop double-open (area click + button click)
+        let pickerBusy = false;
+        const openPicker = (e) => {
+            if (e) { e.preventDefault(); e.stopPropagation(); }
+            if (pickerBusy) return;
+            pickerBusy = true;
+            this.fileInput.click();
+            // Small cooldown prevents duplicate .click() from bubbling/second binding
+            setTimeout(() => { pickerBusy = false; }, 600);
+        };
+
+        // Clicking the big area opens picker, except when the inner button is the target
+        this.dropZone.addEventListener('click', (e) => {
+            if (e.target.closest('#home-choose-btn')) return;
+            openPicker(e);
+        }, { passive: true });
+
+        // Button explicitly opens picker and stops propagation
+        this.chooseFileBtn.addEventListener('click', openPicker, { passive: true });
+
+        // Prevent clicks on the input from bubbling back up
+        this.fileInput.addEventListener('click', (e) => e.stopPropagation());
+
+        // Normal change handler (existing logic). Keep whatever function you already use.
+        this.fileInput.addEventListener('change', this.handleFileSelect.bind(this), { once: false });
         // --- END PATCH ---
         
         // Drop zone events for drag and drop
@@ -39,12 +56,6 @@ class UniversalHomepageConverter {
         // Convert button and format change events
         this.convertBtn.addEventListener('click', this.handleConvert.bind(this));
         this.outputFormatSelect.addEventListener('change', this.updateConvertButton.bind(this));
-    }
-    
-    async handleHomeUpload(files) {
-        if (!files || !files.length) return;
-        // Call existing upload logic
-        this.handleFileSelect({ target: { files } });
     }
     
     handleDragOver(e) {
