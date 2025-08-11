@@ -1,3 +1,5 @@
+import { mountVideoPreview } from '/js/components/videoPreview.js';
+
 /**
  * Video Compressor
  * Compresses video files with quality and size optimization
@@ -115,6 +117,13 @@ class VideoCompressor {
 
         this.currentFile = file;
         this.showFileInfo(file);
+
+        // Add video preview
+        const previewSlot = document.getElementById('videoPreviewSlot');
+        if (previewSlot && file && file.type.startsWith('video/')) {
+            mountVideoPreview({ container: previewSlot, file, autoplay: false });
+        }
+
         this.setProcessingState(true, 'Uploading file...');
 
         try {

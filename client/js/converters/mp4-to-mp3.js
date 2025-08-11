@@ -1,3 +1,5 @@
+import { mountVideoPreview } from '/js/components/videoPreview.js';
+
 /**
  * MP4 to MP3 Converter
  * Converts video files to audio format with advanced options
@@ -107,6 +109,13 @@ class MP4ToMP3Converter {
 
         this.currentFile = file;
         this.showFileInfo(file);
+
+        // Add video preview
+        const previewSlot = document.getElementById('videoPreviewSlot');
+        if (previewSlot && file && file.type.startsWith('video/')) {
+            mountVideoPreview({ container: previewSlot, file, autoplay: false });
+        }
+
         this.setProcessingState(true, 'Uploading file...');
 
         try {
