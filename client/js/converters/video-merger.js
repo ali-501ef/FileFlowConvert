@@ -176,30 +176,65 @@ class VideoMerger {
         this.uploadedFiles.forEach((file, index) => {
             const videoItem = document.createElement('div');
             videoItem.className = 'video-item';
-            videoItem.innerHTML = `
-                <div class="video-item-info">
-                    <div class="video-item-name">${file.name}</div>
-                    <div class="video-item-size">${this.formatFileSize(file.size)}</div>
-                </div>
-                <div class="video-item-actions">
-                    <button class="move-up-btn" onclick="window.videoMerger.moveVideo(${index}, -1)" ${index === 0 ? 'disabled' : ''}>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="m18 15-6-6-6 6"/>
-                        </svg>
-                    </button>
-                    <button class="move-down-btn" onclick="window.videoMerger.moveVideo(${index}, 1)" ${index === this.uploadedFiles.length - 1 ? 'disabled' : ''}>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="m6 9 6 6 6-6"/>
-                        </svg>
-                    </button>
-                    <button class="remove-btn" onclick="window.videoMerger.removeVideo(${index})">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <line x1="18" y1="6" x2="6" y2="18"></line>
-                            <line x1="6" y1="6" x2="18" y2="18"></line>
-                        </svg>
-                    </button>
-                </div>
+            
+            // Create info section
+            const infoDiv = document.createElement('div');
+            infoDiv.className = 'video-item-info';
+            
+            const nameDiv = document.createElement('div');
+            nameDiv.className = 'video-item-name';
+            nameDiv.textContent = file.name; // Safe: uses textContent instead of innerHTML
+            
+            const sizeDiv = document.createElement('div');
+            sizeDiv.className = 'video-item-size';
+            sizeDiv.textContent = this.formatFileSize(file.size);
+            
+            infoDiv.appendChild(nameDiv);
+            infoDiv.appendChild(sizeDiv);
+            
+            // Create actions section
+            const actionsDiv = document.createElement('div');
+            actionsDiv.className = 'video-item-actions';
+            
+            // Move up button
+            const moveUpBtn = document.createElement('button');
+            moveUpBtn.className = 'move-up-btn';
+            if (index === 0) moveUpBtn.disabled = true;
+            moveUpBtn.onclick = () => window.videoMerger.moveVideo(index, -1);
+            moveUpBtn.innerHTML = `
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="m18 15-6-6-6 6"/>
+                </svg>
             `;
+            
+            // Move down button
+            const moveDownBtn = document.createElement('button');
+            moveDownBtn.className = 'move-down-btn';
+            if (index === this.uploadedFiles.length - 1) moveDownBtn.disabled = true;
+            moveDownBtn.onclick = () => window.videoMerger.moveVideo(index, 1);
+            moveDownBtn.innerHTML = `
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="m6 9 6 6 6-6"/>
+                </svg>
+            `;
+            
+            // Remove button
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'remove-btn';
+            removeBtn.onclick = () => window.videoMerger.removeVideo(index);
+            removeBtn.innerHTML = `
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            `;
+            
+            actionsDiv.appendChild(moveUpBtn);
+            actionsDiv.appendChild(moveDownBtn);
+            actionsDiv.appendChild(removeBtn);
+            
+            videoItem.appendChild(infoDiv);
+            videoItem.appendChild(actionsDiv);
             this.videoItems.appendChild(videoItem);
         });
         
