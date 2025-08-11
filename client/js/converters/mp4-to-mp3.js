@@ -279,35 +279,91 @@ class MP4ToMP3Converter {
 
         // Show file stats
         if (audioStats && this.conversionResult) {
-            audioStats.innerHTML = `
-                <div class="stats-grid">
-                    <div class="stat-item">
-                        <span class="stat-label">Format</span>
-                        <span class="stat-value">${this.audioFormat?.value?.toUpperCase() || 'MP3'}</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Bitrate</span>
-                        <span class="stat-value">${this.audioBitrate?.value || '192'} kbps</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Size</span>
-                        <span class="stat-value">${this.formatFileSize(this.conversionResult.file_size)}</span>
-                    </div>
-                </div>
-            `;
+            // Clear existing content
+            audioStats.textContent = '';
+            
+            // Create stats container using safe DOM methods
+            const statsGrid = document.createElement('div');
+            statsGrid.className = 'stats-grid';
+            
+            // Format stat item
+            const formatItem = document.createElement('div');
+            formatItem.className = 'stat-item';
+            const formatLabel = document.createElement('span');
+            formatLabel.className = 'stat-label';
+            formatLabel.textContent = 'Format';
+            const formatValue = document.createElement('span');
+            formatValue.className = 'stat-value';
+            formatValue.textContent = this.audioFormat?.value?.toUpperCase() || 'MP3';
+            formatItem.appendChild(formatLabel);
+            formatItem.appendChild(formatValue);
+            
+            // Bitrate stat item
+            const bitrateItem = document.createElement('div');
+            bitrateItem.className = 'stat-item';
+            const bitrateLabel = document.createElement('span');
+            bitrateLabel.className = 'stat-label';
+            bitrateLabel.textContent = 'Bitrate';
+            const bitrateValue = document.createElement('span');
+            bitrateValue.className = 'stat-value';
+            bitrateValue.textContent = `${this.audioBitrate?.value || '192'} kbps`;
+            bitrateItem.appendChild(bitrateLabel);
+            bitrateItem.appendChild(bitrateValue);
+            
+            // Size stat item
+            const sizeItem = document.createElement('div');
+            sizeItem.className = 'stat-item';
+            const sizeLabel = document.createElement('span');
+            sizeLabel.className = 'stat-label';
+            sizeLabel.textContent = 'Size';
+            const sizeValue = document.createElement('span');
+            sizeValue.className = 'stat-value';
+            sizeValue.textContent = this.formatFileSize(this.conversionResult.file_size);
+            sizeItem.appendChild(sizeLabel);
+            sizeItem.appendChild(sizeValue);
+            
+            // Append all items to grid
+            statsGrid.appendChild(formatItem);
+            statsGrid.appendChild(bitrateItem);
+            statsGrid.appendChild(sizeItem);
+            
+            // Append grid to container
+            audioStats.appendChild(statsGrid);
         }
 
         // Show audio preview
         if (audioPreview && this.conversionResult.download_url) {
-            audioPreview.innerHTML = `
-                <div class="audio-preview-container">
-                    <h4>Audio Preview</h4>
-                    <audio controls style="width: 100%; margin-top: 10px;">
-                        <source src="${this.conversionResult.download_url}" type="audio/${this.audioFormat?.value || 'mp3'}">
-                        Your browser does not support the audio element.
-                    </audio>
-                </div>
-            `;
+            // Clear existing content
+            audioPreview.textContent = '';
+            
+            // Create preview container using safe DOM methods
+            const previewContainer = document.createElement('div');
+            previewContainer.className = 'audio-preview-container';
+            
+            // Create title
+            const title = document.createElement('h4');
+            title.textContent = 'Audio Preview';
+            
+            // Create audio element
+            const audio = document.createElement('audio');
+            audio.controls = true;
+            audio.style.width = '100%';
+            audio.style.marginTop = '10px';
+            
+            // Create source element
+            const source = document.createElement('source');
+            source.src = this.conversionResult.download_url;
+            source.type = `audio/${this.audioFormat?.value || 'mp3'}`;
+            
+            // Create fallback text
+            const fallbackText = document.createTextNode('Your browser does not support the audio element.');
+            
+            // Append elements
+            audio.appendChild(source);
+            audio.appendChild(fallbackText);
+            previewContainer.appendChild(title);
+            previewContainer.appendChild(audio);
+            audioPreview.appendChild(previewContainer);
         }
 
         this.results.style.display = 'block';
@@ -335,12 +391,20 @@ class MP4ToMP3Converter {
                 overlay.className = 'processing-overlay';
                 this.uploadArea.appendChild(overlay);
             }
-            overlay.innerHTML = `
-                <div class="processing-content">
-                    <div class="spinner"></div>
-                    <p>${message}</p>
-                </div>
-            `;
+            // Clear and create processing content using safe DOM methods
+            overlay.textContent = '';
+            const processingContent = document.createElement('div');
+            processingContent.className = 'processing-content';
+            
+            const spinner = document.createElement('div');
+            spinner.className = 'spinner';
+            
+            const messageP = document.createElement('p');
+            messageP.textContent = message;
+            
+            processingContent.appendChild(spinner);
+            processingContent.appendChild(messageP);
+            overlay.appendChild(processingContent);
             overlay.style.display = 'flex';
             
             // Disable upload area interactions
@@ -394,16 +458,50 @@ class MP4ToMP3Converter {
             this.uploadArea.parentNode.insertBefore(errorDiv, this.uploadArea.nextSibling);
         }
         
-        errorDiv.innerHTML = `
-            <div class="error-content">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10"/>
-                    <line x1="15" y1="9" x2="9" y2="15"/>
-                    <line x1="9" y1="9" x2="15" y2="15"/>
-                </svg>
-                <span>${message}</span>
-            </div>
-        `;
+        // Clear and create error content using safe DOM methods
+        errorDiv.textContent = '';
+        const errorContent = document.createElement('div');
+        errorContent.className = 'error-content';
+        
+        // Create SVG icon using DOM methods
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+        svg.setAttribute('width', '20');
+        svg.setAttribute('height', '20');
+        svg.setAttribute('viewBox', '0 0 24 24');
+        svg.setAttribute('fill', 'none');
+        svg.setAttribute('stroke', 'currentColor');
+        svg.setAttribute('stroke-width', '2');
+        svg.setAttribute('stroke-linecap', 'round');
+        svg.setAttribute('stroke-linejoin', 'round');
+        
+        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', '12');
+        circle.setAttribute('cy', '12');
+        circle.setAttribute('r', '10');
+        
+        const line1 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line1.setAttribute('x1', '15');
+        line1.setAttribute('y1', '9');
+        line1.setAttribute('x2', '9');
+        line1.setAttribute('y2', '15');
+        
+        const line2 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line2.setAttribute('x1', '9');
+        line2.setAttribute('y1', '9');
+        line2.setAttribute('x2', '15');
+        line2.setAttribute('y2', '15');
+        
+        svg.appendChild(circle);
+        svg.appendChild(line1);
+        svg.appendChild(line2);
+        
+        const messageSpan = document.createElement('span');
+        messageSpan.textContent = message;
+        
+        errorContent.appendChild(svg);
+        errorContent.appendChild(messageSpan);
+        errorDiv.appendChild(errorContent);
         errorDiv.style.display = 'block';
         
         // Auto-hide after 5 seconds
