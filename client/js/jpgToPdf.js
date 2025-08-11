@@ -187,8 +187,8 @@ class JpgToPdfConverter {
       return;
     }
 
-    // Hide upload area and show preview
-    uploadArea.style.display = 'none';
+    // Keep upload area visible and show preview below it
+    uploadArea.style.display = 'flex';
     filePreview.style.display = 'block';
 
     // Update header
