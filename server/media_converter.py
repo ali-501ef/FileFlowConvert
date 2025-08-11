@@ -41,6 +41,7 @@ def convert_media(input_path, output_path, conversion_type, options=None):
 def compress_video(input_path, output_path, options):
     """Compress video file"""
     import shlex
+    import re
     # Sanitize paths to prevent command injection
     safe_input_path = shlex.quote(input_path)
     safe_output_path = shlex.quote(output_path)
@@ -58,13 +59,20 @@ def compress_video(input_path, output_path, options):
     elif compression == 'heavy':
         cmd.extend(['-crf', '32', '-preset', 'fast'])
     else:
-        # Custom settings
+        # Custom settings - validate input to prevent command injection
         if 'bitrate' in options:
-            cmd.extend(['-b:v', f"{str(options['bitrate'])}k"])
+            bitrate = options['bitrate']
+            if isinstance(bitrate, (int, float)) and 0 < bitrate <= 50000:
+                cmd.extend(['-b:v', f"{int(bitrate)}k"])
         if 'crf' in options:
-            cmd.extend(['-crf', str(options['crf'])])
+            crf = options['crf']
+            if isinstance(crf, (int, float)) and 0 <= crf <= 51:
+                cmd.extend(['-crf', str(int(crf))])
         if 'preset' in options:
-            cmd.extend(['-preset', str(options['preset'])])
+            preset = str(options['preset'])
+            # Validate against allowed FFmpeg presets
+            if preset in ['ultrafast', 'superfast', 'veryfast', 'faster', 'fast', 'medium', 'slow', 'slower', 'veryslow']:
+                cmd.extend(['-preset', preset])
     
     # Resolution scaling
     if 'resolution' in options and options['resolution'] != 'original':
@@ -75,9 +83,11 @@ def compress_video(input_path, output_path, options):
         elif options['resolution'] == '480p':
             cmd.extend(['-vf', 'scale=854:480'])
     
-    # Frame rate
+    # Frame rate - validate to prevent command injection
     if 'framerate' in options and options['framerate'] != 'original':
-        cmd.extend(['-r', str(options['framerate'])])
+        framerate = options['framerate']
+        if isinstance(framerate, (int, float)) and 1 <= framerate <= 120:
+            cmd.extend(['-r', str(int(framerate))])
     
     # Audio codec
     cmd.extend(['-c:a', 'aac', '-b:a', '128k'])
@@ -110,21 +120,30 @@ def extract_audio(input_path, output_path, options):
     format_ext = options.get('format', 'mp3')
     if format_ext == 'mp3':
         cmd.extend(['-vn', '-acodec', 'libmp3lame'])
-        # Bitrate
+        # Bitrate - validate to prevent command injection
         bitrate = options.get('bitrate', '192')
-        cmd.extend(['-b:a', f'{str(bitrate)}k'])
+        if isinstance(bitrate, (int, float, str)) and str(bitrate).isdigit() and 8 <= int(bitrate) <= 320:
+            cmd.extend(['-b:a', f'{int(bitrate)}k'])
+        else:
+            cmd.extend(['-b:a', '192k'])  # Default fallback
     elif format_ext == 'wav':
         cmd.extend(['-vn', '-acodec', 'pcm_s16le'])
     elif format_ext == 'aac':
         cmd.extend(['-vn', '-c:a', 'aac'])
-        bitrate = options.get('bitrate', '128') 
-        cmd.extend(['-b:a', f'{str(bitrate)}k'])
+        bitrate = options.get('bitrate', '128')
+        if isinstance(bitrate, (int, float, str)) and str(bitrate).isdigit() and 8 <= int(bitrate) <= 320:
+            cmd.extend(['-b:a', f'{int(bitrate)}k'])
+        else:
+            cmd.extend(['-b:a', '128k'])  # Default fallback
     elif format_ext == 'flac':
         cmd.extend(['-vn', '-c:a', 'flac'])
     elif format_ext == 'ogg':
         cmd.extend(['-vn', '-c:a', 'libvorbis'])
         bitrate = options.get('bitrate', '192')
-        cmd.extend(['-b:a', f'{str(bitrate)}k'])
+        if isinstance(bitrate, (int, float, str)) and str(bitrate).isdigit() and 8 <= int(bitrate) <= 500:
+            cmd.extend(['-b:a', f'{int(bitrate)}k'])
+        else:
+            cmd.extend(['-b:a', '192k'])  # Default fallback
     
     # Add metadata preservation
     cmd.extend(['-map_metadata', '0'])
@@ -149,7 +168,10 @@ def convert_audio(input_path, output_path, options):
     if format_ext == 'mp3':
         cmd.extend(['-c:a', 'libmp3lame'])
         bitrate = options.get('bitrate', '192')
-        cmd.extend(['-b:a', f'{str(bitrate)}k'])
+        if isinstance(bitrate, (int, float, str)) and str(bitrate).isdigit() and 8 <= int(bitrate) <= 320:
+            cmd.extend(['-b:a', f'{int(bitrate)}k'])
+        else:
+            cmd.extend(['-b:a', '192k'])
     elif format_ext == 'wav':
         cmd.extend(['-c:a', 'pcm_s16le'])
     elif format_ext == 'flac':
@@ -157,15 +179,25 @@ def convert_audio(input_path, output_path, options):
     elif format_ext == 'aac':
         cmd.extend(['-c:a', 'aac'])
         bitrate = options.get('bitrate', '128')
-        cmd.extend(['-b:a', f'{str(bitrate)}k'])
+        if isinstance(bitrate, (int, float, str)) and str(bitrate).isdigit() and 8 <= int(bitrate) <= 320:
+            cmd.extend(['-b:a', f'{int(bitrate)}k'])
+        else:
+            cmd.extend(['-b:a', '128k'])
     elif format_ext == 'ogg':
         cmd.extend(['-c:a', 'libvorbis'])
         bitrate = options.get('bitrate', '192')
-        cmd.extend(['-b:a', f'{str(bitrate)}k'])
+        if isinstance(bitrate, (int, float, str)) and str(bitrate).isdigit() and 8 <= int(bitrate) <= 500:
+            cmd.extend(['-b:a', f'{int(bitrate)}k'])
+        else:
+            cmd.extend(['-b:a', '192k'])
     
-    # Sample rate
+    # Sample rate - validate to prevent command injection
     if 'sample_rate' in options and options['sample_rate'] != 'keep':
-        cmd.extend(['-ar', str(options['sample_rate'])])
+        sample_rate = options['sample_rate']
+        # Valid sample rates for audio
+        valid_rates = [8000, 11025, 16000, 22050, 32000, 44100, 48000, 88200, 96000, 176400, 192000]
+        if isinstance(sample_rate, (int, float)) and int(sample_rate) in valid_rates:
+            cmd.extend(['-ar', str(int(sample_rate))])
     
     # Preserve metadata if requested
     if options.get('preserve_metadata', True):
@@ -187,6 +219,7 @@ def trim_video(input_path, output_path, options):
     safe_input_path = shlex.quote(input_path)
     safe_output_path = shlex.quote(output_path)
     
+    # Validate time parameters to prevent command injection
     start_time = options.get('start_time', 0)
     end_time = options.get('end_time')
     duration = options.get('duration')
@@ -194,15 +227,15 @@ def trim_video(input_path, output_path, options):
     
     cmd = ['ffmpeg', '-i', safe_input_path]
     
-    # Set start time
-    if start_time > 0:
-        cmd.extend(['-ss', str(start_time)])
+    # Set start time - validate numeric input
+    if isinstance(start_time, (int, float)) and start_time > 0:
+        cmd.extend(['-ss', str(float(start_time))])
     
-    # Set end time or duration
-    if end_time is not None:
-        cmd.extend(['-to', str(end_time)])
-    elif duration is not None:
-        cmd.extend(['-t', str(duration)])
+    # Set end time or duration - validate numeric input
+    if end_time is not None and isinstance(end_time, (int, float)) and end_time > 0:
+        cmd.extend(['-to', str(float(end_time))])
+    elif duration is not None and isinstance(duration, (int, float)) and duration > 0:
+        cmd.extend(['-t', str(float(duration))])
     else:
         cmd.extend(['-t', '10'])  # Default 10 seconds
     
@@ -228,10 +261,27 @@ def create_gif(input_path, output_path, options):
     safe_input_path = shlex.quote(input_path)
     safe_output_path = shlex.quote(output_path)
     
+    # Validate parameters to prevent command injection
     start_time = options.get('start_time', 0)
     duration = options.get('duration', 3)
     fps = options.get('fps', 10)
     width = options.get('width', 480)
+    
+    # Validate and sanitize numeric values
+    if not (isinstance(start_time, (int, float)) and start_time >= 0):
+        start_time = 0
+    if not (isinstance(duration, (int, float)) and 0.1 <= duration <= 60):
+        duration = 3
+    if not (isinstance(fps, (int, float)) and 1 <= fps <= 30):
+        fps = 10
+    if not (isinstance(width, (int, float)) and 50 <= width <= 1920):
+        width = 480
+    
+    # Convert to safe integer values
+    start_time = float(start_time)
+    duration = float(duration) 
+    fps = int(fps)
+    width = int(width)
     
     # Two-pass approach for better quality
     palette_path = output_path.replace('.gif', '_palette.png')
@@ -241,7 +291,7 @@ def create_gif(input_path, output_path, options):
     palette_cmd = [
         'ffmpeg', '-i', safe_input_path,
         '-ss', str(start_time), '-t', str(duration),
-        '-vf', f'fps={str(fps)},scale={str(width)}:-1:flags=lanczos,palettegen',
+        '-vf', f'fps={fps},scale={width}:-1:flags=lanczos,palettegen',
         '-y', safe_palette_path
     ]
     
@@ -253,7 +303,7 @@ def create_gif(input_path, output_path, options):
     gif_cmd = [
         'ffmpeg', '-i', safe_input_path, '-i', safe_palette_path,
         '-ss', str(start_time), '-t', str(duration),
-        '-lavfi', f'fps={str(fps)},scale={str(width)}:-1:flags=lanczos[x];[x][1:v]paletteuse',
+        '-lavfi', f'fps={fps},scale={width}:-1:flags=lanczos[x];[x][1:v]paletteuse',
         '-y', safe_output_path
     ]
     
