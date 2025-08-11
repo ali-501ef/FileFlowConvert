@@ -80,24 +80,9 @@ function displayFilePreview() {
     const fileSize = document.getElementById('fileSize');
     const fileList = document.getElementById('fileList');
 
-    // Update header with file info and preview
     if (uploadedFiles.length === 1) {
-        fileName.innerHTML = `
-            <div class="file-header-preview">
-                <div class="header-preview-container" id="header-preview">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                        <circle cx="9" cy="9" r="2"/>
-                        <path d="M21 15l-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
-                    </svg>
-                </div>
-                <span class="file-name-text">${uploadedFiles[0].name}</span>
-            </div>
-        `;
+        fileName.textContent = uploadedFiles[0].name;
         fileSize.textContent = formatFileSize(uploadedFiles[0].size);
-        
-        // Create preview for the header
-        createHeaderImagePreview(uploadedFiles[0]);
     } else {
         fileName.textContent = `${uploadedFiles.length} HEIC files selected`;
         const totalSize = uploadedFiles.reduce((sum, file) => sum + file.size, 0);
@@ -138,9 +123,6 @@ function displayFilePreview() {
         createImagePreview(file, index);
     });
 
-    // Show preview in upload area
-    showUploadAreaPreview();
-    
     filePreview.style.display = 'block';
 }
 
@@ -207,106 +189,6 @@ function tryCanvasPreview(file, previewContainer) {
     }
 }
 
-function createHeaderImagePreview(file) {
-    const headerPreview = document.getElementById('header-preview');
-    if (!headerPreview) return;
-
-    try {
-        const img = new Image();
-        img.crossOrigin = 'anonymous';
-        
-        img.onload = function() {
-            // Success - browser supports HEIC natively
-            headerPreview.innerHTML = '';
-            img.style.width = '32px';
-            img.style.height = '32px';
-            img.style.objectFit = 'cover';
-            img.style.borderRadius = '6px';
-            img.style.border = '1px solid #e5e7eb';
-            headerPreview.appendChild(img);
-        };
-        
-        img.onerror = function() {
-            // Show HEIC badge for unsupported browsers
-            headerPreview.innerHTML = `
-                <div class="heic-badge-small">
-                    <span class="heic-text-small">HEIC</span>
-                </div>
-            `;
-        };
-        
-        img.src = URL.createObjectURL(file);
-        
-    } catch (error) {
-        console.log('Header preview not supported:', error);
-    }
-}
-
-function showUploadAreaPreview() {
-    const uploadArea = document.getElementById('uploadArea');
-    if (!uploadArea) return;
-
-    // Only show preview for single file
-    if (uploadedFiles.length !== 1) return;
-
-    const file = uploadedFiles[0];
-    
-    try {
-        const img = new Image();
-        img.crossOrigin = 'anonymous';
-        
-        img.onload = function() {
-            // Success - create large preview in upload area
-            uploadArea.innerHTML = `
-                <div class="upload-preview-container">
-                    <div class="large-image-preview" id="large-preview">
-                        <div class="preview-overlay">
-                            <div class="preview-info">
-                                <span class="preview-filename">${file.name}</span>
-                                <span class="preview-size">${formatFileSize(file.size)}</span>
-                            </div>
-                        </div>
-                    </div>
-                    <p class="preview-hint">Click to select different files</p>
-                </div>
-            `;
-            
-            // Add the image to the preview
-            const largePreview = document.getElementById('large-preview');
-            if (largePreview) {
-                img.style.width = '100%';
-                img.style.height = '100%';
-                img.style.objectFit = 'cover';
-                img.style.borderRadius = '12px';
-                largePreview.appendChild(img);
-            }
-        };
-        
-        img.onerror = function() {
-            // Show HEIC preview for unsupported browsers
-            uploadArea.innerHTML = `
-                <div class="upload-preview-container">
-                    <div class="large-heic-preview">
-                        <div class="heic-badge-large">
-                            <span class="heic-text-large">HEIC</span>
-                        </div>
-                        <div class="preview-info-fallback">
-                            <span class="preview-filename">${file.name}</span>
-                            <span class="preview-size">${formatFileSize(file.size)}</span>
-                        </div>
-                    </div>
-                    <p class="preview-hint">Click to select different files</p>
-                </div>
-            `;
-        };
-        
-        img.src = URL.createObjectURL(file);
-        
-    } catch (error) {
-        console.log('Upload area preview not supported:', error);
-    }
-}
-
 function removeFile(index) {
     uploadedFiles.splice(index, 1);
     
@@ -314,24 +196,6 @@ function removeFile(index) {
         document.getElementById('filePreview').style.display = 'none';
         disableConvertButton();
         document.getElementById('fileInput').value = '';
-        
-        // Restore original upload area
-        const uploadArea = document.getElementById('uploadArea');
-        if (uploadArea) {
-            uploadArea.innerHTML = `
-                <div class="upload-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                        <circle cx="9" cy="9" r="2"/>
-                        <path d="M21 15l-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
-                    </svg>
-                </div>
-                <h3>Drop your HEIC files here</h3>
-                <p>or click anywhere to browse files</p>
-                <p class="supported-formats">Supports HEIC files only</p>
-                <input type="file" id="fileInput" multiple accept=".heic,.heif,.HEIC,.HEIF" hidden>
-            `;
-        }
     } else {
         displayFilePreview();
     }
