@@ -182,20 +182,34 @@ class WebpToJpgConverter {
         convertedFiles.forEach((file, index) => {
             const resultItem = document.createElement('div');
             resultItem.className = 'result-item';
-            resultItem.innerHTML = `
-                <div class="result-info">
-                    <h4>${file.name}</h4>
-                    <p>Original: ${this.formatFileSize(file.originalSize)} → Converted: ${this.formatFileSize(file.convertedSize)}</p>
-                </div>
-                <button class="download-btn" onclick="downloadFile(${index})">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                        <polyline points="7,10 12,15 17,10"></polyline>
-                        <line x1="12" y1="15" x2="12" y2="3"></line>
-                    </svg>
-                    Download
-                </button>
+            
+            // Create result info section
+            const resultInfo = document.createElement('div');
+            resultInfo.className = 'result-info';
+            
+            const fileName = document.createElement('h4');
+            fileName.textContent = file.name; // Safe text content
+            resultInfo.appendChild(fileName);
+            
+            const fileSizes = document.createElement('p');
+            fileSizes.textContent = `Original: ${this.formatFileSize(file.originalSize)} → Converted: ${this.formatFileSize(file.convertedSize)}`;
+            resultInfo.appendChild(fileSizes);
+            
+            // Create download button
+            const downloadBtn = document.createElement('button');
+            downloadBtn.className = 'download-btn';
+            downloadBtn.onclick = () => downloadFile(index);
+            downloadBtn.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7,10 12,15 17,10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                Download
             `;
+            
+            resultItem.appendChild(resultInfo);
+            resultItem.appendChild(downloadBtn);
             this.resultsList.appendChild(resultItem);
         });
         
