@@ -121,14 +121,30 @@ class ImageConverter {
         }
         
         if (fileList) {
-            fileList.innerHTML = files.map(file => `
+            fileList.innerHTML = files.map((file, index) => `
                 <div class="file-item">
                     <div class="file-info">
-                        <div class="file-name">${file.name}</div>
-                        <div class="file-size">${this.formatFileSize(file.size)}</div>
+                        <div class="file-icon-container">
+                            <div class="image-preview-placeholder" id="preview-${index}">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                                    <circle cx="9" cy="9" r="2"/>
+                                    <path d="M21 15l-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="file-details">
+                            <div class="file-name">${file.name}</div>
+                            <div class="file-size">${this.formatFileSize(file.size)}</div>
+                        </div>
                     </div>
                 </div>
             `).join('');
+            
+            // Create image previews for each file
+            files.forEach((file, index) => {
+                this.createImagePreview(file, index);
+            });
         }
     }
     
@@ -138,6 +154,45 @@ class ImageConverter {
         const sizes = ['Bytes', 'KB', 'MB', 'GB'];
         const i = Math.floor(Math.log(bytes) / Math.log(k));
         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+    
+    createImagePreview(file, index) {
+        const previewContainer = document.getElementById(`preview-${index}`);
+        if (!previewContainer) return;
+
+        // Try to create image preview for standard web image formats
+        try {
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            
+            img.onload = function() {
+                // Success - browser supports this image format
+                previewContainer.innerHTML = '';
+                img.style.width = '48px';
+                img.style.height = '48px';
+                img.style.objectFit = 'cover';
+                img.style.borderRadius = '4px';
+                img.style.border = '1px solid #e5e7eb';
+                previewContainer.appendChild(img);
+            };
+            
+            img.onerror = function() {
+                // Image loading failed - show format-specific badge
+                const fileExtension = file.name.split('.').pop().toUpperCase();
+                previewContainer.innerHTML = `
+                    <div class="format-badge">
+                        <span class="format-text">${fileExtension}</span>
+                    </div>
+                `;
+            };
+            
+            // Set image source to the uploaded file
+            img.src = URL.createObjectURL(file);
+            
+        } catch (error) {
+            console.log('Image preview not supported for this file:', error);
+            // Keep the default SVG icon
+        }
     }
     
     enableConvertButton() {

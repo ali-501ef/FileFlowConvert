@@ -5972,6 +5972,24 @@ body {
     letter-spacing: 0.5px;
 }
 
+.file-item .format-badge {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-soft);
+}
+
+.file-item .format-text {
+    color: white;
+    font-weight: bold;
+    font-size: 9px;
+    letter-spacing: 0.5px;
+}
+
 .file-item .remove-btn {
     padding: 0.5rem;
     background: var(--error-bg);
