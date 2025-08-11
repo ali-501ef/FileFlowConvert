@@ -210,12 +210,24 @@ class PDFWatermark {
             this.pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
             const pageCount = this.pdfDoc.getPageCount();
             
-            document.getElementById('pdfInfo').innerHTML = `
-                <div class="pdf-details">
-                    <span class="detail-item">📄 ${pageCount} pages</span>
-                    <span class="detail-item">📊 ${this.formatFileSize(file.size)}</span>
-                </div>
-            `;
+            // Safe DOM manipulation to prevent XSS
+            const pdfInfo = document.getElementById('pdfInfo');
+            pdfInfo.innerHTML = ''; // Clear existing content
+            
+            const detailsDiv = document.createElement('div');
+            detailsDiv.className = 'pdf-details';
+            
+            const pagesSpan = document.createElement('span');
+            pagesSpan.className = 'detail-item';
+            pagesSpan.textContent = `📄 ${pageCount} pages`;
+            
+            const sizeSpan = document.createElement('span');
+            sizeSpan.className = 'detail-item';
+            sizeSpan.textContent = `📊 ${this.formatFileSize(file.size)}`;
+            
+            detailsDiv.appendChild(pagesSpan);
+            detailsDiv.appendChild(sizeSpan);
+            pdfInfo.appendChild(detailsDiv);
             
             this.convertBtn.disabled = false;
             
@@ -246,41 +258,58 @@ class PDFWatermark {
             const previewWidth = 300;
             const previewHeight = (height / width) * previewWidth;
             
-            // Create preview with simulated watermark patterns
-            document.getElementById('watermarkPreview').innerHTML = `
-                <div class="preview-canvas" style="width: ${previewWidth}px; height: ${previewHeight}px; position: relative; background: white; border: 1px solid #ddd; overflow: hidden;">
-                    <div class="page-content" style="width: 100%; height: 100%; background: #f8f9fa; position: relative;">
-                        ${this.generatePreviewWatermarks(settings, previewWidth, previewHeight)}
-                    </div>
-                </div>
-                <p class="preview-note">Preview showing main watermark (actual implementation includes multiple security layers)</p>
-            `;
+            // Create preview with safe DOM manipulation
+            const previewContainer = document.getElementById('watermarkPreview');
+            previewContainer.innerHTML = ''; // Clear existing content
+            
+            const canvasDiv = document.createElement('div');
+            canvasDiv.className = 'preview-canvas';
+            canvasDiv.style.cssText = `width: ${previewWidth}px; height: ${previewHeight}px; position: relative; background: white; border: 1px solid #ddd; overflow: hidden;`;
+            
+            const pageContentDiv = document.createElement('div');
+            pageContentDiv.className = 'page-content';
+            pageContentDiv.style.cssText = 'width: 100%; height: 100%; background: #f8f9fa; position: relative;';
+            
+            // Add watermark safely
+            const watermarkDiv = this.createSafeWatermarkElement(settings, previewWidth, previewHeight);
+            pageContentDiv.appendChild(watermarkDiv);
+            canvasDiv.appendChild(pageContentDiv);
+            
+            const noteP = document.createElement('p');
+            noteP.className = 'preview-note';
+            noteP.textContent = 'Preview showing main watermark (actual implementation includes multiple security layers)';
+            
+            previewContainer.appendChild(canvasDiv);
+            previewContainer.appendChild(noteP);
         } catch (error) {
             console.error('Preview error:', error);
         }
     }
 
-    generatePreviewWatermarks(settings, previewWidth, previewHeight) {
+    createSafeWatermarkElement(settings, previewWidth, previewHeight) {
         const pos = this.getPositionCoordinates(settings.position, previewWidth, previewHeight);
         const fontSize = Math.floor(settings.fontSize * 0.15); // Scale for preview
         
-        return `
-            <div class="watermark-overlay" style="
-                position: absolute;
-                top: ${pos.y}px;
-                left: ${pos.x}px;
-                transform: translate(-50%, -50%) rotate(${settings.rotation}deg);
-                color: ${settings.color};
-                font-size: ${fontSize}px;
-                opacity: ${settings.opacity / 100};
-                font-weight: bold;
-                pointer-events: none;
-                font-family: Arial, sans-serif;
-                text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
-            ">
-                ${settings.text}
-            </div>
+        const watermarkDiv = document.createElement('div');
+        watermarkDiv.className = 'watermark-overlay';
+        watermarkDiv.style.cssText = `
+            position: absolute;
+            top: ${pos.y}px;
+            left: ${pos.x}px;
+            transform: translate(-50%, -50%) rotate(${settings.rotation}deg);
+            color: ${settings.color};
+            font-size: ${fontSize}px;
+            opacity: ${settings.opacity / 100};
+            font-weight: bold;
+            pointer-events: none;
+            font-family: Arial, sans-serif;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
         `;
+        
+        // Safely set text content to prevent XSS
+        watermarkDiv.textContent = settings.text;
+        
+        return watermarkDiv;
     }
 
     updateLivePreview() {
