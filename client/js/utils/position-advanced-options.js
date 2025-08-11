@@ -1,40 +1,50 @@
-// Reorder Advanced Options to appear right above the main action button.
-// Runs on every tool page; no-op if selectors aren't found.
-document.addEventListener('DOMContentLoaded', () => {
-  // Each page wraps content in a .converter-container (used across tools)
-  const containers = document.querySelectorAll('.converter-container');
+// Keep Advanced Options directly above the primary Convert button,
+// even after uploads or dynamic DOM updates. Non-destructive.
 
-  containers.forEach((root) => {
+(function () {
+  function findPrimaryBtn(root) {
+    return (
+      root.querySelector(
+        'button#convertBtn, button.convert-btn,' +
+        'button.merge-btn, button.compress-btn, button.trim-btn,' +
+        'button.create-btn, button.extract-btn,' +
+        'button.action-primary, button.primary, button.primary-action'
+      ) ||
+      Array.from(root.querySelectorAll('button')).find((b) => {
+        const w = b.getBoundingClientRect?.().width || 0;
+        return w > 300; // heuristic for main CTA
+      })
+    );
+  }
+
+  function placeAdvanced(root) {
     const adv = root.querySelector('.advanced-options');
     if (!adv) return;
 
-    // Heuristic to find the primary action button without breaking pages.
-    // We try the common classes/ids first; then fall back to the first large button.
-    const primaryBtn =
-      root.querySelector(
-        // common across our tools
-        'button#convertBtn, button.convert-btn,' +
-        // other common verbs
-        'button.merge-btn, button.compress-btn, button.trim-btn, button.create-btn, button.extract-btn,' +
-        // generic "primary" classes used in some pages
-        'button.action-primary, button.primary, button.primary-action'
-      ) ||
-      // last resort: the first full-width button inside the container
-      Array.from(root.querySelectorAll('button')).find((b) => {
-        const w = b.getBoundingClientRect?.().width || 0;
-        return w > 300; // likely the main CTA
-      });
+    const btn = findPrimaryBtn(root);
+    if (!btn) return;
 
-    if (!primaryBtn) return;
+    // If it's already right above the button, do nothing
+    const prev = btn.previousElementSibling;
+    if (prev === adv) return;
 
-    // If it's already right above, do nothing
-    let cursor = primaryBtn.previousElementSibling;
-    while (cursor && cursor.matches('.progress-container, .results, .info-grid, .tool-info-section, .file-preview, .upload-area')) {
-      cursor = cursor.previousElementSibling;
-    }
-    if (cursor === adv) return;
+    // Move Advanced Options directly above the main button
+    btn.parentNode.insertBefore(adv, btn);
+  }
 
-    // Move Advanced Options right before the primary button
-    primaryBtn.parentNode.insertBefore(adv, primaryBtn);
+  function initContainer(root) {
+    placeAdvanced(root);
+
+    // Re-apply whenever uploads/results modify the DOM
+    const obs = new MutationObserver(() => placeAdvanced(root));
+    obs.observe(root, { childList: true, subtree: true });
+
+    // Also respond to custom events some tools emit
+    ['file-added', 'file-removed', 'conversion-start', 'conversion-complete']
+      .forEach(evt => root.addEventListener(evt, () => placeAdvanced(root), { passive: true }));
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.converter-container').forEach(initContainer);
   });
-});
+})();
