@@ -94,14 +94,36 @@ class PDFToWordConverter {
             // Analyze PDF content
             const analysisResult = await this.analyzePDFContent();
             
-            document.getElementById('pdfInfo').innerHTML = `
-                <div class="pdf-details">
-                    <span class="detail-item">📄 ${pageCount} pages</span>
-                    <span class="detail-item">📊 ${this.formatFileSize(file.size)}</span>
-                    <span class="detail-item">📝 ${analysisResult.textPages} pages with text</span>
-                    <span class="detail-item">🖼️ ${analysisResult.hasImages ? 'Contains images' : 'Text only'}</span>
-                </div>
-            `;
+            // Create DOM elements safely to avoid innerHTML security warnings
+            const pdfInfoElement = document.getElementById('pdfInfo');
+            pdfInfoElement.innerHTML = ''; // Clear existing content
+            
+            const detailsDiv = document.createElement('div');
+            detailsDiv.className = 'pdf-details';
+            
+            // Create each detail item safely
+            const pageItem = document.createElement('span');
+            pageItem.className = 'detail-item';
+            pageItem.textContent = `📄 ${pageCount} pages`;
+            
+            const sizeItem = document.createElement('span');
+            sizeItem.className = 'detail-item';
+            sizeItem.textContent = `📊 ${this.formatFileSize(file.size)}`;
+            
+            const textPagesItem = document.createElement('span');
+            textPagesItem.className = 'detail-item';
+            textPagesItem.textContent = `📝 ${analysisResult.textPages} pages with text`;
+            
+            const imagesItem = document.createElement('span');
+            imagesItem.className = 'detail-item';
+            imagesItem.textContent = `🖼️ ${analysisResult.hasImages ? 'Contains images' : 'Text only'}`;
+            
+            // Append all elements
+            detailsDiv.appendChild(pageItem);
+            detailsDiv.appendChild(sizeItem);
+            detailsDiv.appendChild(textPagesItem);
+            detailsDiv.appendChild(imagesItem);
+            pdfInfoElement.appendChild(detailsDiv);
             
             this.convertBtn.disabled = false;
             
