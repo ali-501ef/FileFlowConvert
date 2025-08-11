@@ -81,12 +81,24 @@ class PDFSplitter {
             this.pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
             this.totalPages = this.pdfDoc.getPageCount();
             
-            document.getElementById('pdfInfo').innerHTML = `
-                <div class="pdf-details">
-                    <span class="detail-item">📄 ${this.totalPages} pages</span>
-                    <span class="detail-item">📊 ${this.formatFileSize(file.size)}</span>
-                </div>
-            `;
+            // Safe DOM manipulation to prevent XSS
+            const pdfInfoDiv = document.getElementById('pdfInfo');
+            pdfInfoDiv.innerHTML = ''; // Clear existing content
+            
+            const detailsDiv = document.createElement('div');
+            detailsDiv.className = 'pdf-details';
+            
+            const pagesSpan = document.createElement('span');
+            pagesSpan.className = 'detail-item';
+            pagesSpan.textContent = `📄 ${this.totalPages} pages`;
+            
+            const sizeSpan = document.createElement('span');
+            sizeSpan.className = 'detail-item';
+            sizeSpan.textContent = `📊 ${this.formatFileSize(file.size)}`;
+            
+            detailsDiv.appendChild(pagesSpan);
+            detailsDiv.appendChild(sizeSpan);
+            pdfInfoDiv.appendChild(detailsDiv);
             
             this.convertBtn.disabled = false;
         } catch (error) {
@@ -258,29 +270,43 @@ class PDFSplitter {
         results.forEach(result => {
             const resultItem = document.createElement('div');
             resultItem.className = 'result-item';
-            resultItem.innerHTML = `
-                <div class="result-info">
-                    <div class="result-name">${result.name}</div>
-                    <div class="result-details">
-                        ${result.pages} page${result.pages > 1 ? 's' : ''} • ${this.formatFileSize(result.size)}
-                    </div>
-                </div>
-                <button class="download-btn" data-url="${result.url}" data-name="${result.name}">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                        <polyline points="7,10 12,15 17,10"></polyline>
-                        <line x1="12" y1="15" x2="12" y2="3"></line>
-                    </svg>
-                    Download
-                </button>
+            
+            // Safe DOM construction to prevent XSS
+            const resultInfo = document.createElement('div');
+            resultInfo.className = 'result-info';
+            
+            const resultName = document.createElement('div');
+            resultName.className = 'result-name';
+            resultName.textContent = result.name; // Safe text content
+            
+            const resultDetails = document.createElement('div');
+            resultDetails.className = 'result-details';
+            resultDetails.textContent = `${result.pages} page${result.pages > 1 ? 's' : ''} • ${this.formatFileSize(result.size)}`;
+            
+            resultInfo.appendChild(resultName);
+            resultInfo.appendChild(resultDetails);
+            
+            const downloadBtn = document.createElement('button');
+            downloadBtn.className = 'download-btn';
+            downloadBtn.setAttribute('data-url', result.url);
+            downloadBtn.setAttribute('data-name', result.name);
+            
+            // Safe SVG creation
+            downloadBtn.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7,10 12,15 17,10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                Download
             `;
             
-            // Add event listener for download button
-            const downloadBtn = resultItem.querySelector('.download-btn');
             downloadBtn.addEventListener('click', () => {
                 this.downloadFile(result.url, result.name);
             });
             
+            resultItem.appendChild(resultInfo);
+            resultItem.appendChild(downloadBtn);
             this.resultsList.appendChild(resultItem);
         });
 
