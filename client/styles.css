@@ -5917,77 +5917,17 @@ body {
 
 .file-item .file-info {
     flex: 1;
-    display: flex;
-    align-items: center;
-    gap: var(--element-spacing);
-}
-
-.file-item .file-icon-container {
-    flex-shrink: 0;
-}
-
-.file-item .image-preview-placeholder {
-    width: 48px;
-    height: 48px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--background-soft);
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--border-soft);
-}
-
-.file-item .file-details {
-    flex: 1;
 }
 
 .file-item .file-name {
     font-weight: 500;
     color: var(--foreground);
     margin-bottom: 2px;
-    display: block;
 }
 
 .file-item .file-size {
     font-size: var(--font-size-sm);
     color: var(--foreground-light);
-    display: block;
-}
-
-.file-item .heic-badge {
-    width: 48px;
-    height: 48px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--border-soft);
-}
-
-.file-item .heic-text {
-    color: white;
-    font-weight: bold;
-    font-size: 10px;
-    letter-spacing: 0.5px;
-}
-
-.file-item .format-badge {
-    width: 48px;
-    height: 48px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--border-soft);
-}
-
-.file-item .format-text {
-    color: white;
-    font-weight: bold;
-    font-size: 9px;
-    letter-spacing: 0.5px;
 }
 
 .file-item .remove-btn {
