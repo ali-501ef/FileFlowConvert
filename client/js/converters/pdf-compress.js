@@ -274,25 +274,51 @@ class PDFCompressor {
 
     showCompressionResults() {
         const stats = this.compressionStats;
+        const compressionStatsEl = document.getElementById('compressionStats');
         
-        document.getElementById('compressionStats').innerHTML = `
-            <div class="stats-grid">
-                <div class="stat-item">
-                    <span class="stat-label">Original Size:</span>
-                    <span class="stat-value">${this.formatFileSize(stats.originalSize)}</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Compressed Size:</span>
-                    <span class="stat-value">${this.formatFileSize(stats.compressedSize)}</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Size Reduction:</span>
-                    <span class="stat-value success">${stats.compressionRatio}%</span>
-                </div>
-            </div>
-        `;
+        // Clear existing content
+        compressionStatsEl.textContent = '';
+        
+        // Create stats grid container
+        const statsGrid = document.createElement('div');
+        statsGrid.className = 'stats-grid';
+        
+        // Create original size stat
+        const originalStat = this.createStatItem('Original Size:', this.formatFileSize(stats.originalSize));
+        
+        // Create compressed size stat  
+        const compressedStat = this.createStatItem('Compressed Size:', this.formatFileSize(stats.compressedSize));
+        
+        // Create size reduction stat
+        const reductionStat = this.createStatItem('Size Reduction:', `${stats.compressionRatio}%`, 'success');
+        
+        // Append all stats to grid
+        statsGrid.appendChild(originalStat);
+        statsGrid.appendChild(compressedStat);
+        statsGrid.appendChild(reductionStat);
+        
+        // Add grid to container
+        compressionStatsEl.appendChild(statsGrid);
         
         this.results.style.display = 'block';
+    }
+
+    createStatItem(label, value, valueClass = '') {
+        const statItem = document.createElement('div');
+        statItem.className = 'stat-item';
+        
+        const labelSpan = document.createElement('span');
+        labelSpan.className = 'stat-label';
+        labelSpan.textContent = label;
+        
+        const valueSpan = document.createElement('span');
+        valueSpan.className = valueClass ? `stat-value ${valueClass}` : 'stat-value';
+        valueSpan.textContent = value;
+        
+        statItem.appendChild(labelSpan);
+        statItem.appendChild(valueSpan);
+        
+        return statItem;
     }
 
     downloadPDF() {
