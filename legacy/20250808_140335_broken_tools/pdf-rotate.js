@@ -346,22 +346,56 @@ class PDFRotate {
         const rotatedSize = this.outputBlob.size;
         const rotatedPages = Array.from(this.pageRotations.values()).filter(r => r !== 0).length;
         
-        document.getElementById('rotationStats').innerHTML = `
-            <div class="stats-grid">
-                <div class="stat-item">
-                    <span class="stat-label">Original Size:</span>
-                    <span class="stat-value">${this.formatFileSize(originalSize)}</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Processed Size:</span>
-                    <span class="stat-value">${this.formatFileSize(rotatedSize)}</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Pages Rotated:</span>
-                    <span class="stat-value success">${rotatedPages}</span>
-                </div>
-            </div>
-        `;
+        const statsElement = document.getElementById('rotationStats');
+        
+        // Clear existing content safely
+        statsElement.textContent = '';
+        
+        // Create DOM elements safely
+        const statsGrid = document.createElement('div');
+        statsGrid.className = 'stats-grid';
+        
+        // Original Size item
+        const originalItem = document.createElement('div');
+        originalItem.className = 'stat-item';
+        const originalLabel = document.createElement('span');
+        originalLabel.className = 'stat-label';
+        originalLabel.textContent = 'Original Size:';
+        const originalValue = document.createElement('span');
+        originalValue.className = 'stat-value';
+        originalValue.textContent = this.formatFileSize(originalSize);
+        originalItem.appendChild(originalLabel);
+        originalItem.appendChild(originalValue);
+        
+        // Processed Size item
+        const processedItem = document.createElement('div');
+        processedItem.className = 'stat-item';
+        const processedLabel = document.createElement('span');
+        processedLabel.className = 'stat-label';
+        processedLabel.textContent = 'Processed Size:';
+        const processedValue = document.createElement('span');
+        processedValue.className = 'stat-value';
+        processedValue.textContent = this.formatFileSize(rotatedSize);
+        processedItem.appendChild(processedLabel);
+        processedItem.appendChild(processedValue);
+        
+        // Pages Rotated item
+        const pagesItem = document.createElement('div');
+        pagesItem.className = 'stat-item';
+        const pagesLabel = document.createElement('span');
+        pagesLabel.className = 'stat-label';
+        pagesLabel.textContent = 'Pages Rotated:';
+        const pagesValue = document.createElement('span');
+        pagesValue.className = 'stat-value success';
+        pagesValue.textContent = rotatedPages.toString();
+        pagesItem.appendChild(pagesLabel);
+        pagesItem.appendChild(pagesValue);
+        
+        // Assemble the structure
+        statsGrid.appendChild(originalItem);
+        statsGrid.appendChild(processedItem);
+        statsGrid.appendChild(pagesItem);
+        statsElement.appendChild(statsGrid);
         
         this.results.style.display = 'block';
     }
