@@ -341,10 +341,16 @@ class PDFWatermark {
             reader.onload = (e) => {
                 this.watermarkSettings.imageData = e.target.result;
                 
-                // Show image preview
-                document.getElementById('imagePreview').innerHTML = `
-                    <img src="${e.target.result}" alt="Watermark Preview" style="max-width: 150px; max-height: 100px; border-radius: 4px;">
-                `;
+                // Show image preview - using safe DOM methods
+                const imagePreview = document.getElementById('imagePreview');
+                imagePreview.innerHTML = ''; // Clear previous content
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.alt = 'Watermark Preview';
+                img.style.maxWidth = '150px';
+                img.style.maxHeight = '100px';
+                img.style.borderRadius = '4px';
+                imagePreview.appendChild(img);
                 
                 this.updateLivePreview();
             };
