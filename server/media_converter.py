@@ -41,7 +41,7 @@ def convert_media(input_path, output_path, conversion_type, options=None):
 
 def compress_video(input_path, output_path, options):
     """Compress video file"""
-    cmd = ['ffmpeg', '-i', input_path]
+    cmd = ['ffmpeg', '-i', shlex.quote(input_path)]
     
     # Video codec settings
     cmd.extend(['-c:v', 'libx264'])
@@ -79,7 +79,7 @@ def compress_video(input_path, output_path, options):
     # Audio codec
     cmd.extend(['-c:a', 'aac', '-b:a', '128k'])
     
-    cmd.extend(['-y', output_path])
+    cmd.extend(['-y', shlex.quote(output_path)])
     
     result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
     
@@ -97,7 +97,7 @@ def compress_video(input_path, output_path, options):
 
 def extract_audio(input_path, output_path, options):
     """Extract audio from video"""
-    cmd = ['ffmpeg', '-i', input_path]
+    cmd = ['ffmpeg', '-i', shlex.quote(input_path)]
     
     # Audio format
     format_ext = options.get('format', 'mp3')
@@ -121,7 +121,7 @@ def extract_audio(input_path, output_path, options):
     
     # Add metadata preservation
     cmd.extend(['-map_metadata', '0'])
-    cmd.extend(['-y', output_path])
+    cmd.extend(['-y', shlex.quote(output_path)])
     
     result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
     
@@ -132,7 +132,7 @@ def extract_audio(input_path, output_path, options):
 
 def convert_audio(input_path, output_path, options):
     """Convert audio format"""
-    cmd = ['ffmpeg', '-i', input_path]
+    cmd = ['ffmpeg', '-i', shlex.quote(input_path)]
     
     format_ext = options.get('format', 'mp3')
     if format_ext == 'mp3':
@@ -160,7 +160,7 @@ def convert_audio(input_path, output_path, options):
     if options.get('preserve_metadata', True):
         cmd.extend(['-map_metadata', '0'])
     
-    cmd.extend(['-y', output_path])
+    cmd.extend(['-y', shlex.quote(output_path)])
     
     result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
     
@@ -176,7 +176,7 @@ def trim_video(input_path, output_path, options):
     duration = options.get('duration')
     fast_copy = options.get('fast_copy', True)
     
-    cmd = ['ffmpeg', '-i', input_path]
+    cmd = ['ffmpeg', '-i', shlex.quote(input_path)]
     
     # Set start time
     if start_time > 0:
@@ -196,7 +196,7 @@ def trim_video(input_path, output_path, options):
     else:
         cmd.extend(['-c:v', 'libx264', '-c:a', 'aac'])  # Re-encode
     
-    cmd.extend(['-y', output_path])
+    cmd.extend(['-y', shlex.quote(output_path)])
     
     result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
     
@@ -217,10 +217,10 @@ def create_gif(input_path, output_path, options):
     
     # Generate palette
     palette_cmd = [
-        'ffmpeg', '-i', input_path,
+        'ffmpeg', '-i', shlex.quote(input_path),
         '-ss', shlex.quote(str(start_time)), '-t', shlex.quote(str(duration)),
         '-vf', f'fps={shlex.quote(str(fps))},scale={shlex.quote(str(width))}:-1:flags=lanczos,palettegen',
-        '-y', palette_path
+        '-y', shlex.quote(palette_path)
     ]
     
     result = subprocess.run(palette_cmd, capture_output=True, text=True, timeout=120)
@@ -229,10 +229,10 @@ def create_gif(input_path, output_path, options):
     
     # Create GIF with palette
     gif_cmd = [
-        'ffmpeg', '-i', input_path, '-i', palette_path,
+        'ffmpeg', '-i', shlex.quote(input_path), '-i', shlex.quote(palette_path),
         '-ss', shlex.quote(str(start_time)), '-t', shlex.quote(str(duration)),
         '-lavfi', f'fps={shlex.quote(str(fps))},scale={shlex.quote(str(width))}:-1:flags=lanczos[x];[x][1:v]paletteuse',
-        '-y', output_path
+        '-y', shlex.quote(output_path)
     ]
     
     result = subprocess.run(gif_cmd, capture_output=True, text=True, timeout=120)
@@ -253,7 +253,7 @@ def get_video_duration(video_path):
     try:
         cmd = [
             'ffprobe', '-v', 'quiet', '-show_entries', 'format=duration',
-            '-of', 'csv=p=0', video_path
+            '-of', 'csv=p=0', shlex.quote(video_path)
         ]
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
         if result.returncode == 0:
@@ -292,19 +292,19 @@ def merge_videos(input_path, output_path, options):
         if normalize:
             # First normalize all videos to same codec/resolution, then concat
             cmd = [
-                'ffmpeg', '-f', 'concat', '-safe', '0', '-i', concat_file,
+                'ffmpeg', '-f', 'concat', '-safe', '0', '-i', shlex.quote(concat_file),
                 '-c:v', 'libx264', '-c:a', 'aac',
                 '-preset', 'medium', '-crf', '23',
                 '-y', '-hide_banner', '-nostats', '-progress', 'pipe:1',
-                output_path
+                shlex.quote(output_path)
             ]
         else:
             # Try direct concat first (faster)
             cmd = [
-                'ffmpeg', '-f', 'concat', '-safe', '0', '-i', concat_file,
+                'ffmpeg', '-f', 'concat', '-safe', '0', '-i', shlex.quote(concat_file),
                 '-c', 'copy',  # Copy streams without re-encoding for speed
                 '-y', '-hide_banner', '-nostats', '-progress', 'pipe:1',
-                output_path
+                shlex.quote(output_path)
             ]
         
         # Use Popen for real-time progress tracking
