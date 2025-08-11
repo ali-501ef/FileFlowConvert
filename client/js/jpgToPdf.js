@@ -203,13 +203,32 @@ class JpgToPdfConverter {
     this.selectedFiles.forEach((file, index) => {
       const fileItem = document.createElement('div');
       fileItem.className = 'file-item';
-      fileItem.innerHTML = `
-        <div class="file-info">
-          <span class="file-name">${file.name}</span>
-          <span class="file-size">${this.formatFileSize(file.size)}</span>
-        </div>
-        <button class="remove-file-btn" onclick="jpgToPdfConverter.removeFile(${index})">×</button>
-      `;
+      
+      // Create file info container
+      const fileInfo = document.createElement('div');
+      fileInfo.className = 'file-info';
+      
+      // Safely set file name using textContent
+      const fileName = document.createElement('span');
+      fileName.className = 'file-name';
+      fileName.textContent = file.name; // Safe: no HTML interpretation
+      
+      // Safely set file size
+      const fileSize = document.createElement('span');
+      fileSize.className = 'file-size';
+      fileSize.textContent = this.formatFileSize(file.size);
+      
+      // Create remove button
+      const removeBtn = document.createElement('button');
+      removeBtn.className = 'remove-file-btn';
+      removeBtn.textContent = '×';
+      removeBtn.onclick = () => jpgToPdfConverter.removeFile(index);
+      
+      // Assemble the elements
+      fileInfo.appendChild(fileName);
+      fileInfo.appendChild(fileSize);
+      fileItem.appendChild(fileInfo);
+      fileItem.appendChild(removeBtn);
       fileList.appendChild(fileItem);
     });
   }
