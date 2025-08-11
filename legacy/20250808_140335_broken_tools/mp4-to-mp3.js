@@ -81,14 +81,36 @@ class Mp4ToMp3Converter {
             const duration = this.formatDuration(this.videoPreview.duration);
             const fileExtension = file.name.split('.').pop().toLowerCase();
             
-            document.getElementById('videoInfo').innerHTML = `
-                <div class="video-details">
-                    <span class="detail-item">🎬 ${fileExtension.toUpperCase()}</span>
-                    <span class="detail-item">⏱️ ${duration}</span>
-                    <span class="detail-item">📏 ${this.videoPreview.videoWidth}x${this.videoPreview.videoHeight}</span>
-                    <span class="detail-item">💾 ${this.formatFileSize(file.size)}</span>
-                </div>
-            `;
+            // Safe DOM manipulation to prevent XSS
+            const videoInfoContainer = document.getElementById('videoInfo');
+            videoInfoContainer.textContent = ''; // Clear existing content
+            
+            const videoDetails = document.createElement('div');
+            videoDetails.className = 'video-details';
+            
+            // Create each detail item with safe textContent
+            const formatSpan = document.createElement('span');
+            formatSpan.className = 'detail-item';
+            formatSpan.textContent = `🎬 ${fileExtension.toUpperCase()}`;
+            
+            const durationSpan = document.createElement('span');
+            durationSpan.className = 'detail-item';
+            durationSpan.textContent = `⏱️ ${duration}`;
+            
+            const resolutionSpan = document.createElement('span');
+            resolutionSpan.className = 'detail-item';
+            resolutionSpan.textContent = `📏 ${this.videoPreview.videoWidth}x${this.videoPreview.videoHeight}`;
+            
+            const sizeSpan = document.createElement('span');
+            sizeSpan.className = 'detail-item';
+            sizeSpan.textContent = `💾 ${this.formatFileSize(file.size)}`;
+            
+            // Append all elements safely
+            videoDetails.appendChild(formatSpan);
+            videoDetails.appendChild(durationSpan);
+            videoDetails.appendChild(resolutionSpan);
+            videoDetails.appendChild(sizeSpan);
+            videoInfoContainer.appendChild(videoDetails);
         };
         
         this.convertBtn.disabled = false;
