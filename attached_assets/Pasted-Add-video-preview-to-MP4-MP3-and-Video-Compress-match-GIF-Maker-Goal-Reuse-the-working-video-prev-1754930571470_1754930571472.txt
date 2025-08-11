@@ -1,0 +1,135 @@
+Add video preview to MP4→MP3 and Video Compress (match GIF Maker)
+Goal: Reuse the working video preview from gif-maker.html/js so users can see the selected video before running the job on:
+
+/mp4-to-mp3.html (converter: js/converters/mp4-to-mp3.js)
+
+/video-compress.html (converter: js/converters/video-compress.js)
+
+Hard constraints
+
+Do not modify any conversion/queue/upload logic.
+
+Do not hide the upload box at any time.
+
+Apply changes only to the two pages above.
+
+Use the same styles/markup conventions already used by GIF Maker’s preview so the look is consistent.
+
+Keep preview visible after conversion completes; clear only when the user removes the file.
+
+1) Extract the existing GIF Maker preview into a tiny shared helper
+Create client/js/components/videoPreview.js with a single exported function:
+
+js
+Copy
+Edit
+// client/js/components/videoPreview.js
+export function mountVideoPreview({ container, file, autoplay=false }) {
+  if (!container || !file) return;
+
+  // Ensure one preview instance per container
+  let holder = container.querySelector('.video-preview');
+  if (!holder) {
+    holder = document.createElement('div');
+    holder.className = 'video-preview';
+    holder.style.marginTop = '16px';
+    holder.innerHTML = `
+      <video class="video-preview-el" playsinline controls style="width:100%;border-radius:12px;outline:none"></video>
+    `;
+    container.appendChild(holder);
+  }
+
+  const videoEl = holder.querySelector('.video-preview-el');
+
+  // Revoke any previous URL
+  if (videoEl.dataset.blobUrl) {
+    URL.revokeObjectURL(videoEl.dataset.blobUrl);
+  }
+
+  const url = URL.createObjectURL(file);
+  videoEl.src = url;
+  videoEl.dataset.blobUrl = url;
+
+  // Autoplay only if allowed (no sound)
+  if (autoplay) {
+    videoEl.muted = true;
+    videoEl.play().catch(() => {/* ignore autoplay block */});
+  }
+
+  // Clean up on unload
+  window.addEventListener('beforeunload', () => {
+    try { URL.revokeObjectURL(url); } catch {}
+  }, { once:true });
+}
+Implementation note: copy any minimal CSS GIF Maker uses for .video-preview if it’s not already covered by page-wide styles. Do not import big CSS; keep styling inline/minimal as above.
+
+2) MP4 → MP3 page: add a preview container and call the helper
+File: client/mp4-to-mp3.html
+
+HTML: Inside .converter-container, just below the existing <div class="file-preview" id="filePreview">…</div>, add:
+
+html
+Copy
+Edit
+<div id="videoPreviewSlot" class="video-preview-slot"></div>
+File: client/js/converters/mp4-to-mp3.js
+
+Import at the top:
+
+js
+Copy
+Edit
+import { mountVideoPreview } from '/js/components/videoPreview.js';
+In the file-selection handler (where the tool currently enables the Convert button and shows filename/size), after the file has passed validation, add:
+
+js
+Copy
+Edit
+const previewSlot = document.getElementById('videoPreviewSlot');
+if (previewSlot && file && file.type.startsWith('video/')) {
+  mountVideoPreview({ container: previewSlot, file, autoplay: false });
+}
+Do not remove or hide the upload box. Do not clear the preview on “Convert”; only clear when the user removes/replaces the file.
+
+3) Video Compress page: add the same container and call the helper
+File: client/video-compress.html
+
+HTML: Inside .converter-container, below the existing file info block, add:
+
+html
+Copy
+Edit
+<div id="videoPreviewSlot" class="video-preview-slot"></div>
+File: client/js/converters/video-compress.js
+
+Import:
+
+js
+Copy
+Edit
+import { mountVideoPreview } from '/js/components/videoPreview.js';
+After a valid video file is selected/read, add:
+
+js
+Copy
+Edit
+const previewSlot = document.getElementById('videoPreviewSlot');
+if (previewSlot && file && file.type.startsWith('video/')) {
+  mountVideoPreview({ container: previewSlot, file, autoplay: false });
+}
+4) Safety/QA
+Keep the upload area always visible; do not toggle display:none on it in these two pages.
+
+Ensure no duplicate listeners are added (guard existing selection handlers if they run multiple times).
+
+Test with MP4 and MOV. Confirm:
+
+Drag-and-drop and “Choose file” both render the preview.
+
+Converting still works exactly as before.
+
+Replacing the file updates the preview.
+
+Removing the file clears the preview container’s <video> src (optional) or just mounts a new one next time.
+
+Out of scope: Everything else—styles outside the preview, navigation, advanced options, other tools—must remain untouched.
