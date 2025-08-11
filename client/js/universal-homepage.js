@@ -18,15 +18,24 @@ class UniversalHomepageConverter {
         
         // --- BEGIN PATCH: homepage uploader double-open fix ---
         // Prevent multiple bindings after re-render/navigation
-        if (this.dropZone.dataset.bound === '1') return;
+        if (this.dropZone.dataset.bound === '1') {
+            console.log('Upload area already bound, skipping...');
+            return;
+        }
         this.dropZone.dataset.bound = '1';
+        console.log('Binding upload area event listeners...');
 
         // Re-entrancy guard to stop double-open (area click + button click)
         let pickerBusy = false;
         const openPicker = (e) => {
+            console.log('openPicker called', e?.target);
             if (e) { e.preventDefault(); e.stopPropagation(); }
-            if (pickerBusy) return;
+            if (pickerBusy) {
+                console.log('Picker busy, ignoring click');
+                return;
+            }
             pickerBusy = true;
+            console.log('Clicking file input...');
             this.fileInput.click();
             // Small cooldown prevents duplicate .click() from bubbling/second binding
             setTimeout(() => { pickerBusy = false; }, 600);
