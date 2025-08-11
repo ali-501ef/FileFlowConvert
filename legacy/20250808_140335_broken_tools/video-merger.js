@@ -294,31 +294,58 @@ class VideoMerger {
 
     showMergeResults() {
         const info = this.mergeInfo;
+        const mergeInfoElement = document.getElementById('mergeInfo');
         
-        document.getElementById('mergeInfo').innerHTML = `
-            <div class="merge-details">
-                <div class="detail-row">
-                    <span class="detail-label">Videos Merged:</span>
-                    <span class="detail-value">${info.totalVideos}</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Total Duration:</span>
-                    <span class="detail-value">${this.formatDuration(info.totalDuration)}</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Output Format:</span>
-                    <span class="detail-value">${info.format}</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">File Size:</span>
-                    <span class="detail-value">${this.formatFileSize(info.outputSize)}</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Status:</span>
-                    <span class="detail-value success">✓ Ready for download</span>
-                </div>
-            </div>
-        `;
+        // Create container with safe DOM methods
+        const mergeDetails = document.createElement('div');
+        mergeDetails.className = 'merge-details';
+        
+        // Helper function to create detail rows
+        const createDetailRow = (label, value) => {
+            const row = document.createElement('div');
+            row.className = 'detail-row';
+            
+            const labelSpan = document.createElement('span');
+            labelSpan.className = 'detail-label';
+            labelSpan.textContent = label;
+            
+            const valueSpan = document.createElement('span');
+            valueSpan.className = 'detail-value';
+            valueSpan.textContent = value;
+            
+            row.appendChild(labelSpan);
+            row.appendChild(valueSpan);
+            return row;
+        };
+        
+        // Create status row with icon
+        const createStatusRow = () => {
+            const row = document.createElement('div');
+            row.className = 'detail-row';
+            
+            const labelSpan = document.createElement('span');
+            labelSpan.className = 'detail-label';
+            labelSpan.textContent = 'Status:';
+            
+            const valueSpan = document.createElement('span');
+            valueSpan.className = 'detail-value success';
+            valueSpan.textContent = '✓ Ready for download';
+            
+            row.appendChild(labelSpan);
+            row.appendChild(valueSpan);
+            return row;
+        };
+        
+        // Append all detail rows
+        mergeDetails.appendChild(createDetailRow('Videos Merged:', info.totalVideos));
+        mergeDetails.appendChild(createDetailRow('Total Duration:', this.formatDuration(info.totalDuration)));
+        mergeDetails.appendChild(createDetailRow('Output Format:', info.format));
+        mergeDetails.appendChild(createDetailRow('File Size:', this.formatFileSize(info.outputSize)));
+        mergeDetails.appendChild(createStatusRow());
+        
+        // Clear and append to DOM
+        mergeInfoElement.textContent = '';
+        mergeInfoElement.appendChild(mergeDetails);
         
         this.results.style.display = 'block';
     }
