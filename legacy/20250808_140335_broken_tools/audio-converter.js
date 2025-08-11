@@ -92,13 +92,29 @@ class AudioConverter {
             const duration = this.formatDuration(this.audioPreview.duration);
             const fileExtension = file.name.split('.').pop().toLowerCase();
             
-            document.getElementById('audioInfo').innerHTML = `
-                <div class="audio-details">
-                    <span class="detail-item">🎵 ${fileExtension.toUpperCase()}</span>
-                    <span class="detail-item">⏱️ ${duration}</span>
-                    <span class="detail-item">📊 ${this.formatFileSize(file.size)}</span>
-                </div>
-            `;
+            // Safe DOM manipulation to prevent XSS
+            const audioInfoElement = document.getElementById('audioInfo');
+            audioInfoElement.innerHTML = ''; // Clear existing content
+            
+            const audioDetails = document.createElement('div');
+            audioDetails.className = 'audio-details';
+            
+            const extensionSpan = document.createElement('span');
+            extensionSpan.className = 'detail-item';
+            extensionSpan.textContent = `🎵 ${fileExtension.toUpperCase()}`;
+            
+            const durationSpan = document.createElement('span');
+            durationSpan.className = 'detail-item';
+            durationSpan.textContent = `⏱️ ${duration}`;
+            
+            const sizeSpan = document.createElement('span');
+            sizeSpan.className = 'detail-item';
+            sizeSpan.textContent = `📊 ${this.formatFileSize(file.size)}`;
+            
+            audioDetails.appendChild(extensionSpan);
+            audioDetails.appendChild(durationSpan);
+            audioDetails.appendChild(sizeSpan);
+            audioInfoElement.appendChild(audioDetails);
         };
         
         this.convertBtn.disabled = false;
