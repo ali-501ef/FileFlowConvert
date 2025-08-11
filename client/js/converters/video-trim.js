@@ -398,12 +398,22 @@ class VideoTrimmer {
                 overlay.className = 'processing-overlay';
                 this.uploadArea.appendChild(overlay);
             }
-            overlay.innerHTML = `
-                <div class="processing-content">
-                    <div class="spinner"></div>
-                    <p>${message}</p>
-                </div>
-            `;
+            // Clear existing content safely
+            overlay.innerHTML = '';
+            
+            // Create elements safely using DOM methods
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'processing-content';
+            
+            const spinner = document.createElement('div');
+            spinner.className = 'spinner';
+            
+            const messageP = document.createElement('p');
+            messageP.textContent = message; // Use textContent to prevent XSS
+            
+            contentDiv.appendChild(spinner);
+            contentDiv.appendChild(messageP);
+            overlay.appendChild(contentDiv);
             overlay.style.display = 'flex';
             
             // Disable upload area interactions
