@@ -386,6 +386,10 @@ body {
     overflow: hidden;
     box-shadow: var(--shadow-soft);
     margin-bottom: var(--card-spacing);
+    min-height: 280px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .upload-area::before {
