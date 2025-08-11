@@ -357,46 +357,96 @@ class PDFToWordConverter {
         const convertedSize = this.conversionResult.file_size;
         const pageCount = this.pdfDoc ? this.pdfDoc.getPageCount() : 'N/A';
         
-        // Show conversion stats
+        // Show conversion stats using safe DOM methods
         const conversionInfo = document.getElementById('conversionInfo');
         if (conversionInfo) {
-            conversionInfo.innerHTML = `
-                <div class="stats-grid">
-                    <div class="stat-item">
-                        <span class="stat-label">ORIGINAL PDF:</span>
-                        <span class="stat-value">${this.formatFileSize(originalSize)}</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">WORD DOCUMENT:</span>
-                        <span class="stat-value">${this.formatFileSize(convertedSize)}</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">OUTPUT FORMAT:</span>
-                        <span class="stat-value">DOCX</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">PAGES PROCESSED:</span>
-                        <span class="stat-value">${pageCount}</span>
-                    </div>
-                </div>
-            `;
+            // Clear existing content
+            conversionInfo.textContent = '';
+            
+            // Create stats grid
+            const statsGrid = document.createElement('div');
+            statsGrid.className = 'stats-grid';
+            
+            // Create stat items safely
+            const statsData = [
+                { label: 'ORIGINAL PDF:', value: this.formatFileSize(originalSize) },
+                { label: 'WORD DOCUMENT:', value: this.formatFileSize(convertedSize) },
+                { label: 'OUTPUT FORMAT:', value: 'DOCX' },
+                { label: 'PAGES PROCESSED:', value: String(pageCount) } // Convert to string to prevent XSS
+            ];
+            
+            statsData.forEach(stat => {
+                const statItem = document.createElement('div');
+                statItem.className = 'stat-item';
+                
+                const statLabel = document.createElement('span');
+                statLabel.className = 'stat-label';
+                statLabel.textContent = stat.label;
+                
+                const statValue = document.createElement('span');
+                statValue.className = 'stat-value';
+                statValue.textContent = stat.value;
+                
+                statItem.appendChild(statLabel);
+                statItem.appendChild(statValue);
+                statsGrid.appendChild(statItem);
+            });
+            
+            conversionInfo.appendChild(statsGrid);
         }
 
-        // Show download section
+        // Show download section using safe DOM methods
         const downloadSection = document.getElementById('downloadSection');
         if (downloadSection) {
-            downloadSection.innerHTML = `
-                <div class="download-container">
-                    <button class="download-btn" onclick="window.pdfToWordConverter.downloadFile()">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                            <polyline points="7,10 12,15 17,10"></polyline>
-                            <line x1="12" y1="15" x2="12" y2="3"></line>
-                        </svg>
-                        Download DOCX
-                    </button>
-                </div>
-            `;
+            // Clear existing content
+            downloadSection.textContent = '';
+            
+            // Create download container
+            const downloadContainer = document.createElement('div');
+            downloadContainer.className = 'download-container';
+            
+            // Create download button
+            const downloadBtn = document.createElement('button');
+            downloadBtn.className = 'download-btn';
+            
+            // Create SVG icon
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('width', '16');
+            svg.setAttribute('height', '16');
+            svg.setAttribute('viewBox', '0 0 24 24');
+            svg.setAttribute('fill', 'none');
+            svg.setAttribute('stroke', 'currentColor');
+            svg.setAttribute('stroke-width', '2');
+            svg.setAttribute('stroke-linecap', 'round');
+            svg.setAttribute('stroke-linejoin', 'round');
+            
+            // Create SVG paths
+            const path1 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path1.setAttribute('d', 'M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4');
+            
+            const polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+            polyline.setAttribute('points', '7,10 12,15 17,10');
+            
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('x1', '12');
+            line.setAttribute('y1', '15');
+            line.setAttribute('x2', '12');
+            line.setAttribute('y2', '3');
+            
+            svg.appendChild(path1);
+            svg.appendChild(polyline);
+            svg.appendChild(line);
+            
+            // Add text node
+            const buttonText = document.createTextNode(' Download DOCX');
+            
+            // Assemble button with safe event listener
+            downloadBtn.appendChild(svg);
+            downloadBtn.appendChild(buttonText);
+            downloadBtn.addEventListener('click', () => this.downloadFile());
+            
+            downloadContainer.appendChild(downloadBtn);
+            downloadSection.appendChild(downloadContainer);
         }
         
         this.results.style.display = 'block';
