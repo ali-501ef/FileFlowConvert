@@ -270,22 +270,65 @@ class VideoCompressor {
     showCompressionResults() {
         const stats = this.compressionStats;
         
-        document.getElementById('compressionStats').innerHTML = `
-            <div class="stats-grid">
-                <div class="stat-item">
-                    <span class="stat-label">Original Size:</span>
-                    <span class="stat-value">${this.formatFileSize(stats.originalSize)}</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Compressed Size:</span>
-                    <span class="stat-value">${this.formatFileSize(stats.compressedSize)}</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Size Reduction:</span>
-                    <span class="stat-value success">${stats.compressionRatio}%</span>
-                </div>
-            </div>
-        `;
+        // Create elements safely to prevent XSS
+        const statsContainer = document.getElementById('compressionStats');
+        statsContainer.innerHTML = ''; // Clear existing content
+        
+        const statsGrid = document.createElement('div');
+        statsGrid.className = 'stats-grid';
+        
+        // Original Size
+        const originalItem = document.createElement('div');
+        originalItem.className = 'stat-item';
+        
+        const originalLabel = document.createElement('span');
+        originalLabel.className = 'stat-label';
+        originalLabel.textContent = 'Original Size:';
+        
+        const originalValue = document.createElement('span');
+        originalValue.className = 'stat-value';
+        originalValue.textContent = this.formatFileSize(stats.originalSize);
+        
+        originalItem.appendChild(originalLabel);
+        originalItem.appendChild(originalValue);
+        
+        // Compressed Size
+        const compressedItem = document.createElement('div');
+        compressedItem.className = 'stat-item';
+        
+        const compressedLabel = document.createElement('span');
+        compressedLabel.className = 'stat-label';
+        compressedLabel.textContent = 'Compressed Size:';
+        
+        const compressedValue = document.createElement('span');
+        compressedValue.className = 'stat-value';
+        compressedValue.textContent = this.formatFileSize(stats.compressedSize);
+        
+        compressedItem.appendChild(compressedLabel);
+        compressedItem.appendChild(compressedValue);
+        
+        // Size Reduction
+        const reductionItem = document.createElement('div');
+        reductionItem.className = 'stat-item';
+        
+        const reductionLabel = document.createElement('span');
+        reductionLabel.className = 'stat-label';
+        reductionLabel.textContent = 'Size Reduction:';
+        
+        const reductionValue = document.createElement('span');
+        reductionValue.className = 'stat-value success';
+        reductionValue.textContent = stats.compressionRatio + '%';
+        
+        reductionItem.appendChild(reductionLabel);
+        reductionItem.appendChild(reductionValue);
+        
+        // Append all items to grid
+        statsGrid.appendChild(originalItem);
+        statsGrid.appendChild(compressedItem);
+        statsGrid.appendChild(reductionItem);
+        
+        // Append grid to container
+        statsContainer.appendChild(statsGrid);
         
         this.results.style.display = 'block';
     }
