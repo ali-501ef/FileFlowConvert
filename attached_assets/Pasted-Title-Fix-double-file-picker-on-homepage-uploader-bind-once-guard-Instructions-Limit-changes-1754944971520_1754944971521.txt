@@ -1,0 +1,85 @@
+Title: Fix double file picker on homepage uploader (bind once + guard)
+
+Instructions:
+
+Limit changes to the homepage uploader only:
+
+Files to edit:
+
+index.html (or /index.html if at repo root)
+
+client/js/universal-homepage.js
+
+Do not modify any other converter pages or shared upload utilities.
+
+In index.html (homepage only), ensure the uploader has stable IDs and no inline onclick:
+
+Outer clickable area: <div id="home-upload-area" class="upload-area">…</div>
+
+Hidden input: <input id="home-file-input" type="file" hidden />
+
+Button inside area: <button id="home-choose-btn" type="button">Choose File</button>
+
+Remove any onclick on the area or button.
+
+In client/js/universal-homepage.js, replace the uploader binding with a single, guarded implementation:
+
+js
+Copy
+Edit
+// --- BEGIN PATCH: homepage uploader double-open fix ---
+(() => {
+  const area = document.getElementById('home-upload-area');
+  const btn  = document.getElementById('home-choose-btn');
+  const input = document.getElementById('home-file-input');
+
+  if (!area || !btn || !input) return;
+
+  // Prevent multiple bindings after re-render/navigation
+  if (area.dataset.bound === '1') return;
+  area.dataset.bound = '1';
+
+  // Re-entrancy guard to stop double-open (area click + button click)
+  let pickerBusy = false;
+  const openPicker = (e) => {
+    if (e) { e.preventDefault(); e.stopPropagation(); }
+    if (pickerBusy) return;
+    pickerBusy = true;
+    input.click();
+    // Small cooldown prevents duplicate .click() from bubbling/second binding
+    setTimeout(() => { pickerBusy = false; }, 600);
+  };
+
+  // Clicking the big area opens picker, except when the inner button is the target
+  area.addEventListener('click', (e) => {
+    if (e.target.closest('#home-choose-btn')) return;
+    openPicker(e);
+  }, { passive: true });
+
+  // Button explicitly opens picker and stops propagation
+  btn.addEventListener('click', openPicker, { passive: true });
+
+  // Prevent clicks on the input from bubbling back up
+  input.addEventListener('click', (e) => e.stopPropagation());
+
+  // Normal change handler (existing logic). Keep whatever function you already use.
+  // Just make sure it’s bound ONCE here:
+  input.addEventListener('change', async (e) => {
+    const files = e.target.files;
+    if (!files || !files.length) return;
+    // CALL existing homepage upload/convert flow here (do not duplicate listeners)
+    // e.g. await handleHomeUpload(files);
+  }, { once: false });
+})();
+/// --- END PATCH ---
+Confirm:
+
+From the homepage, click anywhere in the big drop area → file dialog opens once.
+
+Click the Choose File button → opens once.
+
+After a conversion and download, return to the homepage and repeat: still opens once.
+
+Drag & drop still works (no changes made there).
+
+Don’t change any other pages or shared modules. Keep the rest of the site as-is.

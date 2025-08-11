@@ -1,8 +1,8 @@
 class UniversalHomepageConverter {
     constructor() {
-        this.dropZone = document.getElementById('universal-drop-zone');
-        this.fileInput = document.getElementById('universal-file-input');
-        this.chooseFileBtn = document.getElementById('choose-file-btn');
+        this.dropZone = document.getElementById('home-upload-area');
+        this.fileInput = document.getElementById('home-file-input');
+        this.chooseFileBtn = document.getElementById('home-choose-btn');
         this.outputFormatSelect = document.getElementById('output-format');
         this.convertBtn = document.getElementById('convert-now-btn');
         
@@ -16,20 +16,45 @@ class UniversalHomepageConverter {
             return; // Elements not found, homepage converter not available
         }
         
-        // Drop zone events
+        // --- BEGIN PATCH: homepage uploader double-open fix ---
+        // Prevent multiple bindings after re-render/navigation
+        if (this.dropZone.dataset.bound === '1') return;
+        this.dropZone.dataset.bound = '1';
+
+        // Re-entrancy guard to stop double-open (area click + button click)
+        let pickerBusy = false;
+        const openPicker = (e) => {
+            if (e) { e.preventDefault(); e.stopPropagation(); }
+            if (pickerBusy) return;
+            pickerBusy = true;
+            this.fileInput.click();
+            // Small cooldown prevents duplicate .click() from bubbling/second binding
+            setTimeout(() => { pickerBusy = false; }, 600);
+        };
+
+        // Clicking the big area opens picker, except when the inner button is the target
+        this.dropZone.addEventListener('click', (e) => {
+            if (e.target.closest('#home-choose-btn')) return;
+            openPicker(e);
+        }, { passive: true });
+
+        // Button explicitly opens picker and stops propagation
+        this.chooseFileBtn.addEventListener('click', openPicker, { passive: true });
+
+        // Prevent clicks on the input from bubbling back up
+        this.fileInput.addEventListener('click', (e) => e.stopPropagation());
+
+        // Normal change handler (existing logic). Keep whatever function you already use.
+        this.fileInput.addEventListener('change', this.handleFileSelect.bind(this), { once: false });
+        // --- END PATCH ---
+        
+        // Drop zone events for drag and drop
         this.dropZone.addEventListener('dragover', this.handleDragOver.bind(this));
         this.dropZone.addEventListener('dragleave', this.handleDragLeave.bind(this));
         this.dropZone.addEventListener('drop', this.handleDrop.bind(this));
-        this.dropZone.addEventListener('click', () => this.fileInput.click());
         
-        // File input events
-        this.fileInput.addEventListener('change', this.handleFileSelect.bind(this));
-        
-        // Button events
-        this.chooseFileBtn.addEventListener('click', () => this.fileInput.click());
+        // Convert button and format change events
         this.convertBtn.addEventListener('click', this.handleConvert.bind(this));
-        
-        // Format change events
         this.outputFormatSelect.addEventListener('change', this.updateConvertButton.bind(this));
     }
     
