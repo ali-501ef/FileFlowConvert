@@ -96,13 +96,19 @@ function displayFilePreview() {
         fileItem.className = 'file-item';
         fileItem.innerHTML = `
             <div class="file-info">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                    <circle cx="9" cy="9" r="2"/>
-                    <path d="M21 15l-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
-                </svg>
-                <span class="file-name">${file.name}</span>
-                <span class="file-size">${formatFileSize(file.size)}</span>
+                <div class="file-icon-container">
+                    <div class="image-preview-placeholder" id="preview-${index}">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                            <circle cx="9" cy="9" r="2"/>
+                            <path d="M21 15l-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="file-details">
+                    <span class="file-name">${file.name}</span>
+                    <span class="file-size">${formatFileSize(file.size)}</span>
+                </div>
             </div>
             <button class="remove-file" onclick="removeFile(${index})" data-testid="remove-file-${index}">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -112,9 +118,75 @@ function displayFilePreview() {
             </button>
         `;
         fileList.appendChild(fileItem);
+        
+        // Try to create image preview for the HEIC file
+        createImagePreview(file, index);
     });
 
     filePreview.style.display = 'block';
+}
+
+function createImagePreview(file, index) {
+    const previewContainer = document.getElementById(`preview-${index}`);
+    if (!previewContainer) return;
+
+    // Try to create image preview using different methods
+    try {
+        // Method 1: Try native browser HEIC support (Safari, some Chrome versions)
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        
+        img.onload = function() {
+            // Success - browser supports HEIC natively
+            previewContainer.innerHTML = '';
+            img.style.width = '48px';
+            img.style.height = '48px';
+            img.style.objectFit = 'cover';
+            img.style.borderRadius = '4px';
+            img.style.border = '1px solid #e5e7eb';
+            previewContainer.appendChild(img);
+        };
+        
+        img.onerror = function() {
+            // Native loading failed - try Canvas API approach
+            tryCanvasPreview(file, previewContainer);
+        };
+        
+        // Set image source to the HEIC file
+        img.src = URL.createObjectURL(file);
+        
+    } catch (error) {
+        console.log('Image preview not supported for this HEIC file:', error);
+        // Keep the default SVG icon
+    }
+}
+
+function tryCanvasPreview(file, previewContainer) {
+    try {
+        // Try to read HEIC file using FileReader and create a preview
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+            // For browsers with limited HEIC support, we'll show a custom HEIC badge
+            // instead of the generic image icon
+            previewContainer.innerHTML = `
+                <div class="heic-badge">
+                    <span class="heic-text">HEIC</span>
+                </div>
+            `;
+        };
+        
+        reader.onerror = function() {
+            // Keep the default SVG icon on any error
+            console.log('Could not read HEIC file for preview');
+        };
+        
+        reader.readAsArrayBuffer(file);
+        
+    } catch (error) {
+        console.log('Canvas preview method failed:', error);
+        // Keep the default SVG icon
+    }
 }
 
 function removeFile(index) {
