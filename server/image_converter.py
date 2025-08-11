@@ -52,13 +52,14 @@ def convert_heic_to_pil(input_path):
 def main():
     """Main conversion function"""
     try:
-        if len(sys.argv) < 4 or len(sys.argv) > 5:
-            raise Exception("Usage: python3 image_converter.py <input_path> <output_path> <output_format> [quality]")
+        if len(sys.argv) < 4 or len(sys.argv) > 6:
+            raise Exception("Usage: python3 image_converter.py <input_path> <output_path> <output_format> [quality] [compression_level]")
         
         input_path = sys.argv[1]
         output_path = sys.argv[2]
         output_format = sys.argv[3].upper()
-        quality = float(sys.argv[4]) if len(sys.argv) == 5 else 0.95
+        quality = float(sys.argv[4]) if len(sys.argv) >= 5 else 0.95
+        compression_level = int(sys.argv[5]) if len(sys.argv) == 6 else 9
         
         print(f"Starting conversion: {input_path} -> {output_path} ({output_format})")
         
@@ -97,8 +98,8 @@ def main():
             jpeg_quality = int(quality * 100) if quality <= 1.0 else int(quality)
             img.save(output_path, 'JPEG', quality=jpeg_quality, optimize=True, progressive=True)
         elif output_format == 'PNG':
-            print("Converting to PNG")
-            img.save(output_path, 'PNG', optimize=True, compress_level=9)
+            print(f"Converting to PNG with compression level {compression_level}")
+            img.save(output_path, 'PNG', optimize=True, compress_level=compression_level)
         else:
             print(f"Converting to {output_format}")
             img.save(output_path, output_format, optimize=True)

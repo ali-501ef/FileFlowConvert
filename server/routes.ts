@@ -366,7 +366,7 @@ async function convertPDFWithPython(inputPath: string, outputPath: string, outpu
 }
 
 // Image conversion helper function with retry logic and better error handling
-async function convertImageWithPython(inputPath: string, outputPath: string, outputFormat: string, quality?: number, maxRetries: number = 3): Promise<boolean> {
+async function convertImageWithPython(inputPath: string, outputPath: string, outputFormat: string, quality?: number, compression_level?: number, maxRetries: number = 3): Promise<boolean> {
   const imageConverterPath = path.join(process.cwd(), 'server', 'image_converter.py');
   
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
@@ -377,6 +377,9 @@ async function convertImageWithPython(inputPath: string, outputPath: string, out
         const args = [imageConverterPath, inputPath, outputPath, outputFormat];
         if (quality !== undefined) {
           args.push(quality.toString());
+        }
+        if (compression_level !== undefined) {
+          args.push(compression_level.toString());
         }
         const pythonProcess = spawn('python3', args, {
           timeout: 60000, // 1 minute timeout
@@ -529,7 +532,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     try {
       console.log('Convert request body:', req.body);
-      const { file_id, output_format, temp_path, quality } = req.body;
+      const { file_id, output_format, temp_path, quality, compression_level } = req.body;
 
       // Validate required parameters
       if (!file_id || !output_format || !temp_path) {
@@ -583,7 +586,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (fileExtension === 'pdf') {
           return await convertPDFWithPython(tempPath, outputPath, output_format);
         } else {
-          return await convertImageWithPython(tempPath, outputPath, output_format, quality);
+          return await convertImageWithPython(tempPath, outputPath, output_format, quality, compression_level);
         }
       })();
       
