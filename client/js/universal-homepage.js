@@ -36,10 +36,10 @@ class UniversalHomepageConverter {
         this.dropZone.addEventListener('click', (e) => {
             if (e.target.closest('#home-choose-btn')) return;
             openPicker(e);
-        }, { passive: true });
+        });
 
         // Button explicitly opens picker and stops propagation
-        this.chooseFileBtn.addEventListener('click', openPicker, { passive: true });
+        this.chooseFileBtn.addEventListener('click', openPicker);
 
         // Prevent clicks on the input from bubbling back up
         this.fileInput.addEventListener('click', (e) => e.stopPropagation());
