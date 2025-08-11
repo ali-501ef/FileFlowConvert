@@ -281,24 +281,40 @@ class PDFMerger {
 
     showMergeResults() {
         const stats = this.mergeStats;
+        const mergeStatsElement = document.getElementById('mergeStats');
         
-        document.getElementById('mergeStats').innerHTML = `
-            <div class="stats-grid">
-                <div class="stat-item">
-                    <span class="stat-label">Files Merged:</span>
-                    <span class="stat-value">${stats.fileCount}</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Total Pages:</span>
-                    <span class="stat-value">${stats.totalPages}</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Output Size:</span>
-                    <span class="stat-value">${this.formatFileSize(stats.outputSize)}</span>
-                </div>
-            </div>
-        `;
+        // Clear existing content
+        mergeStatsElement.textContent = '';
         
+        // Create stats grid container
+        const statsGrid = document.createElement('div');
+        statsGrid.className = 'stats-grid';
+        
+        // Create stat items with safe DOM methods
+        const statItems = [
+            { label: 'Files Merged:', value: stats.fileCount.toString() },
+            { label: 'Total Pages:', value: stats.totalPages.toString() },
+            { label: 'Output Size:', value: this.formatFileSize(stats.outputSize) }
+        ];
+        
+        statItems.forEach(item => {
+            const statItem = document.createElement('div');
+            statItem.className = 'stat-item';
+            
+            const statLabel = document.createElement('span');
+            statLabel.className = 'stat-label';
+            statLabel.textContent = item.label;
+            
+            const statValue = document.createElement('span');
+            statValue.className = 'stat-value';
+            statValue.textContent = item.value;
+            
+            statItem.appendChild(statLabel);
+            statItem.appendChild(statValue);
+            statsGrid.appendChild(statItem);
+        });
+        
+        mergeStatsElement.appendChild(statsGrid);
         this.results.style.display = 'block';
     }
 
