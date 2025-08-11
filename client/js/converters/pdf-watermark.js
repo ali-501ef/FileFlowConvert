@@ -358,22 +358,57 @@ class PDFWatermarker {
     showWatermarkResults() {
         const stats = this.watermarkStats;
         
-        document.getElementById('watermarkStats').innerHTML = `
-            <div class="stats-grid">
-                <div class="stat-item">
-                    <span class="stat-label">Pages Processed:</span>
-                    <span class="stat-value">${stats.pagesProcessed}</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Watermark Type:</span>
-                    <span class="stat-value">${stats.watermarkType.charAt(0).toUpperCase() + stats.watermarkType.slice(1)}</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Output Size:</span>
-                    <span class="stat-value">${this.formatFileSize(stats.outputSize)}</span>
-                </div>
-            </div>
-        `;
+        // Clear existing content
+        const statsContainer = document.getElementById('watermarkStats');
+        statsContainer.textContent = '';
+        
+        // Create stats grid using safe DOM methods
+        const statsGrid = document.createElement('div');
+        statsGrid.className = 'stats-grid';
+        
+        // Create pages processed stat
+        const pagesItem = document.createElement('div');
+        pagesItem.className = 'stat-item';
+        const pagesLabel = document.createElement('span');
+        pagesLabel.className = 'stat-label';
+        pagesLabel.textContent = 'Pages Processed:';
+        const pagesValue = document.createElement('span');
+        pagesValue.className = 'stat-value';
+        pagesValue.textContent = stats.pagesProcessed.toString();
+        pagesItem.appendChild(pagesLabel);
+        pagesItem.appendChild(pagesValue);
+        
+        // Create watermark type stat
+        const typeItem = document.createElement('div');
+        typeItem.className = 'stat-item';
+        const typeLabel = document.createElement('span');
+        typeLabel.className = 'stat-label';
+        typeLabel.textContent = 'Watermark Type:';
+        const typeValue = document.createElement('span');
+        typeValue.className = 'stat-value';
+        typeValue.textContent = stats.watermarkType.charAt(0).toUpperCase() + stats.watermarkType.slice(1);
+        typeItem.appendChild(typeLabel);
+        typeItem.appendChild(typeValue);
+        
+        // Create output size stat
+        const sizeItem = document.createElement('div');
+        sizeItem.className = 'stat-item';
+        const sizeLabel = document.createElement('span');
+        sizeLabel.className = 'stat-label';
+        sizeLabel.textContent = 'Output Size:';
+        const sizeValue = document.createElement('span');
+        sizeValue.className = 'stat-value';
+        sizeValue.textContent = this.formatFileSize(stats.outputSize);
+        sizeItem.appendChild(sizeLabel);
+        sizeItem.appendChild(sizeValue);
+        
+        // Append all stat items to grid
+        statsGrid.appendChild(pagesItem);
+        statsGrid.appendChild(typeItem);
+        statsGrid.appendChild(sizeItem);
+        
+        // Append grid to container
+        statsContainer.appendChild(statsGrid);
         
         this.results.style.display = 'block';
     }
