@@ -4,7 +4,6 @@ import sys
 import os
 import subprocess
 import json
-import shlex
 from pathlib import Path
 
 def convert_media(input_path, output_path, conversion_type, options=None):
@@ -41,7 +40,7 @@ def convert_media(input_path, output_path, conversion_type, options=None):
 
 def compress_video(input_path, output_path, options):
     """Compress video file"""
-    cmd = ['ffmpeg', '-i', shlex.quote(input_path)]
+    cmd = ['ffmpeg', '-i', input_path]
     
     # Video codec settings
     cmd.extend(['-c:v', 'libx264'])
@@ -57,11 +56,11 @@ def compress_video(input_path, output_path, options):
     else:
         # Custom settings
         if 'bitrate' in options:
-            cmd.extend(['-b:v', f"{shlex.quote(str(options['bitrate']))}k"])
+            cmd.extend(['-b:v', f"{str(options['bitrate'])}k"])
         if 'crf' in options:
-            cmd.extend(['-crf', shlex.quote(str(options['crf']))])
+            cmd.extend(['-crf', str(options['crf'])])
         if 'preset' in options:
-            cmd.extend(['-preset', shlex.quote(str(options['preset']))])
+            cmd.extend(['-preset', str(options['preset'])])
     
     # Resolution scaling
     if 'resolution' in options and options['resolution'] != 'original':
@@ -74,12 +73,12 @@ def compress_video(input_path, output_path, options):
     
     # Frame rate
     if 'framerate' in options and options['framerate'] != 'original':
-        cmd.extend(['-r', shlex.quote(str(options['framerate']))])
+        cmd.extend(['-r', str(options['framerate'])])
     
     # Audio codec
     cmd.extend(['-c:a', 'aac', '-b:a', '128k'])
     
-    cmd.extend(['-y', shlex.quote(output_path)])
+    cmd.extend(['-y', output_path])
     
     result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
     
@@ -97,7 +96,7 @@ def compress_video(input_path, output_path, options):
 
 def extract_audio(input_path, output_path, options):
     """Extract audio from video"""
-    cmd = ['ffmpeg', '-i', shlex.quote(input_path)]
+    cmd = ['ffmpeg', '-i', input_path]
     
     # Audio format
     format_ext = options.get('format', 'mp3')
@@ -105,23 +104,23 @@ def extract_audio(input_path, output_path, options):
         cmd.extend(['-vn', '-acodec', 'libmp3lame'])
         # Bitrate
         bitrate = options.get('bitrate', '192')
-        cmd.extend(['-b:a', f'{shlex.quote(str(bitrate))}k'])
+        cmd.extend(['-b:a', f'{str(bitrate)}k'])
     elif format_ext == 'wav':
         cmd.extend(['-vn', '-acodec', 'pcm_s16le'])
     elif format_ext == 'aac':
         cmd.extend(['-vn', '-c:a', 'aac'])
         bitrate = options.get('bitrate', '128') 
-        cmd.extend(['-b:a', f'{shlex.quote(str(bitrate))}k'])
+        cmd.extend(['-b:a', f'{str(bitrate)}k'])
     elif format_ext == 'flac':
         cmd.extend(['-vn', '-c:a', 'flac'])
     elif format_ext == 'ogg':
         cmd.extend(['-vn', '-c:a', 'libvorbis'])
         bitrate = options.get('bitrate', '192')
-        cmd.extend(['-b:a', f'{shlex.quote(str(bitrate))}k'])
+        cmd.extend(['-b:a', f'{str(bitrate)}k'])
     
     # Add metadata preservation
     cmd.extend(['-map_metadata', '0'])
-    cmd.extend(['-y', shlex.quote(output_path)])
+    cmd.extend(['-y', output_path])
     
     result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
     
@@ -132,13 +131,13 @@ def extract_audio(input_path, output_path, options):
 
 def convert_audio(input_path, output_path, options):
     """Convert audio format"""
-    cmd = ['ffmpeg', '-i', shlex.quote(input_path)]
+    cmd = ['ffmpeg', '-i', input_path]
     
     format_ext = options.get('format', 'mp3')
     if format_ext == 'mp3':
         cmd.extend(['-c:a', 'libmp3lame'])
         bitrate = options.get('bitrate', '192')
-        cmd.extend(['-b:a', f'{shlex.quote(str(bitrate))}k'])
+        cmd.extend(['-b:a', f'{str(bitrate)}k'])
     elif format_ext == 'wav':
         cmd.extend(['-c:a', 'pcm_s16le'])
     elif format_ext == 'flac':
@@ -146,21 +145,21 @@ def convert_audio(input_path, output_path, options):
     elif format_ext == 'aac':
         cmd.extend(['-c:a', 'aac'])
         bitrate = options.get('bitrate', '128')
-        cmd.extend(['-b:a', f'{shlex.quote(str(bitrate))}k'])
+        cmd.extend(['-b:a', f'{str(bitrate)}k'])
     elif format_ext == 'ogg':
         cmd.extend(['-c:a', 'libvorbis'])
         bitrate = options.get('bitrate', '192')
-        cmd.extend(['-b:a', f'{shlex.quote(str(bitrate))}k'])
+        cmd.extend(['-b:a', f'{str(bitrate)}k'])
     
     # Sample rate
     if 'sample_rate' in options and options['sample_rate'] != 'keep':
-        cmd.extend(['-ar', shlex.quote(str(options['sample_rate']))])
+        cmd.extend(['-ar', str(options['sample_rate'])])
     
     # Preserve metadata if requested
     if options.get('preserve_metadata', True):
         cmd.extend(['-map_metadata', '0'])
     
-    cmd.extend(['-y', shlex.quote(output_path)])
+    cmd.extend(['-y', output_path])
     
     result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
     
@@ -176,17 +175,17 @@ def trim_video(input_path, output_path, options):
     duration = options.get('duration')
     fast_copy = options.get('fast_copy', True)
     
-    cmd = ['ffmpeg', '-i', shlex.quote(input_path)]
+    cmd = ['ffmpeg', '-i', input_path]
     
     # Set start time
     if start_time > 0:
-        cmd.extend(['-ss', shlex.quote(str(start_time))])
+        cmd.extend(['-ss', str(start_time)])
     
     # Set end time or duration
     if end_time is not None:
-        cmd.extend(['-to', shlex.quote(str(end_time))])
+        cmd.extend(['-to', str(end_time)])
     elif duration is not None:
-        cmd.extend(['-t', shlex.quote(str(duration))])
+        cmd.extend(['-t', str(duration)])
     else:
         cmd.extend(['-t', '10'])  # Default 10 seconds
     
@@ -196,7 +195,7 @@ def trim_video(input_path, output_path, options):
     else:
         cmd.extend(['-c:v', 'libx264', '-c:a', 'aac'])  # Re-encode
     
-    cmd.extend(['-y', shlex.quote(output_path)])
+    cmd.extend(['-y', output_path])
     
     result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
     
@@ -217,10 +216,10 @@ def create_gif(input_path, output_path, options):
     
     # Generate palette
     palette_cmd = [
-        'ffmpeg', '-i', shlex.quote(input_path),
-        '-ss', shlex.quote(str(start_time)), '-t', shlex.quote(str(duration)),
-        '-vf', f'fps={shlex.quote(str(fps))},scale={shlex.quote(str(width))}:-1:flags=lanczos,palettegen',
-        '-y', shlex.quote(palette_path)
+        'ffmpeg', '-i', input_path,
+        '-ss', str(start_time), '-t', str(duration),
+        '-vf', f'fps={str(fps)},scale={str(width)}:-1:flags=lanczos,palettegen',
+        '-y', palette_path
     ]
     
     result = subprocess.run(palette_cmd, capture_output=True, text=True, timeout=120)
@@ -229,10 +228,10 @@ def create_gif(input_path, output_path, options):
     
     # Create GIF with palette
     gif_cmd = [
-        'ffmpeg', '-i', shlex.quote(input_path), '-i', shlex.quote(palette_path),
-        '-ss', shlex.quote(str(start_time)), '-t', shlex.quote(str(duration)),
-        '-lavfi', f'fps={shlex.quote(str(fps))},scale={shlex.quote(str(width))}:-1:flags=lanczos[x];[x][1:v]paletteuse',
-        '-y', shlex.quote(output_path)
+        'ffmpeg', '-i', input_path, '-i', palette_path,
+        '-ss', str(start_time), '-t', str(duration),
+        '-lavfi', f'fps={str(fps)},scale={str(width)}:-1:flags=lanczos[x];[x][1:v]paletteuse',
+        '-y', output_path
     ]
     
     result = subprocess.run(gif_cmd, capture_output=True, text=True, timeout=120)
@@ -253,7 +252,7 @@ def get_video_duration(video_path):
     try:
         cmd = [
             'ffprobe', '-v', 'quiet', '-show_entries', 'format=duration',
-            '-of', 'csv=p=0', shlex.quote(video_path)
+            '-of', 'csv=p=0', video_path
         ]
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
         if result.returncode == 0:
@@ -292,19 +291,19 @@ def merge_videos(input_path, output_path, options):
         if normalize:
             # First normalize all videos to same codec/resolution, then concat
             cmd = [
-                'ffmpeg', '-f', 'concat', '-safe', '0', '-i', shlex.quote(concat_file),
+                'ffmpeg', '-f', 'concat', '-safe', '0', '-i', concat_file,
                 '-c:v', 'libx264', '-c:a', 'aac',
                 '-preset', 'medium', '-crf', '23',
                 '-y', '-hide_banner', '-nostats', '-progress', 'pipe:1',
-                shlex.quote(output_path)
+                output_path
             ]
         else:
             # Try direct concat first (faster)
             cmd = [
-                'ffmpeg', '-f', 'concat', '-safe', '0', '-i', shlex.quote(concat_file),
+                'ffmpeg', '-f', 'concat', '-safe', '0', '-i', concat_file,
                 '-c', 'copy',  # Copy streams without re-encoding for speed
                 '-y', '-hide_banner', '-nostats', '-progress', 'pipe:1',
-                shlex.quote(output_path)
+                output_path
             ]
         
         # Use Popen for real-time progress tracking
