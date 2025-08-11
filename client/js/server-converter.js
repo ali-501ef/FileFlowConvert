@@ -138,7 +138,7 @@ class ServerFileConverter {
         fileSelectedDiv.appendChild(removeButton);
         
         // Clear and append safely
-        this.dropZone.innerHTML = '';
+        this.dropZone.textContent = '';
         this.dropZone.appendChild(fileSelectedDiv);
     }
     
@@ -146,21 +146,50 @@ class ServerFileConverter {
         this.selectedFile = null;
         this.uploadedFileData = null;
         
-        // Reset UI to original state
-        this.dropZone.innerHTML = `
-            <div class="drop-zone-content">
-                <div class="upload-icon">
-                    <svg width="48" height="48" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-                    </svg>
-                </div>
-                <p class="drop-zone-text">Drag and drop your file here</p>
-                <p class="drop-zone-subtext">or click to browse</p>
-            </div>
-        `;
+        // Reset UI to original state using safe DOM methods
+        this.dropZone.textContent = '';
         
-        // Reset format selector
-        this.outputFormatSelect.innerHTML = '<option value="">Select format...</option>';
+        const dropZoneContent = document.createElement('div');
+        dropZoneContent.className = 'drop-zone-content';
+        
+        const uploadIcon = document.createElement('div');
+        uploadIcon.className = 'upload-icon';
+        
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('width', '48');
+        svg.setAttribute('height', '48');
+        svg.setAttribute('fill', 'none');
+        svg.setAttribute('stroke', 'currentColor');
+        svg.setAttribute('viewBox', '0 0 24 24');
+        
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('stroke-linecap', 'round');
+        path.setAttribute('stroke-linejoin', 'round');
+        path.setAttribute('stroke-width', '1.5');
+        path.setAttribute('d', 'M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12');
+        
+        svg.appendChild(path);
+        uploadIcon.appendChild(svg);
+        
+        const dropZoneText = document.createElement('p');
+        dropZoneText.className = 'drop-zone-text';
+        dropZoneText.textContent = 'Drag and drop your file here';
+        
+        const dropZoneSubtext = document.createElement('p');
+        dropZoneSubtext.className = 'drop-zone-subtext';
+        dropZoneSubtext.textContent = 'or click to browse';
+        
+        dropZoneContent.appendChild(uploadIcon);
+        dropZoneContent.appendChild(dropZoneText);
+        dropZoneContent.appendChild(dropZoneSubtext);
+        this.dropZone.appendChild(dropZoneContent);
+        
+        // Reset format selector using safe DOM methods
+        this.outputFormatSelect.textContent = '';
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.textContent = 'Select format...';
+        this.outputFormatSelect.appendChild(defaultOption);
         this.convertBtn.disabled = true;
     }
     
@@ -200,13 +229,21 @@ class ServerFileConverter {
         console.log('Updating format options with:', supportedFormats);
         
         if (!supportedFormats || supportedFormats.length === 0) {
-            this.outputFormatSelect.innerHTML = '<option value="">No conversions available</option>';
+            this.outputFormatSelect.textContent = '';
+            const noOptionElement = document.createElement('option');
+            noOptionElement.value = '';
+            noOptionElement.textContent = 'No conversions available';
+            this.outputFormatSelect.appendChild(noOptionElement);
             this.convertBtn.disabled = true;
             return;
         }
         
-        // Clear existing options
-        this.outputFormatSelect.innerHTML = '<option value="">Select format...</option>';
+        // Clear existing options using safe DOM methods
+        this.outputFormatSelect.textContent = '';
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.textContent = 'Select format...';
+        this.outputFormatSelect.appendChild(defaultOption);
         
         // Add supported format options
         supportedFormats.forEach(format => {
@@ -288,13 +325,31 @@ class ServerFileConverter {
     showDownloadReady(conversionData) {
         this.showStatus('Conversion completed!', 'success');
         
-        // Update convert button to download button
-        this.convertBtn.innerHTML = `
-            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-            </svg>
-            Download (${this.formatFileSize(conversionData.file_size)})
-        `;
+        // Update convert button to download button using safe DOM methods
+        this.convertBtn.textContent = ''; // Clear existing content
+        
+        // Create SVG element
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('width', '20');
+        svg.setAttribute('height', '20');
+        svg.setAttribute('fill', 'none');
+        svg.setAttribute('stroke', 'currentColor');
+        svg.setAttribute('viewBox', '0 0 24 24');
+        
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('stroke-linecap', 'round');
+        path.setAttribute('stroke-linejoin', 'round');
+        path.setAttribute('stroke-width', '2');
+        path.setAttribute('d', 'M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z');
+        
+        svg.appendChild(path);
+        
+        // Create text content
+        const textNode = document.createTextNode(`Download (${this.formatFileSize(conversionData.file_size)})`);
+        
+        // Append elements to button
+        this.convertBtn.appendChild(svg);
+        this.convertBtn.appendChild(textNode);
         this.convertBtn.disabled = false;
         
         // Replace click handler with download
@@ -323,27 +378,70 @@ class ServerFileConverter {
         this.selectedFile = null;
         this.isConverting = false;
         
-        this.convertBtn.innerHTML = 'Convert Now';
+        this.convertBtn.textContent = 'Convert Now';
         this.convertBtn.onclick = () => this.handleConvert();
         this.convertBtn.disabled = true; // Disable until new file is selected
         this.showStatus('Ready for next conversion', 'ready');
         
-        // Reset drop zone UI to original state
-        this.dropZone.innerHTML = `
-            <div class="drop-zone-content">
-                <div class="upload-icon">
-                    <svg width="48" height="48" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3 3m0 0l-3-3m3 3V8"></path>
-                    </svg>
-                </div>
-                <p class="upload-text">Drop your file here or <strong>choose file</strong></p>
-                <p class="upload-subtext">Supports images, PDFs, and many other formats</p>
-                <button type="button" id="choose-file-btn" class="choose-file-btn">Choose File</button>
-            </div>
-        `;
+        // Reset drop zone UI to original state using safe DOM methods
+        this.dropZone.textContent = ''; // Clear existing content
         
-        // Reset format selector
-        this.outputFormatSelect.innerHTML = '<option value="">Select format...</option>';
+        const dropZoneContent = document.createElement('div');
+        dropZoneContent.className = 'drop-zone-content';
+        
+        // Create upload icon container
+        const uploadIcon = document.createElement('div');
+        uploadIcon.className = 'upload-icon';
+        
+        // Create SVG element
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('width', '48');
+        svg.setAttribute('height', '48');
+        svg.setAttribute('fill', 'none');
+        svg.setAttribute('stroke', 'currentColor');
+        svg.setAttribute('viewBox', '0 0 24 24');
+        
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('stroke-linecap', 'round');
+        path.setAttribute('stroke-linejoin', 'round');
+        path.setAttribute('stroke-width', '2');
+        path.setAttribute('d', 'M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3 3m0 0l-3-3m3 3V8');
+        
+        svg.appendChild(path);
+        uploadIcon.appendChild(svg);
+        
+        // Create text elements
+        const uploadText = document.createElement('p');
+        uploadText.className = 'upload-text';
+        uploadText.appendChild(document.createTextNode('Drop your file here or '));
+        const strongText = document.createElement('strong');
+        strongText.textContent = 'choose file';
+        uploadText.appendChild(strongText);
+        
+        const uploadSubtext = document.createElement('p');
+        uploadSubtext.className = 'upload-subtext';
+        uploadSubtext.textContent = 'Supports images, PDFs, and many other formats';
+        
+        // Create button
+        const chooseFileBtn = document.createElement('button');
+        chooseFileBtn.type = 'button';
+        chooseFileBtn.id = 'choose-file-btn';
+        chooseFileBtn.className = 'choose-file-btn';
+        chooseFileBtn.textContent = 'Choose File';
+        
+        // Assemble elements
+        dropZoneContent.appendChild(uploadIcon);
+        dropZoneContent.appendChild(uploadText);
+        dropZoneContent.appendChild(uploadSubtext);
+        dropZoneContent.appendChild(chooseFileBtn);
+        this.dropZone.appendChild(dropZoneContent);
+        
+        // Reset format selector using safe DOM methods
+        this.outputFormatSelect.textContent = ''; // Clear existing content
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.textContent = 'Select format...';
+        this.outputFormatSelect.appendChild(defaultOption);
         this.outputFormatSelect.disabled = true;
         
         // Reinitialize event listeners for the new elements
@@ -387,7 +485,15 @@ class ServerFileConverter {
         }
         
         statusElement.className = `conversion-status ${statusClass}`;
-        statusElement.innerHTML = `<span class="status-icon">${icon}</span> ${message}`;
+        
+        // Use safe DOM methods instead of innerHTML
+        statusElement.textContent = '';
+        const iconSpan = document.createElement('span');
+        iconSpan.className = 'status-icon';
+        iconSpan.textContent = icon;
+        const messageText = document.createTextNode(` ${message}`);
+        statusElement.appendChild(iconSpan);
+        statusElement.appendChild(messageText);
         
         // Auto-hide non-persistent statuses
         if (type === 'ready' || type === 'success') {
