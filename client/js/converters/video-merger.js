@@ -528,16 +528,54 @@ class VideoMerger {
             this.uploadArea.parentNode.insertBefore(errorDiv, this.uploadArea.nextSibling);
         }
         
-        errorDiv.innerHTML = `
-            <div class="error-content">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10"/>
-                    <line x1="15" y1="9" x2="9" y2="15"/>
-                    <line x1="9" y1="9" x2="15" y2="15"/>
-                </svg>
-                <span>${message}</span>
-            </div>
-        `;
+        // Clear existing content
+        errorDiv.innerHTML = '';
+        
+        // Create content container
+        const contentDiv = document.createElement('div');
+        contentDiv.className = 'error-content';
+        
+        // Create SVG icon safely
+        const svgIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svgIcon.setAttribute('width', '20');
+        svgIcon.setAttribute('height', '20');
+        svgIcon.setAttribute('viewBox', '0 0 24 24');
+        svgIcon.setAttribute('fill', 'none');
+        svgIcon.setAttribute('stroke', 'currentColor');
+        svgIcon.setAttribute('stroke-width', '2');
+        svgIcon.setAttribute('stroke-linecap', 'round');
+        svgIcon.setAttribute('stroke-linejoin', 'round');
+        
+        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', '12');
+        circle.setAttribute('cy', '12');
+        circle.setAttribute('r', '10');
+        
+        const line1 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line1.setAttribute('x1', '15');
+        line1.setAttribute('y1', '9');
+        line1.setAttribute('x2', '9');
+        line1.setAttribute('y2', '15');
+        
+        const line2 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line2.setAttribute('x1', '9');
+        line2.setAttribute('y1', '9');
+        line2.setAttribute('x2', '15');
+        line2.setAttribute('y2', '15');
+        
+        svgIcon.appendChild(circle);
+        svgIcon.appendChild(line1);
+        svgIcon.appendChild(line2);
+        
+        // Create message span safely
+        const messageSpan = document.createElement('span');
+        messageSpan.textContent = message; // Safe text content assignment
+        
+        // Assemble the elements
+        contentDiv.appendChild(svgIcon);
+        contentDiv.appendChild(messageSpan);
+        errorDiv.appendChild(contentDiv);
+        
         errorDiv.style.display = 'block';
         
         // Auto-hide after 5 seconds
