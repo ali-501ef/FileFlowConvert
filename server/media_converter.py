@@ -250,9 +250,12 @@ def create_gif(input_path, output_path, options):
 def get_video_duration(video_path):
     """Get video duration in seconds using ffprobe"""
     try:
+        import shlex
+        # Sanitize the video_path to prevent command injection
+        sanitized_path = shlex.quote(video_path)
         cmd = [
             'ffprobe', '-v', 'quiet', '-show_entries', 'format=duration',
-            '-of', 'csv=p=0', video_path
+            '-of', 'csv=p=0', sanitized_path
         ]
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
         if result.returncode == 0:
