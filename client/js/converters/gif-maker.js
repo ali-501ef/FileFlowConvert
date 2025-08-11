@@ -416,12 +416,22 @@ class GifMaker {
                 overlay.className = 'processing-overlay';
                 this.uploadArea.appendChild(overlay);
             }
-            overlay.innerHTML = `
-                <div class="processing-content">
-                    <div class="spinner"></div>
-                    <p>${message}</p>
-                </div>
-            `;
+            // Create content safely using DOM methods
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'processing-content';
+            
+            const spinner = document.createElement('div');
+            spinner.className = 'spinner';
+            
+            const messageP = document.createElement('p');
+            messageP.textContent = message;
+            
+            contentDiv.appendChild(spinner);
+            contentDiv.appendChild(messageP);
+            
+            // Clear and append new content
+            overlay.innerHTML = '';
+            overlay.appendChild(contentDiv);
             overlay.style.display = 'flex';
             
             // Disable upload area interactions
