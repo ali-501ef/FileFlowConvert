@@ -116,14 +116,30 @@ class VideoConverter {
         }
         
         if (fileList) {
-            fileList.innerHTML = files.map(file => `
-                <div class="file-item">
-                    <div class="file-info">
-                        <div class="file-name">${file.name}</div>
-                        <div class="file-size">${this.formatFileSize(file.size)}</div>
-                    </div>
-                </div>
-            `).join('');
+            // Clear existing content
+            fileList.innerHTML = '';
+            
+            // Create safe DOM elements for each file
+            files.forEach(file => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                
+                const fileInfo = document.createElement('div');
+                fileInfo.className = 'file-info';
+                
+                const fileName = document.createElement('div');
+                fileName.className = 'file-name';
+                fileName.textContent = file.name; // Safe: textContent prevents XSS
+                
+                const fileSize = document.createElement('div');
+                fileSize.className = 'file-size';
+                fileSize.textContent = this.formatFileSize(file.size); // Safe: textContent prevents XSS
+                
+                fileInfo.appendChild(fileName);
+                fileInfo.appendChild(fileSize);
+                fileItem.appendChild(fileInfo);
+                fileList.appendChild(fileItem);
+            });
         }
     }
     
