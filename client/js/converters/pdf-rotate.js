@@ -1,11 +1,7 @@
-import { pruneByMatrix, bindOrPrune, pruneOnBackendError, checkAdvancedOptionsContainer, collectExistingOptions } from "../utils/pruneOptions.js";
-
 class PDFRotator {
     constructor() {
-        this.TOOL_KEY = "pdf-rotate";
         this.init();
         this.setupEventListeners();
-        this.initAdvancedOptionsPruning();
     }
 
     init() {
@@ -43,34 +39,6 @@ class PDFRotator {
         
         // Download button
         document.getElementById('downloadBtn')?.addEventListener('click', this.downloadPDF.bind(this));
-    }
-
-    initAdvancedOptionsPruning() {
-        // Remove unsupported options first
-        pruneByMatrix(this.TOOL_KEY, document);
-        
-        // Safely bind each advanced option
-        bindOrPrune(this.TOOL_KEY, "defaultRotation", "#defaultRotation", (el) => {
-            el.addEventListener("change", () => this.validateRotateOptions());
-        });
-        
-        bindOrPrune(this.TOOL_KEY, "autoDetectOrientation", "#autoDetectOrientation", (el) => {
-            el.addEventListener("change", () => this.validateRotateOptions());
-        });
-        
-        bindOrPrune(this.TOOL_KEY, "preserveAspect", "#preserveAspect", (el) => {
-            el.addEventListener("change", () => this.validateRotateOptions());
-        });
-        
-        // Check if advanced options container should be hidden
-        checkAdvancedOptionsContainer();
-        
-        console.info(`[Options] ${this.TOOL_KEY}: Advanced options initialization complete`);
-    }
-
-    validateRotateOptions() {
-        // Basic validation for existing options
-        console.debug(`[Options] ${this.TOOL_KEY}: Options validated`);
     }
 
     handleUploadAreaClick(e) {

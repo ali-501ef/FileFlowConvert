@@ -478,16 +478,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Serve static files from client directory
   const clientPath = path.resolve(import.meta.dirname, "../client");
   app.use(express.static(clientPath));
-  
-  // Serve config files with proper Content-Type
-  const configPath = path.resolve(import.meta.dirname, "..", "config");
-  app.use('/config', express.static(configPath, {
-    setHeaders: (res, path) => {
-      if (path.endsWith('.json')) {
-        res.setHeader('Content-Type', 'application/json');
-      }
-    }
-  }));
 
   // File conversion API endpoints
   app.post('/api/upload', uploadLimiter, speedLimiter, upload.single('file'), async (req: MulterRequest, res) => {

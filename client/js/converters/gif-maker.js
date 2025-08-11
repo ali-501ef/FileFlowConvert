@@ -1,5 +1,3 @@
-import { pruneByMatrix, bindOrPrune, pruneOnBackendError, checkAdvancedOptionsContainer, collectExistingOptions } from "../utils/pruneOptions.js";
-
 /**
  * GIF Maker
  * Creates animated GIFs from video files
@@ -11,10 +9,8 @@ class GifMaker {
         this.isFilePickerOpen = false;
         this.isProcessing = false;
         this.videoDuration = 0;
-        this.TOOL_KEY = "gif-maker";
         this.init();
         this.setupEventListeners();
-        this.initAdvancedOptionsPruning();
     }
 
     init() {
@@ -30,14 +26,23 @@ class GifMaker {
         this.results = document.getElementById('results');
         this.downloadBtn = document.getElementById('downloadBtn');
         
-        // Advanced options - will be set after pruning
-        this.startTime = null;
-        this.duration = null;
-        this.frameRate = null;
-        this.quality = null;
-        this.width = null;
-        this.loop = null;
-        this.boomerang = null;
+        // Advanced options
+        this.startTime = document.getElementById('startTime');
+        this.duration = document.getElementById('duration');
+        this.frameRate = document.getElementById('frameRate');
+        this.quality = document.getElementById('quality');
+        this.width = document.getElementById('width');
+        this.loop = document.getElementById('loop');
+        this.boomerang = document.getElementById('boomerang');
+        
+        // Initialize with default values
+        if (this.startTime) this.startTime.value = '0';
+        if (this.duration) this.duration.value = '3';
+        if (this.frameRate) this.frameRate.value = '10';
+        if (this.quality) this.quality.value = 'medium';
+        if (this.width) this.width.value = '480';
+        if (this.loop) this.loop.checked = true;
+        if (this.boomerang) this.boomerang.checked = false;
     }
 
     setupEventListeners() {
@@ -61,79 +66,12 @@ class GifMaker {
             this.downloadBtn.addEventListener('click', () => this.downloadFile());
         }
 
-    }
-
-    initAdvancedOptionsPruning() {
-        // Remove unsupported options first
-        pruneByMatrix(this.TOOL_KEY, document);
-        
-        // Safely bind each advanced option
-        bindOrPrune(this.TOOL_KEY, "start", "#startTime", (el) => {
-            this.startTime = el;
-            el.value = '0';
-            el.addEventListener("input", () => this.validateStartTime());
-        });
-        
-        bindOrPrune(this.TOOL_KEY, "duration", "#duration", (el) => {
-            this.duration = el;
-            el.value = '3';
-            el.addEventListener("input", () => this.validateDuration());
-        });
-        
-        bindOrPrune(this.TOOL_KEY, "fps", "#frameRate", (el) => {
-            this.frameRate = el;
-            el.value = '10';
-            el.addEventListener("change", () => this.validateGifOptions());
-        });
-        
-        bindOrPrune(this.TOOL_KEY, "quality", "#quality", (el) => {
-            this.quality = el;
-            el.value = 'medium';
-            el.addEventListener("change", () => this.validateGifOptions());
-        });
-        
-        bindOrPrune(this.TOOL_KEY, "width", "#width", (el) => {
-            this.width = el;
-            el.value = '480';
-            el.addEventListener("change", () => this.validateGifOptions());
-        });
-        
-        bindOrPrune(this.TOOL_KEY, "loop", "#loop", (el) => {
-            this.loop = el;
-            el.checked = true;
-            el.addEventListener("change", () => this.validateGifOptions());
-        });
-        
-        bindOrPrune(this.TOOL_KEY, "boomerang", "#boomerang", (el) => {
-            this.boomerang = el;
-            el.checked = false;
-            el.addEventListener("change", () => this.validateGifOptions());
-        });
-        
-        // Check if advanced options container should be hidden
-        checkAdvancedOptionsContainer();
-        
-        console.info(`[Options] ${this.TOOL_KEY}: Advanced options initialization complete`);
-    }
-
-    validateGifOptions() {
-        // Basic validation for existing options
-        if (this.frameRate && this.frameRate.value) {
-            const fps = parseInt(this.frameRate.value);
-            if (fps < 1 || fps > 60) {
-                this.frameRate.setCustomValidity('Frame rate must be between 1 and 60 FPS');
-            } else {
-                this.frameRate.setCustomValidity('');
-            }
+        // Option change handlers
+        if (this.duration) {
+            this.duration.addEventListener('input', () => this.validateDuration());
         }
-        
-        if (this.width && this.width.value && this.width.value !== 'original') {
-            const width = parseInt(this.width.value);
-            if (width < 100 || width > 1920) {
-                this.width.setCustomValidity('Width must be between 100 and 1920 pixels');
-            } else {
-                this.width.setCustomValidity('');
-            }
+        if (this.startTime) {
+            this.startTime.addEventListener('input', () => this.validateStartTime());
         }
     }
 
@@ -302,10 +240,6 @@ class GifMaker {
             
         } catch (error) {
             this.showError('GIF creation failed: ' + error.message);
-            
-            // Check if backend rejected specific options and remove them
-            pruneOnBackendError(this.TOOL_KEY, error, document);
-            checkAdvancedOptionsContainer();
         }
 
         this.setProcessingState(false);
@@ -313,37 +247,15 @@ class GifMaker {
     }
 
     getGifSettings() {
-        // Use the pruning utility to collect only existing options
-        const optionSelectors = {
-            start_time: '#startTime',
-            duration: '#duration',
-            fps: '#frameRate',
-            quality: '#quality',
-            width: '#width',
-            loop: '#loop',
-            boomerang: '#boomerang'
+        return {
+            start_time: parseFloat(this.startTime?.value || '0'),
+            duration: parseFloat(this.duration?.value || '3'),
+            fps: parseInt(this.frameRate?.value || '10'),
+            quality: this.quality?.value || 'medium',
+            width: this.width?.value === 'original' ? 'original' : parseInt(this.width?.value || '480'),
+            loop: this.loop?.checked || true,
+            boomerang: this.boomerang?.checked || false
         };
-        
-        const settings = collectExistingOptions(optionSelectors);
-        
-        // Set defaults and parse values for missing options
-        if (!settings.start_time) settings.start_time = '0';
-        if (!settings.duration) settings.duration = '3';
-        if (!settings.fps) settings.fps = '10';
-        if (!settings.quality) settings.quality = 'medium';
-        if (!settings.width) settings.width = '480';
-        if (!settings.loop) settings.loop = true;
-        if (!settings.boomerang) settings.boomerang = false;
-        
-        // Parse numeric values
-        settings.start_time = parseFloat(settings.start_time);
-        settings.duration = parseFloat(settings.duration);
-        settings.fps = parseInt(settings.fps);
-        if (settings.width !== 'original') {
-            settings.width = parseInt(settings.width);
-        }
-        
-        return settings;
     }
 
     async performGifCreation(settings) {

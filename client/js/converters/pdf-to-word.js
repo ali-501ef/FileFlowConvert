@@ -1,5 +1,3 @@
-import { pruneByMatrix, bindOrPrune, pruneOnBackendError, checkAdvancedOptionsContainer, collectExistingOptions } from "../utils/pruneOptions.js";
-
 /**
  * PDF to Word Converter
  * Advanced PDF text extraction with proper Word document generation
@@ -8,16 +6,13 @@ import { pruneByMatrix, bindOrPrune, pruneOnBackendError, checkAdvancedOptionsCo
 
 class PDFToWordConverter {
     constructor() {
-        this.TOOL_KEY = "pdf-to-word";
         this.init();
         this.setupEventListeners();
-        this.initAdvancedOptionsPruning();
-        
-        // Initialize Advanced Options Manager for compatibility
-        this.optionsManager = window.createAdvancedOptionsManager ? window.createAdvancedOptionsManager('pdf-to-word') : null;
+        // Initialize Advanced Options Manager
+        this.optionsManager = window.createAdvancedOptionsManager('pdf-to-word');
         
         // Link with the legacy advanced options handler
-        if (window.advancedOptionsHandler && this.optionsManager) {
+        if (window.advancedOptionsHandler) {
             window.advancedOptionsHandler.setOptionsManager(this.optionsManager);
         }
     }
@@ -51,39 +46,6 @@ class PDFToWordConverter {
         
         // Download button
         document.getElementById('downloadBtn')?.addEventListener('click', this.downloadWord.bind(this));
-    }
-
-    initAdvancedOptionsPruning() {
-        // Remove unsupported options first
-        pruneByMatrix(this.TOOL_KEY, document);
-        
-        // Safely bind each advanced option
-        bindOrPrune(this.TOOL_KEY, "ocr", "#ocrEnabled", (el) => {
-            el.addEventListener("change", () => this.validatePdfOptions());
-        });
-        
-        bindOrPrune(this.TOOL_KEY, "preserveFormatting", "#preserveFormatting", (el) => {
-            el.addEventListener("change", () => this.validatePdfOptions());
-        });
-        
-        bindOrPrune(this.TOOL_KEY, "includeImages", "#includeImages", (el) => {
-            el.addEventListener("change", () => this.validatePdfOptions());
-        });
-        
-        bindOrPrune(this.TOOL_KEY, "mode", "#conversionMode", (el) => {
-            el.addEventListener("change", () => this.validatePdfOptions());
-        });
-        
-        // Check if advanced options container should be hidden
-        checkAdvancedOptionsContainer();
-        
-        console.info(`[Options] ${this.TOOL_KEY}: Advanced options initialization complete`);
-    }
-
-    validatePdfOptions() {
-        // Basic validation for existing options
-        // Most PDF options are boolean or select, so minimal validation needed
-        console.debug(`[Options] ${this.TOOL_KEY}: Options validated`);
     }
 
     handleDragOver(e) {
