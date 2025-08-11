@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Advanced Options Pruning</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; }
+        .hidden { display: none !important; }
+        .supported { color: green; }
+        .unsupported { color: red; }
+        .unknown { color: orange; }
+        #advanced-options { margin: 15px 0; }
+        .option-group { margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>Advanced Options Pruning Test</h1>
+    
+    <div class="test-section">
+        <h2>MP4 to MP3 Tool (mp4-to-mp3)</h2>
+        <div id="advanced-options">
+            <div class="option-group">
+                <label for="audioBitrate">Audio Bitrate (should stay - supported):</label>
+                <select id="audioBitrate">
+                    <option value="128">128 kbps</option>
+                    <option value="192">192 kbps</option>
+                    <option value="320">320 kbps</option>
+                </select>
+            </div>
+            
+            <div class="option-group">
+                <label for="audioFormat">Audio Format (should stay - supported):</label>
+                <select id="audioFormat">
+                    <option value="mp3">MP3</option>
+                    <option value="wav">WAV</option>
+                </select>
+            </div>
+            
+            <div class="option-group">
+                <label for="preserveMetadata">Preserve Metadata (should stay - supported):</label>
+                <input type="checkbox" id="preserveMetadata">
+            </div>
+            
+            <div class="option-group">
+                <label for="normalizeAudio">Normalize Audio (should be hidden - unknown):</label>
+                <input type="checkbox" id="normalizeAudio">
+            </div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>Video Compress Tool (video-compress)</h2>
+        <div id="advanced-options">
+            <div class="option-group">
+                <label for="compressionLevel">Compression Level (should stay - supported as targetBitrate):</label>
+                <select id="compressionLevel">
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                </select>
+            </div>
+            
+            <div class="option-group">
+                <label for="videoQuality">Video Quality (should stay - supported as scale):</label>
+                <select id="videoQuality">
+                    <option value="low">Low</option>
+                    <option value="balanced">Balanced</option>
+                    <option value="high">High</option>
+                </select>
+            </div>
+            
+            <div class="option-group">
+                <label for="frameRate">Frame Rate (should be hidden - fps unknown):</label>
+                <select id="frameRate">
+                    <option value="original">Original</option>
+                    <option value="30">30 FPS</option>
+                    <option value="60">60 FPS</option>
+                </select>
+            </div>
+            
+            <div class="option-group">
+                <label for="targetSize">Target Size (should be hidden - profile unsupported):</label>
+                <input type="text" id="targetSize" placeholder="Target file size in MB">
+            </div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>Results Log</h2>
+        <div id="resultsLog"></div>
+    </div>
+
+    <!-- Load the pruning utility -->
+    <script type="module">
+        import { pruneByMatrix, checkAdvancedOptionsContainer } from '/js/utils/pruneOptions.js';
+        
+        function log(message) {
+            const logDiv = document.getElementById('resultsLog');
+            logDiv.innerHTML += `<div>${new Date().toLocaleTimeString()}: ${message}</div>`;
+        }
+        
+        async function testPruning() {
+            try {
+                log('Starting Advanced Options Pruning Test...');
+                
+                // Test MP4 to MP3 tool
+                log('Testing MP4-to-MP3 tool...');
+                await pruneByMatrix('mp4-to-mp3', document);
+                
+                // Test Video Compress tool  
+                log('Testing video-compress tool...');
+                await pruneByMatrix('video-compress', document);
+                
+                // Check if advanced options container should be hidden
+                checkAdvancedOptionsContainer();
+                
+                // Report results
+                const hiddenElements = document.querySelectorAll('.hidden, [style*="display: none"]');
+                log(`Test completed. ${hiddenElements.length} elements were hidden.`);
+                
+                hiddenElements.forEach(el => {
+                    const label = el.querySelector('label') || el.closest('.option-group')?.querySelector('label');
+                    if (label) {
+                        log(`Hidden: ${label.textContent}`);
+                    }
+                });
+                
+            } catch (error) {
+                log(`Error during test: ${error.message}`);
+                console.error('Pruning test error:', error);
+            }
+        }
+        
+        // Run test when page loads
+        window.addEventListener('load', testPruning);
+    </script>
+</body>
+</html>

@@ -1,5 +1,7 @@
 
 
+import { pruneByMatrix, bindOrPrune, pruneOnBackendError, checkAdvancedOptionsContainer, collectExistingOptions } from "../utils/pruneOptions.js";
+
 /**
  * Video Compressor
  * Compresses video files with quality and size optimization
@@ -10,8 +12,10 @@ class VideoCompressor {
         this.uploadResult = null;
         this.isFilePickerOpen = false;
         this.isProcessing = false;
+        this.TOOL_KEY = "video-compress";
         this.init();
         this.setupEventListeners();
+        this.initAdvancedOptionsPruning();
     }
 
     init() {
@@ -27,19 +31,12 @@ class VideoCompressor {
         this.results = document.getElementById('results');
         this.downloadBtn = document.getElementById('downloadBtn');
         
-        // Advanced options
-        this.compressionLevel = document.getElementById('compressionLevel');
-        this.videoQuality = document.getElementById('videoQuality');
-        this.outputResolution = document.getElementById('outputResolution');
-        this.frameRate = document.getElementById('frameRate');
-        this.targetSize = document.getElementById('targetSize');
-        
-        // Initialize with default values
-        if (this.compressionLevel) this.compressionLevel.value = 'medium';
-        if (this.videoQuality) this.videoQuality.value = 'balanced';
-        if (this.outputResolution) this.outputResolution.value = 'original';
-        if (this.frameRate) this.frameRate.value = 'original';
-        if (this.targetSize) this.targetSize.value = '';
+        // Advanced options - will be set after pruning
+        this.compressionLevel = null;
+        this.videoQuality = null;
+        this.outputResolution = null;
+        this.frameRate = null;
+        this.targetSize = null;
 
         // Guarantee the upload area is clickable
         const uploadArea = document.getElementById('uploadArea');
@@ -75,9 +72,58 @@ class VideoCompressor {
             this.downloadBtn.addEventListener('click', () => this.downloadFile());
         }
 
-        // Option change handlers
-        if (this.compressionLevel) {
-            this.compressionLevel.addEventListener('change', () => this.updateQualityOptions());
+    }
+
+    initAdvancedOptionsPruning() {
+        // Remove unsupported options first
+        pruneByMatrix(this.TOOL_KEY, document);
+        
+        // Safely bind each advanced option
+        bindOrPrune(this.TOOL_KEY, "targetBitrate", "#compressionLevel", (el) => {
+            this.compressionLevel = el;
+            el.value = 'medium';
+            el.addEventListener("change", () => this.updateQualityOptions());
+        });
+        
+        bindOrPrune(this.TOOL_KEY, "scale", "#videoQuality", (el) => {
+            this.videoQuality = el;
+            el.value = 'balanced';
+            el.addEventListener("change", () => this.validateVideoOptions());
+        });
+        
+        bindOrPrune(this.TOOL_KEY, "fps", "#outputResolution", (el) => {
+            this.outputResolution = el;
+            el.value = 'original';
+            el.addEventListener("change", () => this.validateVideoOptions());
+        });
+        
+        bindOrPrune(this.TOOL_KEY, "fps", "#frameRate", (el) => {
+            this.frameRate = el;
+            el.value = 'original';
+            el.addEventListener("change", () => this.validateVideoOptions());
+        });
+        
+        bindOrPrune(this.TOOL_KEY, "profile", "#targetSize", (el) => {
+            this.targetSize = el;
+            el.value = '';
+            el.addEventListener("change", () => this.validateVideoOptions());
+        });
+        
+        // Check if advanced options container should be hidden
+        checkAdvancedOptionsContainer();
+        
+        console.info(`[Options] ${this.TOOL_KEY}: Advanced options initialization complete`);
+    }
+
+    validateVideoOptions() {
+        // Basic validation for existing options
+        if (this.targetSize && this.targetSize.value) {
+            const sizeValue = parseFloat(this.targetSize.value);
+            if (sizeValue <= 0) {
+                this.targetSize.setCustomValidity('Target size must be greater than 0');
+            } else {
+                this.targetSize.setCustomValidity('');
+            }
         }
     }
 
@@ -239,6 +285,10 @@ class VideoCompressor {
             
         } catch (error) {
             this.showError('Compression failed: ' + error.message);
+            
+            // Check if backend rejected specific options and remove them
+            pruneOnBackendError(this.TOOL_KEY, error, document);
+            checkAdvancedOptionsContainer();
         }
 
         this.setProcessingState(false);
@@ -246,13 +296,24 @@ class VideoCompressor {
     }
 
     getCompressionSettings() {
-        return {
-            compression: this.compressionLevel?.value || 'medium',
-            quality: this.videoQuality?.value || 'balanced',
-            resolution: this.outputResolution?.value || 'original',
-            framerate: this.frameRate?.value === 'original' ? undefined : this.frameRate?.value,
-            target_size: this.targetSize?.value || undefined
+        // Use the pruning utility to collect only existing options
+        const optionSelectors = {
+            compression: '#compressionLevel',
+            quality: '#videoQuality',
+            resolution: '#outputResolution',
+            framerate: '#frameRate',
+            target_size: '#targetSize'
         };
+        
+        const settings = collectExistingOptions(optionSelectors);
+        
+        // Set defaults for missing options
+        if (!settings.compression) settings.compression = 'medium';
+        if (!settings.quality) settings.quality = 'balanced';
+        if (!settings.resolution) settings.resolution = 'original';
+        if (settings.framerate === 'original') settings.framerate = undefined;
+        
+        return settings;
     }
 
     async performCompression(settings) {

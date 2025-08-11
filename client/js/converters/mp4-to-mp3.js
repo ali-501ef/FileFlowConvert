@@ -1,5 +1,7 @@
 
 
+import { pruneByMatrix, bindOrPrune, pruneOnBackendError, checkAdvancedOptionsContainer, collectExistingOptions } from "../utils/pruneOptions.js";
+
 /**
  * MP4 to MP3 Converter
  * Converts video files to audio format with advanced options
@@ -10,8 +12,11 @@ class MP4ToMP3Converter {
         this.uploadResult = null;
         this.isFilePickerOpen = false;
         this.isProcessing = false;
+        this.TOOL_KEY = "mp4-to-mp3";
+        this.removedOptions = [];
         this.init();
         this.setupEventListeners();
+        this.initAdvancedOptionsPruning();
     }
 
     init() {
@@ -26,17 +31,11 @@ class MP4ToMP3Converter {
         this.results = document.getElementById('results');
         this.downloadBtn = document.getElementById('downloadBtn');
         
-        // Advanced options
-        this.audioBitrate = document.getElementById('audioBitrate');
-        this.audioFormat = document.getElementById('audioFormat');
-        this.preserveMetadata = document.getElementById('preserveMetadata');
-        this.normalizeAudio = document.getElementById('normalizeAudio');
-        
-        // Initialize with default values
-        if (this.audioBitrate) this.audioBitrate.value = '192';
-        if (this.audioFormat) this.audioFormat.value = 'mp3';
-        if (this.preserveMetadata) this.preserveMetadata.checked = true;
-        if (this.normalizeAudio) this.normalizeAudio.checked = false;
+        // Advanced options - will be set after pruning
+        this.audioBitrate = null;
+        this.audioFormat = null;
+        this.preserveMetadata = null;
+        this.normalizeAudio = null;
 
         // Guarantee the upload area is clickable
         const uploadArea = document.getElementById('uploadArea');
@@ -70,6 +69,54 @@ class MP4ToMP3Converter {
 
         if (this.downloadBtn) {
             this.downloadBtn.addEventListener('click', () => this.downloadFile());
+        }
+    }
+
+    initAdvancedOptionsPruning() {
+        // Remove unsupported options first
+        pruneByMatrix(this.TOOL_KEY, document);
+        
+        // Safely bind each advanced option
+        bindOrPrune(this.TOOL_KEY, "audioBitrate", "#audioBitrate", (el) => {
+            this.audioBitrate = el;
+            el.value = '192';
+            el.addEventListener("change", () => this.validateAudioOptions());
+        });
+        
+        bindOrPrune(this.TOOL_KEY, "audioFormat", "#audioFormat", (el) => {
+            this.audioFormat = el;
+            el.value = 'mp3';
+            el.addEventListener("change", () => this.validateAudioOptions());
+        });
+        
+        bindOrPrune(this.TOOL_KEY, "preserveMetadata", "#preserveMetadata", (el) => {
+            this.preserveMetadata = el;
+            el.checked = true;
+            el.addEventListener("change", () => this.validateAudioOptions());
+        });
+        
+        bindOrPrune(this.TOOL_KEY, "normalizeAudio", "#normalizeAudio", (el) => {
+            this.normalizeAudio = el;
+            el.checked = false;
+            el.addEventListener("change", () => this.validateAudioOptions());
+        });
+        
+        // Check if advanced options container should be hidden
+        checkAdvancedOptionsContainer();
+        
+        // Print summary
+        console.info(`[Options] ${this.TOOL_KEY}: Advanced options initialization complete`);
+    }
+
+    validateAudioOptions() {
+        // Basic validation for existing options
+        if (this.audioBitrate && this.audioBitrate.value) {
+            const bitrate = parseInt(this.audioBitrate.value);
+            if (bitrate < 32 || bitrate > 320) {
+                this.audioBitrate.setCustomValidity('Bitrate must be between 32 and 320 kbps');
+            } else {
+                this.audioBitrate.setCustomValidity('');
+            }
         }
     }
 
@@ -226,6 +273,10 @@ class MP4ToMP3Converter {
             
         } catch (error) {
             this.showError('Conversion failed: ' + error.message);
+            
+            // Check if backend rejected specific options and remove them
+            pruneOnBackendError(this.TOOL_KEY, error, document);
+            checkAdvancedOptionsContainer();
         }
 
         this.setProcessingState(false);
@@ -233,12 +284,22 @@ class MP4ToMP3Converter {
     }
 
     getConversionSettings() {
-        return {
-            bitrate: this.audioBitrate?.value || '192',
-            format: this.audioFormat?.value || 'mp3',
-            preserveMetadata: this.preserveMetadata?.checked || false,
-            normalizeAudio: this.normalizeAudio?.checked || false
+        // Use the pruning utility to collect only existing options
+        const optionSelectors = {
+            bitrate: '#audioBitrate',
+            format: '#audioFormat', 
+            preserveMetadata: '#preserveMetadata',
+            normalizeAudio: '#normalizeAudio'
         };
+        
+        const settings = collectExistingOptions(optionSelectors);
+        
+        // Set defaults for missing options
+        if (!settings.bitrate) settings.bitrate = '192';
+        if (!settings.format) settings.format = 'mp3';
+        if (!settings.preserveMetadata) settings.preserveMetadata = false;
+        
+        return settings;
     }
 
     async performConversion(settings) {
