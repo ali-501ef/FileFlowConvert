@@ -297,12 +297,26 @@ class GifMaker {
 
         // Show GIF preview
         if (gifPreview && this.conversionResult.download_url) {
-            gifPreview.innerHTML = `
-                <div class="gif-preview-container">
-                    <h4>GIF Preview</h4>
-                    <img src="${this.conversionResult.download_url}" alt="Generated GIF" style="max-width: 100%; border-radius: 8px; margin-top: 10px;">
-                </div>
-            `;
+            // Clear previous content safely
+            gifPreview.textContent = '';
+            
+            // Create container using safe DOM methods
+            const container = document.createElement('div');
+            container.className = 'gif-preview-container';
+            
+            const heading = document.createElement('h4');
+            heading.textContent = 'GIF Preview';
+            
+            const img = document.createElement('img');
+            img.src = this.conversionResult.download_url;
+            img.alt = 'Generated GIF';
+            img.style.maxWidth = '100%';
+            img.style.borderRadius = '8px';
+            img.style.marginTop = '10px';
+            
+            container.appendChild(heading);
+            container.appendChild(img);
+            gifPreview.appendChild(container);
         }
 
         // Show GIF stats
@@ -311,26 +325,39 @@ class GifMaker {
             const fps = parseInt(this.frameRate?.value || '10');
             const width = this.width?.value === 'original' ? 'Original' : `${this.width?.value}px`;
 
-            gifStats.innerHTML = `
-                <div class="stats-grid">
-                    <div class="stat-item">
-                        <span class="stat-label">Duration</span>
-                        <span class="stat-value">${duration}s</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Frame Rate</span>
-                        <span class="stat-value">${fps} FPS</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Width</span>
-                        <span class="stat-value">${width}</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">File Size</span>
-                        <span class="stat-value">${this.formatFileSize(this.conversionResult.file_size)}</span>
-                    </div>
-                </div>
-            `;
+            // Clear previous content safely
+            gifStats.textContent = '';
+            
+            // Create stats grid using safe DOM methods
+            const statsGrid = document.createElement('div');
+            statsGrid.className = 'stats-grid';
+            
+            // Create stat items
+            const statItems = [
+                { label: 'Duration', value: `${duration}s` },
+                { label: 'Frame Rate', value: `${fps} FPS` },
+                { label: 'Width', value: width },
+                { label: 'File Size', value: this.formatFileSize(this.conversionResult.file_size) }
+            ];
+            
+            statItems.forEach(({ label, value }) => {
+                const statItem = document.createElement('div');
+                statItem.className = 'stat-item';
+                
+                const statLabel = document.createElement('span');
+                statLabel.className = 'stat-label';
+                statLabel.textContent = label;
+                
+                const statValue = document.createElement('span');
+                statValue.className = 'stat-value';
+                statValue.textContent = value;
+                
+                statItem.appendChild(statLabel);
+                statItem.appendChild(statValue);
+                statsGrid.appendChild(statItem);
+            });
+            
+            gifStats.appendChild(statsGrid);
         }
 
         this.results.style.display = 'block';
