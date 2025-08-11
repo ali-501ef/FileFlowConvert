@@ -120,44 +120,85 @@ class UniversalConverter {
         const fileSize = this.formatFileSize(file.size);
         const fileExtension = fileName.split('.').pop().toLowerCase();
         
-        card.innerHTML = `
-            <div class="file-preview-content">
-                <div class="file-preview-thumbnail">
-                    ${this.generateThumbnail(file, fileExtension)}
-                </div>
-                <div class="file-preview-info">
-                    <div class="file-preview-name" title="${fileName}">${fileName}</div>
-                    <div class="file-preview-meta">
-                        <span class="file-size">${fileSize}</span>
-                        <span class="file-type">${fileExtension.toUpperCase()}</span>
-                    </div>
-                </div>
-                <button class="file-remove-btn" onclick="universalConverter.removeFile(${index})" data-testid="button-remove-file-${index}">
-                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
-            </div>
+        // Create content wrapper
+        const content = document.createElement('div');
+        content.className = 'file-preview-content';
+        
+        // Create thumbnail wrapper
+        const thumbnailDiv = document.createElement('div');
+        thumbnailDiv.className = 'file-preview-thumbnail';
+        const thumbnailElement = this.generateThumbnailElement(file, fileExtension);
+        thumbnailDiv.appendChild(thumbnailElement);
+        
+        // Create info wrapper
+        const infoDiv = document.createElement('div');
+        infoDiv.className = 'file-preview-info';
+        
+        // Create file name element with safe text content
+        const nameDiv = document.createElement('div');
+        nameDiv.className = 'file-preview-name';
+        nameDiv.setAttribute('title', fileName); // Safe: setAttribute handles escaping
+        nameDiv.textContent = fileName; // Safe: textContent prevents HTML injection
+        
+        // Create meta wrapper
+        const metaDiv = document.createElement('div');
+        metaDiv.className = 'file-preview-meta';
+        
+        // Create file size span
+        const sizeSpan = document.createElement('span');
+        sizeSpan.className = 'file-size';
+        sizeSpan.textContent = fileSize;
+        
+        // Create file type span
+        const typeSpan = document.createElement('span');
+        typeSpan.className = 'file-type';
+        typeSpan.textContent = fileExtension.toUpperCase();
+        
+        // Create remove button
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'file-remove-btn';
+        removeBtn.setAttribute('data-testid', `button-remove-file-${index}`);
+        removeBtn.addEventListener('click', () => this.removeFile(index));
+        removeBtn.innerHTML = `
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
         `;
+        
+        // Assemble the structure
+        metaDiv.appendChild(sizeSpan);
+        metaDiv.appendChild(typeSpan);
+        infoDiv.appendChild(nameDiv);
+        infoDiv.appendChild(metaDiv);
+        content.appendChild(thumbnailDiv);
+        content.appendChild(infoDiv);
+        content.appendChild(removeBtn);
+        card.appendChild(content);
         
         return card;
     }
     
-    generateThumbnail(file, extension) {
+    generateThumbnailElement(file, extension) {
         if (this.supportedFormats.image.includes(extension) && extension !== 'heic') {
-            // Create image preview
+            // Create image preview element
             const img = document.createElement('img');
             img.className = 'file-thumbnail-img';
             img.src = URL.createObjectURL(file);
             img.onload = () => URL.revokeObjectURL(img.src);
-            return img.outerHTML;
+            return img;
         } else {
-            // Create icon based on file type
-            return this.getFileTypeIcon(extension);
+            // Create icon element based on file type
+            return this.getFileTypeIconElement(extension);
         }
     }
+
+    // Legacy method for backward compatibility (if needed elsewhere)
+    generateThumbnail(file, extension) {
+        const element = this.generateThumbnailElement(file, extension);
+        return element.outerHTML;
+    }
     
-    getFileTypeIcon(extension) {
+    getFileTypeIconElement(extension) {
         const iconMap = {
             // Images
             jpg: '🖼️', jpeg: '🖼️', png: '🖼️', gif: '🖼️', webp: '🖼️', heic: '🖼️', bmp: '🖼️', tiff: '🖼️',
@@ -169,8 +210,16 @@ class UniversalConverter {
             pdf: '📄', doc: '📝', docx: '📝', txt: '📝', rtf: '📝'
         };
         
-        const icon = iconMap[extension] || '📁';
-        return `<span class="file-type-icon">${icon}</span>`;
+        const span = document.createElement('span');
+        span.className = 'file-type-icon';
+        span.textContent = iconMap[extension] || '📁';
+        return span;
+    }
+
+    // Legacy method for backward compatibility (if needed elsewhere)
+    getFileTypeIcon(extension) {
+        const element = this.getFileTypeIconElement(extension);
+        return element.outerHTML;
     }
     
     formatFileSize(bytes) {
