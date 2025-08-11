@@ -79,10 +79,19 @@ class UniversalHomepageConverter {
             // Add file info
             const fileInfo = document.createElement('div');
             fileInfo.className = 'file-preview-info';
-            fileInfo.innerHTML = `
-                <p class="file-preview-name">${this.selectedFile.name}</p>
-                <p class="file-preview-size">${this.formatFileSize(this.selectedFile.size)} • Click to change file</p>
-            `;
+            
+            // Create file name element safely
+            const fileName = document.createElement('p');
+            fileName.className = 'file-preview-name';
+            fileName.textContent = this.selectedFile.name;
+            
+            // Create file size element safely
+            const fileSize = document.createElement('p');
+            fileSize.className = 'file-preview-size';
+            fileSize.textContent = `${this.formatFileSize(this.selectedFile.size)} • Click to change file`;
+            
+            fileInfo.appendChild(fileName);
+            fileInfo.appendChild(fileSize);
             dropZoneContent.appendChild(fileInfo);
         }
     }
