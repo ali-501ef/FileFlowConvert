@@ -131,39 +131,80 @@ class PDFMerger {
             fileItem.draggable = true;
             fileItem.dataset.index = index;
             
-            fileItem.innerHTML = `
-                <div class="file-info">
-                    <div class="file-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
-                            <polyline points="14,2 14,8 20,8"></polyline>
-                        </svg>
-                    </div>
-                    <div class="file-details">
-                        <span class="file-name">${fileData.file.name}</span>
-                        <span class="file-meta">${fileData.pageCount} pages • ${this.formatFileSize(fileData.file.size)}</span>
-                    </div>
-                </div>
-                <div class="file-actions">
-                    <button class="move-up-btn" ${index === 0 ? 'disabled' : ''} onclick="pdfMerger.moveFile(${index}, -1)">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M18 15l-6-6-6 6"/>
-                        </svg>
-                    </button>
-                    <button class="move-down-btn" ${index === this.selectedFiles.length - 1 ? 'disabled' : ''} onclick="pdfMerger.moveFile(${index}, 1)">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M6 9l6 6 6-6"/>
-                        </svg>
-                    </button>
-                    <button class="remove-btn" onclick="pdfMerger.removeFile(${index})">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M18 6L6 18"/>
-                            <path d="M6 6l12 12"/>
-                        </svg>
-                    </button>
-                </div>
+            // Create file info section
+            const fileInfo = document.createElement('div');
+            fileInfo.className = 'file-info';
+            
+            // Create file icon
+            const fileIcon = document.createElement('div');
+            fileIcon.className = 'file-icon';
+            fileIcon.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+                    <polyline points="14,2 14,8 20,8"></polyline>
+                </svg>
             `;
             
+            // Create file details with safe text content
+            const fileDetails = document.createElement('div');
+            fileDetails.className = 'file-details';
+            
+            const fileName = document.createElement('span');
+            fileName.className = 'file-name';
+            fileName.textContent = fileData.file.name; // Safe text assignment
+            
+            const fileMeta = document.createElement('span');
+            fileMeta.className = 'file-meta';
+            fileMeta.textContent = `${fileData.pageCount} pages • ${this.formatFileSize(fileData.file.size)}`; // Safe text assignment
+            
+            fileDetails.appendChild(fileName);
+            fileDetails.appendChild(fileMeta);
+            fileInfo.appendChild(fileIcon);
+            fileInfo.appendChild(fileDetails);
+            
+            // Create file actions section
+            const fileActions = document.createElement('div');
+            fileActions.className = 'file-actions';
+            
+            // Move up button
+            const moveUpBtn = document.createElement('button');
+            moveUpBtn.className = 'move-up-btn';
+            if (index === 0) moveUpBtn.disabled = true;
+            moveUpBtn.onclick = () => this.moveFile(index, -1);
+            moveUpBtn.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 15l-6-6-6 6"/>
+                </svg>
+            `;
+            
+            // Move down button
+            const moveDownBtn = document.createElement('button');
+            moveDownBtn.className = 'move-down-btn';
+            if (index === this.selectedFiles.length - 1) moveDownBtn.disabled = true;
+            moveDownBtn.onclick = () => this.moveFile(index, 1);
+            moveDownBtn.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6 9l6 6 6-6"/>
+                </svg>
+            `;
+            
+            // Remove button
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'remove-btn';
+            removeBtn.onclick = () => this.removeFile(index);
+            removeBtn.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 6L6 18"/>
+                    <path d="M6 6l12 12"/>
+                </svg>
+            `;
+            
+            fileActions.appendChild(moveUpBtn);
+            fileActions.appendChild(moveDownBtn);
+            fileActions.appendChild(removeBtn);
+            
+            fileItem.appendChild(fileInfo);
+            fileItem.appendChild(fileActions);
             this.filesContainer.appendChild(fileItem);
         });
     }
