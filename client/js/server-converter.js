@@ -106,16 +106,40 @@ class ServerFileConverter {
         const fileName = file.name;
         const fileSize = this.formatFileSize(file.size);
         
-        this.dropZone.innerHTML = `
-            <div class="file-selected">
-                <div class="file-icon">📄</div>
-                <div class="file-info">
-                    <div class="file-name">${fileName}</div>
-                    <div class="file-size">${fileSize}</div>
-                </div>
-                <button class="remove-file" onclick="serverConverter.clearFile()">×</button>
-            </div>
-        `;
+        // Create elements safely to prevent XSS
+        const fileSelectedDiv = document.createElement('div');
+        fileSelectedDiv.className = 'file-selected';
+        
+        const fileIconDiv = document.createElement('div');
+        fileIconDiv.className = 'file-icon';
+        fileIconDiv.textContent = '📄';
+        
+        const fileInfoDiv = document.createElement('div');
+        fileInfoDiv.className = 'file-info';
+        
+        const fileNameDiv = document.createElement('div');
+        fileNameDiv.className = 'file-name';
+        fileNameDiv.textContent = fileName; // Safe: uses textContent instead of innerHTML
+        
+        const fileSizeDiv = document.createElement('div');
+        fileSizeDiv.className = 'file-size';
+        fileSizeDiv.textContent = fileSize;
+        
+        const removeButton = document.createElement('button');
+        removeButton.className = 'remove-file';
+        removeButton.textContent = '×';
+        removeButton.addEventListener('click', () => this.clearFile());
+        
+        // Assemble the structure
+        fileInfoDiv.appendChild(fileNameDiv);
+        fileInfoDiv.appendChild(fileSizeDiv);
+        fileSelectedDiv.appendChild(fileIconDiv);
+        fileSelectedDiv.appendChild(fileInfoDiv);
+        fileSelectedDiv.appendChild(removeButton);
+        
+        // Clear and append safely
+        this.dropZone.innerHTML = '';
+        this.dropZone.appendChild(fileSelectedDiv);
     }
     
     clearFile() {
