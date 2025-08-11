@@ -191,3 +191,11 @@ class AdvancedOptionsHandler {
 
 // Initialize advanced options handler
 window.advancedOptionsHandler = new AdvancedOptionsHandler();
+
+// Load the lightweight reordering helper (safe if missing on a page)
+(() => {
+  const s = document.createElement('script');
+  s.src = '/js/utils/position-advanced-options.js';
+  s.defer = true;
+  document.head.appendChild(s);
+})();
