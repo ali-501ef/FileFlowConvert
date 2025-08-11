@@ -85,12 +85,23 @@ class PDFRotator {
             this.pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
             const pageCount = this.pdfDoc.getPageCount();
             
-            document.getElementById('pdfInfo').innerHTML = `
-                <div class="pdf-details">
-                    <span class="detail-item">📄 ${pageCount} pages</span>
-                    <span class="detail-item">📊 ${this.formatFileSize(file.size)}</span>
-                </div>
-            `;
+            const pdfInfoElement = document.getElementById('pdfInfo');
+            pdfInfoElement.innerHTML = ''; // Clear existing content
+            
+            const pdfDetails = document.createElement('div');
+            pdfDetails.className = 'pdf-details';
+            
+            const pagesSpan = document.createElement('span');
+            pagesSpan.className = 'detail-item';
+            pagesSpan.textContent = `📄 ${pageCount} pages`;
+            
+            const sizeSpan = document.createElement('span');
+            sizeSpan.className = 'detail-item';
+            sizeSpan.textContent = `📊 ${this.formatFileSize(file.size)}`;
+            
+            pdfDetails.appendChild(pagesSpan);
+            pdfDetails.appendChild(sizeSpan);
+            pdfInfoElement.appendChild(pdfDetails);
             
             this.showRotationOptions();
             this.convertBtn.disabled = false;
@@ -190,22 +201,52 @@ class PDFRotator {
         const stats = this.rotationStats;
         const directionText = this.getRotationDirection(stats.rotationAngle);
         
-        document.getElementById('rotationStats').innerHTML = `
-            <div class="stats-grid">
-                <div class="stat-item">
-                    <span class="stat-label">Pages Rotated:</span>
-                    <span class="stat-value">${stats.pagesRotated}</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Rotation Applied:</span>
-                    <span class="stat-value">${stats.rotationAngle}° ${directionText}</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Output Size:</span>
-                    <span class="stat-value">${this.formatFileSize(stats.outputSize)}</span>
-                </div>
-            </div>
-        `;
+        const rotationStatsElement = document.getElementById('rotationStats');
+        rotationStatsElement.innerHTML = ''; // Clear existing content
+        
+        const statsGrid = document.createElement('div');
+        statsGrid.className = 'stats-grid';
+        
+        // Pages rotated stat
+        const pagesStatItem = document.createElement('div');
+        pagesStatItem.className = 'stat-item';
+        const pagesLabel = document.createElement('span');
+        pagesLabel.className = 'stat-label';
+        pagesLabel.textContent = 'Pages Rotated:';
+        const pagesValue = document.createElement('span');
+        pagesValue.className = 'stat-value';
+        pagesValue.textContent = stats.pagesRotated.toString();
+        pagesStatItem.appendChild(pagesLabel);
+        pagesStatItem.appendChild(pagesValue);
+        
+        // Rotation applied stat
+        const rotationStatItem = document.createElement('div');
+        rotationStatItem.className = 'stat-item';
+        const rotationLabel = document.createElement('span');
+        rotationLabel.className = 'stat-label';
+        rotationLabel.textContent = 'Rotation Applied:';
+        const rotationValue = document.createElement('span');
+        rotationValue.className = 'stat-value';
+        rotationValue.textContent = `${stats.rotationAngle}° ${directionText}`;
+        rotationStatItem.appendChild(rotationLabel);
+        rotationStatItem.appendChild(rotationValue);
+        
+        // Output size stat
+        const sizeStatItem = document.createElement('div');
+        sizeStatItem.className = 'stat-item';
+        const sizeLabel = document.createElement('span');
+        sizeLabel.className = 'stat-label';
+        sizeLabel.textContent = 'Output Size:';
+        const sizeValue = document.createElement('span');
+        sizeValue.className = 'stat-value';
+        sizeValue.textContent = this.formatFileSize(stats.outputSize);
+        sizeStatItem.appendChild(sizeLabel);
+        sizeStatItem.appendChild(sizeValue);
+        
+        statsGrid.appendChild(pagesStatItem);
+        statsGrid.appendChild(rotationStatItem);
+        statsGrid.appendChild(sizeStatItem);
+        rotationStatsElement.appendChild(statsGrid);
         
         this.results.style.display = 'block';
     }
