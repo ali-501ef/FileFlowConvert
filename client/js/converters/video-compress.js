@@ -168,13 +168,33 @@ class VideoCompressor {
                 const resolution = `${videoPlayer.videoWidth}x${videoPlayer.videoHeight}`;
                 
                 if (videoInfo) {
-                    videoInfo.innerHTML = `
-                        <div class="video-details">
-                            <span class="detail-item">🎬 ${duration}</span>
-                            <span class="detail-item">📐 ${resolution}</span>
-                            <span class="detail-item">📊 ${this.formatFileSize(file.size)}</span>
-                        </div>
-                    `;
+                    // Clear existing content
+                    videoInfo.textContent = '';
+                    
+                    // Create container safely
+                    const videoDetailsDiv = document.createElement('div');
+                    videoDetailsDiv.className = 'video-details';
+                    
+                    // Create duration span
+                    const durationSpan = document.createElement('span');
+                    durationSpan.className = 'detail-item';
+                    durationSpan.textContent = `🎬 ${duration}`;
+                    
+                    // Create resolution span
+                    const resolutionSpan = document.createElement('span');
+                    resolutionSpan.className = 'detail-item';
+                    resolutionSpan.textContent = `📐 ${resolution}`;
+                    
+                    // Create file size span
+                    const fileSizeSpan = document.createElement('span');
+                    fileSizeSpan.className = 'detail-item';
+                    fileSizeSpan.textContent = `📊 ${this.formatFileSize(file.size)}`;
+                    
+                    // Append all elements safely
+                    videoDetailsDiv.appendChild(durationSpan);
+                    videoDetailsDiv.appendChild(resolutionSpan);
+                    videoDetailsDiv.appendChild(fileSizeSpan);
+                    videoInfo.appendChild(videoDetailsDiv);
                 }
                 
                 // Clean up object URL after a delay
