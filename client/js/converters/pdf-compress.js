@@ -77,12 +77,23 @@ class PDFCompressor {
             const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
             const pageCount = pdfDoc.getPageCount();
             
-            document.getElementById('pdfInfo').innerHTML = `
-                <div class="pdf-details">
-                    <span class="detail-item">📄 ${pageCount} pages</span>
-                    <span class="detail-item">📊 ${this.formatFileSize(file.size)}</span>
-                </div>
-            `;
+            const pdfInfoElement = document.getElementById('pdfInfo');
+            pdfInfoElement.replaceChildren(); // Clear existing content
+            
+            const detailsDiv = document.createElement('div');
+            detailsDiv.className = 'pdf-details';
+            
+            const pagesSpan = document.createElement('span');
+            pagesSpan.className = 'detail-item';
+            pagesSpan.textContent = `📄 ${pageCount} pages`;
+            
+            const sizeSpan = document.createElement('span');
+            sizeSpan.className = 'detail-item';
+            sizeSpan.textContent = `📊 ${this.formatFileSize(file.size)}`;
+            
+            detailsDiv.appendChild(pagesSpan);
+            detailsDiv.appendChild(sizeSpan);
+            pdfInfoElement.appendChild(detailsDiv);
             
             this.convertBtn.disabled = false;
         } catch (error) {
