@@ -158,13 +158,33 @@ class MP4ToMP3Converter {
             const resolution = `${video.videoWidth}x${video.videoHeight}`;
             
             if (videoInfo) {
-                videoInfo.innerHTML = `
-                    <div class="video-details">
-                        <span class="detail-item">🎬 ${duration}</span>
-                        <span class="detail-item">📐 ${resolution}</span>
-                        <span class="detail-item">📊 ${this.formatFileSize(file.size)}</span>
-                    </div>
-                `;
+                // Clear existing content
+                videoInfo.textContent = '';
+                
+                // Create container div
+                const videoDetails = document.createElement('div');
+                videoDetails.className = 'video-details';
+                
+                // Create duration span
+                const durationSpan = document.createElement('span');
+                durationSpan.className = 'detail-item';
+                durationSpan.textContent = `🎬 ${duration}`;
+                
+                // Create resolution span
+                const resolutionSpan = document.createElement('span');
+                resolutionSpan.className = 'detail-item';
+                resolutionSpan.textContent = `📐 ${resolution}`;
+                
+                // Create file size span
+                const fileSizeSpan = document.createElement('span');
+                fileSizeSpan.className = 'detail-item';
+                fileSizeSpan.textContent = `📊 ${this.formatFileSize(file.size)}`;
+                
+                // Append all elements
+                videoDetails.appendChild(durationSpan);
+                videoDetails.appendChild(resolutionSpan);
+                videoDetails.appendChild(fileSizeSpan);
+                videoInfo.appendChild(videoDetails);
             }
             
             URL.revokeObjectURL(video.src);
