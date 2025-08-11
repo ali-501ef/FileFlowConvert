@@ -80,32 +80,67 @@ const FileFlowUtils = {
         const isVideo = file.type.startsWith('video/');
         const hasError = isVideo && file.size > 50 * 1024 * 1024;
         
-        fileCard.innerHTML = `
-            ${draggable ? `
-                <button class="drag-handle" data-testid="handle-drag-${index}">
-                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4M8 15l4 4 4 4"></path>
-                    </svg>
-                </button>
-            ` : ''}
-            <div class="file-info">
-                <div class="file-icon">
-                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                    </svg>
-                </div>
-                <div class="file-details">
-                    <div class="file-name">${file.name}</div>
-                    <div class="file-size">${this.formatFileSize(file.size)}</div>
-                    ${hasError ? '<div class="file-error">File too large (max 50MB for videos)</div>' : ''}
-                </div>
-            </div>
-            <button class="file-remove" onclick="removeFile(${index})" data-testid="button-remove-${index}">
-                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        // Create drag handle if needed
+        if (draggable) {
+            const dragHandle = document.createElement('button');
+            dragHandle.className = 'drag-handle';
+            dragHandle.setAttribute('data-testid', `handle-drag-${index}`);
+            dragHandle.innerHTML = `
+                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4M8 15l4 4 4 4"></path>
                 </svg>
-            </button>
+            `;
+            fileCard.appendChild(dragHandle);
+        }
+        
+        // Create file info section
+        const fileInfo = document.createElement('div');
+        fileInfo.className = 'file-info';
+        
+        const fileIcon = document.createElement('div');
+        fileIcon.className = 'file-icon';
+        fileIcon.innerHTML = `
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
         `;
+        
+        const fileDetails = document.createElement('div');
+        fileDetails.className = 'file-details';
+        
+        // Safely set file name using textContent
+        const fileName = document.createElement('div');
+        fileName.className = 'file-name';
+        fileName.textContent = file.name;
+        fileDetails.appendChild(fileName);
+        
+        const fileSize = document.createElement('div');
+        fileSize.className = 'file-size';
+        fileSize.textContent = this.formatFileSize(file.size);
+        fileDetails.appendChild(fileSize);
+        
+        if (hasError) {
+            const fileError = document.createElement('div');
+            fileError.className = 'file-error';
+            fileError.textContent = 'File too large (max 50MB for videos)';
+            fileDetails.appendChild(fileError);
+        }
+        
+        fileInfo.appendChild(fileIcon);
+        fileInfo.appendChild(fileDetails);
+        fileCard.appendChild(fileInfo);
+        
+        // Create remove button
+        const removeButton = document.createElement('button');
+        removeButton.className = 'file-remove';
+        removeButton.setAttribute('data-testid', `button-remove-${index}`);
+        removeButton.onclick = () => removeFile(index);
+        removeButton.innerHTML = `
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        `;
+        fileCard.appendChild(removeButton);
         
         return fileCard;
     },
@@ -119,23 +154,39 @@ const FileFlowUtils = {
     createDownloadLink(filename, blob) {
         const downloadLink = document.createElement('div');
         downloadLink.className = 'download-link';
-        downloadLink.innerHTML = `
-            <div class="download-info">
-                <svg class="download-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-4-4m4 4l4-4m-6 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                </svg>
-                <span class="download-filename">${filename}</span>
-            </div>
-            <button class="btn btn-success" onclick="FileFlowUtils.downloadFile(arguments[0], '${filename}')" data-testid="button-download-${filename}">
-                Download
-            </button>
+        
+        // Create download info section
+        const downloadInfo = document.createElement('div');
+        downloadInfo.className = 'download-info';
+        
+        const downloadIcon = document.createElement('svg');
+        downloadIcon.className = 'download-icon';
+        downloadIcon.setAttribute('fill', 'none');
+        downloadIcon.setAttribute('stroke', 'currentColor');
+        downloadIcon.setAttribute('viewBox', '0 0 24 24');
+        downloadIcon.innerHTML = `
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-4-4m4 4l4-4m-6 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
         `;
         
-        // Store blob reference for download
-        downloadLink.querySelector('button').blobData = blob;
-        downloadLink.querySelector('button').onclick = () => {
+        // Safely set filename using textContent
+        const filenameSpan = document.createElement('span');
+        filenameSpan.className = 'download-filename';
+        filenameSpan.textContent = filename;
+        
+        downloadInfo.appendChild(downloadIcon);
+        downloadInfo.appendChild(filenameSpan);
+        downloadLink.appendChild(downloadInfo);
+        
+        // Create download button
+        const downloadButton = document.createElement('button');
+        downloadButton.className = 'btn btn-success';
+        downloadButton.setAttribute('data-testid', `button-download-${filename}`);
+        downloadButton.textContent = 'Download';
+        downloadButton.onclick = () => {
             FileFlowUtils.downloadFile(blob, filename);
         };
+        
+        downloadLink.appendChild(downloadButton);
         
         return downloadLink;
     }
