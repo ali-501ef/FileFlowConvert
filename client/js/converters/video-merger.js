@@ -279,8 +279,11 @@ class VideoMerger {
     }
 
     async performMerge(settings) {
-        this.showProgress(10);
+        const POLL_MS = 1000; // Poll every 1 second for progress updates
         
+        this.showProgress(0);
+        
+        // Start the conversion
         const response = await fetch('/api/convert-media', {
             method: 'POST',
             headers: {
@@ -292,14 +295,41 @@ class VideoMerger {
             })
         });
 
-        this.showProgress(50);
-
         if (!response.ok) {
             const error = await response.json();
             throw new Error(error.error || 'Merge failed');
         }
 
         this.conversionResult = await response.json();
+        
+        // If we have the output file, poll for progress
+        if (this.conversionResult.output_file) {
+            let currentProgress = 0;
+            while (currentProgress < 100) {
+                try {
+                    const progressResponse = await fetch(`/api/progress/${this.conversionResult.output_file}`);
+                    if (progressResponse.ok) {
+                        const progressData = await progressResponse.json();
+                        currentProgress = progressData.progress || 0;
+                        this.showProgress(currentProgress);
+                        
+                        if (currentProgress >= 100) {
+                            break;
+                        }
+                        
+                        // Wait before next poll
+                        await new Promise(resolve => setTimeout(resolve, POLL_MS));
+                    } else {
+                        // If progress endpoint fails, assume completed
+                        break;
+                    }
+                } catch (error) {
+                    // If polling fails, assume completed
+                    break;
+                }
+            }
+        }
+        
         this.showProgress(100);
     }
 

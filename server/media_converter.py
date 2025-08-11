@@ -247,12 +247,33 @@ def create_gif(input_path, output_path, options):
     else:
         return {"error": f"GIF creation failed: {result.stderr}"}
 
+def get_video_duration(video_path):
+    """Get video duration in seconds using ffprobe"""
+    try:
+        cmd = [
+            'ffprobe', '-v', 'quiet', '-show_entries', 'format=duration',
+            '-of', 'csv=p=0', video_path
+        ]
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+        if result.returncode == 0:
+            return float(result.stdout.strip())
+        return 0.0
+    except:
+        return 0.0
+
 def merge_videos(input_path, output_path, options):
-    """Merge multiple video files into one"""
+    """Merge multiple video files into one with real progress tracking"""
     # For video merger, input_path should be a directory or list of files
     video_list = options.get('video_files', [])
     if not video_list:
         return {"error": "No video files provided for merging"}
+    
+    # Calculate total duration for progress tracking
+    total_duration = 0.0
+    for video_file in video_list:
+        if os.path.exists(video_file):
+            duration = get_video_duration(video_file)
+            total_duration += duration
     
     # Create a temporary file list for FFmpeg concat
     import tempfile
@@ -273,22 +294,72 @@ def merge_videos(input_path, output_path, options):
                 'ffmpeg', '-f', 'concat', '-safe', '0', '-i', concat_file,
                 '-c:v', 'libx264', '-c:a', 'aac',
                 '-preset', 'medium', '-crf', '23',
-                '-y', output_path
+                '-y', '-hide_banner', '-nostats', '-progress', 'pipe:1',
+                output_path
             ]
         else:
             # Try direct concat first (faster)
             cmd = [
                 'ffmpeg', '-f', 'concat', '-safe', '0', '-i', concat_file,
                 '-c', 'copy',  # Copy streams without re-encoding for speed
-                '-y', output_path
+                '-y', '-hide_banner', '-nostats', '-progress', 'pipe:1',
+                output_path
             ]
         
-        result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
+        # Use Popen for real-time progress tracking
+        import threading
+        import time
         
-        if result.returncode == 0:
+        # Initialize progress tracking
+        progress_data = {"percent": 0, "status": "running"}
+        
+        def update_progress_file():
+            """Update progress in a file that can be read by the API"""
+            progress_file = output_path + '.progress'
+            try:
+                with open(progress_file, 'w') as f:
+                    f.write(f"{progress_data['percent']}")
+            except:
+                pass
+        
+        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, 
+                                 universal_newlines=True, bufsize=1)
+        
+        # Track progress in separate thread
+        def track_progress():
+            last_percent = 0
+            while process.poll() is None:
+                try:
+                    if process.stdout:
+                        line = process.stdout.readline()
+                        if line:
+                            # Parse FFmpeg progress output
+                            if 'out_time_ms=' in line:
+                                time_ms = int(line.split('=')[1].strip()) / 1000000.0  # Convert microseconds to seconds
+                                if total_duration > 0:
+                                    percent = min(99, max(0, int((time_ms / total_duration) * 100)))
+                                    if percent > last_percent:
+                                        last_percent = percent
+                                        progress_data["percent"] = percent
+                                        update_progress_file()
+                except:
+                    continue
+        
+        progress_thread = threading.Thread(target=track_progress)
+        progress_thread.start()
+        
+        # Wait for process to complete
+        stdout, stderr = process.communicate()
+        progress_thread.join(timeout=1)
+        
+        if process.returncode == 0:
+            progress_data["percent"] = 100
+            progress_data["status"] = "completed"
+            update_progress_file()
             return {"success": True}
         else:
-            return {"error": f"Video merge failed: {result.stderr}"}
+            progress_data["status"] = "failed"
+            return {"error": f"Video merge failed: {stderr}"}
     finally:
         # Clean up temporary concat file
         try:

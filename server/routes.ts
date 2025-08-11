@@ -747,6 +747,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Progress endpoint for video merge
+  app.get('/api/progress/:filename', (req, res) => {
+    const filename = req.params.filename;
+    const progressFile = path.join(outputDir, filename + '.progress');
+    
+    try {
+      if (fs.existsSync(progressFile)) {
+        const progress = fs.readFileSync(progressFile, 'utf8').trim();
+        const percent = parseInt(progress) || 0;
+        res.json({ progress: percent });
+      } else {
+        // If no progress file exists, assume it's completed or hasn't started
+        const outputFile = path.join(outputDir, filename);
+        if (fs.existsSync(outputFile)) {
+          res.json({ progress: 100 });
+        } else {
+          res.json({ progress: 0 });
+        }
+      }
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to read progress' });
+    }
+  });
+
   function getOutputExtension(conversionType: string, format?: string): string {
     switch (conversionType) {
       case 'video_compress':

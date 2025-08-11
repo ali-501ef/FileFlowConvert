@@ -1,0 +1,93 @@
+ideo Merger — real progress (no more stuck at 10%)
+Change only these files:
+
+server/api/src/controllers/videoMerger.ts (or your merger controller)
+
+client/js/converters/video-merger.js (poll interval only)
+
+Backend (controller)
+Compute total duration with ffprobe (sum of all input files).
+
+Run ffmpeg with the native progress channel and map out_time_ms → percent.
+
+Update the job store with a bounded, increasing percent (0–99) and set 100 on exit.
+
+Patch sketch (TypeScript/Node):
+
+ts
+Copy
+Edit
+// videoMerger.ts (only progress parts shown)
+import { spawn } from "node:child_process";
+import { ffprobeDuration } from "../utils/ffmpeg"; // helper that returns seconds as number
+
+async function runMerge(inputs: string[], outPath: string, job) {
+  const totalSec = (await Promise.all(inputs.map(ffprobeDuration))).reduce((a,b)=>a+b,0);
+  job.status = "running";
+  job.progress = 0;
+
+  // Build args (use your existing args, just add -progress and -nostats/-hide_banner)
+  const args = [
+    /* ... your existing inputs & filters ... */,
+    "-y",
+    "-hide_banner",
+    "-nostats",
+    "-progress", "pipe:1",      // <= progress to stdout
+    outPath
+  ];
+
+  const proc = spawn("ffmpeg", args, { stdio: ["ignore", "pipe", "pipe"] });
+
+  let lastPct = 0;
+  const updatePct = (ms:number) => {
+    if (!totalSec || !isFinite(totalSec)) return;
+    const pct = Math.max(0, Math.min(99, Math.floor((ms/1000) / totalSec * 100)));
+    if (pct > lastPct) { lastPct = pct; job.progress = pct; }
+  };
+
+  // Parse native progress lines: key=value per line, includes out_time_ms
+  proc.stdout.setEncoding("utf8");
+  proc.stdout.on("data", (chunk:string) => {
+    for (const line of chunk.split("\n")) {
+      const [k,v] = line.split("=");
+      if (k === "out_time_ms") {
+        const ms = Number(v || 0);
+        if (!Number.isNaN(ms)) updatePct(ms/1000); // v is microseconds in some builds; keep division consistent with your ffmpeg
+      }
+      // optional: if (k === "progress" && v === "end") ...
+    }
+  });
+
+  // If you already parse stderr for errors, keep it; just don’t calculate % from it anymore
+  let errTail = "";
+  proc.stderr.on("data",(d:Buffer)=>{ errTail = (errTail + d.toString()).slice(-4000); });
+
+  proc.on("close", (code) => {
+    if (code === 0) {
+      job.progress = 100;
+      job.status = "completed";
+      job.resultUrl = /* your signed/TTL URL for outPath */;
+    } else {
+      job.status = "failed";
+      job.error = errTail || `ffmpeg exited with code ${code}`;
+    }
+  });
+}
+If you have a fast-path -c copy concat, include the same -progress pipe:1 flags on that invocation so progress still advances.
+
+Frontend (polling interval only)
+Keep your existing polling; just poll every 800–1200 ms so the bar feels alive.
+
+js
+Copy
+Edit
+// client/js/converters/video-merger.js
+const POLL_MS = 1000; // was 3000 or hard-coded to show 10%
+Acceptance
+Progress rises (e.g., 1%, 2%, … 78%, 92%, 99%) instead of freezing at 10%.
+
+On success, percent hits 100 and the Download button appears.
+
+On failure, spinner stops and the inline error shows the backend message.
+
+No other tools/pages are changed.
