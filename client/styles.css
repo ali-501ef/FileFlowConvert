@@ -1156,15 +1156,19 @@ body {
     }
 }
 
-/* Tool cards - Enhanced Consistency */
+/* Tool cards - Enhanced Consistency with Unified Layout */
 .tool-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    min-height: 240px;
+    padding: 20px;
     background-color: var(--surface);
     border-radius: var(--radius-xl);
-    padding: var(--card-spacing);
     box-shadow: var(--shadow-sm);
     border: 1px solid hsl(210, 20%, 92%);
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform .15s ease, box-shadow .15s ease;
     transform: translateY(0);
     width: 100%;
     max-width: 320px;
@@ -1172,10 +1176,8 @@ body {
 }
 
 .tool-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.2), 0 10px 30px -5px rgba(0, 0, 0, 0.15);
-    border-color: rgba(99, 102, 241, 0.3);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(0,0,0,.06);
 }
 
 .tool-header {
@@ -1184,6 +1186,27 @@ body {
     margin-bottom: 1rem;
 }
 
+/* Card Icon - Unified positioning across all sections */
+.image-tools .tool-card .card-icon,
+.pdf-tools .tool-card .card-icon,
+.media-tools .tool-card .card-icon {
+    height: 56px;
+}
+
+.card-icon {
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+}
+
+.card-icon img, .card-icon svg {
+    width: 40px;
+    height: 40px;
+}
+
+/* Legacy tool-icon styles - kept for compatibility */
 .tool-icon {
     width: 3rem;
     height: 3rem;
@@ -1225,6 +1248,21 @@ body {
     min-width: 0;
 }
 
+.card-title {
+    min-height: 48px;
+    font-size: 18px;
+    line-height: 24px;
+    font-weight: 700;
+}
+
+.card-meta {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Legacy tool-title styles - kept for compatibility */
 .tool-title {
     font-size: 1.125rem;
     font-weight: 600;
@@ -1269,6 +1307,22 @@ body {
 .tool-card.coming-soon:hover {
     transform: none;
     box-shadow: var(--shadow-sm);
+}
+
+/* Image Tools Section - Match "More Image Tools" Box Width */
+.image-tools .tools-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+.image-tools .full-width-tool-container {
+    grid-column: span 3;
+}
+
+.image-tools .tool-card,
+.image-tools .tool-card.wide-card {
+    width: 100%;
 }
 
 /* Full Width Tool Container */

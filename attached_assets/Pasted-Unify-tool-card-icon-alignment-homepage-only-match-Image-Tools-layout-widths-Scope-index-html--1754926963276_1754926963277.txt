@@ -1,0 +1,113 @@
+Unify tool card icon alignment (homepage only) + match Image Tools layout widths
+
+Scope: index.html (homepage only) and the shared CSS that styles homepage tool cards. Do not touch any converter pages or JS.
+
+Part 1 – Icon Alignment Across All Sections
+Goal: Make every tool card’s icon sit at the exact same vertical position across all cards in each section (Image Tools, PDF Tools, Media Tools).
+Keep current icon graphics and sizes; this is alignment and spacing only.
+
+CSS/Layout Rules:
+
+Lock a consistent vertical skeleton for each card
+
+css
+Copy
+Edit
+.tool-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  min-height: 240px;
+  padding: 20px;
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+
+.card-icon {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.card-icon img, .card-icon svg {
+  width: 40px;
+  height: 40px;
+}
+
+.card-title {
+  min-height: 48px;
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 700;
+}
+
+.card-meta {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.tool-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0,0,0,.06);
+}
+Apply section-scoped selectors so all three main sections use the same rules without affecting internal converter pages:
+
+css
+Copy
+Edit
+.image-tools .tool-card .card-icon,
+.pdf-tools .tool-card .card-icon,
+.media-tools .tool-card .card-icon {
+  height: 56px;
+}
+Part 2 – Match “More Image Tools” Box Width
+Goal: In the Image Tools section, make the width of the top three icons exactly match the “More Image Tools” box below, so they align perfectly in a grid.
+
+CSS/Layout Rules:
+
+Force a consistent column layout:
+
+css
+Copy
+Edit
+.image-tools {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.image-tools .more-tools {
+  grid-column: span 3;
+}
+Ensure all four boxes share the same width constraints so the “More Image Tools” box does not appear wider or narrower:
+
+css
+Copy
+Edit
+.image-tools .tool-card,
+.image-tools .more-tools {
+  width: 100%;
+}
+Do Not Change
+Any routes, links, text, or icon artwork beyond the alignment/width rules above.
+
+Converter page styles or JavaScript.
+
+Card order or section headings.
+
+Acceptance Criteria
+Homepage only changes—no impact on converter pages.
+
+Icons align perfectly across cards in each row for all three sections.
+
+“More Image Tools” box matches the exact width of the top three Image Tools cards.
+
+All cards in the same row have identical heights and padding.
+
+No text wrapping causes icons to shift.
+
+Hover effect adds slight lift and shadow.
+
