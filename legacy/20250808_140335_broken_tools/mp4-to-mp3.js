@@ -225,34 +225,40 @@ class Mp4ToMp3Converter {
     showExtractionResults() {
         const info = this.audioInfo;
         
-        document.getElementById('audioInfo').innerHTML = `
-            <div class="audio-details">
-                <div class="detail-row">
-                    <span class="detail-label">Original Video Size:</span>
-                    <span class="detail-value">${this.formatFileSize(info.originalSize)}</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Extracted Audio Size:</span>
-                    <span class="detail-value">${this.formatFileSize(info.audioSize)}</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Audio Format:</span>
-                    <span class="detail-value">${info.format}</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Quality Level:</span>
-                    <span class="detail-value">${info.quality}</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Size Reduction:</span>
-                    <span class="detail-value success">${info.compressionRatio}%</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Status:</span>
-                    <span class="detail-value success">✓ Ready for download</span>
-                </div>
-            </div>
-        `;
+        // Safe DOM manipulation to prevent XSS
+        const audioInfoContainer = document.getElementById('audioInfo');
+        audioInfoContainer.textContent = ''; // Clear existing content
+        
+        const audioDetails = document.createElement('div');
+        audioDetails.className = 'audio-details';
+        
+        // Create each detail row with safe textContent
+        const createDetailRow = (label, value, className = '') => {
+            const row = document.createElement('div');
+            row.className = 'detail-row';
+            
+            const labelSpan = document.createElement('span');
+            labelSpan.className = 'detail-label';
+            labelSpan.textContent = label;
+            
+            const valueSpan = document.createElement('span');
+            valueSpan.className = `detail-value ${className}`;
+            valueSpan.textContent = value;
+            
+            row.appendChild(labelSpan);
+            row.appendChild(valueSpan);
+            return row;
+        };
+        
+        // Add all detail rows safely
+        audioDetails.appendChild(createDetailRow('Original Video Size:', this.formatFileSize(info.originalSize)));
+        audioDetails.appendChild(createDetailRow('Extracted Audio Size:', this.formatFileSize(info.audioSize)));
+        audioDetails.appendChild(createDetailRow('Audio Format:', info.format));
+        audioDetails.appendChild(createDetailRow('Quality Level:', info.quality));
+        audioDetails.appendChild(createDetailRow('Size Reduction:', `${info.compressionRatio}%`, 'success'));
+        audioDetails.appendChild(createDetailRow('Status:', '✓ Ready for download', 'success'));
+        
+        audioInfoContainer.appendChild(audioDetails);
         
         this.results.style.display = 'block';
     }
