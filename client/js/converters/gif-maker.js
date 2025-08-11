@@ -485,16 +485,53 @@ class GifMaker {
             this.uploadArea.parentNode.insertBefore(errorDiv, this.uploadArea.nextSibling);
         }
         
-        errorDiv.innerHTML = `
-            <div class="error-content">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10"/>
-                    <line x1="15" y1="9" x2="9" y2="15"/>
-                    <line x1="9" y1="9" x2="15" y2="15"/>
-                </svg>
-                <span>${message}</span>
-            </div>
-        `;
+        // Create safe DOM structure to prevent XSS
+        const errorContent = document.createElement('div');
+        errorContent.className = 'error-content';
+        
+        // Create SVG icon safely
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('width', '20');
+        svg.setAttribute('height', '20');
+        svg.setAttribute('viewBox', '0 0 24 24');
+        svg.setAttribute('fill', 'none');
+        svg.setAttribute('stroke', 'currentColor');
+        svg.setAttribute('stroke-width', '2');
+        svg.setAttribute('stroke-linecap', 'round');
+        svg.setAttribute('stroke-linejoin', 'round');
+        
+        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', '12');
+        circle.setAttribute('cy', '12');
+        circle.setAttribute('r', '10');
+        
+        const line1 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line1.setAttribute('x1', '15');
+        line1.setAttribute('y1', '9');
+        line1.setAttribute('x2', '9');
+        line1.setAttribute('y2', '15');
+        
+        const line2 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line2.setAttribute('x1', '9');
+        line2.setAttribute('y1', '9');
+        line2.setAttribute('x2', '15');
+        line2.setAttribute('y2', '15');
+        
+        svg.appendChild(circle);
+        svg.appendChild(line1);
+        svg.appendChild(line2);
+        
+        // Create text span safely using textContent
+        const span = document.createElement('span');
+        span.textContent = message; // Safe - prevents XSS
+        
+        // Assemble the structure
+        errorContent.appendChild(svg);
+        errorContent.appendChild(span);
+        
+        // Clear and set new content safely
+        errorDiv.textContent = ''; // Clear existing content
+        errorDiv.appendChild(errorContent);
         errorDiv.style.display = 'block';
         
         // Auto-hide after 5 seconds
