@@ -1,4 +1,4 @@
-import { mountVideoPreview } from '/js/components/videoPreview.js';
+
 
 /**
  * MP4 to MP3 Converter
@@ -37,6 +37,18 @@ class MP4ToMP3Converter {
         if (this.audioFormat) this.audioFormat.value = 'mp3';
         if (this.preserveMetadata) this.preserveMetadata.checked = true;
         if (this.normalizeAudio) this.normalizeAudio.checked = false;
+
+        // Guarantee the upload area is clickable
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+
+        if (uploadArea && fileInput) {
+            uploadArea.style.position = 'relative'; // safety
+            uploadArea.addEventListener('click', (e) => {
+                // don't trigger if user clicked the hidden input itself
+                if (!(e.target instanceof HTMLInputElement)) fileInput.click();
+            });
+        }
     }
 
     setupEventListeners() {
@@ -111,9 +123,9 @@ class MP4ToMP3Converter {
         this.showFileInfo(file);
 
         // Add video preview
-        const previewSlot = document.getElementById('videoPreviewSlot');
-        if (previewSlot && file && file.type.startsWith('video/')) {
-            mountVideoPreview({ container: previewSlot, file, autoplay: false });
+        const slot = document.getElementById('videoPreviewSlot');
+        if (slot && file && file.type.startsWith('video/')) {
+            window.mountVideoPreview({ container: slot, file, autoplay: false });
         }
 
         this.setProcessingState(true, 'Uploading file...');

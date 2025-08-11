@@ -6527,5 +6527,19 @@ body {
     box-shadow: var(--shadow-soft);
 }
 
+/* Video Preview Styles - Ensure clickability */
+.video-preview-slot { 
+    position: relative; 
+}
+
+.video-preview-slot, 
+.video-preview-slot * { 
+    pointer-events: auto; 
+}
+
+#uploadArea { 
+    position: relative; 
+    z-index: 1; 
+}
 
 

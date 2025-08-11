@@ -1,4 +1,4 @@
-import { mountVideoPreview } from '/js/components/videoPreview.js';
+
 
 /**
  * Video Compressor
@@ -40,6 +40,18 @@ class VideoCompressor {
         if (this.outputResolution) this.outputResolution.value = 'original';
         if (this.frameRate) this.frameRate.value = 'original';
         if (this.targetSize) this.targetSize.value = '';
+
+        // Guarantee the upload area is clickable
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+
+        if (uploadArea && fileInput) {
+            uploadArea.style.position = 'relative'; // safety
+            uploadArea.addEventListener('click', (e) => {
+                // don't trigger if user clicked the hidden input itself
+                if (!(e.target instanceof HTMLInputElement)) fileInput.click();
+            });
+        }
     }
 
     setupEventListeners() {
@@ -119,9 +131,9 @@ class VideoCompressor {
         this.showFileInfo(file);
 
         // Add video preview
-        const previewSlot = document.getElementById('videoPreviewSlot');
-        if (previewSlot && file && file.type.startsWith('video/')) {
-            mountVideoPreview({ container: previewSlot, file, autoplay: false });
+        const slot = document.getElementById('videoPreviewSlot');
+        if (slot && file && file.type.startsWith('video/')) {
+            window.mountVideoPreview({ container: slot, file, autoplay: false });
         }
 
         this.setProcessingState(true, 'Uploading file...');

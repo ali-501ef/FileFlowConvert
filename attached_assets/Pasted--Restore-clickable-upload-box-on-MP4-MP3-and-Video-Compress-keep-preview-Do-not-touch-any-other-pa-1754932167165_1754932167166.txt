@@ -1,0 +1,111 @@
+ Restore clickable upload box on MP4→MP3 and Video Compress (keep preview)
+Do not touch any other pages or logic.
+
+1) Make the preview helper global (no imports)
+Create/replace client/js/components/videoPreview.js with:
+
+js
+Copy
+Edit
+// client/js/components/videoPreview.js
+(function () {
+  function mountVideoPreview({ container, file, autoplay = false }) {
+    if (!container || !file) return;
+
+    let holder = container.querySelector('.video-preview');
+    if (!holder) {
+      holder = document.createElement('div');
+      holder.className = 'video-preview';
+      holder.style.marginTop = '16px';
+      holder.innerHTML = `
+        <video class="video-preview-el" playsinline controls style="width:100%;border-radius:12px;outline:none"></video>
+      `;
+      container.appendChild(holder);
+    }
+
+    const videoEl = holder.querySelector('.video-preview-el');
+
+    if (videoEl.dataset.blobUrl) {
+      try { URL.revokeObjectURL(videoEl.dataset.blobUrl); } catch {}
+    }
+
+    const url = URL.createObjectURL(file);
+    videoEl.src = url;
+    videoEl.dataset.blobUrl = url;
+
+    if (autoplay) {
+      videoEl.muted = true;
+      videoEl.play().catch(() => {});
+    }
+
+    window.addEventListener('beforeunload', () => {
+      try { URL.revokeObjectURL(url); } catch {}
+    }, { once: true });
+  }
+
+  window.mountVideoPreview = mountVideoPreview;
+})();
+2) Include the helper before each page’s converter script
+In client/mp4-to-mp3.html and client/video-compress.html, add this line just before the existing converter <script> tag:
+
+html
+Copy
+Edit
+<script src="/js/components/videoPreview.js" defer></script>
+(Do not change any other scripts to type="module".)
+
+3) Remove the import lines and call the global helper
+File: client/js/converters/mp4-to-mp3.js
+
+File: client/js/converters/video-compress.js
+
+Do:
+
+Delete: import { mountVideoPreview } from '/js/components/videoPreview.js';
+
+Where the file is validated/accepted, keep the preview call but use the global:
+
+js
+Copy
+Edit
+const slot = document.getElementById('videoPreviewSlot');
+if (slot && file && file.type.startsWith('video/')) {
+  window.mountVideoPreview({ container: slot, file, autoplay: false });
+}
+4) Guarantee the upload area is clickable
+In both converter JS files, immediately after you grab the elements, ensure this binding exists (add it if missing):
+
+js
+Copy
+Edit
+const uploadArea = document.getElementById('uploadArea');
+const fileInput  = document.getElementById('fileInput');
+
+if (uploadArea && fileInput) {
+  uploadArea.style.position = 'relative'; // safety
+  uploadArea.addEventListener('click', (e) => {
+    // don’t trigger if user clicked the hidden input itself
+    if (!(e.target instanceof HTMLInputElement)) fileInput.click();
+  });
+}
+5) Make sure the preview never blocks clicks
+Add this tiny CSS rule to your global stylesheet (or a page style block) to be safe:
+
+css
+Copy
+Edit
+.video-preview-slot { position: relative; }
+.video-preview-slot, .video-preview-slot * { pointer-events: auto; }
+#uploadArea { position: relative; z-index: 1; }
+(Preview is below the upload area, but we set a z-index on the upload area to prevent any accidental overlap.)
+
+6) Quick test (must pass)
+Reload both pages with DevTools open — there should be no “Cannot use import statement outside a module” error.
+
+Click the drop box → file picker opens.
+
+Drag & drop a video → preview appears and Convert still works.
+
+Replace/remove file → preview updates/clears; upload box remains clickable.
+
+Scope lock: Only modify the two pages above and the single helper file. No other pages, styles, or converters.
