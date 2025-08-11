@@ -169,7 +169,9 @@ class PDFRotate {
         if (pageCount > 10) {
             const moreDiv = document.createElement('div');
             moreDiv.className = 'more-pages';
-            moreDiv.innerHTML = `<p>+ ${pageCount - 10} more pages</p>`;
+            const moreParagraph = document.createElement('p');
+            moreParagraph.textContent = `+ ${pageCount - 10} more pages`;
+            moreDiv.appendChild(moreParagraph);
             this.pagesContainer.appendChild(moreDiv);
         }
 
