@@ -378,22 +378,56 @@ class VideoMerger {
             const totalFiles = this.uploadedFiles.length;
             const totalSize = this.uploadedFiles.reduce((sum, file) => sum + file.size, 0);
 
-            mergeStats.innerHTML = `
-                <div class="stats-grid">
-                    <div class="stat-item">
-                        <span class="stat-label">Files Merged</span>
-                        <span class="stat-value">${totalFiles}</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Total Input Size</span>
-                        <span class="stat-value">${this.formatFileSize(totalSize)}</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Output Size</span>
-                        <span class="stat-value">${this.formatFileSize(this.conversionResult.file_size)}</span>
-                    </div>
-                </div>
-            `;
+            // Clear existing content
+            mergeStats.textContent = '';
+            
+            // Create stats grid using safe DOM methods
+            const statsGrid = document.createElement('div');
+            statsGrid.className = 'stats-grid';
+            
+            // Files merged stat
+            const filesItem = document.createElement('div');
+            filesItem.className = 'stat-item';
+            const filesLabel = document.createElement('span');
+            filesLabel.className = 'stat-label';
+            filesLabel.textContent = 'Files Merged';
+            const filesValue = document.createElement('span');
+            filesValue.className = 'stat-value';
+            filesValue.textContent = totalFiles;
+            filesItem.appendChild(filesLabel);
+            filesItem.appendChild(filesValue);
+            
+            // Total input size stat
+            const inputSizeItem = document.createElement('div');
+            inputSizeItem.className = 'stat-item';
+            const inputSizeLabel = document.createElement('span');
+            inputSizeLabel.className = 'stat-label';
+            inputSizeLabel.textContent = 'Total Input Size';
+            const inputSizeValue = document.createElement('span');
+            inputSizeValue.className = 'stat-value';
+            inputSizeValue.textContent = this.formatFileSize(totalSize);
+            inputSizeItem.appendChild(inputSizeLabel);
+            inputSizeItem.appendChild(inputSizeValue);
+            
+            // Output size stat
+            const outputSizeItem = document.createElement('div');
+            outputSizeItem.className = 'stat-item';
+            const outputSizeLabel = document.createElement('span');
+            outputSizeLabel.className = 'stat-label';
+            outputSizeLabel.textContent = 'Output Size';
+            const outputSizeValue = document.createElement('span');
+            outputSizeValue.className = 'stat-value';
+            outputSizeValue.textContent = this.formatFileSize(this.conversionResult.file_size);
+            outputSizeItem.appendChild(outputSizeLabel);
+            outputSizeItem.appendChild(outputSizeValue);
+            
+            // Append all items to grid
+            statsGrid.appendChild(filesItem);
+            statsGrid.appendChild(inputSizeItem);
+            statsGrid.appendChild(outputSizeItem);
+            
+            // Append grid to container
+            mergeStats.appendChild(statsGrid);
         }
 
         this.results.style.display = 'block';
