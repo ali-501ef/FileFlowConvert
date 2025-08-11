@@ -26,16 +26,14 @@ class AudioConverter {
         
         // Advanced options
         this.outputFormat = document.getElementById('outputFormat');
-        this.audioBitrate = document.getElementById('audioBitrate');
-        this.sampleRate = document.getElementById('sampleRate');
         this.audioQuality = document.getElementById('audioQuality');
+        this.sampleRate = document.getElementById('sampleRate');
         this.preserveMetadata = document.getElementById('preserveMetadata');
         
         // Initialize with default values
         if (this.outputFormat) this.outputFormat.value = 'mp3';
-        if (this.audioBitrate) this.audioBitrate.value = '192';
+        if (this.audioQuality) this.audioQuality.value = '192';
         if (this.sampleRate) this.sampleRate.value = 'keep';
-        if (this.audioQuality) this.audioQuality.value = 'standard';
         if (this.preserveMetadata) this.preserveMetadata.checked = true;
     }
 
@@ -60,10 +58,7 @@ class AudioConverter {
             this.downloadBtn.addEventListener('click', () => this.downloadFile());
         }
 
-        // Format change handler
-        if (this.outputFormat) {
-            this.outputFormat.addEventListener('change', () => this.updateBitrateOptions());
-        }
+        // Format change handler (removed bitrate update since audioQuality is now static)
     }
 
     handleUploadAreaClick(e) {
@@ -230,9 +225,9 @@ class AudioConverter {
     getConversionSettings() {
         return {
             format: this.outputFormat?.value || 'mp3',
-            bitrate: this.audioBitrate?.value || '192',
+            bitrate: this.audioQuality?.value || '192',
             sample_rate: this.sampleRate?.value === 'keep' ? undefined : this.sampleRate?.value,
-            quality: this.audioQuality?.value || 'standard',
+            quality: this.audioQuality?.value || '192',
             preserve_metadata: this.preserveMetadata?.checked || false
         };
     }
@@ -276,77 +271,93 @@ class AudioConverter {
 
         // Show file stats
         if (audioStats && this.conversionResult) {
-            audioStats.innerHTML = `
-                <div class="stats-grid">
-                    <div class="stat-item">
-                        <span class="stat-label">Format</span>
-                        <span class="stat-value">${this.outputFormat?.value?.toUpperCase() || 'MP3'}</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Bitrate</span>
-                        <span class="stat-value">${this.audioBitrate?.value || '192'} kbps</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Size</span>
-                        <span class="stat-value">${this.formatFileSize(this.conversionResult.file_size)}</span>
-                    </div>
-                </div>
-            `;
+            // Clear existing content
+            audioStats.textContent = '';
+            
+            // Create stats grid using safe DOM methods
+            const statsGrid = document.createElement('div');
+            statsGrid.className = 'stats-grid';
+            
+            // Format stat
+            const formatItem = document.createElement('div');
+            formatItem.className = 'stat-item';
+            const formatLabel = document.createElement('span');
+            formatLabel.className = 'stat-label';
+            formatLabel.textContent = 'Format';
+            const formatValue = document.createElement('span');
+            formatValue.className = 'stat-value';
+            formatValue.textContent = (this.outputFormat?.value?.toUpperCase() || 'MP3');
+            formatItem.appendChild(formatLabel);
+            formatItem.appendChild(formatValue);
+            
+            // Bitrate stat
+            const bitrateItem = document.createElement('div');
+            bitrateItem.className = 'stat-item';
+            const bitrateLabel = document.createElement('span');
+            bitrateLabel.className = 'stat-label';
+            bitrateLabel.textContent = 'Bitrate';
+            const bitrateValue = document.createElement('span');
+            bitrateValue.className = 'stat-value';
+            bitrateValue.textContent = `${this.audioQuality?.value || '192'} kbps`;
+            bitrateItem.appendChild(bitrateLabel);
+            bitrateItem.appendChild(bitrateValue);
+            
+            // Size stat
+            const sizeItem = document.createElement('div');
+            sizeItem.className = 'stat-item';
+            const sizeLabel = document.createElement('span');
+            sizeLabel.className = 'stat-label';
+            sizeLabel.textContent = 'Size';
+            const sizeValue = document.createElement('span');
+            sizeValue.className = 'stat-value';
+            sizeValue.textContent = this.formatFileSize(this.conversionResult.file_size);
+            sizeItem.appendChild(sizeLabel);
+            sizeItem.appendChild(sizeValue);
+            
+            statsGrid.appendChild(formatItem);
+            statsGrid.appendChild(bitrateItem);
+            statsGrid.appendChild(sizeItem);
+            audioStats.appendChild(statsGrid);
         }
 
         // Show audio preview
         if (audioPreview && this.conversionResult.download_url) {
-            audioPreview.innerHTML = `
-                <div class="audio-preview-container">
-                    <h4>Converted Audio</h4>
-                    <audio controls style="width: 100%; margin-top: 10px;">
-                        <source src="${this.conversionResult.download_url}" type="audio/${this.outputFormat?.value || 'mp3'}">
-                        Your browser does not support the audio element.
-                    </audio>
-                </div>
-            `;
+            // Clear existing content
+            audioPreview.textContent = '';
+            
+            // Create audio preview using safe DOM methods
+            const container = document.createElement('div');
+            container.className = 'audio-preview-container';
+            
+            const title = document.createElement('h4');
+            title.textContent = 'Converted Audio';
+            
+            const audio = document.createElement('audio');
+            audio.controls = true;
+            audio.style.width = '100%';
+            audio.style.marginTop = '10px';
+            
+            const source = document.createElement('source');
+            // Validate URL is from our domain/server for security
+            if (this.conversionResult.download_url.startsWith('/api/download/') || 
+                this.conversionResult.download_url.startsWith('./output/') ||
+                this.conversionResult.download_url.startsWith('/output/')) {
+                source.src = this.conversionResult.download_url;
+            }
+            source.type = `audio/${this.outputFormat?.value || 'mp3'}`;
+            
+            audio.appendChild(source);
+            audio.appendChild(document.createTextNode('Your browser does not support the audio element.'));
+            
+            container.appendChild(title);
+            container.appendChild(audio);
+            audioPreview.appendChild(container);
         }
 
         this.results.style.display = 'block';
     }
 
-    updateBitrateOptions() {
-        if (!this.audioBitrate || !this.outputFormat) return;
-        
-        const format = this.outputFormat.value;
-        const bitrateSelect = this.audioBitrate;
-        
-        // Clear existing options
-        bitrateSelect.innerHTML = '';
-        
-        let bitrates = [];
-        if (format === 'mp3') {
-            bitrates = ['96', '128', '192', '256', '320'];
-        } else if (format === 'aac') {
-            bitrates = ['96', '128', '192', '256'];
-        } else if (format === 'ogg') {
-            bitrates = ['96', '128', '192', '256', '320'];
-        } else if (format === 'wav') {
-            // WAV is lossless, no bitrate options
-            bitrateSelect.innerHTML = '<option value="lossless">Lossless</option>';
-            bitrateSelect.disabled = true;
-            return;
-        } else if (format === 'flac') {
-            // FLAC is lossless, no bitrate options
-            bitrateSelect.innerHTML = '<option value="lossless">Lossless</option>';
-            bitrateSelect.disabled = true;
-            return;
-        }
-        
-        bitrateSelect.disabled = false;
-        bitrates.forEach(bitrate => {
-            const option = document.createElement('option');
-            option.value = bitrate;
-            option.textContent = `${bitrate} kbps`;
-            if (bitrate === '192') option.selected = true;
-            bitrateSelect.appendChild(option);
-        });
-    }
+
 
     downloadFile() {
         if (this.conversionResult?.download_url) {
@@ -370,12 +381,17 @@ class AudioConverter {
                 overlay.className = 'processing-overlay';
                 this.uploadArea.appendChild(overlay);
             }
-            overlay.innerHTML = `
-                <div class="processing-content">
-                    <div class="spinner"></div>
-                    <p>${message}</p>
-                </div>
-            `;
+            // Clear and create processing content safely
+            overlay.textContent = '';
+            const content = document.createElement('div');
+            content.className = 'processing-content';
+            const spinner = document.createElement('div');
+            spinner.className = 'spinner';
+            const text = document.createElement('p');
+            text.textContent = message;
+            content.appendChild(spinner);
+            content.appendChild(text);
+            overlay.appendChild(content);
             overlay.style.display = 'flex';
             
             // Disable upload area interactions
@@ -429,16 +445,49 @@ class AudioConverter {
             this.uploadArea.parentNode.insertBefore(errorDiv, this.uploadArea.nextSibling);
         }
         
-        errorDiv.innerHTML = `
-            <div class="error-content">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10"/>
-                    <line x1="15" y1="9" x2="9" y2="15"/>
-                    <line x1="9" y1="9" x2="15" y2="15"/>
-                </svg>
-                <span>${message}</span>
-            </div>
-        `;
+        // Clear and create error content safely
+        errorDiv.textContent = '';
+        const content = document.createElement('div');
+        content.className = 'error-content';
+        
+        // Create error icon SVG
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('width', '20');
+        svg.setAttribute('height', '20');
+        svg.setAttribute('viewBox', '0 0 24 24');
+        svg.setAttribute('fill', 'none');
+        svg.setAttribute('stroke', 'currentColor');
+        svg.setAttribute('stroke-width', '2');
+        svg.setAttribute('stroke-linecap', 'round');
+        svg.setAttribute('stroke-linejoin', 'round');
+        
+        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', '12');
+        circle.setAttribute('cy', '12');
+        circle.setAttribute('r', '10');
+        
+        const line1 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line1.setAttribute('x1', '15');
+        line1.setAttribute('y1', '9');
+        line1.setAttribute('x2', '9');
+        line1.setAttribute('y2', '15');
+        
+        const line2 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line2.setAttribute('x1', '9');
+        line2.setAttribute('y1', '9');
+        line2.setAttribute('x2', '15');
+        line2.setAttribute('y2', '15');
+        
+        svg.appendChild(circle);
+        svg.appendChild(line1);
+        svg.appendChild(line2);
+        
+        const span = document.createElement('span');
+        span.textContent = message;
+        
+        content.appendChild(svg);
+        content.appendChild(span);
+        errorDiv.appendChild(content);
         errorDiv.style.display = 'block';
         
         // Auto-hide after 5 seconds
