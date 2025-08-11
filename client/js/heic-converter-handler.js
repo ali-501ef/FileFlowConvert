@@ -280,26 +280,48 @@ function showResults(downloadUrls) {
     // Store download URLs for the download handler
     window.conversionResults = downloadUrls;
     
-    // Update button text based on number of files
-    if (downloadUrls.length === 1) {
-        downloadBtn.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="7,10 12,15 17,10"></polyline>
-                <line x1="12" y1="15" x2="12" y2="3"></line>
-            </svg>
-            Download Converted Image
-        `;
-    } else {
-        downloadBtn.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="7,10 12,15 17,10"></polyline>
-                <line x1="12" y1="15" x2="12" y2="3"></line>
-            </svg>
-            Download All Images (${downloadUrls.length})
-        `;
-    }
+    // Update button content using safe DOM methods
+    // Clear existing content
+    downloadBtn.textContent = '';
+    
+    // Create SVG element
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('width', '16');
+    svg.setAttribute('height', '16');
+    svg.setAttribute('viewBox', '0 0 24 24');
+    svg.setAttribute('fill', 'none');
+    svg.setAttribute('stroke', 'currentColor');
+    svg.setAttribute('stroke-width', '2');
+    svg.setAttribute('stroke-linecap', 'round');
+    svg.setAttribute('stroke-linejoin', 'round');
+    
+    // Create SVG paths
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', 'M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4');
+    
+    const polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+    polyline.setAttribute('points', '7,10 12,15 17,10');
+    
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', '12');
+    line.setAttribute('y1', '15');
+    line.setAttribute('x2', '12');
+    line.setAttribute('y2', '3');
+    
+    // Assemble SVG
+    svg.appendChild(path);
+    svg.appendChild(polyline);
+    svg.appendChild(line);
+    
+    // Create text content
+    const textContent = downloadUrls.length === 1 
+        ? 'Download Converted Image' 
+        : `Download All Images (${downloadUrls.length})`;
+    const textNode = document.createTextNode(' ' + textContent);
+    
+    // Append to button
+    downloadBtn.appendChild(svg);
+    downloadBtn.appendChild(textNode);
     
     results.style.display = 'block';
     // Scroll to the download button specifically to keep it visible
