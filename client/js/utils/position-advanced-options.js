@@ -24,11 +24,11 @@
     const btn = findPrimaryBtn(root);
     if (!btn) return;
 
-    // If it's already right above the button, do nothing
-    const prev = btn.previousElementSibling;
-    if (prev === adv) return;
+    // Check if Advanced Options is already immediately before the button
+    if (btn.previousElementSibling === adv) return;
 
-    // Move Advanced Options directly above the main button
+    // Move Advanced Options directly above the convert button
+    // This ensures it's always the immediate predecessor regardless of other elements
     btn.parentNode.insertBefore(adv, btn);
   }
 
@@ -36,12 +36,25 @@
     placeAdvanced(root);
 
     // Re-apply whenever uploads/results modify the DOM
-    const obs = new MutationObserver(() => placeAdvanced(root));
-    obs.observe(root, { childList: true, subtree: true });
+    const obs = new MutationObserver(() => {
+      // Small delay to ensure DOM is fully updated
+      setTimeout(() => placeAdvanced(root), 10);
+    });
+    obs.observe(root, { 
+      childList: true, 
+      subtree: true, 
+      attributes: true,
+      attributeFilter: ['style', 'class']
+    });
 
     // Also respond to custom events some tools emit
-    ['file-added', 'file-removed', 'conversion-start', 'conversion-complete']
-      .forEach(evt => root.addEventListener(evt, () => placeAdvanced(root), { passive: true }));
+    ['file-added', 'file-removed', 'conversion-start', 'conversion-complete', 'upload-complete', 'files-updated']
+      .forEach(evt => root.addEventListener(evt, () => {
+        setTimeout(() => placeAdvanced(root), 10);
+      }, { passive: true }));
+
+    // Periodic check to ensure positioning stays correct
+    setInterval(() => placeAdvanced(root), 1000);
   }
 
   document.addEventListener('DOMContentLoaded', () => {
