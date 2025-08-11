@@ -98,7 +98,7 @@ class FileConverter:
             "extension": Path(file_path).suffix.lower().lstrip('.'),
         }
     
-    def convert_heic_to_image(self, input_path: str, output_path: str, output_format: str) -> bool:
+    def convert_heic_to_image(self, input_path: str, output_path: str, output_format: str, quality: float = 0.95) -> bool:
         """Convert HEIC/HEIF files to standard image formats"""
         try:
             # Read HEIC file
@@ -126,7 +126,9 @@ class FileConverter:
                         image = image.convert('RGBA')
                     rgb_image.paste(image, mask=image.split()[-1] if image.mode == 'RGBA' else None)
                     image = rgb_image
-                image.save(output_path, 'JPEG', quality=92, optimize=True)
+                # Convert quality from 0-1 scale to 0-100 scale for PIL
+                jpeg_quality = int(quality * 100) if quality <= 1.0 else int(quality)
+                image.save(output_path, 'JPEG', quality=jpeg_quality, optimize=True)
             else:
                 image.save(output_path, output_format.upper(), optimize=True)
             
@@ -245,7 +247,9 @@ class FileConverter:
             
             # Route to appropriate converter
             if input_ext in ['heic', 'heif']:
-                success = self.convert_heic_to_image(input_path, str(output_path), output_format)
+                # Get quality from conversion options if available
+                quality = getattr(self, 'quality', 0.95)
+                success = self.convert_heic_to_image(input_path, str(output_path), output_format, quality)
             elif input_ext in ['jpg', 'jpeg', 'png', 'webp', 'gif', 'bmp', 'tiff']:
                 success = self.convert_image_to_image(input_path, str(output_path), output_format)
             elif input_ext == 'pdf' and output_format in ['jpg', 'jpeg', 'png', 'webp']:

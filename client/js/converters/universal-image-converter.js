@@ -220,16 +220,34 @@ class ImageConverter {
             
             img.onload = () => {
                 try {
-                    canvas.width = img.naturalWidth;
-                    canvas.height = img.naturalHeight;
+                    let width = img.naturalWidth;
+                    let height = img.naturalHeight;
                     
-                    // Handle background for formats that don't support transparency
-                    if (this.outputFormat === 'jpg' && advancedOptions.backgroundColor) {
-                        ctx.fillStyle = advancedOptions.backgroundColor;
+                    // Handle output size for specific converters
+                    if (advancedOptions.outputSize && advancedOptions.outputSize !== 'original') {
+                        const [targetWidth, targetHeight] = advancedOptions.outputSize.split('x').map(Number);
+                        const aspectRatio = width / height;
+                        
+                        if (width > height) {
+                            width = targetWidth;
+                            height = targetWidth / aspectRatio;
+                        } else {
+                            height = targetHeight;
+                            width = targetHeight * aspectRatio;
+                        }
+                    }
+                    
+                    canvas.width = width;
+                    canvas.height = height;
+                    
+                    // Handle background for formats that don't support transparency or when user specifies background
+                    if ((this.outputFormat === 'jpg' || advancedOptions.backgroundColor) && !advancedOptions.preserveTransparency) {
+                        const bgColor = advancedOptions.backgroundColor || '#ffffff';
+                        ctx.fillStyle = bgColor;
                         ctx.fillRect(0, 0, canvas.width, canvas.height);
                     }
                     
-                    ctx.drawImage(img, 0, 0);
+                    ctx.drawImage(img, 0, 0, width, height);
                     
                     // Apply any transformations based on advanced options
                     this.applyAdvancedOptions(canvas, ctx, advancedOptions);
@@ -237,13 +255,27 @@ class ImageConverter {
                     const quality = this.getOutputQuality(advancedOptions);
                     const mimeType = this.getOutputMimeType();
                     
-                    canvas.toBlob((blob) => {
-                        if (blob) {
-                            resolve(blob);
-                        } else {
-                            reject(new Error('Failed to create output blob'));
-                        }
-                    }, mimeType, quality);
+                    // For PNG files, we need to handle the compression level differently
+                    if (this.outputFormat === 'png') {
+                        canvas.toBlob((blob) => {
+                            if (blob) {
+                                // PNG compression level is handled at the Canvas API level
+                                // The compressionLevel option is stored but Canvas API doesn't directly support it
+                                // The browser's PNG encoder will use its own compression
+                                resolve(blob);
+                            } else {
+                                reject(new Error('Failed to create output blob'));
+                            }
+                        }, mimeType);
+                    } else {
+                        canvas.toBlob((blob) => {
+                            if (blob) {
+                                resolve(blob);
+                            } else {
+                                reject(new Error('Failed to create output blob'));
+                            }
+                        }, mimeType, quality);
+                    }
                     
                 } catch (error) {
                     reject(error);
@@ -266,8 +298,7 @@ class ImageConverter {
                             document.getElementById('jpegQuality') ||
                             document.getElementById('qualityLevel') ||
                             document.getElementById('imageQuality') ||
-                            document.getElementById('pngQuality') || 
-                            document.getElementById('compressionLevel');
+                            document.getElementById('pngQuality');
         if (qualitySelect) {
             const value = qualitySelect.value;
             // Handle different quality formats
@@ -277,7 +308,13 @@ class ImageConverter {
             else options.quality = parseFloat(value);
         }
         
-        // Background settings - capture all possible background variable names
+        // PNG compression level - separate from quality
+        const compressionSelect = document.getElementById('compressionLevel');
+        if (compressionSelect && this.outputFormat === 'png') {
+            options.compressionLevel = parseInt(compressionSelect.value);
+        }
+        
+        // Background/Transparency settings - capture all possible background variable names
         const backgroundSelect = document.getElementById('backgroundColor') || 
                                document.getElementById('preserveTransparency') ||
                                document.getElementById('transparencyHandling');
@@ -285,8 +322,7 @@ class ImageConverter {
             const value = backgroundSelect.value;
             if (value === 'white') options.backgroundColor = '#ffffff';
             else if (value === 'black') options.backgroundColor = '#000000';
-            else if (value === 'transparent') options.preserveTransparency = true;
-            else if (value === 'preserve') options.preserveTransparency = true;
+            else if (value === 'transparent' || value === 'preserve') options.preserveTransparency = true;
         }
         
         // Progressive JPEG

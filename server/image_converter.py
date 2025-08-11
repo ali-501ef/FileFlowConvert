@@ -52,12 +52,13 @@ def convert_heic_to_pil(input_path):
 def main():
     """Main conversion function"""
     try:
-        if len(sys.argv) != 4:
-            raise Exception("Usage: python3 image_converter.py <input_path> <output_path> <output_format>")
+        if len(sys.argv) < 4 or len(sys.argv) > 5:
+            raise Exception("Usage: python3 image_converter.py <input_path> <output_path> <output_format> [quality]")
         
         input_path = sys.argv[1]
         output_path = sys.argv[2]
         output_format = sys.argv[3].upper()
+        quality = float(sys.argv[4]) if len(sys.argv) == 5 else 0.95
         
         print(f"Starting conversion: {input_path} -> {output_path} ({output_format})")
         
@@ -93,7 +94,8 @@ def main():
                 if img.mode == 'RGBA':
                     background.paste(img, mask=img.split()[-1])
                 img = background
-            img.save(output_path, 'JPEG', quality=85, optimize=True, progressive=True)
+            jpeg_quality = int(quality * 100) if quality <= 1.0 else int(quality)
+            img.save(output_path, 'JPEG', quality=jpeg_quality, optimize=True, progressive=True)
         elif output_format == 'PNG':
             print("Converting to PNG")
             img.save(output_path, 'PNG', optimize=True, compress_level=9)

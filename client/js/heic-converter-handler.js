@@ -187,8 +187,9 @@ async function handleConversion() {
     progressContainer.style.display = 'block';
 
     try {
-        // Get output format from advanced options
+        // Get advanced options
         const outputFormat = document.getElementById('outputFormat').value || 'jpg';
+        const imageQuality = document.getElementById('imageQuality').value || 'high';
         
         let completedFiles = 0;
         const downloadUrls = [];
@@ -202,11 +203,12 @@ async function handleConversion() {
                     throw new Error(`Upload failed: ${uploadResult.error || 'Unknown error'}`);
                 }
 
-                // Convert file
+                // Convert file with quality settings
                 const convertResult = await convertFile(
                     uploadResult.file_id,
                     outputFormat,
-                    uploadResult.temp_path
+                    uploadResult.temp_path,
+                    imageQuality
                 );
 
                 if (!convertResult.success) {
@@ -257,7 +259,21 @@ async function uploadFile(file) {
     return await response.json();
 }
 
-async function convertFile(fileId, outputFormat, tempPath) {
+async function convertFile(fileId, outputFormat, tempPath, imageQuality = 'high') {
+    // Convert quality setting to numeric value
+    let qualityValue = 0.95; // Default high quality
+    switch (imageQuality) {
+        case 'high':
+            qualityValue = 0.95;
+            break;
+        case 'medium':
+            qualityValue = 0.85;
+            break;
+        case 'low':
+            qualityValue = 0.75;
+            break;
+    }
+
     const response = await fetch('/api/convert', {
         method: 'POST',
         headers: {
@@ -266,7 +282,8 @@ async function convertFile(fileId, outputFormat, tempPath) {
         body: JSON.stringify({
             file_id: fileId,
             output_format: outputFormat,
-            temp_path: tempPath
+            temp_path: tempPath,
+            quality: qualityValue
         })
     });
 
