@@ -1,0 +1,82 @@
+Task: Auto-download on successful conversion and remove the separate “Download converted file” button — for the currently open Convert to JPG page only. Do not change any other tools.
+
+Acceptance criteria:
+
+Pressing Convert to JPG triggers the conversion and immediately downloads the result (no extra click).
+
+The “Download converted file” button is removed/hidden.
+
+Progress bar, errors, filename scheme, and analytics/events remain unchanged.
+
+No edits to other pages/tools.
+
+Do this:
+
+Find the current page + script
+
+Identify the HTML file that contains the “Convert to JPG” button for the page I’m viewing (e.g., image-tools/heic-to-jpg.html, png-to-jpg.html, webp-to-jpg.html, or similar).
+
+Identify its linked converter script in client/js/converters/ (e.g., heic-to-jpg.js / png-to-jpg.js).
+
+Remove/hide the manual Download button (this page only)
+
+In the page’s HTML, locate the results block (.results / .result-actions) and remove the button with class .download-btn (or add a page-scoped CSS rule to hide it: .results .download-btn { display:none; } in this page only; do not edit global CSS).
+
+Mirror JPG→PDF auto-download
+
+Open the working JPG→PDF converter script (e.g., client/js/converters/jpg-to-pdf.js) and copy the exact auto-download logic it uses after a successful conversion (the part that creates a Blob/Object URL and programmatically clicks an <a download>).
+
+Create/confirm a small util client/js/utils/autoDownload.js with:
+
+js
+Copy
+Edit
+export async function autoDownloadFromUrl(fileUrl, filename='download'){
+  const res = await fetch(fileUrl);
+  if (!res.ok) throw new Error('download fetch failed');
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+Import this util only in the current to JPG converter script.
+
+Call auto-download in the success handler (this page only)
+
+In the success path where we currently show “results” or previously enabled the old download button, instead call:
+
+js
+Copy
+Edit
+// Example: adjust these variable names to match current code
+const { downloadUrl, suggestedName } = jobResult; 
+await autoDownloadFromUrl(downloadUrl, suggestedName || 'converted.jpg');
+Keep the existing UI updates (stats/preview) intact.
+
+Make no backend changes.
+
+Filename rules
+
+Reuse the same filename logic already used on this page, or if none, match JPG→PDF’s convention (base name + timestamp + .jpg).
+
+Guardrails
+
+If conversion fails, show the existing inline error and do not try to download.
+
+Do not modify any other pages, shared CSS, or nav.
+
+Do not change progress indicators or advanced options.
+
+Test (this page only):
+
+Upload a HEIC/PNG/WEBP (whichever this page supports) → click Convert to JPG → file auto-downloads → no “Download converted file” button is present.
+
+Verify repeat conversions continue to auto-download with correct names.
+
+Confirm no regressions on other tools.
+

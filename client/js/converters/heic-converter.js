@@ -3,6 +3,8 @@
  * Uses heic2any library for client-side HEIC conversion
  */
 
+import { autoDownloadFromBlob } from '../utils/autoDownload.js';
+
 class HEICConverter extends FileHandler {
     constructor() {
         super();
@@ -112,8 +114,8 @@ class HEICConverter extends FileHandler {
                 }
             }
 
-            // Show download results
-            this.showDownloadResults(results);
+            // Auto-download results instead of showing download links
+            this.autoDownloadResults(results);
 
         } catch (error) {
             console.error('Conversion process failed:', error);
@@ -122,6 +124,47 @@ class HEICConverter extends FileHandler {
             // Reset interface on error
             this.resetInterface();
             this.showActionButtons();
+        }
+    }
+
+    /**
+     * Auto-download converted files instead of showing download links
+     * @param {Array} results - Array of converted file results
+     */
+    async autoDownloadResults(results) {
+        // Hide progress
+        this.hideProgress();
+        
+        // Show completion message
+        const resultsSection = document.getElementById('results');
+        if (resultsSection) {
+            resultsSection.style.display = 'block';
+        }
+
+        try {
+            // Auto-download each converted file
+            for (const result of results) {
+                if (result.blob && result.filename) {
+                    // Generate filename with timestamp for uniqueness
+                    const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+                    const baseFilename = result.filename.replace(/\.(jpg|jpeg)$/i, '');
+                    const finalFilename = `${baseFilename}_${timestamp}.jpg`;
+                    
+                    await autoDownloadFromBlob(result.blob, finalFilename);
+                    
+                    // Small delay between downloads to prevent browser issues
+                    if (results.length > 1) {
+                        await new Promise(resolve => setTimeout(resolve, 500));
+                    }
+                }
+            }
+            
+            console.log(`✅ Auto-downloaded ${results.length} converted file(s)`);
+            
+        } catch (error) {
+            console.error('Auto-download failed:', error);
+            // Fallback to showing download links if auto-download fails
+            this.showDownloadResults(results);
         }
     }
 }

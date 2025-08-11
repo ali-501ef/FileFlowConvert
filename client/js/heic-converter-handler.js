@@ -204,8 +204,8 @@ async function handleConversion() {
             }
         }
 
-        // All files converted successfully
-        showResults(downloadUrls);
+        // All files converted successfully - auto-download instead of showing results
+        await autoDownloadResults(downloadUrls);
 
     } catch (error) {
         console.error('Conversion error:', error);
@@ -365,6 +365,62 @@ function showError(message) {
             errorDiv.parentNode.removeChild(errorDiv);
         }
     }, 5000);
+}
+
+async function autoDownloadResults(downloadUrls) {
+    // Show completion message
+    const results = document.getElementById('results');
+    results.style.display = 'block';
+    
+    try {
+        // Auto-download each converted file
+        for (const result of downloadUrls) {
+            // Generate filename with timestamp for uniqueness
+            const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+            const baseName = result.originalName.replace(/\.(heic|heif)$/i, '');
+            const outputFormat = document.getElementById('outputFormat').value || 'jpg';
+            const finalFilename = `${baseName}_${timestamp}.${outputFormat}`;
+            
+            await downloadSingleFileWithName(result.downloadUrl, finalFilename);
+            
+            // Small delay between downloads to prevent browser issues
+            if (downloadUrls.length > 1) {
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+        }
+        
+        console.log(`✅ Auto-downloaded ${downloadUrls.length} converted file(s)`);
+        
+    } catch (error) {
+        console.error('Auto-download failed:', error);
+        // Fallback to showing download links if auto-download fails
+        showResults(downloadUrls);
+    }
+}
+
+async function downloadSingleFileWithName(downloadUrl, filename) {
+    try {
+        const response = await fetch(downloadUrl);
+        if (!response.ok) {
+            throw new Error(`Download failed with status: ${response.status}`);
+        }
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        window.URL.revokeObjectURL(url);
+    } catch (error) {
+        console.error('Single file download error:', error);
+        throw error;
+    }
 }
 
 function formatFileSize(bytes) {
