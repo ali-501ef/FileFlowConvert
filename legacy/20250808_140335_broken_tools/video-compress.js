@@ -87,13 +87,28 @@ class VideoCompressor {
             const duration = this.formatDuration(this.videoPreview.duration);
             const resolution = `${this.videoPreview.videoWidth}x${this.videoPreview.videoHeight}`;
             
-            document.getElementById('videoInfo').innerHTML = `
-                <div class="video-details">
-                    <span class="detail-item">🎬 ${resolution}</span>
-                    <span class="detail-item">⏱️ ${duration}</span>
-                    <span class="detail-item">📊 ${this.formatFileSize(file.size)}</span>
-                </div>
-            `;
+            const videoInfoElement = document.getElementById('videoInfo');
+            const videoDetailsDiv = document.createElement('div');
+            videoDetailsDiv.className = 'video-details';
+            
+            const resolutionSpan = document.createElement('span');
+            resolutionSpan.className = 'detail-item';
+            resolutionSpan.textContent = `🎬 ${resolution}`;
+            
+            const durationSpan = document.createElement('span');
+            durationSpan.className = 'detail-item';
+            durationSpan.textContent = `⏱️ ${duration}`;
+            
+            const sizeSpan = document.createElement('span');
+            sizeSpan.className = 'detail-item';
+            sizeSpan.textContent = `📊 ${this.formatFileSize(file.size)}`;
+            
+            videoDetailsDiv.appendChild(resolutionSpan);
+            videoDetailsDiv.appendChild(durationSpan);
+            videoDetailsDiv.appendChild(sizeSpan);
+            
+            videoInfoElement.innerHTML = ''; // Clear existing content
+            videoInfoElement.appendChild(videoDetailsDiv);
         };
         
         // Initialize FFmpeg if not loaded
