@@ -123,9 +123,9 @@ class MP4ToMP3Converter {
         this.showFileInfo(file);
 
         // Add video preview
-        const slot = document.getElementById('videoPreviewSlot');
-        if (slot && file && file.type.startsWith('video/')) {
-            window.mountVideoPreview({ container: slot, file, autoplay: false });
+        const previewSlot = document.getElementById('videoPreviewSlot');
+        if (previewSlot && file && file.type.startsWith('video/')) {
+            window.mountVideoPreview({ container: previewSlot, file, autoplay: false });
         }
 
         this.setProcessingState(true, 'Uploading file...');

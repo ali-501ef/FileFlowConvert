@@ -6537,6 +6537,11 @@ body {
     pointer-events: auto; 
 }
 
+.video-preview-slot video {
+    max-width: 100%;
+    border-radius: 12px;
+}
+
 #uploadArea { 
     position: relative; 
     z-index: 1; 
