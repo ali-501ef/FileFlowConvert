@@ -368,9 +368,7 @@ function showError(message) {
 }
 
 async function autoDownloadResults(downloadUrls) {
-    // Show completion message
-    const results = document.getElementById('results');
-    results.style.display = 'block';
+    // Skip showing completion message - auto-download only
     
     try {
         // Auto-download each converted file
