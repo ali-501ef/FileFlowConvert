@@ -181,25 +181,61 @@ class PDFRotate {
     createPagePreview(pageIndex) {
         const pageDiv = document.createElement('div');
         pageDiv.className = 'page-preview';
-        pageDiv.innerHTML = `
-            <div class="page-thumbnail" style="transform: rotate(${this.pageRotations.get(pageIndex)}deg)">
-                <div class="page-content">Page ${pageIndex + 1}</div>
-            </div>
-            <div class="page-controls">
-                <button class="rotate-btn" data-page="${pageIndex}" data-rotation="-90">↺</button>
-                <span class="rotation-display">${this.pageRotations.get(pageIndex)}°</span>
-                <button class="rotate-btn" data-page="${pageIndex}" data-rotation="90">↻</button>
-            </div>
-        `;
+        
+        // Create thumbnail container
+        const thumbnailDiv = document.createElement('div');
+        thumbnailDiv.className = 'page-thumbnail';
+        thumbnailDiv.style.transform = `rotate(${this.pageRotations.get(pageIndex)}deg)`;
+        
+        // Create page content
+        const contentDiv = document.createElement('div');
+        contentDiv.className = 'page-content';
+        contentDiv.textContent = `Page ${pageIndex + 1}`;
+        thumbnailDiv.appendChild(contentDiv);
+        
+        // Create controls container
+        const controlsDiv = document.createElement('div');
+        controlsDiv.className = 'page-controls';
+        
+        // Create rotate left button
+        const rotateLeftBtn = document.createElement('button');
+        rotateLeftBtn.className = 'rotate-btn';
+        rotateLeftBtn.setAttribute('data-page', pageIndex);
+        rotateLeftBtn.setAttribute('data-rotation', '-90');
+        rotateLeftBtn.textContent = '↺';
+        
+        // Create rotation display
+        const rotationSpan = document.createElement('span');
+        rotationSpan.className = 'rotation-display';
+        rotationSpan.textContent = `${this.pageRotations.get(pageIndex)}°`;
+        
+        // Create rotate right button
+        const rotateRightBtn = document.createElement('button');
+        rotateRightBtn.className = 'rotate-btn';
+        rotateRightBtn.setAttribute('data-page', pageIndex);
+        rotateRightBtn.setAttribute('data-rotation', '90');
+        rotateRightBtn.textContent = '↻';
+        
+        // Assemble controls
+        controlsDiv.appendChild(rotateLeftBtn);
+        controlsDiv.appendChild(rotationSpan);
+        controlsDiv.appendChild(rotateRightBtn);
+        
+        // Assemble page preview
+        pageDiv.appendChild(thumbnailDiv);
+        pageDiv.appendChild(controlsDiv);
 
         // Add rotation listeners
-        const rotateButtons = pageDiv.querySelectorAll('.rotate-btn');
-        rotateButtons.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const page = parseInt(btn.dataset.page);
-                const rotation = parseInt(btn.dataset.rotation);
-                this.rotateIndividualPage(page, rotation);
-            });
+        rotateLeftBtn.addEventListener('click', () => {
+            const page = parseInt(rotateLeftBtn.dataset.page);
+            const rotation = parseInt(rotateLeftBtn.dataset.rotation);
+            this.rotateIndividualPage(page, rotation);
+        });
+        
+        rotateRightBtn.addEventListener('click', () => {
+            const page = parseInt(rotateRightBtn.dataset.page);
+            const rotation = parseInt(rotateRightBtn.dataset.rotation);
+            this.rotateIndividualPage(page, rotation);
         });
 
         return pageDiv;
