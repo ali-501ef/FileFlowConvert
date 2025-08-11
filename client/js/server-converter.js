@@ -14,11 +14,15 @@ class ServerFileConverter {
         this.selectedFile = null;
         this.uploadedFileData = null;
         this.serverUrl = window.location.origin; // Use same origin for API calls
+        this.isConverting = false; // Flag to prevent duplicate conversions
         
         this.initializeEventListeners();
     }
     
     initializeEventListeners() {
+        // Re-query elements in case they were recreated
+        this.chooseFileBtn = document.getElementById('choose-file-btn');
+        
         if (!this.dropZone || !this.fileInput || !this.chooseFileBtn || !this.convertBtn) {
             console.error('Required elements not found for server converter');
             return;
@@ -208,7 +212,13 @@ class ServerFileConverter {
             return;
         }
         
+        // Prevent duplicate conversion attempts
+        if (this.convertBtn.disabled || this.isConverting) {
+            return;
+        }
+        
         try {
+            this.isConverting = true;
             this.showStatus('Converting file...', 'converting');
             this.convertBtn.disabled = true;
             
@@ -247,6 +257,7 @@ class ServerFileConverter {
             console.error('Conversion error:', error);
             this.showStatus(`Conversion failed: ${error.message}`, 'error');
             this.convertBtn.disabled = false;
+            this.isConverting = false;
         }
     }
     
@@ -283,9 +294,36 @@ class ServerFileConverter {
     }
     
     resetAfterDownload() {
+        // Clear file data to prevent retries with deleted files
+        this.uploadedFileData = null;
+        this.selectedFile = null;
+        this.isConverting = false;
+        
         this.convertBtn.innerHTML = 'Convert Now';
         this.convertBtn.onclick = () => this.handleConvert();
+        this.convertBtn.disabled = true; // Disable until new file is selected
         this.showStatus('Ready for next conversion', 'ready');
+        
+        // Reset drop zone UI to original state
+        this.dropZone.innerHTML = `
+            <div class="drop-zone-content">
+                <div class="upload-icon">
+                    <svg width="48" height="48" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3 3m0 0l-3-3m3 3V8"></path>
+                    </svg>
+                </div>
+                <p class="upload-text">Drop your file here or <strong>choose file</strong></p>
+                <p class="upload-subtext">Supports images, PDFs, and many other formats</p>
+                <button type="button" id="choose-file-btn" class="choose-file-btn">Choose File</button>
+            </div>
+        `;
+        
+        // Reset format selector
+        this.outputFormatSelect.innerHTML = '<option value="">Select format...</option>';
+        this.outputFormatSelect.disabled = true;
+        
+        // Reinitialize event listeners for the new elements
+        this.initializeEventListeners();
     }
     
     showStatus(message, type) {
