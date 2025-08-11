@@ -298,22 +298,65 @@ class VideoCompressor {
             const compressionRatio = this.conversionResult.compression_ratio || 
                 Math.round((1 - compressedSize/originalSize) * 100);
 
-            videoStats.innerHTML = `
-                <div class="stats-grid">
-                    <div class="stat-item">
-                        <span class="stat-label">Original Size</span>
-                        <span class="stat-value">${this.formatFileSize(originalSize)}</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Compressed Size</span>
-                        <span class="stat-value">${this.formatFileSize(compressedSize)}</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Space Saved</span>
-                        <span class="stat-value">${compressionRatio}%</span>
-                    </div>
-                </div>
-            `;
+            // Clear existing content safely
+            videoStats.textContent = '';
+            
+            // Create stats grid container
+            const statsGrid = document.createElement('div');
+            statsGrid.className = 'stats-grid';
+            
+            // Create original size stat
+            const originalStat = document.createElement('div');
+            originalStat.className = 'stat-item';
+            
+            const originalLabel = document.createElement('span');
+            originalLabel.className = 'stat-label';
+            originalLabel.textContent = 'Original Size';
+            
+            const originalValue = document.createElement('span');
+            originalValue.className = 'stat-value';
+            originalValue.textContent = this.formatFileSize(originalSize);
+            
+            originalStat.appendChild(originalLabel);
+            originalStat.appendChild(originalValue);
+            
+            // Create compressed size stat
+            const compressedStat = document.createElement('div');
+            compressedStat.className = 'stat-item';
+            
+            const compressedLabel = document.createElement('span');
+            compressedLabel.className = 'stat-label';
+            compressedLabel.textContent = 'Compressed Size';
+            
+            const compressedValue = document.createElement('span');
+            compressedValue.className = 'stat-value';
+            compressedValue.textContent = this.formatFileSize(compressedSize);
+            
+            compressedStat.appendChild(compressedLabel);
+            compressedStat.appendChild(compressedValue);
+            
+            // Create space saved stat
+            const savedStat = document.createElement('div');
+            savedStat.className = 'stat-item';
+            
+            const savedLabel = document.createElement('span');
+            savedLabel.className = 'stat-label';
+            savedLabel.textContent = 'Space Saved';
+            
+            const savedValue = document.createElement('span');
+            savedValue.className = 'stat-value';
+            savedValue.textContent = String(compressionRatio) + '%';
+            
+            savedStat.appendChild(savedLabel);
+            savedStat.appendChild(savedValue);
+            
+            // Append all stats to grid
+            statsGrid.appendChild(originalStat);
+            statsGrid.appendChild(compressedStat);
+            statsGrid.appendChild(savedStat);
+            
+            // Append grid to container
+            videoStats.appendChild(statsGrid);
         }
 
         this.results.style.display = 'block';
@@ -326,24 +369,40 @@ class VideoCompressor {
         
         if (qualitySelect) {
             const currentValue = qualitySelect.value;
-            qualitySelect.innerHTML = '';
             
-            if (level === 'light') {
-                qualitySelect.innerHTML = `
-                    <option value="high">High Quality</option>
-                    <option value="balanced" selected>Balanced</option>
-                `;
-            } else if (level === 'medium') {
-                qualitySelect.innerHTML = `
-                    <option value="balanced" selected>Balanced</option>
-                    <option value="good">Good</option>
-                `;
-            } else if (level === 'heavy') {
-                qualitySelect.innerHTML = `
-                    <option value="good">Good</option>
-                    <option value="acceptable" selected>Acceptable</option>
-                `;
+            // Clear existing options safely
+            while (qualitySelect.firstChild) {
+                qualitySelect.removeChild(qualitySelect.firstChild);
             }
+            
+            let options = [];
+            if (level === 'light') {
+                options = [
+                    { value: 'high', text: 'High Quality', selected: false },
+                    { value: 'balanced', text: 'Balanced', selected: true }
+                ];
+            } else if (level === 'medium') {
+                options = [
+                    { value: 'balanced', text: 'Balanced', selected: true },
+                    { value: 'good', text: 'Good', selected: false }
+                ];
+            } else if (level === 'heavy') {
+                options = [
+                    { value: 'good', text: 'Good', selected: false },
+                    { value: 'acceptable', text: 'Acceptable', selected: true }
+                ];
+            }
+            
+            // Create options using safe DOM methods
+            options.forEach(optionData => {
+                const option = document.createElement('option');
+                option.value = optionData.value;
+                option.textContent = optionData.text;
+                if (optionData.selected) {
+                    option.selected = true;
+                }
+                qualitySelect.appendChild(option);
+            });
             
             // Restore previous value if available
             if (qualitySelect.querySelector(`option[value="${currentValue}"]`)) {
@@ -374,12 +433,24 @@ class VideoCompressor {
                 overlay.className = 'processing-overlay';
                 this.uploadArea.appendChild(overlay);
             }
-            overlay.innerHTML = `
-                <div class="processing-content">
-                    <div class="spinner"></div>
-                    <p>${message}</p>
-                </div>
-            `;
+            
+            // Clear existing content safely
+            overlay.textContent = '';
+            
+            // Create processing content structure
+            const processingContent = document.createElement('div');
+            processingContent.className = 'processing-content';
+            
+            const spinner = document.createElement('div');
+            spinner.className = 'spinner';
+            
+            const messageP = document.createElement('p');
+            messageP.textContent = message;
+            
+            processingContent.appendChild(spinner);
+            processingContent.appendChild(messageP);
+            overlay.appendChild(processingContent);
+            
             overlay.style.display = 'flex';
             
             // Disable upload area interactions
