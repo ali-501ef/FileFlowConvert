@@ -467,12 +467,30 @@ class UniversalConverter {
             downloadLink.download = fileData.filename;
             downloadLink.className = 'download-link';
             downloadLink.setAttribute('data-testid', `download-link-${index}`);
-            downloadLink.innerHTML = `
-                <svg class="download-icon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                </svg>
-                Download ${fileData.filename}
-            `;
+            
+            // Create SVG icon using safe DOM methods
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('class', 'download-icon');
+            svg.setAttribute('width', '20');
+            svg.setAttribute('height', '20');
+            svg.setAttribute('fill', 'none');
+            svg.setAttribute('stroke', 'currentColor');
+            svg.setAttribute('viewBox', '0 0 24 24');
+            
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttribute('stroke-linecap', 'round');
+            path.setAttribute('stroke-linejoin', 'round');
+            path.setAttribute('stroke-width', '2');
+            path.setAttribute('d', 'M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z');
+            
+            svg.appendChild(path);
+            downloadLink.appendChild(svg);
+            
+            // Create text node safely to prevent XSS
+            const textSpan = document.createElement('span');
+            textSpan.textContent = `Download ${fileData.filename}`;
+            downloadLink.appendChild(textSpan);
+            
             downloadContainer.appendChild(downloadLink);
         });
         
