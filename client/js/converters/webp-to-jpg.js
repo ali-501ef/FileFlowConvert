@@ -81,9 +81,18 @@ class WebpToJpgConverter {
         if (this.selectedFiles.length > 0) {
             const reader = new FileReader();
             reader.onload = (e) => {
-                this.imagePreview.innerHTML = `
-                    <img src="${e.target.result}" alt="Preview" style="max-width: 200px; max-height: 200px; border-radius: 8px;">
-                `;
+                // Clear previous content
+                this.imagePreview.textContent = '';
+                
+                // Create img element safely
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.alt = 'Preview';
+                img.style.maxWidth = '200px';
+                img.style.maxHeight = '200px';
+                img.style.borderRadius = '8px';
+                
+                this.imagePreview.appendChild(img);
             };
             reader.readAsDataURL(this.selectedFiles[0]);
         }
