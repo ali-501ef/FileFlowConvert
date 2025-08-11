@@ -146,22 +146,55 @@ class VideoTrimmer {
         const fileSize = this.formatFileSize(this.currentFile.size);
         const fileName = this.currentFile.name;
         
-        document.getElementById('videoInfo').innerHTML = `
-            <div class="video-details">
-                <div class="detail-item">
-                    <span class="detail-label">File:</span>
-                    <span class="detail-value">${fileName}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Size:</span>
-                    <span class="detail-value">${fileSize}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Duration:</span>
-                    <span class="detail-value" id="originalDuration">${this.formatTime(this.videoDuration)}</span>
-                </div>
-            </div>
-        `;
+        // Create elements safely using DOM methods
+        const videoDetails = document.createElement('div');
+        videoDetails.className = 'video-details';
+        
+        // File detail
+        const fileItem = document.createElement('div');
+        fileItem.className = 'detail-item';
+        const fileLabel = document.createElement('span');
+        fileLabel.className = 'detail-label';
+        fileLabel.textContent = 'File:';
+        const fileValue = document.createElement('span');
+        fileValue.className = 'detail-value';
+        fileValue.textContent = fileName; // Safe: textContent prevents XSS
+        fileItem.appendChild(fileLabel);
+        fileItem.appendChild(fileValue);
+        
+        // Size detail
+        const sizeItem = document.createElement('div');
+        sizeItem.className = 'detail-item';
+        const sizeLabel = document.createElement('span');
+        sizeLabel.className = 'detail-label';
+        sizeLabel.textContent = 'Size:';
+        const sizeValue = document.createElement('span');
+        sizeValue.className = 'detail-value';
+        sizeValue.textContent = fileSize;
+        sizeItem.appendChild(sizeLabel);
+        sizeItem.appendChild(sizeValue);
+        
+        // Duration detail
+        const durationItem = document.createElement('div');
+        durationItem.className = 'detail-item';
+        const durationLabel = document.createElement('span');
+        durationLabel.className = 'detail-label';
+        durationLabel.textContent = 'Duration:';
+        const durationValue = document.createElement('span');
+        durationValue.className = 'detail-value';
+        durationValue.id = 'originalDuration';
+        durationValue.textContent = this.formatTime(this.videoDuration);
+        durationItem.appendChild(durationLabel);
+        durationItem.appendChild(durationValue);
+        
+        // Assemble and update DOM
+        videoDetails.appendChild(fileItem);
+        videoDetails.appendChild(sizeItem);
+        videoDetails.appendChild(durationItem);
+        
+        const videoInfo = document.getElementById('videoInfo');
+        videoInfo.innerHTML = ''; // Clear existing content
+        videoInfo.appendChild(videoDetails);
     }
 
     async trimVideo() {
