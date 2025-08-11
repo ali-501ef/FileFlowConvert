@@ -85,12 +85,23 @@ class PDFWatermarker {
             this.pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
             const pageCount = this.pdfDoc.getPageCount();
             
-            document.getElementById('pdfInfo').innerHTML = `
-                <div class="pdf-details">
-                    <span class="detail-item">📄 ${pageCount} pages</span>
-                    <span class="detail-item">📊 ${this.formatFileSize(file.size)}</span>
-                </div>
-            `;
+            const pdfInfo = document.getElementById('pdfInfo');
+            pdfInfo.innerHTML = ''; // Clear existing content
+            
+            const pdfDetails = document.createElement('div');
+            pdfDetails.className = 'pdf-details';
+            
+            const pagesSpan = document.createElement('span');
+            pagesSpan.className = 'detail-item';
+            pagesSpan.textContent = `📄 ${pageCount} pages`;
+            
+            const sizeSpan = document.createElement('span');
+            sizeSpan.className = 'detail-item';
+            sizeSpan.textContent = `📊 ${this.formatFileSize(file.size)}`;
+            
+            pdfDetails.appendChild(pagesSpan);
+            pdfDetails.appendChild(sizeSpan);
+            pdfInfo.appendChild(pdfDetails);
             
             this.showWatermarkOptions();
             this.convertBtn.disabled = false;
