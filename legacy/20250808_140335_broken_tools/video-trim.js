@@ -294,34 +294,52 @@ class VideoTrimmer {
     showTrimResults() {
         const info = this.trimInfo;
         
-        document.getElementById('trimInfo').innerHTML = `
-            <div class="trim-details">
-                <div class="detail-row">
-                    <span class="detail-label">Original Duration:</span>
-                    <span class="detail-value">${this.formatTime(info.originalDuration)}</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Trimmed Duration:</span>
-                    <span class="detail-value">${this.formatTime(info.trimmedDuration)}</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Trim Range:</span>
-                    <span class="detail-value">${this.formatTime(info.startTime)} - ${this.formatTime(info.endTime)}</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Output Format:</span>
-                    <span class="detail-value">${info.format}</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">File Size:</span>
-                    <span class="detail-value">${this.formatFileSize(info.outputSize)}</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Status:</span>
-                    <span class="detail-value success">✓ Ready for download</span>
-                </div>
-            </div>
-        `;
+        // Create DOM elements safely
+        const trimDetails = document.createElement('div');
+        trimDetails.className = 'trim-details';
+        
+        // Helper function to create detail rows
+        const createDetailRow = (label, value) => {
+            const row = document.createElement('div');
+            row.className = 'detail-row';
+            
+            const labelSpan = document.createElement('span');
+            labelSpan.className = 'detail-label';
+            labelSpan.textContent = label;
+            
+            const valueSpan = document.createElement('span');
+            valueSpan.className = 'detail-value';
+            valueSpan.textContent = value;
+            
+            row.appendChild(labelSpan);
+            row.appendChild(valueSpan);
+            return row;
+        };
+        
+        // Create detail rows
+        trimDetails.appendChild(createDetailRow('Original Duration:', this.formatTime(info.originalDuration)));
+        trimDetails.appendChild(createDetailRow('Trimmed Duration:', this.formatTime(info.trimmedDuration)));
+        trimDetails.appendChild(createDetailRow('Trim Range:', `${this.formatTime(info.startTime)} - ${this.formatTime(info.endTime)}`));
+        trimDetails.appendChild(createDetailRow('Output Format:', info.format));
+        trimDetails.appendChild(createDetailRow('File Size:', this.formatFileSize(info.outputSize)));
+        
+        // Status row with success class
+        const statusRow = document.createElement('div');
+        statusRow.className = 'detail-row';
+        const statusLabel = document.createElement('span');
+        statusLabel.className = 'detail-label';
+        statusLabel.textContent = 'Status:';
+        const statusValue = document.createElement('span');
+        statusValue.className = 'detail-value success';
+        statusValue.textContent = '✓ Ready for download';
+        statusRow.appendChild(statusLabel);
+        statusRow.appendChild(statusValue);
+        trimDetails.appendChild(statusRow);
+        
+        // Clear and update DOM safely
+        const trimInfoElement = document.getElementById('trimInfo');
+        trimInfoElement.innerHTML = '';
+        trimInfoElement.appendChild(trimDetails);
         
         this.results.style.display = 'block';
     }
