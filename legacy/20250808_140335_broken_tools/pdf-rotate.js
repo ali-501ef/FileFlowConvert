@@ -116,12 +116,23 @@ class PDFRotate {
             this.pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
             const pageCount = this.pdfDoc.getPageCount();
             
-            document.getElementById('pdfInfo').innerHTML = `
-                <div class="pdf-details">
-                    <span class="detail-item">📄 ${pageCount} pages</span>
-                    <span class="detail-item">📊 ${this.formatFileSize(file.size)}</span>
-                </div>
-            `;
+            const pdfInfoElement = document.getElementById('pdfInfo');
+            const detailsDiv = document.createElement('div');
+            detailsDiv.className = 'pdf-details';
+            
+            const pagesSpan = document.createElement('span');
+            pagesSpan.className = 'detail-item';
+            pagesSpan.textContent = `📄 ${pageCount} pages`;
+            
+            const sizeSpan = document.createElement('span');
+            sizeSpan.className = 'detail-item';
+            sizeSpan.textContent = `📊 ${this.formatFileSize(file.size)}`;
+            
+            detailsDiv.appendChild(pagesSpan);
+            detailsDiv.appendChild(sizeSpan);
+            
+            pdfInfoElement.innerHTML = ''; // Clear existing content
+            pdfInfoElement.appendChild(detailsDiv);
             
             // Initialize page rotations
             this.pageRotations.clear();
