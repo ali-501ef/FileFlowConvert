@@ -455,12 +455,21 @@ class VideoMerger {
                 overlay.className = 'processing-overlay';
                 this.uploadArea.appendChild(overlay);
             }
-            overlay.innerHTML = `
-                <div class="processing-content">
-                    <div class="spinner"></div>
-                    <p>${message}</p>
-                </div>
-            `;
+            // Create safe DOM structure
+            const content = document.createElement('div');
+            content.className = 'processing-content';
+            
+            const spinner = document.createElement('div');
+            spinner.className = 'spinner';
+            
+            const messageEl = document.createElement('p');
+            messageEl.textContent = message;
+            
+            content.appendChild(spinner);
+            content.appendChild(messageEl);
+            
+            overlay.innerHTML = '';
+            overlay.appendChild(content);
             overlay.style.display = 'flex';
             
             // Disable upload area interactions
