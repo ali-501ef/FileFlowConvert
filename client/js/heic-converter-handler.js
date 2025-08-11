@@ -94,23 +94,49 @@ function displayFilePreview() {
     uploadedFiles.forEach((file, index) => {
         const fileItem = document.createElement('div');
         fileItem.className = 'file-item';
-        fileItem.innerHTML = `
-            <div class="file-info">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                    <circle cx="9" cy="9" r="2"/>
-                    <path d="M21 15l-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
-                </svg>
-                <span class="file-name">${file.name}</span>
-                <span class="file-size">${formatFileSize(file.size)}</span>
-            </div>
-            <button class="remove-file" onclick="removeFile(${index})" data-testid="remove-file-${index}">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-            </button>
+        
+        // Create file info container
+        const fileInfo = document.createElement('div');
+        fileInfo.className = 'file-info';
+        
+        // Create and append SVG icon (safe static content)
+        fileInfo.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                <circle cx="9" cy="9" r="2"/>
+                <path d="M21 15l-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+            </svg>
         `;
+        
+        // Create file name span with safe text content
+        const fileName = document.createElement('span');
+        fileName.className = 'file-name';
+        fileName.textContent = file.name; // Safe: uses textContent instead of innerHTML
+        fileInfo.appendChild(fileName);
+        
+        // Create file size span with safe text content
+        const fileSize = document.createElement('span');
+        fileSize.className = 'file-size';
+        fileSize.textContent = formatFileSize(file.size); // Safe: formatFileSize should return safe text
+        fileInfo.appendChild(fileSize);
+        
+        // Create remove button
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'remove-file';
+        removeBtn.setAttribute('data-testid', `remove-file-${index}`);
+        removeBtn.addEventListener('click', () => removeFile(index)); // Safe: event listener instead of onclick
+        
+        // Add SVG to remove button (safe static content)
+        removeBtn.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+        `;
+        
+        // Append elements
+        fileItem.appendChild(fileInfo);
+        fileItem.appendChild(removeBtn);
         fileList.appendChild(fileItem);
     });
 
