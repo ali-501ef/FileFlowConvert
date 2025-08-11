@@ -155,13 +155,33 @@ class VideoTrimmer {
                 const resolution = `${videoPlayer.videoWidth}x${videoPlayer.videoHeight}`;
                 
                 if (videoInfo) {
-                    videoInfo.innerHTML = `
-                        <div class="video-details">
-                            <span class="detail-item">🎬 ${duration}</span>
-                            <span class="detail-item">📐 ${resolution}</span>
-                            <span class="detail-item">📊 ${this.formatFileSize(file.size)}</span>
-                        </div>
-                    `;
+                    // Clear existing content
+                    videoInfo.textContent = '';
+                    
+                    // Create container div
+                    const detailsDiv = document.createElement('div');
+                    detailsDiv.className = 'video-details';
+                    
+                    // Create duration span
+                    const durationSpan = document.createElement('span');
+                    durationSpan.className = 'detail-item';
+                    durationSpan.textContent = `🎬 ${duration}`;
+                    
+                    // Create resolution span
+                    const resolutionSpan = document.createElement('span');
+                    resolutionSpan.className = 'detail-item';
+                    resolutionSpan.textContent = `📐 ${resolution}`;
+                    
+                    // Create file size span
+                    const fileSizeSpan = document.createElement('span');
+                    fileSizeSpan.className = 'detail-item';
+                    fileSizeSpan.textContent = `📊 ${this.formatFileSize(file.size)}`;
+                    
+                    // Append elements
+                    detailsDiv.appendChild(durationSpan);
+                    detailsDiv.appendChild(resolutionSpan);
+                    detailsDiv.appendChild(fileSizeSpan);
+                    videoInfo.appendChild(detailsDiv);
                 }
                 
                 // Update time inputs with video duration limits
@@ -296,26 +316,38 @@ class VideoTrimmer {
             const endTime = parseFloat(this.endTime?.value || '10');
             const duration = endTime - startTime;
 
-            videoStats.innerHTML = `
-                <div class="stats-grid">
-                    <div class="stat-item">
-                        <span class="stat-label">Start Time</span>
-                        <span class="stat-value">${this.formatDuration(startTime)}</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">End Time</span>
-                        <span class="stat-value">${this.formatDuration(endTime)}</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Duration</span>
-                        <span class="stat-value">${this.formatDuration(duration)}</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">File Size</span>
-                        <span class="stat-value">${this.formatFileSize(this.conversionResult.file_size)}</span>
-                    </div>
-                </div>
-            `;
+            // Clear existing content
+            videoStats.textContent = '';
+            
+            // Create stats grid container
+            const statsGrid = document.createElement('div');
+            statsGrid.className = 'stats-grid';
+            
+            // Helper function to create stat items
+            const createStatItem = (label, value) => {
+                const statItem = document.createElement('div');
+                statItem.className = 'stat-item';
+                
+                const statLabel = document.createElement('span');
+                statLabel.className = 'stat-label';
+                statLabel.textContent = label;
+                
+                const statValue = document.createElement('span');
+                statValue.className = 'stat-value';
+                statValue.textContent = value;
+                
+                statItem.appendChild(statLabel);
+                statItem.appendChild(statValue);
+                return statItem;
+            };
+            
+            // Create and append stat items
+            statsGrid.appendChild(createStatItem('Start Time', this.formatDuration(startTime)));
+            statsGrid.appendChild(createStatItem('End Time', this.formatDuration(endTime)));
+            statsGrid.appendChild(createStatItem('Duration', this.formatDuration(duration)));
+            statsGrid.appendChild(createStatItem('File Size', this.formatFileSize(this.conversionResult.file_size)));
+            
+            videoStats.appendChild(statsGrid);
         }
 
         this.results.style.display = 'block';
