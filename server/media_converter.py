@@ -4,6 +4,7 @@ import sys
 import os
 import subprocess
 import json
+import shlex
 from pathlib import Path
 
 def convert_media(input_path, output_path, conversion_type, options=None):
@@ -56,11 +57,11 @@ def compress_video(input_path, output_path, options):
     else:
         # Custom settings
         if 'bitrate' in options:
-            cmd.extend(['-b:v', f"{options['bitrate']}k"])
+            cmd.extend(['-b:v', f"{shlex.quote(str(options['bitrate']))}k"])
         if 'crf' in options:
-            cmd.extend(['-crf', str(options['crf'])])
+            cmd.extend(['-crf', shlex.quote(str(options['crf']))])
         if 'preset' in options:
-            cmd.extend(['-preset', options['preset']])
+            cmd.extend(['-preset', shlex.quote(str(options['preset']))])
     
     # Resolution scaling
     if 'resolution' in options and options['resolution'] != 'original':
@@ -73,7 +74,7 @@ def compress_video(input_path, output_path, options):
     
     # Frame rate
     if 'framerate' in options and options['framerate'] != 'original':
-        cmd.extend(['-r', str(options['framerate'])])
+        cmd.extend(['-r', shlex.quote(str(options['framerate']))])
     
     # Audio codec
     cmd.extend(['-c:a', 'aac', '-b:a', '128k'])
@@ -104,19 +105,19 @@ def extract_audio(input_path, output_path, options):
         cmd.extend(['-vn', '-acodec', 'libmp3lame'])
         # Bitrate
         bitrate = options.get('bitrate', '192')
-        cmd.extend(['-b:a', f'{bitrate}k'])
+        cmd.extend(['-b:a', f'{shlex.quote(str(bitrate))}k'])
     elif format_ext == 'wav':
         cmd.extend(['-vn', '-acodec', 'pcm_s16le'])
     elif format_ext == 'aac':
         cmd.extend(['-vn', '-c:a', 'aac'])
         bitrate = options.get('bitrate', '128') 
-        cmd.extend(['-b:a', f'{bitrate}k'])
+        cmd.extend(['-b:a', f'{shlex.quote(str(bitrate))}k'])
     elif format_ext == 'flac':
         cmd.extend(['-vn', '-c:a', 'flac'])
     elif format_ext == 'ogg':
         cmd.extend(['-vn', '-c:a', 'libvorbis'])
         bitrate = options.get('bitrate', '192')
-        cmd.extend(['-b:a', f'{bitrate}k'])
+        cmd.extend(['-b:a', f'{shlex.quote(str(bitrate))}k'])
     
     # Add metadata preservation
     cmd.extend(['-map_metadata', '0'])
@@ -137,7 +138,7 @@ def convert_audio(input_path, output_path, options):
     if format_ext == 'mp3':
         cmd.extend(['-c:a', 'libmp3lame'])
         bitrate = options.get('bitrate', '192')
-        cmd.extend(['-b:a', f'{bitrate}k'])
+        cmd.extend(['-b:a', f'{shlex.quote(str(bitrate))}k'])
     elif format_ext == 'wav':
         cmd.extend(['-c:a', 'pcm_s16le'])
     elif format_ext == 'flac':
@@ -145,15 +146,15 @@ def convert_audio(input_path, output_path, options):
     elif format_ext == 'aac':
         cmd.extend(['-c:a', 'aac'])
         bitrate = options.get('bitrate', '128')
-        cmd.extend(['-b:a', f'{bitrate}k'])
+        cmd.extend(['-b:a', f'{shlex.quote(str(bitrate))}k'])
     elif format_ext == 'ogg':
         cmd.extend(['-c:a', 'libvorbis'])
         bitrate = options.get('bitrate', '192')
-        cmd.extend(['-b:a', f'{bitrate}k'])
+        cmd.extend(['-b:a', f'{shlex.quote(str(bitrate))}k'])
     
     # Sample rate
     if 'sample_rate' in options and options['sample_rate'] != 'keep':
-        cmd.extend(['-ar', str(options['sample_rate'])])
+        cmd.extend(['-ar', shlex.quote(str(options['sample_rate']))])
     
     # Preserve metadata if requested
     if options.get('preserve_metadata', True):
@@ -179,13 +180,13 @@ def trim_video(input_path, output_path, options):
     
     # Set start time
     if start_time > 0:
-        cmd.extend(['-ss', str(start_time)])
+        cmd.extend(['-ss', shlex.quote(str(start_time))])
     
     # Set end time or duration
     if end_time is not None:
-        cmd.extend(['-to', str(end_time)])
+        cmd.extend(['-to', shlex.quote(str(end_time))])
     elif duration is not None:
-        cmd.extend(['-t', str(duration)])
+        cmd.extend(['-t', shlex.quote(str(duration))])
     else:
         cmd.extend(['-t', '10'])  # Default 10 seconds
     
@@ -217,8 +218,8 @@ def create_gif(input_path, output_path, options):
     # Generate palette
     palette_cmd = [
         'ffmpeg', '-i', input_path,
-        '-ss', str(start_time), '-t', str(duration),
-        '-vf', f'fps={fps},scale={width}:-1:flags=lanczos,palettegen',
+        '-ss', shlex.quote(str(start_time)), '-t', shlex.quote(str(duration)),
+        '-vf', f'fps={shlex.quote(str(fps))},scale={shlex.quote(str(width))}:-1:flags=lanczos,palettegen',
         '-y', palette_path
     ]
     
@@ -229,8 +230,8 @@ def create_gif(input_path, output_path, options):
     # Create GIF with palette
     gif_cmd = [
         'ffmpeg', '-i', input_path, '-i', palette_path,
-        '-ss', str(start_time), '-t', str(duration),
-        '-lavfi', f'fps={fps},scale={width}:-1:flags=lanczos[x];[x][1:v]paletteuse',
+        '-ss', shlex.quote(str(start_time)), '-t', shlex.quote(str(duration)),
+        '-lavfi', f'fps={shlex.quote(str(fps))},scale={shlex.quote(str(width))}:-1:flags=lanczos[x];[x][1:v]paletteuse',
         '-y', output_path
     ]
     
