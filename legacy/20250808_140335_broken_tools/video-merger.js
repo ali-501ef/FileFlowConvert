@@ -97,47 +97,92 @@ class VideoMerger {
         this.videoFiles.forEach((videoData, index) => {
             const videoItem = document.createElement('div');
             videoItem.className = 'video-item';
-            videoItem.innerHTML = `
-                <div class="video-item-content">
-                    <div class="video-preview">
-                        <video width="120" height="80" style="border-radius: 6px; object-fit: cover;">
-                            <source src="${videoData.url}" type="${videoData.file.type}">
-                        </video>
-                    </div>
-                    <div class="video-info">
-                        <div class="video-name">${videoData.file.name}</div>
-                        <div class="video-details">
-                            <span class="video-size">${this.formatFileSize(videoData.file.size)}</span>
-                            <span class="video-duration" id="duration-${videoData.id}">Loading...</span>
-                        </div>
-                    </div>
-                    <div class="video-controls">
-                        <button class="move-up-btn" onclick="videoMerger.moveVideo(${index}, -1)" ${index === 0 ? 'disabled' : ''}>
-                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
-                            </svg>
-                        </button>
-                        <button class="move-down-btn" onclick="videoMerger.moveVideo(${index}, 1)" ${index === this.videoFiles.length - 1 ? 'disabled' : ''}>
-                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                            </svg>
-                        </button>
-                        <button class="remove-btn" onclick="videoMerger.removeVideo(${index})">
-                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-            `;
+            
+            // Create structure using safe DOM methods
+            const videoItemContent = document.createElement('div');
+            videoItemContent.className = 'video-item-content';
+            
+            // Video preview section
+            const videoPreview = document.createElement('div');
+            videoPreview.className = 'video-preview';
+            const videoElement = document.createElement('video');
+            videoElement.width = 120;
+            videoElement.height = 80;
+            videoElement.style.borderRadius = '6px';
+            videoElement.style.objectFit = 'cover';
+            const source = document.createElement('source');
+            source.src = videoData.url;
+            source.type = videoData.file.type;
+            videoElement.appendChild(source);
+            videoPreview.appendChild(videoElement);
+            
+            // Video info section
+            const videoInfo = document.createElement('div');
+            videoInfo.className = 'video-info';
+            const videoName = document.createElement('div');
+            videoName.className = 'video-name';
+            videoName.textContent = videoData.file.name; // Safe text content
+            const videoDetails = document.createElement('div');
+            videoDetails.className = 'video-details';
+            const videoSize = document.createElement('span');
+            videoSize.className = 'video-size';
+            videoSize.textContent = this.formatFileSize(videoData.file.size);
+            const videoDuration = document.createElement('span');
+            videoDuration.className = 'video-duration';
+            videoDuration.id = `duration-${videoData.id}`;
+            videoDuration.textContent = 'Loading...';
+            videoDetails.appendChild(videoSize);
+            videoDetails.appendChild(videoDuration);
+            videoInfo.appendChild(videoName);
+            videoInfo.appendChild(videoDetails);
+            
+            // Video controls section
+            const videoControls = document.createElement('div');
+            videoControls.className = 'video-controls';
+            
+            // Move up button
+            const moveUpBtn = document.createElement('button');
+            moveUpBtn.className = 'move-up-btn';
+            moveUpBtn.onclick = () => this.moveVideo(index, -1);
+            moveUpBtn.disabled = index === 0;
+            moveUpBtn.innerHTML = `<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+            </svg>`;
+            
+            // Move down button
+            const moveDownBtn = document.createElement('button');
+            moveDownBtn.className = 'move-down-btn';
+            moveDownBtn.onclick = () => this.moveVideo(index, 1);
+            moveDownBtn.disabled = index === this.videoFiles.length - 1;
+            moveDownBtn.innerHTML = `<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>`;
+            
+            // Remove button
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'remove-btn';
+            removeBtn.onclick = () => this.removeVideo(index);
+            removeBtn.innerHTML = `<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>`;
+            
+            videoControls.appendChild(moveUpBtn);
+            videoControls.appendChild(moveDownBtn);
+            videoControls.appendChild(removeBtn);
+            
+            // Assemble the structure
+            videoItemContent.appendChild(videoPreview);
+            videoItemContent.appendChild(videoInfo);
+            videoItemContent.appendChild(videoControls);
+            videoItem.appendChild(videoItemContent);
             
             this.videoItems.appendChild(videoItem);
             
             // Load video metadata
-            const video = videoItem.querySelector('video');
-            video.onloadedmetadata = () => {
-                videoData.duration = video.duration;
-                document.getElementById(`duration-${videoData.id}`).textContent = this.formatDuration(video.duration);
+            const videoEl = videoItem.querySelector('video');
+            videoEl.onloadedmetadata = () => {
+                videoData.duration = videoEl.duration;
+                document.getElementById(`duration-${videoData.id}`).textContent = this.formatDuration(videoEl.duration);
             };
         });
     }
