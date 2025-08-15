@@ -148,7 +148,12 @@ def compress_pdf(in_bytes: bytes, options: dict) -> bytes:
     optimize_images = bool(options.get("optimizeEmbeddedImages", True))
     remove_metadata = bool(options.get("removeMetadata", False))
     
-    print(f"PDF compression: level={level}, quality={cfg['JPEGQuality']}, optimize={optimize_images}, metadata={remove_metadata}")
+    # Log to stderr to avoid polluting stdout JSON
+    import sys
+    def log(msg):
+        print(msg, file=sys.stderr, flush=True)
+    
+    log(f"PDF compression: level={level}, quality={cfg['JPEGQuality']}, optimize={optimize_images}, metadata={remove_metadata}")
     
     with tempfile.TemporaryDirectory() as td:
         temp_dir = Path(td)
@@ -163,45 +168,45 @@ def compress_pdf(in_bytes: bytes, options: dict) -> bytes:
         
         try:
             # Step 1: Apply lossless qpdf compression
-            print("Applying qpdf lossless compression...")
+            log("Applying qpdf lossless compression...")
             _qpdf_lossless(str(src_pdf), str(qpdf_out))
             qpdf_size = qpdf_out.stat().st_size
-            print(f"qpdf result: {qpdf_size} bytes ({(original_size - qpdf_size)/original_size*100:.1f}% reduction)")
+            log(f"qpdf result: {qpdf_size} bytes ({(original_size - qpdf_size)/original_size*100:.1f}% reduction)")
             
             # Step 2: Apply Ghostscript lossy compression
-            print("Applying Ghostscript lossy compression...")
+            log("Applying Ghostscript lossy compression...")
             _gs_lossy(str(qpdf_out), str(gs_out), cfg, optimize_images)
             gs_size = gs_out.stat().st_size
-            print(f"Ghostscript result: {gs_size} bytes ({(original_size - gs_size)/original_size*100:.1f}% reduction)")
+            log(f"Ghostscript result: {gs_size} bytes ({(original_size - gs_size)/original_size*100:.1f}% reduction)")
             
             # Step 3: Choose the smaller result
             if gs_size < qpdf_size:
                 chosen_pdf = gs_out
                 chosen_size = gs_size
-                print("Using Ghostscript result (smaller)")
+                log("Using Ghostscript result (smaller)")
             else:
                 chosen_pdf = qpdf_out
                 chosen_size = qpdf_size
-                print("Using qpdf result (smaller)")
+                log("Using qpdf result (smaller)")
             
             # Step 4: Remove metadata if requested
             final_file = chosen_pdf
             if remove_metadata:
-                print("Removing metadata...")
+                log("Removing metadata...")
                 _strip_metadata(str(chosen_pdf), str(final_pdf))
                 final_size = final_pdf.stat().st_size
                 final_file = final_pdf
-                print(f"Metadata removal result: {final_size} bytes")
+                log(f"Metadata removal result: {final_size} bytes")
             
             # Return the final compressed PDF
             result_bytes = final_file.read_bytes()
             final_reduction = (original_size - len(result_bytes)) / original_size * 100
-            print(f"Final compression: {len(result_bytes)} bytes ({final_reduction:.1f}% reduction)")
+            log(f"Final compression: {len(result_bytes)} bytes ({final_reduction:.1f}% reduction)")
             
             return result_bytes
             
         except Exception as e:
-            print(f"Compression failed: {e}")
+            log(f"Compression failed: {e}")
             # Return original file if compression fails
             return in_bytes
 

@@ -112,9 +112,10 @@ function trackConversion(fileId: string, outputFormat: string, promise: Promise<
 
 // Promisify fs functions for async usage
 const readdir = promisify(fs.readdir);
-const stat = promisify(fs.stat);
+const writeFile = promisify(fs.writeFile);
 const unlink = promisify(fs.unlink);
 const access = promisify(fs.access);
+const stat = promisify(fs.stat);
 
 // Extended Request interface for multer
 interface MulterRequest extends Request {
@@ -923,15 +924,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         pythonProcess.on('close', (code) => {
           console.log(`PDF compression closed with code: ${code}`);
-          console.log('Output:', output);
-          if (error) console.log('Error:', error);
+          console.log('Output length:', output.length);
+          console.log('First 500 chars of output:', output.substring(0, 500));
+          if (error) console.log('Error output:', error);
           
           if (code === 0) {
             try {
-              const result = JSON.parse(output);
+              // Clean the output by removing any non-JSON content
+              const lines = output.trim().split('\n');
+              const jsonLine = lines[lines.length - 1]; // Take the last line
+              const result = JSON.parse(jsonLine);
               resolve(result);
             } catch (e) {
-              reject(new Error(`Failed to parse result: ${output}`));
+              const errorMsg = e instanceof Error ? e.message : String(e);
+              console.error('JSON parse error:', errorMsg);
+              console.error('Raw output:', JSON.stringify(output));
+              reject(new Error(`Failed to parse result: ${errorMsg}`));
             }
           } else {
             reject(new Error(`Compression failed (code ${code}): ${error}`));

@@ -55,10 +55,14 @@ def main():
             "compressed_data": compressed_b64
         }
         
-        print(json.dumps(result))
+        # Print only the JSON result to stdout
+        print(json.dumps(result), flush=True)
         
     except Exception as e:
-        print(json.dumps({"success": False, "error": str(e)}))
+        import traceback
+        error_msg = str(e)
+        traceback.print_exc(file=sys.stderr)  # Send traceback to stderr
+        print(json.dumps({"success": False, "error": error_msg}), flush=True)
         sys.exit(1)
 
 if __name__ == "__main__":
