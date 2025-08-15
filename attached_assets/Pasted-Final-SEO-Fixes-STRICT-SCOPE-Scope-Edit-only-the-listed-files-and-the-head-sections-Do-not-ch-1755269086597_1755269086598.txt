@@ -1,0 +1,139 @@
+Final SEO Fixes (STRICT SCOPE)
+
+Scope: Edit only the listed files and the <head> sections.
+Do not change layout, styles, tool logic, routes, or shared components.
+
+1) Fix wrong canonicals
+
+Update <link rel="canonical"> to the production domain https://fileflow.replit.app:
+
+client/image-tools/more.html
+
+client/pdf-merge-old.html → also mark as noindex (see §4)
+
+<link rel="canonical" href="https://fileflow.replit.app/<correct-route>" />
+
+2) Add missing SEO tags on legal pages
+
+Add the following to both:
+
+client/privacy-policy.html
+
+client/terms-of-use.html
+
+<!-- Canonical -->
+<link rel="canonical" href="https://fileflow.replit.app/privacy-policy.html" />
+<!-- or terms-of-use.html on the ToS page -->
+
+<!-- Open Graph -->
+<meta property="og:type" content="website" />
+<meta property="og:title" content="FileFlow – Privacy Policy" />
+<meta property="og:description" content="Learn how FileFlow collects, uses, and protects your data. We outline the types of information we process and the rights you have over your information." />
+<meta property="og:url" content="https://fileflow.replit.app/privacy-policy.html" />
+<meta property="og:image" content="https://fileflow.replit.app/og/default.png" />
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="FileFlow – Privacy Policy" />
+<meta name="twitter:description" content="Learn how FileFlow collects, uses, and protects your data, including your choices and rights." />
+<meta name="twitter:image" content="https://fileflow.replit.app/og/default.png" />
+
+
+Adjust titles/URLs accordingly on terms-of-use.html.
+
+3) Replace too‑short meta descriptions (80–170 chars)
+
+Update <meta name="description"> on these pages with the exact text below (all 110–160 chars). Only replace the description content; keep titles/canonicals as-is.
+
+Audio/Video tools
+
+client/audio-video-tools/audio-converter.html
+Convert audio between MP3, WAV, FLAC and more. Fast, reliable conversions with bitrate control and metadata preservation for clean, compatible files.
+
+client/audio-video-tools/gif-maker.html
+Create high‑quality GIFs from videos. Control frame rate, resolution, and looping for share‑ready animations that balance smooth motion with small file size.
+
+client/audio-video-tools/mp4-to-mp3.html
+Extract clear MP3 audio from MP4 videos in seconds. Choose bitrate and keep quality for podcasts, voice notes, and music without large file sizes.
+
+client/audio-video-tools/video-compress.html
+Reduce video file size while preserving visual quality. Choose compression levels and formats for fast sharing, storage savings, and smooth playback.
+
+client/audio-video-tools/video-trim.html
+Cut and trim videos precisely to the moment. Preview frames, select ranges, and export clean clips for social media, messages, and editing workflows.
+
+client/audio-video-tools/video-merger.html
+Combine multiple video clips into a single file. Seamless joins with consistent resolution and format for easy sharing and archive‑ready results.
+
+Image tools
+
+client/image-tools/heic-to-jpg.html
+Convert iPhone HEIC photos to universally compatible JPGs. Keep great quality and small sizes for easy sharing, printing, and uploads anywhere.
+
+client/image-tools/jpg-to-png.html
+Convert JPG images to PNG with transparency support. Preserve detail with lossless output that’s ideal for logos, graphics, and web publishing.
+
+client/image-tools/png-to-jpg.html
+Convert PNG images to compressed JPGs to save space. Balance quality and size with smart optimization for the web, emails, and photo libraries.
+
+client/image-tools/webp-to-jpg.html
+Convert modern WEBP images to universal JPG. Maintain visual quality while ensuring compatibility across devices, editors, and websites.
+
+client/image-tools/jpg-to-pdf.html
+Convert JPG images into clean PDF documents. Arrange multiple photos, keep resolution, and export share‑ready files with consistent page layout.
+
+client/image-tools/tiff-to-png.html
+Convert high‑quality TIFF images to PNG while preserving detail and transparency. Perfect for archiving, editing, and web‑ready distribution.
+
+client/image-tools/bmp-to-jpg.html
+Convert uncompressed BMP images to efficient JPGs. Reduce file size dramatically while keeping strong visual quality for easy sharing and storage.
+
+client/image-tools/svg-to-png.html
+Convert vector SVG graphics to PNG bitmaps with custom resolution. Ideal for thumbnails, previews, and platforms that require raster images.
+
+client/image-tools/ico-to-png.html
+Extract PNG images from ICO icon files. Get transparent, high‑quality PNGs in seconds for design systems, favicons, and documentation.
+
+client/image-tools/pdf-to-jpg.html
+Convert PDF pages to high‑resolution JPG images. Export single pages or batches for editing, slides, and fast previews without a PDF viewer.
+
+(If any of these pages already pass length, leave them unchanged.)
+
+4) Exclude templates/old pages from indexing (no layout changes)
+
+For files not meant to be indexed:
+
+client/js/nav-template.html
+
+client/pdf-merge-old.html (legacy)
+
+Add inside <head>:
+
+<meta name="robots" content="noindex, nofollow" />
+<link rel="canonical" href="https://fileflow.replit.app/" />
+
+
+And ensure they are not in sitemap.xml.
+
+5) Re‑run the audit script and share proof
+
+Run the same commands we used:
+
+node scripts/seo-audit.mjs
+
+# Canonicals and endpoints
+grep -oE '<link[^>]+rel="canonical"[^>]*>' client/**/*.html
+for p in "/" "/sitemap.xml" "/robots.txt"; do
+  echo "$p -> $(curl -s -o /dev/null -w "%{http_code}" "http://localhost:5000$p")"
+done
+
+
+Acceptance criteria
+
+Static audit: 0 issues, 0 duplicate titles/descriptions.
+
+All canonicals: https://fileflow.replit.app/....
+
+All OG images tested: HTTP 200.
+
+No visual or functional regressions.
