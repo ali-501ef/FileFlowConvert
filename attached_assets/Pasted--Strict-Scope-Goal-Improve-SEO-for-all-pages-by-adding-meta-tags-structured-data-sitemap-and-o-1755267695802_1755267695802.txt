@@ -1,0 +1,131 @@
+— Strict Scope
+
+Goal:
+Improve SEO for all pages by adding meta tags, structured data, sitemap, and other technical SEO optimisations without changing layout, breaking tools, or altering existing functionality.
+All changes must be isolated to page-level HTML/Head sections and public/static assets.
+No CSS, JS, or component structure should be altered unless explicitly stated.
+
+1. Add Unique Meta Titles & Descriptions for Every Tool Page
+
+Update only the <title> and <meta name="description"> for each page.
+
+Ensure each page has exactly one <h1> (move other headings to <h2>/<h3> if needed).
+
+Use the following exact content:
+
+Route	<title>	<meta name="description">
+/	FileFlow – Convert Files Instantly	Convert files instantly with secure, private, and free tools for PDF, image, audio, and video.
+/pdf-tools/pdf-merge	Merge PDF Files Online	Combine multiple PDFs into one document. Preserve formatting and reorder pages easily.
+/pdf-tools/pdf-split	Split PDF Pages Online	Extract or split PDF pages by range. Fast, accurate, and easy to use.
+/pdf-tools/pdf-compress	Compress PDF Files Online	Reduce PDF size while preserving quality. Supports metadata removal and image optimisation.
+/pdf-tools/pdf-to-word	Convert PDF to Word	Convert PDFs into editable Word documents while preserving layout.
+/pdf-tools/pdf-rotate	Rotate PDF Pages	Rotate one or multiple PDF pages in 90° increments.
+/pdf-tools/pdf-watermark	Add Watermark to PDF	Add custom text or image watermarks to your PDFs.
+/image-tools/heic-to-jpg	HEIC to JPG Converter	Convert iPhone HEIC images to universal JPG format while keeping quality.
+/image-tools/jpg-to-png	JPG to PNG Converter	Convert JPG to PNG with transparency support and lossless quality.
+/image-tools/pdf-to-jpg	PDF to JPG Converter	Convert PDF pages to high-resolution JPG images.
+/image-tools/webp-to-jpg	WEBP to JPG Converter	Convert modern WEBP images to JPG for universal compatibility.
+/image-tools/png-to-jpg	PNG to JPG Converter	Convert PNG to JPG with size optimisation and batch processing.
+/image-tools/jpg-to-pdf	JPG to PDF Converter	Convert JPG images into PDF documents with custom layouts.
+/image-tools/tiff-to-png	TIFF to PNG Converter	Convert high-quality TIFF images to PNG with transparency.
+/image-tools/bmp-to-jpg	BMP to JPG Converter	Convert uncompressed BMP images to compressed JPG format.
+/image-tools/svg-to-png	SVG to PNG Converter	Convert vector SVG files to PNG with custom resolution.
+/image-tools/ico-to-png	ICO to PNG Converter	Extract PNG images from ICO icon files with transparency preserved.
+/image-tools/gif-to-mp4	GIF to MP4 Converter	Convert animated GIFs to MP4 videos with better compression.
+/audio-video-tools/mp4-to-mp3	MP4 to MP3 Converter	Extract audio from MP4 video files in high quality.
+/audio-video-tools/video-compress	Video Compressor	Reduce video file size without losing quality.
+/audio-video-tools/audio-converter	Audio Converter	Convert between audio formats like MP3, WAV, and FLAC.
+/audio-video-tools/video-trim	Video Trimmer	Cut and trim videos with frame-perfect accuracy.
+/audio-video-tools/gif-maker	GIF Maker from Video	Create animated GIFs from video files.
+/audio-video-tools/video-merger	Video Merger	Combine multiple video files into one seamlessly.
+2. Add Canonical, Open Graph, and Twitter Tags
+
+Add canonical tag to each page’s <head> using its clean URL.
+
+Add OG and Twitter Card tags with the same title/description above.
+
+Use a page-specific image if possible (/og/<tool>.png).
+
+Example:
+
+<link rel="canonical" href="https://<your-domain>/pdf-tools/pdf-compress" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Compress PDF Files Online" />
+<meta property="og:description" content="Reduce PDF size while preserving quality. Supports metadata removal and image optimisation." />
+<meta property="og:url" content="https://<your-domain>/pdf-tools/pdf-compress" />
+<meta property="og:image" content="https://<your-domain>/og/pdf-compress.png" />
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Compress PDF Files Online" />
+<meta name="twitter:description" content="Reduce PDF size while preserving quality. Supports metadata removal and image optimisation." />
+<meta name="twitter:image" content="https://<your-domain>/og/pdf-compress.png" />
+
+3. Implement FAQ Schema (JSON-LD)
+
+Only add to pages with real visible FAQs.
+
+Must match on-page content exactly.
+
+Example for /pdf-tools/pdf-compress:
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How do I compress a PDF?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Upload your PDF, choose a compression level, and download the optimised file."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Will the quality be preserved?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, text remains sharp; images are downsampled according to your settings."
+      }
+    }
+  ]
+}
+</script>
+
+4. Generate XML Sitemap & robots.txt
+
+Place in /public or /static folder.
+
+robots.txt:
+
+User-agent: *
+Allow: /
+
+Sitemap: https://<your-domain>/sitemap.xml
+
+
+sitemap.xml: Include all tool URLs above.
+
+5. Performance SEO Tweaks (Non-Visual)
+
+Lazy-load all images below the fold:
+
+<img src="/icons/pdf-merge.svg" alt="PDF Merge" loading="lazy" decoding="async">
+
+
+Add width/height to images to prevent layout shifts.
+
+Defer non-critical scripts:
+
+<script src="/analytics.js" defer></script>
+
+6. Regression Checks
+
+✅ All tool functions still work.
+
+✅ No visual changes to layout or components.
+
+✅ Lighthouse SEO score ≥ 90 for all main pages.
+
+✅ Google Rich Results Test passes for FAQ pages.
