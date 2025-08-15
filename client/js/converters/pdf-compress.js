@@ -196,34 +196,34 @@ class PDFCompressor {
             const saveOptions = {
                 useObjectStreams: settings.compressionLevel !== 'low',
                 addDefaultPage: false,
-                objectsPerTick: this.getObjectsPerTick(settings.compressionLevel)
+                objectsPerTick: this.getObjectsPerTick(settings.compressionLevel),
+                updateFieldAppearances: false,
+                prettyPrint: false
             };
             
             this.showProgress(60);
             
             let pdfBytes = await pdfDoc.save(saveOptions);
             
-            // Apply actual compression by creating a new optimized document
-            if (settings.optimizeImages || settings.compressionLevel === 'high') {
-                const compressedDoc = await this.createCompressedPDF(pdfDoc, settings);
-                pdfBytes = await compressedDoc.save(saveOptions);
+            // Apply additional optimization for high compression levels
+            if (settings.optimizeImages || settings.compressionLevel === 'high' || settings.compressionLevel === 'maximum') {
+                try {
+                    const compressedDoc = await this.createCompressedPDF(pdfDoc, settings);
+                    const optimizedBytes = await compressedDoc.save(saveOptions);
+                    // Only use optimized version if it's actually smaller
+                    if (optimizedBytes.length < pdfBytes.length) {
+                        pdfBytes = optimizedBytes;
+                    }
+                } catch (error) {
+                    console.warn('High compression optimization failed, using standard compression:', error);
+                    // Fall back to standard compression
+                }
             }
             
             this.showProgress(90);
             
-            // Calculate actual compression
-            const targetCompressionRatio = this.getTargetCompressionRatio(settings.compressionLevel);
-            const targetSize = Math.floor(this.currentFile.size * targetCompressionRatio);
-            
-            // Ensure the output is actually smaller by truncating if needed
-            if (pdfBytes.length > targetSize) {
-                // Create a properly compressed version by removing unnecessary data
-                const truncatedBytes = new Uint8Array(targetSize);
-                truncatedBytes.set(pdfBytes.slice(0, targetSize));
-                this.outputBlob = new Blob([truncatedBytes], { type: 'application/pdf' });
-            } else {
-                this.outputBlob = new Blob([pdfBytes], { type: 'application/pdf' });
-            }
+            // Create the final output blob with valid PDF structure
+            this.outputBlob = new Blob([pdfBytes], { type: 'application/pdf' });
             
             // Store accurate compression stats
             this.compressionStats = {
@@ -241,11 +241,11 @@ class PDFCompressor {
 
     getObjectsPerTick(compressionLevel) {
         switch (compressionLevel) {
-            case 'low': return 10;
-            case 'medium': return 25;
-            case 'high': return 50;
-            case 'maximum': return 100;
-            default: return 25;
+            case 'low': return 5;
+            case 'medium': return 15;
+            case 'high': return 30;
+            case 'maximum': return 50;
+            default: return 15;
         }
     }
 
@@ -260,8 +260,21 @@ class PDFCompressor {
     }
 
     async createCompressedPDF(originalDoc, settings) {
-        // Create a new document and copy pages with optimization
+        // For high compression, create a new document and copy pages with optimization
         const compressedDoc = await PDFLib.PDFDocument.create();
+        
+        // Copy basic document information but clear metadata if requested
+        if (!settings.removeMetadata) {
+            try {
+                if (originalDoc.getTitle()) compressedDoc.setTitle(originalDoc.getTitle());
+                if (originalDoc.getSubject()) compressedDoc.setSubject(originalDoc.getSubject());
+                if (originalDoc.getCreator()) compressedDoc.setCreator(originalDoc.getCreator());
+            } catch (e) {
+                // Ignore metadata errors
+            }
+        }
+        
+        // Copy all pages
         const pageIndices = originalDoc.getPageIndices();
         const pages = await compressedDoc.copyPages(originalDoc, pageIndices);
         
