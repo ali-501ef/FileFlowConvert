@@ -3750,13 +3750,15 @@ body {
     background-color: var(--surface);
     border-top: 1px solid var(--border);
     margin-top: 4rem;
-    width: 100%;
+    width: 100vw;
+    margin-left: calc(-50vw + 50%);
 }
 
 .footer .container {
-    max-width: none;
-    width: 100%;
+    max-width: none !important;
+    width: 100% !important;
     padding: 0 2rem;
+    margin: 0 auto;
 }
 
 .footer-content {
