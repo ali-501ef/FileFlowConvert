@@ -185,25 +185,13 @@ class ImageConverter {
                 );
                 
                 try {
-                    const advancedOptions = this.getAdvancedOptions();
+                    const convertedBlob = await this.convertSingleFile(file);
+                    const outputFilename = this.generateOutputFilename(file.name);
                     
-                    // Use server-side conversion for PNG with compression level options
-                    if (this.outputFormat === 'png' && advancedOptions.compressionLevel !== undefined) {
-                        console.log('Using server-side conversion for PNG with compression');
-                        const convertedFile = await this.convertWithServer(file, advancedOptions);
-                        results.push({
-                            filename: this.generateOutputFilename(file.name),
-                            blob: convertedFile.blob
-                        });
-                    } else {
-                        const convertedBlob = await this.convertSingleFile(file);
-                        const outputFilename = this.generateOutputFilename(file.name);
-                        
-                        results.push({
-                            filename: outputFilename,
-                            blob: convertedBlob
-                        });
-                    }
+                    results.push({
+                        filename: outputFilename,
+                        blob: convertedBlob
+                    });
                 } catch (error) {
                     console.error(`Error converting ${file.name}:`, error);
                     // Continue with other files
@@ -324,7 +312,6 @@ class ImageConverter {
         const compressionSelect = document.getElementById('compressionLevel');
         if (compressionSelect && this.outputFormat === 'png') {
             options.compressionLevel = parseInt(compressionSelect.value);
-            console.log('PNG compression level set to:', options.compressionLevel);
         }
         
         // Background/Transparency settings - capture all possible background variable names
@@ -497,66 +484,6 @@ class ImageConverter {
                 this.downloadFile(result.blob, result.filename);
             }, index * 1000); // Stagger downloads
         });
-    }
-
-    async convertWithServer(file, advancedOptions) {
-        // Upload file
-        const formData = new FormData();
-        formData.append('file', file);
-        
-        const uploadResponse = await fetch('/api/upload', {
-            method: 'POST',
-            body: formData
-        });
-        
-        if (!uploadResponse.ok) {
-            throw new Error('Upload failed');
-        }
-        
-        const uploadResult = await uploadResponse.json();
-        
-        // Convert file
-        const convertBody = {
-            file_id: uploadResult.file_id,
-            output_format: this.outputFormat,
-            temp_path: uploadResult.temp_path
-        };
-        
-        // Add advanced options
-        if (advancedOptions.quality) {
-            convertBody.quality = advancedOptions.quality / 100; // Convert to 0-1 scale
-        }
-        if (advancedOptions.compressionLevel !== undefined) {
-            convertBody.compression_level = advancedOptions.compressionLevel;
-        }
-        
-        const convertResponse = await fetch('/api/convert', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(convertBody)
-        });
-        
-        if (!convertResponse.ok) {
-            throw new Error('Conversion failed');
-        }
-        
-        const convertResult = await convertResponse.json();
-        
-        // Download converted file
-        const downloadResponse = await fetch(convertResult.download_url);
-        
-        if (!downloadResponse.ok) {
-            throw new Error('Download failed');
-        }
-        
-        const blob = await downloadResponse.blob();
-        
-        return {
-            blob: blob,
-            filename: this.generateOutputFilename(file.name)
-        };
     }
 }
 
