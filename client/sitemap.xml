@@ -1,38 +1,153 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    <!-- Homepage -->
     <url>
-        <loc>https://fileflow.com/</loc>
-        <lastmod>2024-08-04</lastmod>
+        <loc>https://fileflow.replit.app/</loc>
+        <lastmod>2024-08-15</lastmod>
         <changefreq>weekly</changefreq>
         <priority>1.0</priority>
     </url>
+    
+    <!-- PDF Tools -->
     <url>
-        <loc>https://fileflow.com/image-tools/heic-to-jpg.html</loc>
-        <lastmod>2024-08-04</lastmod>
+        <loc>https://fileflow.replit.app/pdf-merge.html</loc>
+        <lastmod>2024-08-15</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>https://fileflow.com/jpg-to-png.html</loc>
-        <lastmod>2024-08-04</lastmod>
+        <loc>https://fileflow.replit.app/pdf-split.html</loc>
+        <lastmod>2024-08-15</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>https://fileflow.com/pdf-merge.html</loc>
-        <lastmod>2024-08-04</lastmod>
+        <loc>https://fileflow.replit.app/pdf-compress.html</loc>
+        <lastmod>2024-08-15</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>https://fileflow.com/mp4-to-mp3.html</loc>
-        <lastmod>2024-08-04</lastmod>
+        <loc>https://fileflow.replit.app/pdf-to-word.html</loc>
+        <lastmod>2024-08-15</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>https://fileflow.com/pdf-to-jpg.html</loc>
-        <lastmod>2024-08-04</lastmod>
+        <loc>https://fileflow.replit.app/pdf-rotate.html</loc>
+        <lastmod>2024-08-15</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://fileflow.replit.app/pdf-watermark.html</loc>
+        <lastmod>2024-08-15</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    
+    <!-- Image Tools -->
+    <url>
+        <loc>https://fileflow.replit.app/image-tools/heic-to-jpg.html</loc>
+        <lastmod>2024-08-15</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://fileflow.replit.app/jpg-to-png.html</loc>
+        <lastmod>2024-08-15</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://fileflow.replit.app/pdf-to-jpg.html</loc>
+        <lastmod>2024-08-15</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://fileflow.replit.app/image-tools/webp-to-jpg.html</loc>
+        <lastmod>2024-08-15</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://fileflow.replit.app/image-tools/png-to-jpg.html</loc>
+        <lastmod>2024-08-15</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://fileflow.replit.app/image-tools/jpg-to-pdf.html</loc>
+        <lastmod>2024-08-15</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://fileflow.replit.app/image-tools/tiff-to-png.html</loc>
+        <lastmod>2024-08-15</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://fileflow.replit.app/image-tools/bmp-to-jpg.html</loc>
+        <lastmod>2024-08-15</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://fileflow.replit.app/image-tools/svg-to-png.html</loc>
+        <lastmod>2024-08-15</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://fileflow.replit.app/image-tools/ico-to-png.html</loc>
+        <lastmod>2024-08-15</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://fileflow.replit.app/image-tools/gif-to-mp4.html</loc>
+        <lastmod>2024-08-15</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    
+    <!-- Audio/Video Tools -->
+    <url>
+        <loc>https://fileflow.replit.app/mp4-to-mp3.html</loc>
+        <lastmod>2024-08-15</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://fileflow.replit.app/video-compress.html</loc>
+        <lastmod>2024-08-15</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://fileflow.replit.app/audio-converter.html</loc>
+        <lastmod>2024-08-15</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://fileflow.replit.app/video-trim.html</loc>
+        <lastmod>2024-08-15</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://fileflow.replit.app/gif-maker.html</loc>
+        <lastmod>2024-08-15</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://fileflow.replit.app/video-merger.html</loc>
+        <lastmod>2024-08-15</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>

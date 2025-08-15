@@ -2,7 +2,7 @@ User-agent: *
 Allow: /
 
 # Sitemap
-Sitemap: https://fileflow.com/sitemap.xml
+Sitemap: https://fileflow.replit.app/sitemap.xml
 
 # Crawl-delay for politeness
 Crawl-delay: 1
