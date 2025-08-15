@@ -1,0 +1,202 @@
+Monetization: Add Non‑Intrusive Ad Placeholders (STRICT SCOPE)
+Scope:
+
+Add ad placeholders only (HTML/CSS/very small JS) on tool pages.
+
+Do not modify existing tool logic, upload flows, styling of cards, or page layout structure.
+
+No third‑party ad script integration yet—just clean slots we can wire later.
+
+Must preserve Core Web Vitals (no CLS), accessibility, and SEO.
+
+1) Slots & exact placement (per tool page)
+Insert the following four slots in these exact places:
+
+Under the hero title (between the title badges and the upload box)
+
+ID: ad-top-inline
+
+Size: responsive 728×90 / 320×100
+
+Between the upload box and “Advanced Options”
+
+ID: ad-inline-1
+
+Size: responsive 336×280 / 300×250 / 320×250
+
+After the feature cards row (the “Reduce / Smart Optimization / Multiple Levels” row)
+
+ID: ad-inline-2
+
+Size: responsive 336×280 / 300×250 / 320×250
+
+Before the footer (above the footer columns)
+
+ID: ad-bottom-wide
+
+Size: responsive 970×250 / 728×90 / 320×100
+
+On desktop, also show a right rail slot when space allows (≥1200px):
+
+ID: ad-rail-right
+
+Size: 300×600 / 300×250
+
+Absolutely do not push or overlap core UI on narrow screens; hidden on <1200px.
+
+2) Reusable ad component (HTML)
+Create client/partials/ad-slot.html:
+
+html
+Copy
+Edit
+<!-- Reusable responsive ad placeholder -->
+<div class="ad-slot" role="complementary" aria-label="advertisement"
+     data-slot="" data-sizes="auto" data-lazy>
+  <div class="ad-frame">
+    <!-- Temporary placeholder content so layout is stable -->
+    <div class="ad-placeholder">
+      <span>Ad</span>
+    </div>
+  </div>
+</div>
+3) CSS (local, non-global breakage)
+Add to a new file client/css/ads.css and include it on tool pages:
+
+css
+Copy
+Edit
+/* Container keeps reserved space to prevent CLS */
+.ad-slot { width: 100%; margin: 16px 0; }
+.ad-frame { width: 100%; display: grid; place-items: center; overflow: hidden; border-radius: 12px; }
+
+/* Default mobile height (safe) */
+.ad-frame { min-height: 110px; }
+
+/* Placeholder styling (removed when real ad loads) */
+.ad-placeholder {
+  width: 100%; height: 100%;
+  display: grid; place-items: center;
+  border: 1px dashed rgba(0,0,0,.12);
+  background: linear-gradient(90deg, rgba(0,0,0,.03), rgba(0,0,0,.06), rgba(0,0,0,.03));
+  animation: adshimmer 1.4s infinite;
+  font-size: 12px; color: rgba(0,0,0,.45);
+}
+@keyframes adshimmer {
+  0% { background-position: -200px 0; }
+  100% { background-position: calc(200px + 100%) 0; }
+}
+
+/* Size presets by slot id (adjust heights only; width is fluid) */
+#ad-top-inline   .ad-frame { min-height: 110px; }  /* 728x90 / 320x100 */
+#ad-inline-1     .ad-frame,
+#ad-inline-2     .ad-frame { min-height: 280px; }  /* 336x280 */
+#ad-bottom-wide  .ad-frame { min-height: 140px; }  /* 728x90 / 970x250 compressed */
+
+/* Desktop rail (hidden on small screens) */
+#ad-rail-right { display: none; }
+@media (min-width: 1200px) {
+  #ad-rail-right { display: block; position: sticky; top: 96px; }
+  #ad-rail-right .ad-frame { min-height: 600px; max-width: 300px; margin-left: auto; }
+}
+Include once per tool page head (no other CSS touched):
+
+html
+Copy
+Edit
+<link rel="stylesheet" href="/css/ads.css">
+4) Lightweight lazy‑loader (no network calls yet)
+Create client/js/ads-lite.js:
+
+html
+Copy
+Edit
+<script>
+/* Minimal: keeps placeholders, reserves space, and provides a hook
+   for later ad network init. No external scripts loaded here. */
+(function() {
+  const slots = document.querySelectorAll('.ad-slot[data-lazy]');
+  if (!('IntersectionObserver' in window)) return; // graceful
+
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      const el = entry.target;
+      io.unobserve(el);
+
+      // Hook point: later we can inject ad code here.
+      // For now, just tag as "ready" and keep placeholder visible.
+      el.dataset.ready = "1";
+    });
+  }, { rootMargin: '300px 0px' });
+
+  slots.forEach(s => io.observe(s));
+})();
+</script>
+Include once near the end of <body>:
+
+html
+Copy
+Edit
+<script src="/js/ads-lite.js" defer></script>
+5) Place the slots in the DOM (per page)
+On each tool page (e.g., client/pdf-compress.html), insert the slots at the specified anchors. Example (keep your existing structure unchanged; just inject these between blocks):
+
+html
+Copy
+Edit
+<!-- ... hero title & badges ... -->
+
+<!-- 1) Top inline under title -->
+<div id="ad-top-inline" class="ad-slot" data-slot="top_inline" data-sizes="728x90,320x100" data-lazy>
+  <div class="ad-frame"><div class="ad-placeholder"><span>Ad</span></div></div>
+</div>
+
+<!-- Upload box -->
+<div id="upload-area"> ...existing... </div>
+
+<!-- 2) Inline before Advanced Options -->
+<div id="ad-inline-1" class="ad-slot" data-slot="inline_1" data-sizes="336x280,300x250,320x250" data-lazy>
+  <div class="ad-frame"><div class="ad-placeholder"><span>Ad</span></div></div>
+</div>
+
+<!-- Advanced Options -->
+<div id="advanced-options"> ...existing... </div>
+
+<!-- Feature cards row -->
+<div id="features-grid"> ...existing 3 cards... </div>
+
+<!-- 3) Inline after features -->
+<div id="ad-inline-2" class="ad-slot" data-slot="inline_2" data-sizes="336x280,300x250,320x250" data-lazy>
+  <div class="ad-frame"><div class="ad-placeholder"><span>Ad</span></div></div>
+</div>
+
+<!-- 4) Bottom wide before footer -->
+<div id="ad-bottom-wide" class="ad-slot" data-slot="bottom_wide" data-sizes="970x250,728x90,320x100" data-lazy>
+  <div class="ad-frame"><div class="ad-placeholder"><span>Ad</span></div></div>
+</div>
+
+<!-- Optional desktop rail; place in the right column if the page uses a grid,
+     otherwise append near the end and position sticky via CSS. -->
+<div id="ad-rail-right" class="ad-slot" data-slot="rail_right" data-sizes="300x600,300x250" data-lazy>
+  <div class="ad-frame"><div class="ad-placeholder"><span>Ad</span></div></div>
+</div>
+Repeat the same placements for every tool page. If a page doesn’t have the feature cards row, keep slots 1, 2, and 4 only.
+
+6) Accessibility & policy notes
+Each .ad-slot uses role="complementary" and aria-label="advertisement".
+
+When you integrate a network later, ensure “sponsored” labeling where required and TCF/consent if you serve EEA/UK.
+
+7) Acceptance criteria
+✅ No layout shifts (CLS) when ads load (placeholders reserve height).
+
+✅ Tools still work exactly as before (uploads/downloads unaffected).
+
+✅ Mobile: only one ad visible at a time above the fold (slot #1), others below.
+
+✅ Desktop: right rail appears only ≥1200px and never overlaps UI.
+
+✅ Lighthouse Performance/SEO scores do not regress by more than 2 points.
+
+✅ No console errors, no external ad scripts loaded yet.
