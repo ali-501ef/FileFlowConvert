@@ -154,10 +154,15 @@ def compress_pdf(in_bytes: bytes, options: dict) -> bytes:
     level = (options.get("level") or "medium").lower()
     cfg = dict(GS_LEVELS.get(level, GS_LEVELS["medium"]))
     
-    # Override JPEG quality if provided
+    # Override JPEG quality if provided, otherwise use level default
     if "imageQuality" in options and isinstance(options["imageQuality"], (int, float)):
         quality = max(10, min(95, int(options["imageQuality"])))
         cfg["JPEGQuality"] = quality
+    
+    # Ensure compression level affects quality if no explicit imageQuality provided
+    if "imageQuality" not in options:
+        # Use the level's default JPEG quality
+        pass  # cfg already has the right JPEGQuality from GS_LEVELS
     
     optimize_images = bool(options.get("optimizeEmbeddedImages", True))
     remove_metadata = bool(options.get("removeMetadata", False))

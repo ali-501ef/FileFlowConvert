@@ -184,10 +184,16 @@ class PDFCompressor {
             // Map UI settings to server options
             const serverOptions = {
                 level: settings.compressionLevel,
-                imageQuality: settings.imageQuality,
                 removeMetadata: settings.removeMetadata,
                 optimizeEmbeddedImages: settings.optimizeImages
             };
+            
+            // Only send imageQuality if user explicitly changed it (not default 75)
+            const imageQualitySelect = document.getElementById('imageQuality');
+            const defaultImageQuality = 75; // Medium default
+            if (settings.imageQuality !== defaultImageQuality) {
+                serverOptions.imageQuality = settings.imageQuality;
+            }
             formData.append('options', JSON.stringify(serverOptions));
             
             this.showProgress(30);
