@@ -18,6 +18,10 @@ const results = [];
 for (const page of PAGES) {
   const html = readFileSync(page, 'utf8');
 
+  // Skip pages explicitly marked noindex
+  const robotsMeta = extract(html, /<meta\s+name=["']robots["']\s+content=["']([^"']+)["'][^>]*>/i);
+  if (robotsMeta && /noindex/i.test(robotsMeta)) continue;
+
   const title = extract(html, /<title>([\s\S]*?)<\/title>/i);
   const desc  = extract(html, /<meta\s+name=["']description["']\s+content=["']([\s\S]*?)["'][^>]*>/i);
   const canon = extract(html, /<link\s+rel=["']canonical["']\s+href=["']([\s\S]*?)["'][^>]*>/i);

@@ -1,0 +1,86 @@
+SEO — Final Cleanup to Reach 0 Issues (STRICT SCOPE)
+
+Scope: Edit only the head/meta of the listed files, update sitemap entries, and adjust the audit script to ignore noindex pages.
+Do NOT change layout, components, JS logic for tools, routing, or styles.
+
+1) Fix remaining short meta descriptions (80–170 chars)
+
+Replace only the <meta name="description"> content for these pages with the text below.
+
+PDF tools
+
+client/pdf-compress.html
+Reduce PDF file size while keeping documents readable. Choose compression levels, strip metadata, and optimize embedded images for fast sharing and storage.
+
+client/pdf-merge.html
+Combine multiple PDF files into a single, well‑ordered document. Preserve formatting, reorder pages by drag and drop, and export a clean, share‑ready PDF.
+
+client/pdf-split.html
+Extract pages or split PDFs by range in seconds. Select specific pages, create multiple documents, and keep original quality for precise editing and sharing.
+
+client/pdf-rotate.html
+Rotate one or many PDF pages by 90° increments. Fix sideways scans, correct orientation in bulk, and export a clean, readable document.
+
+client/pdf-watermark.html
+Add text or image watermarks to PDFs. Control position, opacity, and size to protect documents with a professional, unobtrusive mark.
+
+client/pdf-to-word.html (include if still short)
+Convert PDFs to editable Word files while preserving layout. Quickly update text, images, and formatting without retyping your document.
+
+Image / Video tools
+
+client/image-tools/gif-to-mp4.html
+Convert animated GIFs to MP4 with modern compression. Keep smooth motion while reducing file size for faster uploads, sharing, and playback.
+
+If any of the above already meet length, leave them unchanged.
+
+2) Exclude legacy/template pages from audit & indexing
+
+These files are intentionally not meant for SEO; keep them out of the sitemap and mark as noindex.
+
+Ensure both have inside <head>:
+client/js/nav-template.html, client/pdf-merge-old.html
+
+<meta name="robots" content="noindex, nofollow">
+
+
+Remove any entries for these files from client/sitemap.xml.
+
+3) Keep sitemap consistent with live routes
+
+Open client/sitemap.xml and ensure it lists only active, publicly accessible pages (the same 22 tools + legal pages). No legacy or template routes.
+
+4) Make the audit script ignore noindex pages (so the report is meaningful)
+
+Update scripts/seo-audit.mjs to skip files that declare noindex. Add this near where each file’s HTML is read:
+
+// Skip pages explicitly marked noindex
+const robotsMeta = extract(html, /<meta\s+name=["']robots["']\s+content=["']([^"']+)["'][^>]*>/i);
+if (robotsMeta && /noindex/i.test(robotsMeta)) continue;
+
+
+Re-run node scripts/seo-audit.mjs afterward.
+
+5) Re‑run proof steps and share output
+# Static audit (should be 0 issues)
+node scripts/seo-audit.mjs
+
+# Canonicals (spot check)
+grep -oE '<link[^>]+rel="canonical"[^>]*>' client/*.html client/**/*.html | head -30
+
+# Live checks
+for p in "/" "/sitemap.xml" "/robots.txt"; do
+  echo "$p -> $(curl -s -o /dev/null -w "%{http_code}" "http://localhost:5000$p")"
+done
+
+Acceptance criteria
+
+Static audit: 0 issues, 0 duplicate titles/descriptions.
+
+Canonicals: all https://fileflow.replit.app/....
+
+Sitemap: only active, indexable pages included.
+
+No regressions: layout and all tool functions unchanged.
+
+If anything still fails, report the file + line only—do not modify unrelated files.
