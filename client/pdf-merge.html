@@ -21,6 +21,7 @@
     <meta name="twitter:image" content="https://fileflow.replit.app/og/pdf-merge.png">
     
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="/css/ads.css">
     
     <!-- Navigation Script -->
     <script src="/js/navigation.js" defer></script>
@@ -127,6 +128,15 @@
             </div>
         </div>
 
+        <!-- 1) Top inline under title -->
+        <div id="ad-top-inline" class="ad-slot" role="complementary" aria-label="advertisement" data-slot="top_inline" data-sizes="728x90,320x100" data-lazy>
+            <div class="ad-frame">
+                <div class="ad-placeholder">
+                    <span>Ad</span>
+                </div>
+            </div>
+        </div>
+
         <div class="converter-container">
             <div class="upload-area" id="uploadArea" data-testid="upload-area-pdf-merge">
                 <div class="upload-icon">
@@ -151,6 +161,15 @@
                     </svg>
                     Add More Files
                 </button>
+            </div>
+
+            <!-- 2) Inline after files list -->
+            <div id="ad-inline-1" class="ad-slot" role="complementary" aria-label="advertisement" data-slot="inline_1" data-sizes="336x280,300x250,320x250" data-lazy>
+                <div class="ad-frame">
+                    <div class="ad-placeholder">
+                        <span>Ad</span>
+                    </div>
+                </div>
             </div>
 
             <button class="convert-btn" id="convertBtn" disabled>
@@ -224,8 +243,35 @@
                 </div>
             </div>
 
+            <!-- 3) Inline after features -->
+            <div id="ad-inline-2" class="ad-slot" role="complementary" aria-label="advertisement" data-slot="inline_2" data-sizes="336x280,300x250,320x250" data-lazy>
+                <div class="ad-frame">
+                    <div class="ad-placeholder">
+                        <span>Ad</span>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </main>
+
+    <!-- 4) Bottom wide before footer -->
+    <div id="ad-bottom-wide" class="ad-slot" role="complementary" aria-label="advertisement" data-slot="bottom_wide" data-sizes="970x250,728x90,320x100" data-lazy>
+        <div class="ad-frame">
+            <div class="ad-placeholder">
+                <span>Ad</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Optional desktop rail -->
+    <div id="ad-rail-right" class="ad-slot" role="complementary" aria-label="advertisement" data-slot="rail_right" data-sizes="300x600,300x250" data-lazy>
+        <div class="ad-frame">
+            <div class="ad-placeholder">
+                <span>Ad</span>
+            </div>
+        </div>
+    </div>
 
     <!-- Footer -->
     <footer class="footer">
@@ -302,5 +348,6 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
     <script src="js/converters/pdf-merge.js"></script>
+    <script src="/js/ads-lite.js" defer></script>
 </body>
 </html>
