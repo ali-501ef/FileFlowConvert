@@ -1,0 +1,329 @@
+Add these system packages (Nix):
+Update replit.nix to include ONLY these new deps:
+
+{ pkgs }: {
+  deps = [
+    pkgs.python311
+    pkgs.python311Packages.pip
+    pkgs.ghostscript            # gs
+    pkgs.qpdf                   # qpdf
+  ];
+}
+
+
+Add these Python packages (pin versions):
+
+pip install fastapi==0.115.0 uvicorn==0.30.1
+pip install pikepdf==9.3.0 pillow==10.4.0 img2pdf==0.5.1
+
+
+If your backend is Node instead of Python, scroll to the Node.js alternative at the end.
+
+🎯 Scope Control (so nothing else breaks)
+
+Create a new, isolated module directory features/pdf_compress/ with its own code and tests.
+
+Add exactly one new API (no edits to existing endpoints):
+
+POST /api/pdf/compress (multipart: file, JSON: options)
+
+Do NOT touch global settings, other routes, or shared middleware.
+
+Feature flag: gate the new route behind ENABLE_PDF_COMPRESS_V2=true.
+
+Default to true. If anything regresses, toggle off instantly.
+
+Contract unchanged for the frontend: it still calls “pdf compress”. Only wire the page to call /api/pdf/compress.
+
+🧠 Compression Strategy (mapped to your UI)
+
+Your UI has:
+
+Compression Level: Low | Medium | High | Maximum (Smallest size)
+
+Advanced Options: ImageQuality%, RemoveMetadata, OptimizeEmbeddedImages
+
+Under the hood pipeline (auto-detect text vs image pdfs):
+
+qpdf pass (lossless structural compression)
+
+Always run first to fix/deflate streams:
+qpdf --object-streams=generate --stream-data=compress --linearize
+
+Ghostscript pass (lossy, level‑based)
+
+Apply level → settings map (below).
+
+Tune downsampling & DCT/JPX quality.
+
+If OptimizeEmbeddedImages=true, enable downsample; else keep images resolution.
+
+Metadata strip (if selected)
+
+Use pikepdf to remove XMP and Info dict and unneeded /Names.
+
+Fallback logic
+
+If GS output is larger than qpdf output, keep the smaller file.
+
+If text‑heavy PDF, prefer qpdf‑only (GS gains are small).
+
+🔩 Level → Ghostscript settings
+
+We’ll not rely on /screen//ebook shortcuts; we specify exact flags.
+
+GS_LEVELS = {
+  "low": {
+    "ColorImageResolution": 300, "GrayImageResolution": 300, "MonoImageResolution": 600,
+    "JPEGQuality": 85, "UseJPX": False
+  },
+  "medium": {
+    "ColorImageResolution": 200, "GrayImageResolution": 200, "MonoImageResolution": 600,
+    "JPEGQuality": 70, "UseJPX": False
+  },
+  "high": {
+    "ColorImageResolution": 150, "GrayImageResolution": 150, "MonoImageResolution": 600,
+    "JPEGQuality": 60, "UseJPX": True   # JPEG2000 for better ratio
+  },
+  "maximum": {
+    "ColorImageResolution": 120, "GrayImageResolution": 120, "MonoImageResolution": 600,
+    "JPEGQuality": 45, "UseJPX": True   # smallest size
+  },
+}
+
+
+Command template (Python subprocess):
+
+gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.6 -dNOPAUSE -dBATCH -dSAFER \
+   -dDetectDuplicateImages=true -dColorImageDownsampleType=/Average \
+   -dGrayImageDownsampleType=/Average -dMonoImageDownsampleType=/Subsample \
+   -dColorImageResolution={ColorImageResolution} \
+   -dGrayImageResolution={GrayImageResolution} \
+   -dMonoImageResolution={MonoImageResolution} \
+   -dEncodeColorImages=true -dEncodeGrayImages=true -dEncodeMonoImages=true \
+   {image_filters} \
+   -sOutputFile="{out_pdf}" "{in_pdf}"
+
+
+Where:
+
+image_filters is either:
+
+-sColorImageFilter=/DCTEncode -sGrayImageFilter=/DCTEncode (JPEG), or
+
+-sColorImageFilter=/JPXEncode -sGrayImageFilter=/JPXEncode (JPEG2000) when UseJPX.
+
+If OptimizeEmbeddedImages=false, omit the *Downsample* flags.
+
+🧪 API & Worker (Python / FastAPI)
+
+Create features/pdf_compress/service.py:
+
+import os, tempfile, subprocess, json
+from pathlib import Path
+import pikepdf
+
+def _run(cmd):
+    p = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    return p.returncode, p.stdout, p.stderr
+
+def _qpdf_lossless(in_pdf, out_pdf):
+    cmd = ["qpdf", "--object-streams=generate", "--stream-data=compress", "--linearize", in_pdf, out_pdf]
+    code, _, err = _run(cmd)
+    if code != 0: raise RuntimeError(f"qpdf failed: {err}")
+
+def _gs_lossy(in_pdf, out_pdf, level_cfg, optimize_images=True):
+    filters = []
+    if level_cfg.get("UseJPX"):
+        filters += ["-sColorImageFilter=/JPXEncode", "-sGrayImageFilter=/JPXEncode"]
+    else:
+        filters += ["-sColorImageFilter=/DCTEncode", "-sGrayImageFilter=/DCTEncode"]
+
+    cmd = [
+        "gs", "-sDEVICE=pdfwrite", "-dCompatibilityLevel=1.6", "-dNOPAUSE", "-dBATCH", "-dSAFER",
+        "-dDetectDuplicateImages=true",
+        "-dEncodeColorImages=true", "-dEncodeGrayImages=true", "-dEncodeMonoImages=true",
+        f"-dColorImageResolution={level_cfg['ColorImageResolution']}",
+        f"-dGrayImageResolution={level_cfg['GrayImageResolution']}",
+        f"-dMonoImageResolution={level_cfg['MonoImageResolution']}",
+        "-sOutputFile=" + out_pdf, in_pdf
+    ]
+
+    if optimize_images:
+        cmd[cmd.index("-sOutputFile="+out_pdf):cmd.index("-sOutputFile="+out_pdf)] = [
+            "-dColorImageDownsampleType=/Average",
+            "-dGrayImageDownsampleType=/Average",
+            "-dMonoImageDownsampleType=/Subsample"
+        ]
+
+    cmd[cmd.index(in_pdf):cmd.index(in_pdf)] = filters
+
+    code, _, err = _run(cmd)
+    if code != 0: raise RuntimeError(f"ghostscript failed: {err}")
+
+def _strip_metadata(in_pdf, out_pdf):
+    with pikepdf.open(in_pdf) as pdf:
+        pdf.docinfo.clear()
+        if "/Metadata" in pdf.root:
+            del pdf.root["/Metadata"]
+        pdf.save(out_pdf)
+
+GS_LEVELS = {
+  "low":     {"ColorImageResolution":300,"GrayImageResolution":300,"MonoImageResolution":600,"JPEGQuality":85,"UseJPX":False},
+  "medium":  {"ColorImageResolution":200,"GrayImageResolution":200,"MonoImageResolution":600,"JPEGQuality":70,"UseJPX":False},
+  "high":    {"ColorImageResolution":150,"GrayImageResolution":150,"MonoImageResolution":600,"JPEGQuality":60,"UseJPX":True},
+  "maximum": {"ColorImageResolution":120,"GrayImageResolution":120,"MonoImageResolution":600,"JPEGQuality":45,"UseJPX":True},
+}
+
+def compress_pdf(in_bytes: bytes, options: dict) -> bytes:
+    """
+    options = {
+      "level": "low|medium|high|maximum",
+      "imageQuality": 45,                 # overrides JPEG quality if provided
+      "removeMetadata": True|False,
+      "optimizeEmbeddedImages": True|False
+    }
+    """
+    level = (options.get("level") or "medium").lower()
+    cfg = dict(GS_LEVELS.get(level, GS_LEVELS["medium"]))
+    if "imageQuality" in options and isinstance(options["imageQuality"], (int, float)):
+        q = max(10, min(95, int(options["imageQuality"])))
+        cfg["JPEGQuality"] = q
+
+    optimize = bool(options.get("optimizeEmbeddedImages", True))
+    remove_meta = bool(options.get("removeMetadata", False))
+
+    with tempfile.TemporaryDirectory() as td:
+        src = Path(td)/"src.pdf"
+        qpdf_out = Path(td)/"qpdf.pdf"
+        gs_out = Path(td)/"gs.pdf"
+        final = Path(td)/"final.pdf"
+
+        src.write_bytes(in_bytes)
+
+        # 1) qpdf pass
+        _qpdf_lossless(str(src), str(qpdf_out))
+
+        # 2) gs pass
+        _gs_lossy(str(qpdf_out), str(gs_out), cfg, optimize)
+
+        # 3) choose smaller
+        pick = gs_out if gs_out.stat().st_size < qpdf_out.stat().st_size else qpdf_out
+
+        # 4) optional metadata strip
+        if remove_meta:
+            _strip_metadata(str(pick), str(final))
+            pick = final
+
+        return pick.read_bytes()
+
+
+Add the API route routes/pdf_compress.py:
+
+import json
+from fastapi import APIRouter, UploadFile, File, Form, HTTPException
+from .features.pdf_compress.service import compress_pdf
+
+router = APIRouter(prefix="/api/pdf", tags=["pdf"])
+
+@router.post("/compress")
+async def compress(
+    file: UploadFile = File(...),
+    options: str = Form("{}")
+):
+    try:
+        opts = json.loads(options or "{}")
+        data = await file.read()
+        out = compress_pdf(data, opts)
+        return {
+            "ok": True,
+            "filename": file.filename,
+            "original_size": len(data),
+            "compressed_size": len(out),
+            "bytes": out.hex()  # or return as FileResponse in your app
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+If your app streams a file back, swap the JSON for a FileResponse and return the bytes as a downloadable PDF.
+
+✅ Acceptance Tests (to prevent collateral damage)
+
+Create features/pdf_compress/test_pdf_compress.py:
+
+from .service import compress_pdf
+
+def _opts(level, meta=False, opt_images=True, iq=None):
+    o = {"level": level, "removeMetadata": meta, "optimizeEmbeddedImages": opt_images}
+    if iq is not None: o["imageQuality"] = iq
+    return o
+
+def test_image_heavy_pdf(tmp_path):
+    sample = (tmp_path/"img-heavy.pdf").read_bytes()  # put a sample in tests/data
+    out = compress_pdf(sample, _opts("maximum", meta=True))
+    assert len(out) < len(sample) * 0.7  # aim ≥30% smaller
+
+def test_text_pdf_no_worse(tmp_path):
+    sample = (tmp_path/"text-heavy.pdf").read_bytes()
+    out = compress_pdf(sample, _opts("medium", meta=True, opt_images=False))
+    assert len(out) <= len(sample)  # never bigger after qpdf+meta strip
+
+
+Run:
+
+pytest -q
+
+🔌 Frontend Wiring (unchanged UI, just working)
+
+Keep your existing page & controls.
+
+On submit, send multipart file + options JSON to /api/pdf/compress.
+
+Map your controls:
+
+Level dropdown → level
+
+Image Quality slider → imageQuality (0–100; we clamp 10–95)
+
+Checkboxes → removeMetadata, optimizeEmbeddedImages
+
+🧯 Failure Modes We Fix
+
+“It downloads fine but size is unchanged” → qpdf+gs pipeline ensures actual recompression and structural deflation.
+
+Advanced options ignored → we translate UI flags directly to GS flags and pikepdf behavior.
+
+Some PDFs get bigger → we compare sizes and keep the smaller artifact.
+
+Other tools break → isolated module, single new route, feature flag, fixed dependencies.
+
+🟢 Node.js Alternative (if your backend is JS)
+
+Install:
+
+npm i express multer
+npm i @lunasec/node-pdf # or use ghostscript via child_process
+sudo apt-get update && sudo apt-get install -y ghostscript qpdf
+
+
+Approach: same 3‑stage pipeline, but use child_process.spawn to call qpdf and gs, and pdf-lib or hummus-recipe for metadata removal (or shell out to pikepdf via python3 -m). Keep the same /api/pdf/compress contract.
+
+🗣️ Message to Replit (paste this verbatim)
+
+Urgent: PDF Compress is not compressing at all.
+Please implement the above blueprint exactly.
+
+Add only the listed dependencies.
+
+Create features/pdf_compress/ with the provided service and route.
+
+Wire one new endpoint POST /api/pdf/compress.
+
+Do not modify any other routes, middleware, UI pages, or global config.
+
+Keep all changes behind ENABLE_PDF_COMPRESS_V2=true.
+
+Run the provided tests; the feature must show real size reduction on image‑heavy PDFs.
+
+If anything outside this feature changes, revert it.

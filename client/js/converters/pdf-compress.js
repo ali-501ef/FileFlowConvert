@@ -174,79 +174,69 @@ class PDFCompressor {
 
     async performCompression(settings) {
         try {
-            const arrayBuffer = await this.currentFile.arrayBuffer();
-            const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
-            
-            // Progress tracking
+            // Use server-side compression with Ghostscript + qpdf + pikepdf
             this.showProgress(10);
             
-            // Remove metadata if requested
-            if (settings.removeMetadata) {
-                pdfDoc.setTitle('');
-                pdfDoc.setSubject('');
-                pdfDoc.setAuthor('');
-                pdfDoc.setCreator('');
-                pdfDoc.setProducer('FileFlow PDF Compressor');
-                pdfDoc.setKeywords([]);
-                pdfDoc.setCreationDate(new Date());
-                pdfDoc.setModificationDate(new Date());
-            }
+            // Prepare form data for server-side compression
+            const formData = new FormData();
+            formData.append('file', this.currentFile);
+            
+            // Map UI settings to server options
+            const serverOptions = {
+                level: settings.compressionLevel,
+                imageQuality: settings.imageQuality,
+                removeMetadata: settings.removeMetadata,
+                optimizeEmbeddedImages: settings.optimizeImages
+            };
+            formData.append('options', JSON.stringify(serverOptions));
             
             this.showProgress(30);
             
-            // Apply aggressive compression for maximum setting
-            const useAggressiveCompression = settings.compressionLevel === 'maximum';
+            console.log('Sending PDF to server for compression:', serverOptions);
             
-            // Create optimized PDF with compression settings
-            const saveOptions = {
-                useObjectStreams: settings.compressionLevel !== 'low',
-                addDefaultPage: false,
-                objectsPerTick: this.getObjectsPerTick(settings.compressionLevel),
-                updateFieldAppearances: false,
-                prettyPrint: false
-            };
+            // Call the new server-side compression endpoint
+            const response = await fetch('/api/pdf/compress', {
+                method: 'POST',
+                body: formData
+            });
             
-            this.showProgress(50);
+            this.showProgress(70);
             
-            let pdfBytes;
-            
-            // For maximum compression, use multiple compression passes
-            if (useAggressiveCompression) {
-                pdfBytes = await this.performMaximumCompression(pdfDoc, settings, saveOptions);
-            } else {
-                pdfBytes = await pdfDoc.save(saveOptions);
-                
-                // Apply additional optimization for high compression levels
-                if (settings.optimizeImages || settings.compressionLevel === 'high') {
-                    try {
-                        const compressedDoc = await this.createCompressedPDF(pdfDoc, settings);
-                        const optimizedBytes = await compressedDoc.save(saveOptions);
-                        // Only use optimized version if it's actually smaller
-                        if (optimizedBytes.length < pdfBytes.length) {
-                            pdfBytes = optimizedBytes;
-                        }
-                    } catch (error) {
-                        console.warn('High compression optimization failed, using standard compression:', error);
-                    }
-                }
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || `Server error: ${response.status}`);
             }
+            
+            const result = await response.json();
             
             this.showProgress(90);
             
-            // Create the final output blob with valid PDF structure
-            this.outputBlob = new Blob([pdfBytes], { type: 'application/pdf' });
-            
-            // Store accurate compression stats
-            this.compressionStats = {
-                originalSize: this.currentFile.size,
-                compressedSize: this.outputBlob.size,
-                compressionRatio: ((this.currentFile.size - this.outputBlob.size) / this.currentFile.size * 100).toFixed(1)
-            };
+            if (result.success) {
+                // Create a blob for download from the server response
+                const downloadResponse = await fetch(result.download_url);
+                if (!downloadResponse.ok) {
+                    throw new Error('Failed to download compressed file');
+                }
+                
+                this.outputBlob = await downloadResponse.blob();
+                
+                // Store accurate compression stats from server
+                this.compressionStats = {
+                    originalSize: result.original_size,
+                    compressedSize: result.compressed_size,
+                    compressionRatio: result.compression_ratio
+                };
+                
+                console.log(`Compression completed: ${result.compression_ratio}% reduction`);
+            } else {
+                throw new Error(result.error || 'Server-side compression failed');
+            }
             
             this.showProgress(100);
             
         } catch (error) {
-            throw new Error('Failed to process PDF: ' + error.message);
+            console.error('PDF compression failed:', error);
+            throw new Error('Failed to compress PDF: ' + error.message);
         }
     }
 

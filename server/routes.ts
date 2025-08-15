@@ -883,6 +883,101 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.sendFile(path.join(clientPath, 'video-trim.html'));
   });
 
+  // Advanced PDF Compression endpoint (server-side with Ghostscript + qpdf + pikepdf)  
+  app.post('/api/pdf/compress', upload.single('file'), async (req, res) => {
+    const enableV2 = process.env.ENABLE_PDF_COMPRESS_V2 !== 'false'; // Default to true
+    
+    if (!enableV2) {
+      return res.status(404).json({ error: "PDF Compress V2 not enabled" });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
+
+    try {
+      const options = req.body.options || '{}';
+      const filePath = req.file.path;
+      
+      console.log('PDF compression request:', { filePath, options });
+      
+      // Call Python compression service
+      const pythonScript = path.join(process.cwd(), 'server', 'pdf_compress_service.py');
+      
+      const result = await new Promise<any>((resolve, reject) => {
+        const pythonProcess = spawn('python3', [pythonScript, filePath, options], {
+          timeout: 60000,
+          stdio: ['pipe', 'pipe', 'pipe']
+        });
+        
+        let output = '';
+        let error = '';
+        
+        pythonProcess.stdout.on('data', (data) => {
+          output += data.toString();
+        });
+        
+        pythonProcess.stderr.on('data', (data) => {
+          error += data.toString();
+        });
+        
+        pythonProcess.on('close', (code) => {
+          console.log(`PDF compression closed with code: ${code}`);
+          console.log('Output:', output);
+          if (error) console.log('Error:', error);
+          
+          if (code === 0) {
+            try {
+              const result = JSON.parse(output);
+              resolve(result);
+            } catch (e) {
+              reject(new Error(`Failed to parse result: ${output}`));
+            }
+          } else {
+            reject(new Error(`Compression failed (code ${code}): ${error}`));
+          }
+        });
+        
+        pythonProcess.on('error', (err) => {
+          reject(err);
+        });
+      });
+
+      // Cleanup input file
+      await cleanupFile(filePath);
+
+      if (result.success) {
+        // Write compressed file to output directory
+        const outputFilename = `compressed_${Date.now()}_${Math.random().toString(36).substring(7)}.pdf`;
+        const outputPath = path.join(outputDir, outputFilename);
+        
+        const compressedBuffer = Buffer.from(result.compressed_data, 'base64');
+        await writeFile(outputPath, compressedBuffer);
+        
+        res.json({
+          success: true,
+          original_size: result.original_size,
+          compressed_size: result.compressed_size,
+          compression_ratio: result.compression_ratio,
+          download_url: `/api/download/${outputFilename}`,
+          output_file: outputFilename
+        });
+      } else {
+        res.status(500).json({ error: result.error || "Compression failed" });
+      }
+
+    } catch (error) {
+      console.error('PDF compression error:', error);
+      if (req.file) {
+        await cleanupFile(req.file.path);
+      }
+      res.status(500).json({ 
+        error: "PDF compression failed", 
+        details: error instanceof Error ? error.message : "Unknown error" 
+      });
+    }
+  });
+
   app.get('/gif-maker', (req, res) => {
     res.sendFile(path.join(clientPath, 'gif-maker.html'));
   });
