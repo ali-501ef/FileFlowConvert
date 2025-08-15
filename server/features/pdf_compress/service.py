@@ -27,41 +27,55 @@ def _qpdf_lossless(in_pdf, out_pdf):
 def _gs_lossy(in_pdf, out_pdf, level_cfg, optimize_images=True):
     """Apply Ghostscript lossy compression"""
     
-    # Select image filters based on UseJPX setting
-    if level_cfg.get("UseJPX", False):
-        filters = ["-sColorImageFilter=/JPXEncode", "-sGrayImageFilter=/JPXEncode"]
-    else:
-        filters = ["-sColorImageFilter=/DCTEncode", "-sGrayImageFilter=/DCTEncode"]
+    import sys
+    def log(msg):
+        print(msg, file=sys.stderr, flush=True)
     
-    # Base Ghostscript command
+    # Simple, reliable Ghostscript command based on compression level
+    jpeg_quality = level_cfg['JPEGQuality']
+    
+    if jpeg_quality <= 50:  # Maximum compression
+        pdfsetting = "/screen"
+    elif jpeg_quality <= 70:  # High/Medium compression  
+        pdfsetting = "/ebook"
+    else:  # Low compression
+        pdfsetting = "/prepress"
+    
     cmd = [
-        "gs", "-sDEVICE=pdfwrite", "-dCompatibilityLevel=1.6", 
-        "-dNOPAUSE", "-dBATCH", "-dSAFER",
-        "-dDetectDuplicateImages=true",
-        "-dEncodeColorImages=true", "-dEncodeGrayImages=true", "-dEncodeMonoImages=true",
-        f"-dColorImageResolution={level_cfg['ColorImageResolution']}",
-        f"-dGrayImageResolution={level_cfg['GrayImageResolution']}",
-        f"-dMonoImageResolution={level_cfg['MonoImageResolution']}",
-        f"-dJPEGQ={level_cfg['JPEGQuality']}"
+        "gs", 
+        "-sDEVICE=pdfwrite", 
+        "-dCompatibilityLevel=1.4",
+        f"-dPDFSETTINGS={pdfsetting}",
+        "-dNOPAUSE", 
+        "-dBATCH", 
+        "-dSAFER"
     ]
     
-    # Add image optimization flags if enabled
-    if optimize_images:
+    # Add specific image optimization for aggressive compression
+    if optimize_images and jpeg_quality <= 50:
         cmd.extend([
+            "-dDownsampleColorImages=true",
+            "-dDownsampleGrayImages=true",
+            f"-dColorImageResolution={max(72, level_cfg['ColorImageResolution'])}",
+            f"-dGrayImageResolution={max(72, level_cfg['GrayImageResolution'])}",
             "-dColorImageDownsampleType=/Average",
-            "-dGrayImageDownsampleType=/Average", 
-            "-dMonoImageDownsampleType=/Subsample"
+            "-dGrayImageDownsampleType=/Average"
         ])
     
-    # Add image filters
-    cmd.extend(filters)
-    
     # Add output and input files
-    cmd.extend(["-sOutputFile=" + out_pdf, in_pdf])
+    cmd.extend([f"-sOutputFile={out_pdf}", in_pdf])
+    
+    # Log the command for debugging
+    log(f"Running Ghostscript: {' '.join(cmd)}")
     
     code, stdout, err = _run(cmd)
     if code != 0:
-        raise RuntimeError(f"ghostscript failed: {err}")
+        log(f"Ghostscript failed with code {code}")
+        log(f"Ghostscript stdout: {stdout}")
+        log(f"Ghostscript stderr: {err}")
+        raise RuntimeError(f"ghostscript failed with code {code}: {err}")
+    
+    log(f"Ghostscript completed successfully")
     return True
 
 def _strip_metadata(in_pdf, out_pdf):
@@ -112,10 +126,10 @@ GS_LEVELS = {
         "UseJPX": True
     },
     "maximum": {
-        "ColorImageResolution": 120,
-        "GrayImageResolution": 120,
-        "MonoImageResolution": 600,
-        "JPEGQuality": 45,
+        "ColorImageResolution": 72,
+        "GrayImageResolution": 72,
+        "MonoImageResolution": 300,
+        "JPEGQuality": 30,
         "UseJPX": True
     }
 }
