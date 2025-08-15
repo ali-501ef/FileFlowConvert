@@ -1,0 +1,75 @@
+Fix Image Tools Responsiveness (STRICT SCOPE)
+
+Scope:
+Apply the following changes only in the Image Tools section/page (the section that contains the three top cards like “HEIC to JPG”, “JPG to PNG”, etc.).
+Do not change global card styles, other pages (e.g., PDF Tools), shared layout, routing, or any backend logic.
+
+1) Use the same responsive grid as PDF Tools
+
+In the Image Tools page (e.g., pages/image-tools.(tsx|jsx|vue) or the component that renders those three cards), update the container/grid to this exact structure:
+
+If using Tailwind (preferred):
+<!-- Parent container for the three top Image Tool cards -->
+<div id="image-tools-grid"
+     class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-fr">
+  <!-- ...three ToolCard components... -->
+</div>
+
+If using CSS (no Tailwind):
+<div id="image-tools-grid" class="image-tools-grid">
+  <!-- ...three ToolCard components... -->
+</div>
+
+/* Place in the local stylesheet for the Image Tools page only */
+#image-tools-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  grid-auto-rows: 1fr; /* cards fill equal height */
+}
+@media (min-width: 640px) { /* sm */
+  #image-tools-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (min-width: 1024px) { /* lg */
+  #image-tools-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+2) Remove any fixed widths/min-widths on the top three Image Tool cards
+
+In the three top card components only (not global card styles), remove or override any of the following if present:
+
+style="width: 360px" or class="w-[360px]"
+
+min-w-*, max-w-*, flex: 0 0 ..., or .tool-card { width: 360px; }
+
+Ensure each card expands to the grid cell:
+
+Tailwind cards should have:
+<div class="h-full w-full">
+  <!-- card content -->
+</div>
+
+Pure CSS override (local to Image Tools only):
+/* Only for the three top Image Tool cards; DO NOT put this in a global card class */
+#image-tools-grid .tool-card {
+  width: 100% !important;
+  min-width: 0 !important;
+  flex: 1 1 auto !important;
+  height: 100%;
+}
+
+3) Match PDF Tools card behavior
+
+If PDF Tools uses a shared ToolCard component with responsive props, reuse the same props for the Image Tools cards.
+
+Do not modify the shared component globally; pass classes/props from the Image Tools page only.
+
+4) Regression checks (must pass)
+
+On a narrow screen (~375–414px), the three Image Tools cards stack 1 per row and fill width.
+
+At >=640px, they show 2 per row; at >=1024px, 3 per row.
+
+The “More Image Tools” block must remain unchanged.
+
+No visual/functional change on PDF Tools or any other page.
