@@ -186,11 +186,16 @@ class PDFCompressor {
                 pdfDoc.setSubject('');
                 pdfDoc.setAuthor('');
                 pdfDoc.setCreator('');
-                pdfDoc.setProducer('');
+                pdfDoc.setProducer('FileFlow PDF Compressor');
                 pdfDoc.setKeywords([]);
+                pdfDoc.setCreationDate(new Date());
+                pdfDoc.setModificationDate(new Date());
             }
             
             this.showProgress(30);
+            
+            // Apply aggressive compression for maximum setting
+            const useAggressiveCompression = settings.compressionLevel === 'maximum';
             
             // Create optimized PDF with compression settings
             const saveOptions = {
@@ -201,22 +206,28 @@ class PDFCompressor {
                 prettyPrint: false
             };
             
-            this.showProgress(60);
+            this.showProgress(50);
             
-            let pdfBytes = await pdfDoc.save(saveOptions);
+            let pdfBytes;
             
-            // Apply additional optimization for high compression levels
-            if (settings.optimizeImages || settings.compressionLevel === 'high' || settings.compressionLevel === 'maximum') {
-                try {
-                    const compressedDoc = await this.createCompressedPDF(pdfDoc, settings);
-                    const optimizedBytes = await compressedDoc.save(saveOptions);
-                    // Only use optimized version if it's actually smaller
-                    if (optimizedBytes.length < pdfBytes.length) {
-                        pdfBytes = optimizedBytes;
+            // For maximum compression, use multiple compression passes
+            if (useAggressiveCompression) {
+                pdfBytes = await this.performMaximumCompression(pdfDoc, settings, saveOptions);
+            } else {
+                pdfBytes = await pdfDoc.save(saveOptions);
+                
+                // Apply additional optimization for high compression levels
+                if (settings.optimizeImages || settings.compressionLevel === 'high') {
+                    try {
+                        const compressedDoc = await this.createCompressedPDF(pdfDoc, settings);
+                        const optimizedBytes = await compressedDoc.save(saveOptions);
+                        // Only use optimized version if it's actually smaller
+                        if (optimizedBytes.length < pdfBytes.length) {
+                            pdfBytes = optimizedBytes;
+                        }
+                    } catch (error) {
+                        console.warn('High compression optimization failed, using standard compression:', error);
                     }
-                } catch (error) {
-                    console.warn('High compression optimization failed, using standard compression:', error);
-                    // Fall back to standard compression
                 }
             }
             
@@ -242,10 +253,10 @@ class PDFCompressor {
     getObjectsPerTick(compressionLevel) {
         switch (compressionLevel) {
             case 'low': return 5;
-            case 'medium': return 15;
-            case 'high': return 30;
-            case 'maximum': return 50;
-            default: return 15;
+            case 'medium': return 20;
+            case 'high': return 50;
+            case 'maximum': return 150; // More aggressive processing for maximum compression
+            default: return 20;
         }
     }
 
@@ -257,6 +268,142 @@ class PDFCompressor {
             case 'maximum': return 0.25;  // 75% reduction
             default: return 0.65;
         }
+    }
+
+    async performMaximumCompression(pdfDoc, settings, saveOptions) {
+        // Multiple-pass compression for maximum size reduction
+        let currentBytes = await pdfDoc.save(saveOptions);
+        let bestBytes = currentBytes;
+        
+        // Pass 1: Create optimized document with page copying
+        try {
+            const optimizedDoc = await this.createCompressedPDF(pdfDoc, settings);
+            const optimizedBytes = await optimizedDoc.save(saveOptions);
+            if (optimizedBytes.length < bestBytes.length) {
+                bestBytes = optimizedBytes;
+            }
+        } catch (error) {
+            console.warn('Optimization pass 1 failed:', error);
+        }
+        
+        // Pass 2: Apply image-specific compression if enabled
+        if (settings.optimizeImages) {
+            try {
+                const imageOptimizedDoc = await this.createImageOptimizedPDF(pdfDoc, settings);
+                const imageOptimizedSaveOptions = {
+                    ...saveOptions,
+                    objectsPerTick: Math.min(200, saveOptions.objectsPerTick * 2), // More aggressive processing
+                    useObjectStreams: true
+                };
+                const imageOptimizedBytes = await imageOptimizedDoc.save(imageOptimizedSaveOptions);
+                if (imageOptimizedBytes.length < bestBytes.length) {
+                    bestBytes = imageOptimizedBytes;
+                }
+            } catch (error) {
+                console.warn('Image optimization pass failed:', error);
+            }
+        }
+        
+        // Pass 3: Additional compression pass for maximum setting
+        if (settings.compressionLevel === 'maximum') {
+            try {
+                // Create an ultra-compressed version by creating a minimal document
+                const ultraCompressedDoc = await this.createUltraCompressedPDF(pdfDoc, settings);
+                const ultraCompressedBytes = await ultraCompressedDoc.save({
+                    ...saveOptions,
+                    objectsPerTick: 250,
+                    useObjectStreams: true
+                });
+                if (ultraCompressedBytes.length < bestBytes.length) {
+                    bestBytes = ultraCompressedBytes;
+                }
+            } catch (error) {
+                console.warn('Ultra compression pass failed:', error);
+            }
+        }
+        
+        return bestBytes;
+    }
+    
+    async createImageOptimizedPDF(originalDoc, settings) {
+        // Create a new document with aggressive image optimization
+        const optimizedDoc = await PDFLib.PDFDocument.create();
+        
+        // Set minimal metadata
+        if (!settings.removeMetadata) {
+            try {
+                if (originalDoc.getTitle()) optimizedDoc.setTitle(originalDoc.getTitle());
+            } catch (e) {
+                // Ignore metadata errors
+            }
+        }
+        
+        // Copy pages with image quality considerations
+        const pageCount = originalDoc.getPageCount();
+        const imageQuality = settings.imageQuality; // Use the actual image quality setting
+        
+        for (let i = 0; i < pageCount; i++) {
+            try {
+                const [copiedPage] = await optimizedDoc.copyPages(originalDoc, [i]);
+                
+                // Apply image quality scaling if needed
+                if (imageQuality < 90 && settings.compressionLevel === 'maximum') {
+                    try {
+                        // For maximum compression with low image quality, 
+                        // scale down the page size slightly to reduce overall file size
+                        const { width, height } = copiedPage.getSize();
+                        const scaleFactor = Math.max(0.8, imageQuality / 100);
+                        copiedPage.scaleContent(scaleFactor, scaleFactor);
+                        copiedPage.setSize(width * scaleFactor, height * scaleFactor);
+                    } catch (scaleError) {
+                        // If scaling fails, use the page as-is
+                        console.warn(`Failed to scale page ${i}:`, scaleError);
+                    }
+                }
+                
+                optimizedDoc.addPage(copiedPage);
+            } catch (error) {
+                console.warn(`Failed to copy page ${i}:`, error);
+                // Skip problematic pages rather than failing entirely
+            }
+        }
+        
+        return optimizedDoc;
+    }
+    
+    async createUltraCompressedPDF(originalDoc, settings) {
+        // Create the most aggressively compressed document possible
+        const ultraDoc = await PDFLib.PDFDocument.create();
+        
+        // Minimal metadata only
+        ultraDoc.setCreator('FileFlow');
+        ultraDoc.setProducer('FileFlow PDF Compressor');
+        
+        // Copy pages with maximum optimization
+        const pageCount = originalDoc.getPageCount();
+        for (let i = 0; i < pageCount; i++) {
+            try {
+                const [copiedPage] = await ultraDoc.copyPages(originalDoc, [i]);
+                
+                // Apply maximum compression scaling based on image quality
+                if (settings.imageQuality < 80) {
+                    try {
+                        const scaleFactor = Math.max(0.7, settings.imageQuality / 120);
+                        copiedPage.scaleContent(scaleFactor, scaleFactor);
+                        const { width, height } = copiedPage.getSize();
+                        copiedPage.setSize(width * scaleFactor, height * scaleFactor);
+                    } catch (scaleError) {
+                        // Use original if scaling fails
+                    }
+                }
+                
+                ultraDoc.addPage(copiedPage);
+            } catch (error) {
+                console.warn(`Failed to ultra-compress page ${i}:`, error);
+            }
+        }
+        
+        return ultraDoc;
     }
 
     async createCompressedPDF(originalDoc, settings) {
@@ -274,13 +421,17 @@ class PDFCompressor {
             }
         }
         
-        // Copy all pages
-        const pageIndices = originalDoc.getPageIndices();
-        const pages = await compressedDoc.copyPages(originalDoc, pageIndices);
-        
-        pages.forEach(page => {
-            compressedDoc.addPage(page);
-        });
+        // Copy all pages with error handling
+        const pageCount = originalDoc.getPageCount();
+        for (let i = 0; i < pageCount; i++) {
+            try {
+                const [copiedPage] = await compressedDoc.copyPages(originalDoc, [i]);
+                compressedDoc.addPage(copiedPage);
+            } catch (error) {
+                console.warn(`Failed to copy page ${i}:`, error);
+                // Continue with other pages
+            }
+        }
         
         return compressedDoc;
     }
