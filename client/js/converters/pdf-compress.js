@@ -1,475 +1,518 @@
-/**
- * PDF Compression Tool - Built from scratch
- * Provides maximum compression with Advanced Options support
- */
 class PDFCompressor {
     constructor() {
-        this.currentFile = null;
-        this.outputBlob = null;
-        this.compressionStats = null;
-        this.isProcessing = false;
-        
-        this.initializeElements();
-        this.bindEvents();
+        this.init();
+        this.setupEventListeners();
     }
 
-    initializeElements() {
-        // Core elements
-        this.fileUploader = document.getElementById('fileUploader');
+    init() {
+        this.uploadArea = document.getElementById('uploadArea');
         this.fileInput = document.getElementById('fileInput');
-        this.uploadArea = this.fileUploader.querySelector('.upload-area');
         this.filePreview = document.getElementById('filePreview');
-        this.fileName = document.getElementById('fileName');
-        this.fileSize = document.getElementById('fileSize');
-        
-        // Advanced Options
-        this.advancedOptions = document.getElementById('advancedOptions');
-        this.advancedToggle = document.getElementById('advancedToggle');
-        this.advancedContent = document.getElementById('advancedContent');
-        this.compressionLevel = document.getElementById('compressionLevel');
-        this.imageQuality = document.getElementById('imageQuality');
-        this.removeMetadata = document.getElementById('removeMetadata');
-        this.optimizeImages = document.getElementById('optimizeImages');
-        
-        // Controls
         this.convertBtn = document.getElementById('convertBtn');
-        this.btnText = this.convertBtn.querySelector('.btn-text');
-        this.btnLoader = this.convertBtn.querySelector('.btn-loader');
-        
-        // Progress and Results
+        this.results = document.getElementById('results');
         this.progressContainer = document.getElementById('progressContainer');
         this.progressFill = document.getElementById('progressFill');
         this.progressText = document.getElementById('progressText');
-        this.results = document.getElementById('results');
-        this.compressionStatsEl = document.getElementById('compressionStats');
-        this.downloadBtn = document.getElementById('downloadBtn');
+        
+        this.currentFile = null;
+        this.outputBlob = null;
+        this.isFilePickerOpen = false;
     }
 
-    bindEvents() {
-        // File upload events
-        this.uploadArea.addEventListener('click', () => this.fileInput.click());
-        this.fileInput.addEventListener('change', (e) => this.handleFileSelect(e));
-        
-        // Drag and drop
-        this.uploadArea.addEventListener('dragover', (e) => this.handleDragOver(e));
-        this.uploadArea.addEventListener('dragleave', (e) => this.handleDragLeave(e));
-        this.uploadArea.addEventListener('drop', (e) => this.handleFileDrop(e));
-        
-        // Advanced options toggle
-        this.advancedToggle.addEventListener('click', () => this.toggleAdvancedOptions());
+    setupEventListeners() {
+        // File upload handlers - with click guard to prevent double opening
+        this.uploadArea.addEventListener('click', this.handleUploadAreaClick.bind(this));
+        this.uploadArea.addEventListener('dragover', this.handleDragOver.bind(this));
+        this.uploadArea.addEventListener('drop', this.handleDrop.bind(this));
+        this.fileInput.addEventListener('change', this.handleFileSelect.bind(this));
         
         // Convert button
-        this.convertBtn.addEventListener('click', () => this.handleCompression());
+        this.convertBtn.addEventListener('click', this.compressPDF.bind(this));
         
         // Download button
-        this.downloadBtn.addEventListener('click', () => this.downloadCompressedPDF());
-        
-        // Advanced options positioning
-        this.setupAdvancedOptionsPositioning();
+        document.getElementById('downloadBtn').addEventListener('click', this.downloadPDF.bind(this));
     }
 
-    setupAdvancedOptionsPositioning() {
-        // Position advanced options above convert button
-        const observer = new MutationObserver(() => {
-            this.positionAdvancedOptions();
-        });
-        
-        observer.observe(this.filePreview, { 
-            attributes: true, 
-            attributeFilter: ['style'] 
-        });
-        
-        // Initial positioning
-        setTimeout(() => this.positionAdvancedOptions(), 100);
-    }
-
-    positionAdvancedOptions() {
-        if (this.filePreview.style.display !== 'none') {
-            const convertSection = document.querySelector('.convert-section');
-            if (convertSection && this.advancedOptions) {
-                convertSection.parentNode.insertBefore(this.advancedOptions, convertSection);
-            }
+    handleUploadAreaClick(e) {
+        // Click guard to prevent double file picker opening
+        if (this.isFilePickerOpen) {
+            return;
         }
+        this.isFilePickerOpen = true;
+        this.fileInput.click();
+        
+        // Reset flag after a delay to handle cancel cases
+        setTimeout(() => {
+            this.isFilePickerOpen = false;
+        }, 100);
     }
 
-    handleFileSelect(event) {
-        const file = event.target.files[0];
-        if (file) {
-            this.processFileSelection(file);
-        }
-    }
-
-    handleDragOver(event) {
-        event.preventDefault();
+    handleDragOver(e) {
+        e.preventDefault();
         this.uploadArea.classList.add('drag-over');
     }
 
-    handleDragLeave(event) {
-        event.preventDefault();
+    handleDrop(e) {
+        e.preventDefault();
         this.uploadArea.classList.remove('drag-over');
-    }
-
-    handleFileDrop(event) {
-        event.preventDefault();
-        this.uploadArea.classList.remove('drag-over');
-        
-        const files = Array.from(event.dataTransfer.files);
-        const pdfFile = files.find(file => file.type === 'application/pdf');
-        
-        if (pdfFile) {
-            this.processFileSelection(pdfFile);
-        } else {
-            alert('Please select a PDF file.');
+        const files = e.dataTransfer.files;
+        if (files.length > 0 && files[0].type === 'application/pdf') {
+            this.handleFile(files[0]);
         }
     }
 
-    processFileSelection(file) {
-        if (file.type !== 'application/pdf') {
-            alert('Please select a valid PDF file.');
-            return;
+    handleFileSelect(e) {
+        const file = e.target.files[0];
+        if (file && file.type === 'application/pdf') {
+            this.handleFile(file);
         }
+    }
 
-        if (file.size > 50 * 1024 * 1024) { // 50MB limit
-            alert('File size must be less than 50MB.');
-            return;
-        }
-
+    async handleFile(file) {
         this.currentFile = file;
-        this.displayFilePreview(file);
-        this.enableConvertButton();
-        this.hideResults();
-    }
-
-    displayFilePreview(file) {
-        this.fileName.textContent = file.name;
-        this.fileSize.textContent = this.formatFileSize(file.size);
-        this.filePreview.style.display = 'block';
-        this.positionAdvancedOptions();
-    }
-
-    enableConvertButton() {
-        this.convertBtn.disabled = false;
-        this.convertBtn.classList.add('enabled');
-    }
-
-    hideResults() {
-        this.results.style.display = 'none';
-        this.progressContainer.style.display = 'none';
-    }
-
-    toggleAdvancedOptions() {
-        const isExpanded = this.advancedContent.style.display !== 'none';
-        this.advancedContent.style.display = isExpanded ? 'none' : 'block';
-        
-        // Rotate arrow icon
-        const arrow = this.advancedToggle.querySelector('svg');
-        arrow.style.transform = isExpanded ? 'rotate(0deg)' : 'rotate(180deg)';
-    }
-
-    async handleCompression() {
-        if (!this.currentFile || this.isProcessing) return;
-
-        this.isProcessing = true;
-        this.setLoadingState(true);
-        this.hideResults();
+        this.showFilePreview(file);
         
         try {
-            const settings = this.getCompressionSettings();
-            await this.performCompression(settings);
-            this.showCompressionResults();
+            const arrayBuffer = await file.arrayBuffer();
+            const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
+            const pageCount = pdfDoc.getPageCount();
+            
+            const pdfInfoElement = document.getElementById('pdfInfo');
+            pdfInfoElement.replaceChildren(); // Clear existing content
+            
+            const detailsDiv = document.createElement('div');
+            detailsDiv.className = 'pdf-details';
+            
+            const pagesSpan = document.createElement('span');
+            pagesSpan.className = 'detail-item';
+            pagesSpan.textContent = `📄 ${pageCount} pages`;
+            
+            const sizeSpan = document.createElement('span');
+            sizeSpan.className = 'detail-item';
+            sizeSpan.textContent = `📊 ${this.formatFileSize(file.size)}`;
+            
+            detailsDiv.appendChild(pagesSpan);
+            detailsDiv.appendChild(sizeSpan);
+            pdfInfoElement.appendChild(detailsDiv);
+            
+            this.convertBtn.disabled = false;
         } catch (error) {
-            console.error('Compression failed:', error);
-            alert('Compression failed: ' + error.message);
-        } finally {
-            this.isProcessing = false;
-            this.setLoadingState(false);
+            this.showError('Failed to load PDF file');
         }
+    }
+
+    showFilePreview(file) {
+        document.getElementById('fileName').textContent = file.name;
+        document.getElementById('fileSize').textContent = this.formatFileSize(file.size);
+        this.filePreview.style.display = 'block';
+        // Keep upload area visible but disable interactions during processing
+        this.fileInput.disabled = false;
+        this.uploadArea.classList.remove('busy');
+    }
+
+    async compressPDF() {
+        if (!this.currentFile) return;
+
+        this.showLoading(true);
+        // Disable upload area during processing
+        this.fileInput.disabled = true;
+        this.uploadArea.classList.add('busy');
+        this.showProgress(0);
+        this.results.style.display = 'none';
+
+        try {
+            // Get compression settings
+            const settings = this.getCompressionSettings();
+            
+            // Load and compress the PDF
+            await this.performCompression(settings);
+            
+            this.showCompressionResults();
+            this.trackConversion();
+            
+        } catch (error) {
+            this.showError('Failed to compress PDF: ' + error.message);
+        }
+
+        this.hideProgress();
+        this.showLoading(false);
+        // Re-enable upload area after processing
+        this.fileInput.disabled = false;
+        this.uploadArea.classList.remove('busy');
     }
 
     getCompressionSettings() {
+        const compressionLevel = document.getElementById('compressionLevel').value;
+        const imageQuality = parseInt(document.getElementById('imageQuality').value);
+        const removeMetadata = document.getElementById('removeMetadata').checked;
+        const optimizeImages = document.getElementById('optimizeImages').checked;
+        
+        let compressionRatio;
+        switch (compressionLevel) {
+            case 'low':
+                compressionRatio = 0.9;
+                break;
+            case 'medium':
+                compressionRatio = 0.7;
+                break;
+            case 'high':
+                compressionRatio = 0.5;
+                break;
+            case 'maximum':
+                compressionRatio = 0.3;
+                break;
+        }
+        
         return {
-            compressionLevel: this.compressionLevel.value,
-            imageQuality: parseInt(this.imageQuality.value),
-            removeMetadata: this.removeMetadata.checked,
-            optimizeImages: this.optimizeImages.checked
+            compressionLevel,
+            compressionRatio,
+            imageQuality,
+            removeMetadata,
+            optimizeImages
         };
     }
 
     async performCompression(settings) {
-        this.updateProgress(10, 'Loading PDF...');
-        
-        const arrayBuffer = await this.currentFile.arrayBuffer();
-        const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
-        
-        this.updateProgress(25, 'Analyzing document...');
-
-        // Apply compression based on settings
-        let compressedDoc;
-        
-        if (settings.compressionLevel === 'maximum') {
-            compressedDoc = await this.performMaximumCompression(pdfDoc, settings);
-        } else {
-            compressedDoc = await this.performStandardCompression(pdfDoc, settings);
-        }
-
-        this.updateProgress(90, 'Finalizing...');
-
-        // Generate final PDF bytes
-        const pdfBytes = await this.generateOptimizedPDF(compressedDoc, settings);
-        
-        this.outputBlob = new Blob([pdfBytes], { type: 'application/pdf' });
-        
-        // Calculate compression stats
-        this.compressionStats = {
-            originalSize: this.currentFile.size,
-            compressedSize: this.outputBlob.size,
-            compressionRatio: ((this.currentFile.size - this.outputBlob.size) / this.currentFile.size * 100).toFixed(1)
-        };
-
-        this.updateProgress(100, 'Complete!');
-    }
-
-    async performMaximumCompression(pdfDoc, settings) {
-        this.updateProgress(30, 'Applying maximum compression...');
-        
-        // Create a new document for maximum compression
-        const compressedDoc = await PDFLib.PDFDocument.create();
-        
-        // Remove all metadata for maximum compression
-        if (settings.removeMetadata) {
-            compressedDoc.setTitle('');
-            compressedDoc.setAuthor('');
-            compressedDoc.setSubject('');
-            compressedDoc.setKeywords([]);
-            compressedDoc.setProducer('FileFlow Compressor');
-            compressedDoc.setCreator('FileFlow');
-        }
-
-        this.updateProgress(45, 'Processing pages...');
-        
-        const pageCount = pdfDoc.getPageCount();
-        
-        // Process pages with aggressive optimization
-        for (let i = 0; i < pageCount; i++) {
-            try {
-                const [copiedPage] = await compressedDoc.copyPages(pdfDoc, [i]);
-                
-                // Apply image quality compression through page scaling
-                if (settings.optimizeImages && settings.imageQuality < 90) {
-                    const scaleFactor = this.calculateScaleFactor(settings.imageQuality);
-                    this.applyPageOptimization(copiedPage, scaleFactor);
-                }
-                
-                compressedDoc.addPage(copiedPage);
-                
-                // Update progress per page
-                const pageProgress = 45 + (i / pageCount) * 30;
-                this.updateProgress(pageProgress, `Processing page ${i + 1}/${pageCount}...`);
-            } catch (error) {
-                console.warn(`Failed to process page ${i + 1}:`, error);
-                // Continue with other pages
-            }
-        }
-
-        return compressedDoc;
-    }
-
-    async performStandardCompression(pdfDoc, settings) {
-        this.updateProgress(40, 'Applying standard compression...');
-        
-        // Apply metadata removal if requested
-        if (settings.removeMetadata) {
-            pdfDoc.setTitle('');
-            pdfDoc.setAuthor('');
-            pdfDoc.setSubject('');
-            pdfDoc.setKeywords([]);
-            pdfDoc.setProducer('FileFlow Compressor');
-            pdfDoc.setCreator('FileFlow');
-        }
-
-        this.updateProgress(70, 'Optimizing document...');
-
-        // For standard compression, we can work with the original document
-        // and apply optimizations during the save process
-        return pdfDoc;
-    }
-
-    calculateScaleFactor(imageQuality) {
-        // Calculate scale factor based on image quality
-        // Higher quality = less scaling, lower quality = more scaling
-        if (imageQuality >= 90) return 1.0;
-        if (imageQuality >= 75) return 0.95;
-        if (imageQuality >= 60) return 0.85;
-        if (imageQuality >= 45) return 0.75;
-        return 0.65; // Very low quality
-    }
-
-    applyPageOptimization(page, scaleFactor) {
         try {
-            if (scaleFactor < 1.0) {
-                const { width, height } = page.getSize();
-                const newWidth = width * scaleFactor;
-                const newHeight = height * scaleFactor;
-                
-                // Scale content and resize page
-                page.scaleContent(scaleFactor, scaleFactor);
-                page.setSize(newWidth, newHeight);
+            const arrayBuffer = await this.currentFile.arrayBuffer();
+            const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
+            
+            // Progress tracking
+            this.showProgress(10);
+            
+            // Remove metadata if requested
+            if (settings.removeMetadata) {
+                pdfDoc.setTitle('');
+                pdfDoc.setSubject('');
+                pdfDoc.setAuthor('');
+                pdfDoc.setCreator('');
+                pdfDoc.setProducer('FileFlow PDF Compressor');
+                pdfDoc.setKeywords([]);
+                pdfDoc.setCreationDate(new Date());
+                pdfDoc.setModificationDate(new Date());
             }
+            
+            this.showProgress(30);
+            
+            // Apply aggressive compression for maximum setting
+            const useAggressiveCompression = settings.compressionLevel === 'maximum';
+            
+            // Create optimized PDF with compression settings
+            const saveOptions = {
+                useObjectStreams: settings.compressionLevel !== 'low',
+                addDefaultPage: false,
+                objectsPerTick: this.getObjectsPerTick(settings.compressionLevel),
+                updateFieldAppearances: false,
+                prettyPrint: false
+            };
+            
+            this.showProgress(50);
+            
+            let pdfBytes;
+            
+            // For maximum compression, use multiple compression passes
+            if (useAggressiveCompression) {
+                pdfBytes = await this.performMaximumCompression(pdfDoc, settings, saveOptions);
+            } else {
+                pdfBytes = await pdfDoc.save(saveOptions);
+                
+                // Apply additional optimization for high compression levels
+                if (settings.optimizeImages || settings.compressionLevel === 'high') {
+                    try {
+                        const compressedDoc = await this.createCompressedPDF(pdfDoc, settings);
+                        const optimizedBytes = await compressedDoc.save(saveOptions);
+                        // Only use optimized version if it's actually smaller
+                        if (optimizedBytes.length < pdfBytes.length) {
+                            pdfBytes = optimizedBytes;
+                        }
+                    } catch (error) {
+                        console.warn('High compression optimization failed, using standard compression:', error);
+                    }
+                }
+            }
+            
+            this.showProgress(90);
+            
+            // Create the final output blob with valid PDF structure
+            this.outputBlob = new Blob([pdfBytes], { type: 'application/pdf' });
+            
+            // Store accurate compression stats
+            this.compressionStats = {
+                originalSize: this.currentFile.size,
+                compressedSize: this.outputBlob.size,
+                compressionRatio: ((this.currentFile.size - this.outputBlob.size) / this.currentFile.size * 100).toFixed(1)
+            };
+            
+            this.showProgress(100);
+            
         } catch (error) {
-            console.warn('Failed to apply page optimization:', error);
+            throw new Error('Failed to process PDF: ' + error.message);
         }
-    }
-
-    async generateOptimizedPDF(pdfDoc, settings) {
-        // Create optimized save options based on compression level
-        const saveOptions = this.createSaveOptions(settings);
-        
-        // Generate PDF bytes with multiple passes for maximum compression
-        if (settings.compressionLevel === 'maximum') {
-            return await this.multiPassCompression(pdfDoc, saveOptions, settings);
-        } else {
-            return await pdfDoc.save(saveOptions);
-        }
-    }
-
-    createSaveOptions(settings) {
-        const compressionLevel = settings.compressionLevel;
-        
-        return {
-            useObjectStreams: compressionLevel !== 'low',
-            addDefaultPage: false,
-            objectsPerTick: this.getObjectsPerTick(compressionLevel),
-            prettyPrint: false,
-            updateFieldAppearances: false
-        };
     }
 
     getObjectsPerTick(compressionLevel) {
         switch (compressionLevel) {
-            case 'low': return 10;
-            case 'medium': return 25;
-            case 'high': return 75;
-            case 'maximum': return 200; // Maximum processing for smallest size
-            default: return 25;
+            case 'low': return 5;
+            case 'medium': return 20;
+            case 'high': return 50;
+            case 'maximum': return 150; // More aggressive processing for maximum compression
+            default: return 20;
         }
     }
 
-    async multiPassCompression(pdfDoc, saveOptions, settings) {
-        // First pass - standard compression
-        let bestBytes = await pdfDoc.save(saveOptions);
+    getTargetCompressionRatio(compressionLevel) {
+        switch (compressionLevel) {
+            case 'low': return 0.85;      // 15% reduction
+            case 'medium': return 0.65;   // 35% reduction  
+            case 'high': return 0.45;     // 55% reduction
+            case 'maximum': return 0.25;  // 75% reduction
+            default: return 0.65;
+        }
+    }
+
+    async performMaximumCompression(pdfDoc, settings, saveOptions) {
+        // Multiple-pass compression for maximum size reduction
+        let currentBytes = await pdfDoc.save(saveOptions);
+        let bestBytes = currentBytes;
         
-        // Second pass - ultra compression settings
+        // Pass 1: Create optimized document with page copying
         try {
-            const ultraOptions = {
-                ...saveOptions,
-                objectsPerTick: 300,
-                useObjectStreams: true
-            };
-            
-            const ultraBytes = await pdfDoc.save(ultraOptions);
-            if (ultraBytes.length < bestBytes.length) {
-                bestBytes = ultraBytes;
+            const optimizedDoc = await this.createCompressedPDF(pdfDoc, settings);
+            const optimizedBytes = await optimizedDoc.save(saveOptions);
+            if (optimizedBytes.length < bestBytes.length) {
+                bestBytes = optimizedBytes;
             }
         } catch (error) {
-            console.warn('Ultra compression pass failed:', error);
+            console.warn('Optimization pass 1 failed:', error);
         }
         
-        // Third pass - create minimal document if image optimization is enabled
-        if (settings.optimizeImages && settings.imageQuality < 60) {
+        // Pass 2: Apply image-specific compression if enabled
+        if (settings.optimizeImages) {
             try {
-                const minimalDoc = await this.createMinimalDocument(pdfDoc, settings);
-                const minimalBytes = await minimalDoc.save(saveOptions);
-                if (minimalBytes.length < bestBytes.length) {
-                    bestBytes = minimalBytes;
+                const imageOptimizedDoc = await this.createImageOptimizedPDF(pdfDoc, settings);
+                const imageOptimizedSaveOptions = {
+                    ...saveOptions,
+                    objectsPerTick: Math.min(200, saveOptions.objectsPerTick * 2), // More aggressive processing
+                    useObjectStreams: true
+                };
+                const imageOptimizedBytes = await imageOptimizedDoc.save(imageOptimizedSaveOptions);
+                if (imageOptimizedBytes.length < bestBytes.length) {
+                    bestBytes = imageOptimizedBytes;
                 }
             } catch (error) {
-                console.warn('Minimal document creation failed:', error);
+                console.warn('Image optimization pass failed:', error);
+            }
+        }
+        
+        // Pass 3: Additional compression pass for maximum setting
+        if (settings.compressionLevel === 'maximum') {
+            try {
+                // Create an ultra-compressed version by creating a minimal document
+                const ultraCompressedDoc = await this.createUltraCompressedPDF(pdfDoc, settings);
+                const ultraCompressedBytes = await ultraCompressedDoc.save({
+                    ...saveOptions,
+                    objectsPerTick: 250,
+                    useObjectStreams: true
+                });
+                if (ultraCompressedBytes.length < bestBytes.length) {
+                    bestBytes = ultraCompressedBytes;
+                }
+            } catch (error) {
+                console.warn('Ultra compression pass failed:', error);
             }
         }
         
         return bestBytes;
     }
-
-    async createMinimalDocument(pdfDoc, settings) {
-        const minimalDoc = await PDFLib.PDFDocument.create();
+    
+    async createImageOptimizedPDF(originalDoc, settings) {
+        // Create a new document with aggressive image optimization
+        const optimizedDoc = await PDFLib.PDFDocument.create();
         
-        // Absolute minimal metadata
-        minimalDoc.setProducer('FileFlow');
-        
-        const pageCount = pdfDoc.getPageCount();
-        const ultraScaleFactor = this.calculateScaleFactor(settings.imageQuality * 0.8); // Even more aggressive
-        
-        for (let i = 0; i < pageCount; i++) {
+        // Set minimal metadata
+        if (!settings.removeMetadata) {
             try {
-                const [copiedPage] = await minimalDoc.copyPages(pdfDoc, [i]);
-                this.applyPageOptimization(copiedPage, ultraScaleFactor);
-                minimalDoc.addPage(copiedPage);
-            } catch (error) {
-                console.warn(`Failed to copy page ${i} to minimal document:`, error);
+                if (originalDoc.getTitle()) optimizedDoc.setTitle(originalDoc.getTitle());
+            } catch (e) {
+                // Ignore metadata errors
             }
         }
         
-        return minimalDoc;
-    }
-
-    setLoadingState(loading) {
-        this.convertBtn.disabled = loading;
-        this.btnText.style.display = loading ? 'none' : 'inline';
-        this.btnLoader.style.display = loading ? 'inline-block' : 'none';
+        // Copy pages with image quality considerations
+        const pageCount = originalDoc.getPageCount();
+        const imageQuality = settings.imageQuality; // Use the actual image quality setting
         
-        if (loading) {
-            this.progressContainer.style.display = 'block';
+        for (let i = 0; i < pageCount; i++) {
+            try {
+                const [copiedPage] = await optimizedDoc.copyPages(originalDoc, [i]);
+                
+                // Apply image quality scaling if needed
+                if (imageQuality < 90 && settings.compressionLevel === 'maximum') {
+                    try {
+                        // For maximum compression with low image quality, 
+                        // scale down the page size slightly to reduce overall file size
+                        const { width, height } = copiedPage.getSize();
+                        const scaleFactor = Math.max(0.8, imageQuality / 100);
+                        copiedPage.scaleContent(scaleFactor, scaleFactor);
+                        copiedPage.setSize(width * scaleFactor, height * scaleFactor);
+                    } catch (scaleError) {
+                        // If scaling fails, use the page as-is
+                        console.warn(`Failed to scale page ${i}:`, scaleError);
+                    }
+                }
+                
+                optimizedDoc.addPage(copiedPage);
+            } catch (error) {
+                console.warn(`Failed to copy page ${i}:`, error);
+                // Skip problematic pages rather than failing entirely
+            }
         }
+        
+        return optimizedDoc;
+    }
+    
+    async createUltraCompressedPDF(originalDoc, settings) {
+        // Create the most aggressively compressed document possible
+        const ultraDoc = await PDFLib.PDFDocument.create();
+        
+        // Minimal metadata only
+        ultraDoc.setCreator('FileFlow');
+        ultraDoc.setProducer('FileFlow PDF Compressor');
+        
+        // Copy pages with maximum optimization
+        const pageCount = originalDoc.getPageCount();
+        for (let i = 0; i < pageCount; i++) {
+            try {
+                const [copiedPage] = await ultraDoc.copyPages(originalDoc, [i]);
+                
+                // Apply maximum compression scaling based on image quality
+                if (settings.imageQuality < 80) {
+                    try {
+                        const scaleFactor = Math.max(0.7, settings.imageQuality / 120);
+                        copiedPage.scaleContent(scaleFactor, scaleFactor);
+                        const { width, height } = copiedPage.getSize();
+                        copiedPage.setSize(width * scaleFactor, height * scaleFactor);
+                    } catch (scaleError) {
+                        // Use original if scaling fails
+                    }
+                }
+                
+                ultraDoc.addPage(copiedPage);
+            } catch (error) {
+                console.warn(`Failed to ultra-compress page ${i}:`, error);
+            }
+        }
+        
+        return ultraDoc;
     }
 
-    updateProgress(percentage, message) {
-        this.progressFill.style.width = percentage + '%';
-        this.progressText.textContent = message || percentage + '%';
+    async createCompressedPDF(originalDoc, settings) {
+        // For high compression, create a new document and copy pages with optimization
+        const compressedDoc = await PDFLib.PDFDocument.create();
+        
+        // Copy basic document information but clear metadata if requested
+        if (!settings.removeMetadata) {
+            try {
+                if (originalDoc.getTitle()) compressedDoc.setTitle(originalDoc.getTitle());
+                if (originalDoc.getSubject()) compressedDoc.setSubject(originalDoc.getSubject());
+                if (originalDoc.getCreator()) compressedDoc.setCreator(originalDoc.getCreator());
+            } catch (e) {
+                // Ignore metadata errors
+            }
+        }
+        
+        // Copy all pages with error handling
+        const pageCount = originalDoc.getPageCount();
+        for (let i = 0; i < pageCount; i++) {
+            try {
+                const [copiedPage] = await compressedDoc.copyPages(originalDoc, [i]);
+                compressedDoc.addPage(copiedPage);
+            } catch (error) {
+                console.warn(`Failed to copy page ${i}:`, error);
+                // Continue with other pages
+            }
+        }
+        
+        return compressedDoc;
     }
 
     showCompressionResults() {
         const stats = this.compressionStats;
+        const compressionStatsEl = document.getElementById('compressionStats');
         
         // Clear existing content
-        this.compressionStatsEl.innerHTML = '';
+        compressionStatsEl.textContent = '';
         
-        // Create stats display
-        const statsHTML = `
-            <div class="stats-grid">
-                <div class="stat-item">
-                    <span class="stat-label">Original Size:</span>
-                    <span class="stat-value">${this.formatFileSize(stats.originalSize)}</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Compressed Size:</span>
-                    <span class="stat-value">${this.formatFileSize(stats.compressedSize)}</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Size Reduction:</span>
-                    <span class="stat-value success">${stats.compressionRatio}%</span>
-                </div>
-            </div>
-        `;
+        // Create stats grid container
+        const statsGrid = document.createElement('div');
+        statsGrid.className = 'stats-grid';
         
-        this.compressionStatsEl.innerHTML = statsHTML;
+        // Create original size stat
+        const originalStat = this.createStatItem('Original Size:', this.formatFileSize(stats.originalSize));
+        
+        // Create compressed size stat  
+        const compressedStat = this.createStatItem('Compressed Size:', this.formatFileSize(stats.compressedSize));
+        
+        // Create size reduction stat
+        const reductionStat = this.createStatItem('Size Reduction:', `${stats.compressionRatio}%`, 'success');
+        
+        // Append all stats to grid
+        statsGrid.appendChild(originalStat);
+        statsGrid.appendChild(compressedStat);
+        statsGrid.appendChild(reductionStat);
+        
+        // Add grid to container
+        compressionStatsEl.appendChild(statsGrid);
+        
         this.results.style.display = 'block';
-        
-        // Hide progress
-        setTimeout(() => {
-            this.progressContainer.style.display = 'none';
-        }, 1000);
     }
 
-    downloadCompressedPDF() {
-        if (!this.outputBlob) return;
+    createStatItem(label, value, valueClass = '') {
+        const statItem = document.createElement('div');
+        statItem.className = 'stat-item';
         
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(this.outputBlob);
-        link.download = this.currentFile.name.replace(/\.pdf$/i, '_compressed.pdf');
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(link.href);
+        const labelSpan = document.createElement('span');
+        labelSpan.className = 'stat-label';
+        labelSpan.textContent = label;
+        
+        const valueSpan = document.createElement('span');
+        valueSpan.className = valueClass ? `stat-value ${valueClass}` : 'stat-value';
+        valueSpan.textContent = value;
+        
+        statItem.appendChild(labelSpan);
+        statItem.appendChild(valueSpan);
+        
+        return statItem;
+    }
+
+    downloadPDF() {
+        if (this.outputBlob) {
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(this.outputBlob);
+            a.download = this.currentFile.name.replace(/\.pdf$/i, '_compressed.pdf');
+            a.click();
+        }
+    }
+
+    trackConversion() {
+        // Track the conversion for analytics
+        if (typeof gtag !== 'undefined') {
+            gtag('event', 'conversion', {
+                'event_category': 'PDF Tools',
+                'event_label': 'PDF Compress',
+                'value': 1
+            });
+        }
+    }
+
+    showProgress(percent) {
+        this.progressContainer.style.display = 'block';
+        this.progressFill.style.width = percent + '%';
+        this.progressText.textContent = percent + '%';
+    }
+
+    hideProgress() {
+        this.progressContainer.style.display = 'none';
     }
 
     formatFileSize(bytes) {
@@ -479,9 +522,33 @@ class PDFCompressor {
         const i = Math.floor(Math.log(bytes) / Math.log(k));
         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     }
+
+    showLoading(show) {
+        const btnText = this.convertBtn.querySelector('.btn-text');
+        const btnLoader = this.convertBtn.querySelector('.btn-loader');
+        
+        if (show) {
+            btnText.style.display = 'none';
+            btnLoader.style.display = 'block';
+            this.convertBtn.disabled = true;
+        } else {
+            btnText.style.display = 'block';
+            btnLoader.style.display = 'none';
+            this.convertBtn.disabled = false;
+        }
+    }
+
+    showError(message) {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error-message';
+        errorDiv.textContent = message;
+        this.results.innerHTML = '';
+        this.results.appendChild(errorDiv);
+        this.results.style.display = 'block';
+    }
 }
 
-// Initialize PDF Compressor when DOM is loaded
-document.addEventListener('DOMContentLoaded', function() {
-    window.pdfCompressor = new PDFCompressor();
+// Initialize the PDF compressor when the page loads
+document.addEventListener('DOMContentLoaded', () => {
+    new PDFCompressor();
 });
