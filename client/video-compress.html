@@ -303,7 +303,37 @@
     <!-- Footer -->
     <footer class="footer">
         <div class="container">
-            <div class="footer-content">
+            <!-- Mobile Footer (Compact Design) -->
+            <div class="footer-content footer-mobile">
+                <!-- Branding Section -->
+                <div class="footer-brand">
+                    <h3 class="footer-title">FileFlow</h3>
+                    <p class="footer-tagline">Professional file conversion tools</p>
+                </div>
+                
+                <!-- Quick Links -->
+                <div class="footer-links-grid">
+                    <div class="footer-popular">
+                        <span class="footer-category">Popular Tools</span>
+                        <div class="footer-tools">
+                            <a href="/pdf-compress.html" class="footer-quick-link" data-testid="footer-pdf-compress">PDF Compress</a>
+                            <a href="/image-tools/heic-to-jpg.html" class="footer-quick-link" data-testid="footer-heic-jpg">HEIC to JPG</a>
+                            <a href="/mp4-to-mp3.html" class="footer-quick-link" data-testid="footer-mp4-mp3">MP4 to MP3</a>
+                        </div>
+                    </div>
+                    
+                    <div class="footer-support">
+                        <div class="footer-links-row">
+                            <a href="/privacy-policy.html" class="footer-link" data-testid="footer-privacy">Privacy</a>
+                            <a href="/terms-of-use.html" class="footer-link" data-testid="footer-terms">Terms</a>
+                            <a href="mailto:support@fileflow.com" class="footer-link" data-testid="footer-contact">Contact</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Desktop Footer (Detailed Design) -->
+            <div class="footer-content footer-desktop">
                 <!-- Branding Section -->
                 <div class="footer-section">
                     <h3 class="footer-title">FileFlow</h3>
@@ -367,6 +397,7 @@
                     </ul>
                 </div>
             </div>
+            
             <div class="footer-bottom">
                 <p>&copy; 2024 FileFlow. All rights reserved.</p>
             </div>
