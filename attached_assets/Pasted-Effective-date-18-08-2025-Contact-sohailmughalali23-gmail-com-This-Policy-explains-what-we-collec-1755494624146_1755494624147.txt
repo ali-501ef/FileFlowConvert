@@ -1,0 +1,95 @@
+Effective date: 18/08/2025
+Contact: sohailmughalali23@gmail.com
+
+This Policy explains what we collect, how we use it, and your choices. It’s written to align with UK/EU GDPR and similar laws.
+
+1) Who we are
+
+FileFlow (“we”, “us”) provides online file-conversion tools used worldwide. We act as data controller for website/operational data and as processor/service provider for uploaded files processed on your instructions. We do not publish a postal address; regulators and users can contact us at the email above.
+
+2) How FileFlow works (client-side vs. server-side)
+	•	Client-side tools: Some conversions run entirely in your browser using JavaScript. Your files never leave your device for these tools.
+	•	Server-side tools: Some conversions require upload to our servers (hosted on Render) for processing; we return the result to you. Where relevant, tools will indicate which mode they use.
+
+3) Data we process
+
+We do not require an account.
+
+A. Content you provide (server-side tools)
+	•	Files you upload and outputs we generate, solely to perform the conversion and deliver results back to you.
+
+B. Technical/usage data
+	•	IP address, timestamps, device/browser type, basic event and error data, and security telemetry (e.g., rate-limiting signals) needed to operate and protect the service.
+
+C. Cookies & similar technologies
+	•	Essential cookies/local storage (always on): remember tool settings, queue/progress state, security (e.g., CSRF), and load balancing.
+	•	Advertising cookies (Google AdSense): see Section 4 below for detail and your choices.
+	•	Analytics: none at this time.
+
+We do not intentionally collect special-category data; we do not use customer files to train AI models.
+
+4) Advertising (Google AdSense) & your choices
+
+We display advertising via Google AdSense. Google and its partners may use cookies and similar technologies to deliver, measure, and personalize ads. In the EEA/UK/Switzerland, we obtain your consent before using advertising cookies. If you decline, we show non-personalized ads (contextual) and prevent ad personalization/measurement by Google.
+	•	We use a Google-certified Consent Management Platform (CMP) that supports the IAB TCF and records your choices.
+	•	We implement Google Consent Mode v2 so Google tags respect your consent status (e.g., ad storage, ad user data, ad personalization).
+	•	You can change your choices anytime via our cookie preferences link in the footer.
+	•	You can also manage ad personalisation in Google Ads Settings (https://adssettings.google.com) and learn how Google uses data on partner sites at “How Google uses information from sites or apps that use our services” (https://policies.google.com/technologies/partner-sites).
+	•	Where consent is not required (e.g., outside EEA/UK/CH), you may still opt out of personalised ads using our cookie preferences.
+
+5) Purposes & legal bases (GDPR/UK GDPR)
+	•	Provide the service (contract): run conversions, deliver results, handle support.
+	•	Security/service integrity (legitimate interests): fraud/abuse prevention, debugging, rate-limiting, availability.
+	•	Advertising (consent in EEA/UK/CH): AdSense cookies for ad delivery/measurement/personalisation; non-personalized ads shown if you don’t consent.
+
+6) Retention & deletion
+	•	Client-side tools: nothing is uploaded; nothing stored by us.
+	•	Server-side tools: uploaded originals and generated outputs are kept for up to 24 hours, then automatically deleted. We may delete earlier after a successful download or upon your request.
+	•	Job metadata (IDs, size/type, status; no file contents): 7 days for troubleshooting and rate-limiting.
+	•	Operational/security logs (no file contents): 30 days to detect abuse and investigate failures.
+	•	Backups: infrastructure backups exclude uploaded file contents.
+
+7) Security
+
+We use HTTPS/TLS in transit, provider-level encryption at rest where supported, access controls/least-privilege, and periodic log review. For server-side uploads, we may run automated malware/abuse checks to protect users and infrastructure. No system is perfectly secure, but we work to protect your data.
+
+8) Sharing & sub-processors
+
+We share data only with service providers acting on our instructions and under confidentiality/data-protection terms:
+	•	Render — hosting/compute/temporary storage/CDN for server-side tools.
+	•	Google (AdSense) — ad delivery/measurement; acts as an independent controller for its ad processing. See Google’s privacy info at https://policies.google.com/privacy.
+	•	Email provider — to process inbound support messages.
+
+We may disclose information if required by law or to prevent harm/abuse. We do not sell personal information.
+
+9) International transfers
+
+Data may be processed in the UK, EU, and/or US depending on infrastructure and ad systems. Where GDPR requires it, we use appropriate safeguards (e.g., EU Standard Contractual Clauses and UK addendum) for transfers outside the UK/EU.
+
+10) Your rights
+
+Subject to law, you can request access, correction, deletion, portability, restriction, or object to certain processing. You can also withdraw consent (for advertising cookies) at any time via the cookie preferences. Email sohailmughalali23@gmail.com; we aim to respond within 30 days. You may lodge a complaint with your local authority (e.g., ICO in the UK).
+
+11) Children
+
+FileFlow is intended for users 13+. We do not knowingly collect data from children under 13.
+
+12) Law-enforcement requests
+
+We require valid legal process and, where lawful, will notify the user before disclosing any data.
+
+13) Changes to this Policy
+
+We may update this Policy; we’ll revise the Effective date and, for material changes, show a notice in-app.
+
+Regional supplements
+
+A. EEA/UK
+Controller: FileFlow (contact above). For EEA/UK/CH visitors, we rely on consent for AdSense cookies and show non-personalized ads if you decline.
+
+B. California (CPRA)
+	•	Categories collected: identifiers (IP, email if you contact us), internet/network activity, approximate geolocation (from IP), and in connection with ads, pseudonymous identifiers and interaction data.
+	•	Purpose: service delivery, security, debugging, and advertising (including ad measurement/personalisation by Google where permitted).
+	•	Sensitive personal information: not collected.
+	•	“Sell”/“Share” for cross-context advertising: If personalised ads are shown, some states treat this as “sharing.” We provide a “Do Not Sell or Share My Personal Information” control in our cookie/preferences link for applicable users. When you opt out, we instruct Google to serve non-personalized ads.
+	•	Rights: know/access, correct, delete, portability, and opt-out of selling/sharing; submit requests via the email above or the in-site controls.
