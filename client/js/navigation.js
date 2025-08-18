@@ -70,43 +70,141 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 <div class="mobile-nav-sections">
                     <div class="mobile-nav-section">
-                        <h3 class="mobile-nav-section-title">Image Tools</h3>
-                        <div class="mobile-nav-items">
-                            <a href="/image-tools/heic-to-jpg.html" class="mobile-nav-item" data-testid="mobile-nav-heic-jpg">HEIC to JPG</a>
-                            <a href="/jpg-to-png.html" class="mobile-nav-item" data-testid="mobile-nav-jpg-png">JPG to PNG</a>
-                            <a href="/pdf-to-jpg.html" class="mobile-nav-item" data-testid="mobile-nav-pdf-to-jpg">PDF to JPG</a>
-                            <a href="/image-tools/png-to-jpg.html" class="mobile-nav-item" data-testid="mobile-nav-png-jpg">PNG to JPG</a>
-                            <a href="/image-tools/webp-to-jpg.html" class="mobile-nav-item" data-testid="mobile-nav-webp-jpg">WEBP to JPG</a>
-                            <a href="/image-tools/jpg-to-pdf.html" class="mobile-nav-item" data-testid="mobile-nav-jpg-pdf">JPG to PDF</a>
-                            <a href="/image-tools/tiff-to-png.html" class="mobile-nav-item" data-testid="mobile-nav-tiff-png">TIFF to PNG</a>
-                            <a href="/image-tools/bmp-to-jpg.html" class="mobile-nav-item" data-testid="mobile-nav-bmp-jpg">BMP to JPG</a>
-                            <a href="/image-tools/svg-to-png.html" class="mobile-nav-item" data-testid="mobile-nav-svg-png">SVG to PNG</a>
-                            <a href="/image-tools/ico-to-png.html" class="mobile-nav-item" data-testid="mobile-nav-ico-png">ICO to PNG</a>
-                            <a href="/image-tools/gif-to-mp4.html" class="mobile-nav-item" data-testid="mobile-nav-gif-mp4">GIF to MP4</a>
+                        <button class="mobile-nav-section-toggle" data-testid="mobile-nav-toggle-image" data-section="image">
+                            <div class="section-toggle-content">
+                                <div class="section-icon">
+                                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                                        <circle cx="8.5" cy="8.5" r="1.5"/>
+                                        <polyline points="21,15 16,10 5,21"/>
+                                    </svg>
+                                </div>
+                                <span class="mobile-nav-section-title">Image Tools</span>
+                                <div class="section-chevron">
+                                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <polyline points="6,9 12,15 18,9"/>
+                                    </svg>
+                                </div>
+                            </div>
+                        </button>
+                        <div class="mobile-nav-items" data-section-content="image">
+                            <a href="/image-tools/heic-to-jpg.html" class="mobile-nav-item" data-testid="mobile-nav-heic-jpg">
+                                <span class="item-text">HEIC to JPG</span>
+                                <span class="item-badge popular">Popular</span>
+                            </a>
+                            <a href="/jpg-to-png.html" class="mobile-nav-item" data-testid="mobile-nav-jpg-png">
+                                <span class="item-text">JPG to PNG</span>
+                            </a>
+                            <a href="/pdf-to-jpg.html" class="mobile-nav-item" data-testid="mobile-nav-pdf-to-jpg">
+                                <span class="item-text">PDF to JPG</span>
+                            </a>
+                            <a href="/image-tools/png-to-jpg.html" class="mobile-nav-item" data-testid="mobile-nav-png-jpg">
+                                <span class="item-text">PNG to JPG</span>
+                            </a>
+                            <a href="/image-tools/webp-to-jpg.html" class="mobile-nav-item" data-testid="mobile-nav-webp-jpg">
+                                <span class="item-text">WEBP to JPG</span>
+                            </a>
+                            <a href="/image-tools/jpg-to-pdf.html" class="mobile-nav-item" data-testid="mobile-nav-jpg-pdf">
+                                <span class="item-text">JPG to PDF</span>
+                            </a>
+                            <a href="/image-tools/tiff-to-png.html" class="mobile-nav-item" data-testid="mobile-nav-tiff-png">
+                                <span class="item-text">TIFF to PNG</span>
+                            </a>
+                            <a href="/image-tools/bmp-to-jpg.html" class="mobile-nav-item" data-testid="mobile-nav-bmp-jpg">
+                                <span class="item-text">BMP to JPG</span>
+                            </a>
+                            <a href="/image-tools/svg-to-png.html" class="mobile-nav-item" data-testid="mobile-nav-svg-png">
+                                <span class="item-text">SVG to PNG</span>
+                            </a>
+                            <a href="/image-tools/ico-to-png.html" class="mobile-nav-item" data-testid="mobile-nav-ico-png">
+                                <span class="item-text">ICO to PNG</span>
+                            </a>
+                            <a href="/image-tools/gif-to-mp4.html" class="mobile-nav-item" data-testid="mobile-nav-gif-mp4">
+                                <span class="item-text">GIF to MP4</span>
+                            </a>
                         </div>
                     </div>
                     
                     <div class="mobile-nav-section">
-                        <h3 class="mobile-nav-section-title">PDF Tools</h3>
-                        <div class="mobile-nav-items">
-                            <a href="/pdf-merge.html" class="mobile-nav-item" data-testid="mobile-nav-pdf-merge">PDF Merge</a>
-                            <a href="/pdf-split.html" class="mobile-nav-item" data-testid="mobile-nav-pdf-split">PDF Split</a>
-                            <a href="/pdf-compress.html" class="mobile-nav-item" data-testid="mobile-nav-pdf-compress">PDF Compress</a>
-                            <a href="/pdf-rotate.html" class="mobile-nav-item" data-testid="mobile-nav-pdf-rotate">PDF Rotate</a>
-                            <a href="/pdf-watermark.html" class="mobile-nav-item" data-testid="mobile-nav-pdf-watermark">PDF Watermark</a>
-                            <a href="/pdf-to-word.html" class="mobile-nav-item" data-testid="mobile-nav-pdf-to-word">PDF to Word</a>
+                        <button class="mobile-nav-section-toggle" data-testid="mobile-nav-toggle-pdf" data-section="pdf">
+                            <div class="section-toggle-content">
+                                <div class="section-icon">
+                                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                        <polyline points="14 2 14 8 20 8"/>
+                                        <line x1="16" y1="13" x2="8" y2="13"/>
+                                        <line x1="16" y1="17" x2="8" y2="17"/>
+                                        <polyline points="10 9 9 9 8 9"/>
+                                    </svg>
+                                </div>
+                                <span class="mobile-nav-section-title">PDF Tools</span>
+                                <div class="section-chevron">
+                                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <polyline points="6,9 12,15 18,9"/>
+                                    </svg>
+                                </div>
+                            </div>
+                        </button>
+                        <div class="mobile-nav-items" data-section-content="pdf">
+                            <a href="/pdf-merge.html" class="mobile-nav-item" data-testid="mobile-nav-pdf-merge">
+                                <span class="item-text">PDF Merge</span>
+                            </a>
+                            <a href="/pdf-split.html" class="mobile-nav-item" data-testid="mobile-nav-pdf-split">
+                                <span class="item-text">PDF Split</span>
+                            </a>
+                            <a href="/pdf-compress.html" class="mobile-nav-item" data-testid="mobile-nav-pdf-compress">
+                                <span class="item-text">PDF Compress</span>
+                                <span class="item-badge popular">Popular</span>
+                            </a>
+                            <a href="/pdf-rotate.html" class="mobile-nav-item" data-testid="mobile-nav-pdf-rotate">
+                                <span class="item-text">PDF Rotate</span>
+                            </a>
+                            <a href="/pdf-watermark.html" class="mobile-nav-item" data-testid="mobile-nav-pdf-watermark">
+                                <span class="item-text">PDF Watermark</span>
+                            </a>
+                            <a href="/pdf-to-word.html" class="mobile-nav-item" data-testid="mobile-nav-pdf-to-word">
+                                <span class="item-text">PDF to Word</span>
+                            </a>
                         </div>
                     </div>
                     
                     <div class="mobile-nav-section">
-                        <h3 class="mobile-nav-section-title">Audio/Video Tools</h3>
-                        <div class="mobile-nav-items">
-                            <a href="/mp4-to-mp3.html" class="mobile-nav-item" data-testid="mobile-nav-mp4-mp3">MP4 to MP3</a>
-                            <a href="/audio-converter.html" class="mobile-nav-item" data-testid="mobile-nav-audio-convert">Audio Converter</a>
-                            <a href="/video-compress.html" class="mobile-nav-item" data-testid="mobile-nav-video-compress">Video Compress</a>
-                            <a href="/gif-maker.html" class="mobile-nav-item" data-testid="mobile-nav-gif-maker">GIF Maker</a>
-                            <a href="/video-trim.html" class="mobile-nav-item" data-testid="mobile-nav-video-trim">Video Trim</a>
-                            <a href="/video-merger.html" class="mobile-nav-item" data-testid="mobile-nav-video-merge">Video Merger</a>
+                        <button class="mobile-nav-section-toggle" data-testid="mobile-nav-toggle-media" data-section="media">
+                            <div class="section-toggle-content">
+                                <div class="section-icon">
+                                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <polygon points="23 7 16 12 23 17 23 7"/>
+                                        <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+                                    </svg>
+                                </div>
+                                <span class="mobile-nav-section-title">Audio/Video Tools</span>
+                                <div class="section-chevron">
+                                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <polyline points="6,9 12,15 18,9"/>
+                                    </svg>
+                                </div>
+                            </div>
+                        </button>
+                        <div class="mobile-nav-items" data-section-content="media">
+                            <a href="/mp4-to-mp3.html" class="mobile-nav-item" data-testid="mobile-nav-mp4-mp3">
+                                <span class="item-text">MP4 to MP3</span>
+                                <span class="item-badge popular">Popular</span>
+                            </a>
+                            <a href="/audio-converter.html" class="mobile-nav-item" data-testid="mobile-nav-audio-convert">
+                                <span class="item-text">Audio Converter</span>
+                            </a>
+                            <a href="/video-compress.html" class="mobile-nav-item" data-testid="mobile-nav-video-compress">
+                                <span class="item-text">Video Compress</span>
+                            </a>
+                            <a href="/gif-maker.html" class="mobile-nav-item" data-testid="mobile-nav-gif-maker">
+                                <span class="item-text">GIF Maker</span>
+                            </a>
+                            <a href="/video-trim.html" class="mobile-nav-item" data-testid="mobile-nav-video-trim">
+                                <span class="item-text">Video Trim</span>
+                            </a>
+                            <a href="/video-merger.html" class="mobile-nav-item" data-testid="mobile-nav-video-merge">
+                                <span class="item-text">Video Merger</span>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -144,6 +242,36 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
         }
+        
+        // Add toggle functionality for sections
+        const sectionToggles = document.querySelectorAll('.mobile-nav-section-toggle');
+        sectionToggles.forEach(toggle => {
+            toggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const section = this.getAttribute('data-section');
+                const sectionContent = document.querySelector(`[data-section-content="${section}"]`);
+                const chevron = this.querySelector('.section-chevron svg');
+                const parentSection = this.closest('.mobile-nav-section');
+                
+                if (sectionContent && chevron && parentSection) {
+                    const isExpanded = parentSection.classList.contains('section-expanded');
+                    
+                    if (isExpanded) {
+                        // Collapse section
+                        parentSection.classList.remove('section-expanded');
+                        sectionContent.style.maxHeight = '0';
+                        chevron.style.transform = 'rotate(0deg)';
+                    } else {
+                        // Expand section
+                        parentSection.classList.add('section-expanded');
+                        sectionContent.style.maxHeight = sectionContent.scrollHeight + 'px';
+                        chevron.style.transform = 'rotate(180deg)';
+                    }
+                }
+            });
+        });
         
         // Close mobile nav when clicking on links
         const mobileNavItems = document.querySelectorAll('.mobile-nav-item');
