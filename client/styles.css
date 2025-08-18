@@ -145,6 +145,8 @@ body {
 .sticky-nav .nav-brand {
     position: absolute;
     left: var(--card-spacing);
+    display: flex;
+    align-items: center;
 }
 
 .sticky-nav .nav-menu {
@@ -158,11 +160,7 @@ body {
 .mobile-nav-toggle {
     position: absolute;
     right: var(--card-spacing);
-}
-
-.sticky-nav .nav-brand {
-    display: flex;
-    align-items: center;
+    z-index: 1001;
 }
 
 .sticky-nav .nav-brand a {
@@ -758,7 +756,8 @@ body {
 
 @media (max-width: 768px) {
     .mobile-nav-toggle {
-        position: relative;
+        position: absolute;
+        right: var(--element-spacing);
     }
 }
 
