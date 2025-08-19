@@ -123,8 +123,8 @@ interface MulterRequest extends Request {
 }
 
 // Configure multer for file uploads
-const uploadsDir = path.resolve(process.cwd(), 'uploads');
-const outputDir = path.resolve(process.cwd(), 'output');
+const uploadsDir = path.join(process.cwd(), 'uploads');
+const outputDir = path.join(process.cwd(), 'output');
 
 // Ensure directories exist
 [uploadsDir, outputDir].forEach(dir => {
@@ -304,7 +304,7 @@ const upload = multer({
 
 // PDF conversion helper function with retry logic and better error handling
 async function convertPDFWithPython(inputPath: string, outputPath: string, outputFormat: string, maxRetries: number = 3): Promise<boolean> {
-  const pdfConverterPath = path.resolve(process.cwd(), 'server', 'pdf_converter.py');
+  const pdfConverterPath = path.join(process.cwd(), 'server', 'pdf_converter.py');
   
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     console.log(`PDF conversion attempt ${attempt}/${maxRetries}:`, inputPath, '->', outputPath, `(${outputFormat})`);
@@ -368,7 +368,7 @@ async function convertPDFWithPython(inputPath: string, outputPath: string, outpu
 
 // Image conversion helper function with retry logic and better error handling
 async function convertImageWithPython(inputPath: string, outputPath: string, outputFormat: string, quality?: number, maxRetries: number = 3): Promise<boolean> {
-  const imageConverterPath = path.resolve(process.cwd(), 'server', 'image_converter.py');
+  const imageConverterPath = path.join(process.cwd(), 'server', 'image_converter.py');
   
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     console.log(`Image conversion attempt ${attempt}/${maxRetries}:`, inputPath, '->', outputPath, `(${outputFormat})`);
