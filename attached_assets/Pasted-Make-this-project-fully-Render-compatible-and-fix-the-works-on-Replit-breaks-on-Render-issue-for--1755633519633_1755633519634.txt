@@ -1,0 +1,36 @@
+Make this project fully Render‑compatible and fix the “works on Replit, breaks on Render” issue for our server‑based converters.
+
+Goals:
+1) Add a Dockerfile that installs the native CLIs libraries many converters need and runs the Node server. Use Node 20 on Debian (bullseye/slim), install: imagemagick, ghostscript, poppler-utils, ffmpeg, libheif-examples, libvips, libvips-dev, libheif-dev, libpng-dev, libjpeg-dev, fonts-dejavu-core. Disable ImageMagick PDF security policy (allow reading/writing PDFs). Set non-root user. Expose no fixed port; the app must listen on process.env.PORT. Use `npm ci` not `npm install`. Ensure `uploads/` exists at runtime.
+
+2) Add a `.dockerignore` to keep image small (node_modules, .git, dist caches etc).
+
+3) Express server fixes in `server/index.ts` (or `server/index.tsx` / current entry):
+   - Trust proxy already set ✅; keep it.
+   - Add `app.use("/uploads", express.static(path.resolve("uploads")));` so files are served in Render.
+   - Add a lightweight health endpoint: `GET /healthz` returns 200 JSON `{ok:true}`.
+   - Ensure only `process.env.PORT` is used (default 5000 locally). Listen on `0.0.0.0`.
+   - Create `uploads/` at startup if missing (fs.mkdirSync("uploads", { recursive: true })).
+
+4) HEIC ➜ JPG endpoint:
+   - Install deps (already present but verify): `multer`, `heic-convert`, and `@types/multer` (dev).
+   - Add route `POST /api/convert/heic-to-jpg` using `multer({ dest: "uploads/", limits: { fileSize: 25 * 1024 * 1024 } })` expecting `file` field. Convert with `heic-convert` to JPEG quality 1. Return JSON with the public URL `/uploads/<generated>.jpg`. Clean up the original HEIC after conversion.
+
+5) Package scripts:
+   - Keep dev script as is.
+   - Ensure build script outputs server to `dist/` (already done).
+   - Set `"start": "NODE_ENV=production node dist/index.js"` so Render can run it.
+   - Add `"postinstall": "npm run build"` only if needed for Docker build.
+
+6) ImageMagick policy tweak for PDFs (to avoid “not authorized” errors on Render):
+   - In the Dockerfile, after installing ImageMagick, replace `/etc/ImageMagick-6/policy.xml` to allow PDF read/write. Minimal policy example:
+     ```
+     <policymap>
+       <policy domain="coder" rights="read|write" pattern="PDF" />
+       <policy domain="coder" rights="read|write" pattern="PS" />
+       <policy domain="coder" rights="read|write" pattern="EPS" />
+     </policymap>
+     ```
+     Put it at `/etc/ImageMagick-6/policy.xml`.
+
+7) Create `Dockerfile` with the following content (adjust paths if needed):
