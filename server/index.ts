@@ -2,9 +2,24 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { log } from "./vite";
 import path from "path";
+import fs from "fs";
 
 const app = express();
 app.set('trust proxy', true); // Trust proxy for rate limiting
+
+// Basic CORS configuration for production deployment
+app.use((req, res, next) => {
+  const origin = process.env.CLIENT_ORIGIN || '*';
+  res.header('Access-Control-Allow-Origin', origin);
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  if (req.method === 'OPTIONS') {
+    res.sendStatus(200);
+  } else {
+    next();
+  }
+});
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
@@ -39,6 +54,21 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  // Ensure uploads directory exists at startup
+  const uploadsDir = path.resolve(process.cwd(), 'uploads');
+  if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+    log('Created uploads directory');
+  }
+
+  // Serve uploaded files statically for Render compatibility
+  app.use("/uploads", express.static(path.resolve("uploads")));
+  
+  // Health check endpoint for deployment monitoring
+  app.get('/healthz', (req, res) => {
+    res.status(200).json({ ok: true, timestamp: new Date().toISOString() });
+  });
+
   const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
