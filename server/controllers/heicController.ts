@@ -16,8 +16,11 @@ export async function heicConvertIfHeic(req: Request, res: Response, next: NextF
       temp_path?: string; output_format?: string; quality?: number;
     };
 
+    console.log(`HEIC Controller: received request body:`, req.body);
+
     // Only intercept real HEIC/HEIF
     const looksHeic = isHeicExt(temp_path || "") || isHeicMime((req as any).file?.mimetype);
+    console.log(`HEIC Controller: looks like HEIC? ${looksHeic}, temp_path: ${temp_path}`);
     if (!looksHeic) return next(); // let your legacy Python flow handle non‑HEIC
 
     // Read input (the uploaded file already on disk)
@@ -32,6 +35,8 @@ export async function heicConvertIfHeic(req: Request, res: Response, next: NextF
 
     // heic-convert expects uppercase format names
     const heicFormat = outFmt === "jpg" ? "JPEG" : "PNG";
+    
+    console.log(`HEIC conversion: input format: ${fmt}, output format: ${outFmt}, heic format: ${heicFormat}`);
 
     const outBuffer = await heicConvert({
       buffer: inBuf,
