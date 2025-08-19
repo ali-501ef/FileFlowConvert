@@ -15,6 +15,7 @@ import { PDFConverter } from "./pdf-converter";
 import { formatOutputFilename, generateUniqueFilename } from "./utils/filename";
 import { validateFile, logConversion } from "./utils/validate";
 import { jpgToPdfRouter } from "./routes/jpgToPdf";
+import heicRouter from "./heic.routes";
 
 // Track active conversions to prevent duplicates
 const activeConversions = new Map<string, { timestamp: number; promise: Promise<any> }>();
@@ -483,6 +484,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Serve static files from client directory
   const clientPath = path.resolve(import.meta.dirname, "../client");
   app.use(express.static(clientPath));
+
+  // HEIC router - handles HEIC conversions first, then falls through to legacy Python converter
+  app.use("/api", heicRouter);
 
   // File conversion API endpoints
   app.post('/api/upload', uploadLimiter, speedLimiter, upload.single('file'), async (req: MulterRequest, res) => {

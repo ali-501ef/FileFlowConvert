@@ -4,7 +4,7 @@ import { log } from "./vite";
 import path from "path";
 
 const app = express();
-app.set('trust proxy', true); // Trust proxy for rate limiting
+app.set("trust proxy", 1); // Trust proxy for rate limiting
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
