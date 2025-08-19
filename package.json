@@ -10,7 +10,7 @@
     "check": "tsc",
     "db:push": "drizzle-kit push",
     "postinstall": "python3 -m pip install --upgrade pip wheel setuptools && python3 -m pip install -r server/requirements.txt --target server/.pydeps"
-  }
+  },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
     "@jridgewell/trace-mapping": "^0.3.25",
