@@ -1,0 +1,155 @@
+Agent, please do the following in this Repl:
+
+Install deps
+
+Run:
+
+npm i heic-convert
+
+npm i multer
+
+npm i -D @types/multer
+
+Create server/filePaths.ts to manage disk paths
+
+Create file server/filePaths.ts with exactly:
+
+import fs from "fs";
+import path from "path";
+
+export const UPLOAD_DIR = path.resolve(process.cwd(), "uploads");
+export const OUTPUT_DIR = path.resolve(process.cwd(), "output");
+
+for (const dir of [UPLOAD_DIR, OUTPUT_DIR]) {
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+}
+
+
+Create HEIC controller
+
+Create file server/controllers/heicController.ts with the following.
+
+IMPORTANT: Before returning the JSON, first search this repo for how /api/convert currently responds on success for images (look at the handler that consumes server/image_converter.py). Match the same response shape/fields so the client UI keeps working unchanged.
+
+import fs from "fs/promises";
+import path from "path";
+import type { Request, Response, NextFunction } from "express";
+import heicConvert from "heic-convert";
+import { OUTPUT_DIR } from "../filePaths";
+
+const isHeicExt = (p: string) => /\.(heic|heif)$/i.test(p || "");
+const isHeicMime = (m?: string) => !!m && /image\/hei(c|f)/i.test(m);
+
+export async function heicConvertIfHeic(req: Request, res: Response, next: NextFunction) {
+  try {
+    // Your existing client posts to /api/convert with body like:
+    // { file_id, temp_path, output_format, quality? }
+    const { temp_path, output_format = "jpg", quality } = (req.body || {}) as {
+      temp_path?: string; output_format?: string; quality?: number;
+    };
+
+    // Only intercept real HEIC/HEIF
+    const looksHeic = isHeicExt(temp_path || "") || isHeicMime((req as any).file?.mimetype);
+    if (!looksHeic) return next(); // let your legacy Python flow handle non‑HEIC
+
+    // Read input (the uploaded file already on disk)
+    if (!temp_path) return res.status(400).json({ error: "Missing temp_path for HEIC file" });
+    const inBuf = await fs.readFile(temp_path);
+
+    // Convert to JPG/PNG/WebP (we'll default to JPG)
+    const fmt = (output_format || "jpg").toLowerCase();
+    const valid = new Set(["jpg","jpeg","png","webp"]);
+    const outFmt = valid.has(fmt) ? (fmt === "jpeg" ? "jpg" : fmt) : "jpg";
+    const quality0to1 = typeof quality === "number" ? Math.max(0.1, Math.min(1, quality)) : 0.95;
+
+    const outBuffer = await heicConvert({
+      buffer: inBuf,
+      format: outFmt as "jpg" | "png" | "webp",
+      quality: outFmt === "jpg" ? quality0to1 : undefined
+    });
+
+    // Name + write output
+    const base = path.basename(temp_path);
+    const stamped = `${base}_${Date.now().toString(16)}.${outFmt}`;
+    const outPath = path.join(OUTPUT_DIR, stamped);
+    await fs.writeFile(outPath, outBuffer);
+
+    // Match existing success response shape used by your image convert endpoint.
+    // Agent: search the repo for the JSON returned when image conversion succeeds
+    // (the handler that calls server/image_converter.py) and mirror it here.
+    // Example shape to adapt (replace with the actual one you find):
+    // return res.json({ success: true, file_id: stamped, output_path: outPath });
+
+    return res.json({ success: true, file_id: stamped, output_path: outPath });
+  } catch (err) {
+    console.error("HEIC convert error:", err);
+    return res.status(500).json({ error: "HEIC conversion failed" });
+  }
+}
+
+
+Create HEIC router
+
+Create file server/heic.routes.ts:
+
+import { Router } from "express";
+import { heicConvertIfHeic } from "./controllers/heicController";
+
+const router = Router();
+// Mount on SAME path your client already posts to.
+// This runs first and only handles HEIC; non‑HEIC calls next()
+router.post("/convert", heicConvertIfHeic);
+
+export default router;
+
+
+Mount the HEIC router early in server/routes.ts
+
+Open server/routes.ts.
+
+At the top add:
+import heicRouter from "./heic.routes";
+
+In the function that registers routes, mount this before your existing /api/convert/legacy handlers:
+
+app.use("/api", heicRouter); // HEIC-first
+// then your existing routes (including the Python-backed /api/convert)
+
+
+Fix the proxy/rate-limit warning in server/index.ts
+
+Open server/index.ts.
+
+Change app.set('trust proxy', true) to:
+
+app.set("trust proxy", 1);
+
+
+If you initialize express-rate-limit, set its trustProxy: true option (the library will validate it).
+If you don’t have rate-limit yet, ignore this line.
+
+Ensure the folders exist and are ignored
+
+Confirm uploads/ and output/ are present at the repo root at runtime (the new filePaths.ts creates them).
+
+Add to .gitignore if missing:
+
+uploads
+output
+
+
+Build & Run
+
+Make sure your start/build remain the same:
+
+Build: npm run build
+
+Start: npm start
+
+Deploy to Render and test:
+
+Upload a .HEIC file and convert to JPG; expect Node handler to respond immediately.
+
+Convert a non‑HEIC (e.g., PNG→JPG) and verify it falls through to your legacy flow.
+
+End of instructions.
