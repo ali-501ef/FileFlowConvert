@@ -24,16 +24,19 @@ export async function heicConvertIfHeic(req: Request, res: Response, next: NextF
     if (!temp_path) return res.status(400).json({ error: "Missing temp_path for HEIC file" });
     const inBuf = await fs.readFile(temp_path);
 
-    // Convert to JPG/PNG/WebP (we'll default to JPG)
+    // Convert to JPG/PNG (heic-convert only supports JPEG and PNG)
     const fmt = (output_format || "jpg").toLowerCase();
-    const valid = new Set(["jpg","jpeg","png","webp"]);
+    const valid = new Set(["jpg","jpeg","png"]);
     const outFmt = valid.has(fmt) ? (fmt === "jpeg" ? "jpg" : fmt) : "jpg";
     const quality0to1 = typeof quality === "number" ? Math.max(0.1, Math.min(1, quality)) : 0.95;
 
+    // heic-convert expects uppercase format names
+    const heicFormat = outFmt === "jpg" ? "JPEG" : "PNG";
+
     const outBuffer = await heicConvert({
       buffer: inBuf,
-      format: outFmt as "jpg" | "png" | "webp",
-      quality: outFmt === "jpg" ? quality0to1 : undefined
+      format: heicFormat,
+      quality: heicFormat === "JPEG" ? quality0to1 : undefined
     });
 
     // Name + write output
