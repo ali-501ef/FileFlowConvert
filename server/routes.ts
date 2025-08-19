@@ -16,6 +16,7 @@ import { formatOutputFilename, generateUniqueFilename } from "./utils/filename";
 import { validateFile, logConversion } from "./utils/validate";
 import { jpgToPdfRouter } from "./routes/jpgToPdf";
 import heicRouter from "./heic.routes";
+import { withPythonEnv } from "./utils/pythonEnv";
 
 // Track active conversions to prevent duplicates
 const activeConversions = new Map<string, { timestamp: number; promise: Promise<any> }>();
@@ -314,7 +315,8 @@ async function convertPDFWithPython(inputPath: string, outputPath: string, outpu
       const success = await new Promise<boolean>((resolve, reject) => {
         const pythonProcess = spawn('python3', [pdfConverterPath, inputPath, outputPath, outputFormat], {
           timeout: 120000, // 2 minute timeout
-          stdio: ['pipe', 'pipe', 'pipe']
+          stdio: ['pipe', 'pipe', 'pipe'],
+          env: withPythonEnv()
         });
         
         let output = '';
@@ -382,7 +384,8 @@ async function convertImageWithPython(inputPath: string, outputPath: string, out
         }
         const pythonProcess = spawn('python3', args, {
           timeout: 60000, // 1 minute timeout
-          stdio: ['pipe', 'pipe', 'pipe']
+          stdio: ['pipe', 'pipe', 'pipe'],
+          env: withPythonEnv()
         });
         
         let output = '';
@@ -704,7 +707,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     // Create media conversion promise and track it
     const conversionPromise = new Promise<void>((resolve, reject) => {
-      const pythonProcess = spawn('python3', [pythonScript, tempPath, outputPath, conversion_type, optionsJson]);
+      const pythonProcess = spawn('python3', [pythonScript, tempPath, outputPath, conversion_type, optionsJson], {
+        env: withPythonEnv()
+      });
       
       let output = '';
       let error = '';
@@ -912,7 +917,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const result = await new Promise<any>((resolve, reject) => {
         const pythonProcess = spawn('python3', [pythonScript, filePath, options], {
           timeout: 60000,
-          stdio: ['pipe', 'pipe', 'pipe']
+          stdio: ['pipe', 'pipe', 'pipe'],
+          env: withPythonEnv()
         });
         
         let output = '';

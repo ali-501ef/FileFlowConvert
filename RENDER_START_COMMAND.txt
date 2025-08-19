@@ -1,0 +1,1 @@
+export PYTHONPATH="$(pwd)/server/.pydeps:$PYTHONPATH" && npm start

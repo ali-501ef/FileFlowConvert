@@ -1,0 +1,61 @@
+Please do ALL of the following changes and then commit & push to main with message "Fix PDF tools on Render (Python deps + PYTHONPATH)":
+
+1) package.json
+- Ensure the scripts block is EXACTLY:
+{
+  "dev": "NODE_ENV=development tsx server/index.ts",
+  "build": "vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
+  "start": "NODE_ENV=production node dist/index.js",
+  "check": "tsc",
+  "db:push": "drizzle-kit push",
+  "postinstall": "python3 -m pip install --upgrade pip wheel setuptools && python3 -m pip install -r server/requirements.txt --target server/.pydeps"
+}
+- Do not change any other fields.
+
+2) server/requirements.txt
+- Keep (or create if missing) exactly these pinned deps:
+pikepdf==9.4.1
+pdfplumber==0.11.3
+python-docx==1.1.2
+Pillow==10.4.0
+pdfminer.six==20240706
+
+3) Create helper: server/utils/pythonEnv.ts
+- File content:
+--------------------------------------------------
+import path from "path";
+
+export function withPythonEnv(env: NodeJS.ProcessEnv = process.env) {
+  const pydeps = path.join(process.cwd(), "server", ".pydeps");
+  return {
+    ...env,
+    PYTHONPATH: `${pydeps}:${env.PYTHONPATH ?? ""}`,
+  };
+}
+--------------------------------------------------
+
+4) Update ALL Node places that spawn Python so they inherit PYTHONPATH.
+- In these files (create the import and use the env option on spawn):
+  - server/pdf_compress_service.ts (or wherever you spawn the compressor)
+  - server/pdf-converter.ts or python_converter.ts (the PDF->DOCX runner)
+  - any other *converter* service files that call `spawn("python" or "python3", ...)`
+- Pattern:
+  Before:
+    const p = spawn("python3", ["server/pdf_compress_service.py", ...]);
+  After:
+    import { withPythonEnv } from "../utils/pythonEnv";
+    const p = spawn("python3", ["server/pdf_compress_service.py", ...], { env: withPythonEnv() });
+
+5) Do NOT change the build/start scripts beyond step (1).
+
+6) Create a developer note file at project root named RENDER_START_COMMAND.txt with exactly:
+export PYTHONPATH="$(pwd)/server/.pydeps:$PYTHONPATH" && npm start
+(This is a reminder for Render → Settings → Start Command; can’t be changed from repo.)
+
+7) Run project type-check to be safe (`npm run check`) and fix any import paths as needed so the repo builds.
+
+After doing all the above, please:
+- Format changed files.
+- Commit all with message "Fix PDF tools on Render (Python deps + PYTHONPATH)".
+- Push to origin main.
+- Reply with a short summary of files changed.
